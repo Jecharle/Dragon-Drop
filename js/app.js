@@ -1,49 +1,114 @@
+/*************************
+ Element-Object pair class
+ *************************/
+
+class ElObj {
+	constructor() {
+		var el = document.createElement(this.elType());
+		this.el = el;
+		el['data-obj'] = this;
+	}
+
+	// type of root element
+	elType() {
+		return 'div';
+	}
+}
+
+/********************
+ Root Container class
+ ********************/
+
+class Container extends ElObj {
+	constructor() {
+		super();
+	}
+
+	// remove a piece remotely
+	removePiece(piece) {
+		if (!piece || piece.parent != this) return false;
+		var parentEl = piece.el.parentElement;
+		if (parentEl) parentEl.removeChild(piece.el);
+		return true;
+	}
+
+	// pieces can be selected and deselected
+	select(piece) { return false; }
+	deselect() { }
+
+	// handle key inputs
+	keydown(key) { }
+	keyup (key) { }
+};
+
+/****************
+ Root Piece class
+ ****************/
+
+class Piece extends ElObj {
+	constructor(size) {
+		super();
+		this.parent = null;
+		this._size = size || 1;
+		this.el.id = Piece.nextId();
+		this.el.classList.add('piece');
+		this.el.classList.add('x'+this._size); // crude way to set the size
+	}
+
+	// static tracker for element IDs
+	static _id = 0;
+	static nextId() {
+		return "piece" + Piece._id++;
+	}
+
+	// size of the piece
+	size() { return this._size; }
+
+	// move the piece between containers
+	setParent(container) {
+		if (this.parent && this.parent != container) {
+			this.parent.removePiece(this);
+		}
+		this.parent = container;
+	}
+
+	// piece can be selected or deselected
+	select() { return false; }
+	deselect() { }
+};
+
 /****************
  Game board class
  ****************/
 
-class Board {
-	// initialize the grid
+class Board extends Container {
 	constructor (w, h) {
+		super();
 		this._squares = [];
 		this.w = w;
 		this.h = h;
 
-		var table = document.createElement('table');
-		table['data-obj'] = this;
-		this.el = table;
-
 		for (var y = 0; y < h; y++) {
 			var row = document.createElement('tr');
 			for (var x = 0; x < w; x++) {
-				var square = this.createSquare(x, y);
+				var square = new Square(x, y, this);
 				this._squares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
 			}
-			table.appendChild(row);
+			this.el.appendChild(row);
 		}
 	}
 
-	// helper method for building squares
-	createSquare(x, y) {
-		var newSquare = {
-			x: x,
-			y: y,
-			parent: this,
-		}
-		newSquare.el = document.createElement('td');
-		newSquare.el['data-obj'] = newSquare;
-		return newSquare;
+	// base element is a table
+	elType() {
+		return 'table';
 	}
 
+	// key event handlers
 	keydown(key) {
 		if (this.selection && key === "Escape") {
 			this.deselect();
 		}
-	}
-
-	keyup(key) {
-		return;
 	}
 
 	// access the individual grid squares
@@ -104,45 +169,41 @@ class Board {
 	}
 
 	// place a piece on the board (vacates previous position)
-	movePiece(obj, x, y) {
-		if (!obj) return false;
+	movePiece(piece, x, y) {
+		if (!piece) return false;
 
 		// lift it off the previous board space
-		if (obj.parent == this) this.fillPiece(null, obj.x, obj.y, obj.size());
+		if (piece.parent == this) this.fillPiece(null, piece.x, piece.y, piece.size());
 
 		// if the area is occupied, cancel the movement
-		if (!this.isClear(x, y, obj.size())) {
+		if (!this.isClear(x, y, piece.size())) {
 			// put it back down
-			if (obj.parent == this) this.fillPiece(obj, obj.x, obj.y, obj.size());
+			if (piece.parent == this) this.fillPiece(piece, piece.x, piece.y);
 			return false;
 		}
 
-		// if it was in a previous container, remove it from there
-		if (obj.parent != this && obj.parent != null) {
-			obj.parent.removePiece(obj);
-		}
+		// update the parent container
+		piece.setParent(this);
 
 		// update position
-		obj.parent = this;
-		obj.x = x;
-		obj.y = y;
+		piece.x = x;
+		piece.y = y;
 
 		// place the piece
-		this.at(x, y).el.appendChild(obj.el);
-		this.fillPiece(obj, x, y);
+		this.at(x, y).el.appendChild(piece.el);
+		this.fillPiece(piece, x, y);
 
 		// movement success!
 		return true;
 	}
 
-	// remove a piece from its previous location
-	removePiece(obj) {
-		if (!obj || obj.parent != this) return;
-
-		var square = this.at(obj.x, obj.y);
-		if (square) {
-			oldSquare.el.removeChild(obj.el);
+	// remove a piece from the board
+	removePiece(piece) {
+		if (super.removePiece(piece)) {
+			this.fillPiece(null, piece.x, piece.y, piece.size());
+			return true;
 		}
+		return false;
 	}
 
 	// select a piece to move
@@ -155,6 +216,7 @@ class Board {
 		this.selection = piece;
 		this.selection.el.classList.add('selected');
 		this.setMoveArea(piece);
+		this.el.onmousedown = this.clickAway;
 		return true;
 	}
 
@@ -166,6 +228,7 @@ class Board {
 		}
 		this.selection = null;
 		this.resetMoveArea();
+		this.el.onmousedown = null;
 	}
 
 	// set up the valid movement area
@@ -181,6 +244,7 @@ class Board {
 					square.el.classList.add('moveRange');
 					square.el.ondragover = this.allowDrop;
 					square.el.ondrop = this.dropMove;
+					square.el.onmousedown = this.clickMove;
 				}
 			}
 		}
@@ -195,12 +259,13 @@ class Board {
 					square.el.classList.remove('moveRange');
 					square.el.ondragover = null;
 					square.el.ondrop = null;
+					square.el.onmousedown = null;
 				}
 			}
 		}
 	}
 
-	// handle drops
+	// handle events
 	allowDrop(ev) {
 		ev.preventDefault();
 	}
@@ -220,41 +285,46 @@ class Board {
 			}
 		}
 	}
+	clickAway(ev) {
+		ev.currentTarget['data-obj'].deselect();
+	};
+	clickMove(ev) {
+		ev.stopPropagation();
+		// TODO: Apply movement, similar to a drop
+	};
 };
 
-/*********************
- Game piece base class
- *********************/
+// bonus Square class
+class Square extends ElObj {
+	constructor(x, y, parent) {
+		super();
+		this.x = x;
+		this.y = y;
+		this.parent = parent;
+	}
 
-class Piece {
+	// base element is a table cell
+	elType() {
+		return 'td';
+	}
+};
+
+/********************
+ Moveable piece class
+ ********************/
+
+class MoveablePiece extends Piece {
 	constructor(type, moveRange, size) {
-		this.parent = null;
+		super(size);
 		this.type = type;
 		this._moveRange = moveRange || 3;
-		this._size = size || 1;
-
-		// create the element
-		this.el = document.createElement('div');
-		this.el.id = Piece.getId();
-		this.el['data-obj'] = this;
-		this.el.classList.add('piece');
-		this.el.classList.add('x'+this._size); // crude way to set the size
 
 		// these will end up being state-dependent, and such
 		this.el.classList.add(type);
 		this.el.onmousedown = this.click;
 	}
 
-	// static tracker for element IDs
-	static _count = 0;
-	static getId() {
-		return "piece" + Piece._count++;
-	}
-
-	// properties of the piece
-	size() {
-		return this._size;
-	}
+	// the piece is now moveable
 	moveRange() {
 		return this._moveRange;
 	}
@@ -280,6 +350,7 @@ class Piece {
 		ev.dataTransfer.clearData("text");
 	}
 	click(ev) {
+		event.stopPropagation();
 		var _piece = ev.target['data-obj'];
 		var _board = _piece.parent;
 		if (_board) _board.select(_piece);
@@ -291,11 +362,11 @@ class Piece {
  ******************/
 
 function Game() {
-	console.log("Game object is static, do not instantiate.");
+	console.log("Game object is static, do not instantiate");
 };
 
 Game.scene = function() {
-	return this._scene; // TODO: handle this better?
+	return this._scene;
 };
 
 Game.setScene = function(scene) {
@@ -318,10 +389,10 @@ Game.start = function() {
 	document.addEventListener('keydown', Game.globalKeydown);
 	document.addEventListener('keyup', Game.globalKeyup);
 	
-	// temporary setup of the first board
+	// TEMPORARY setup of the first board and some pieces
 	var gameBoard = new Board(9, 9);
-	gameBoard.movePiece(new Piece("ball"),        4, 4);
-	gameBoard.movePiece(new Piece("ball2", 4, 3), 4, 6);
+	gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
+	gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
 	this.setScene(gameBoard);
 };
 
