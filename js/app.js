@@ -50,9 +50,15 @@ class Piece extends ElObj {
 		super();
 		this.parent = null;
 		this._size = size || 1;
+
+		// advanced element setup
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
 		this.el.classList.add('x'+this._size); // crude way to set the size
+
+		// drag and drop handling
+		this.el.ondragstart = this.drag;
+		this.el.ondragend = this.drop;
 	}
 
 	// static tracker for element IDs
@@ -75,6 +81,14 @@ class Piece extends ElObj {
 	// piece can be selected or deselected
 	select() { return false; }
 	deselect() { }
+
+	// handle drag and drop
+	drag(ev) {
+		ev.dataTransfer.setData("text", ev.target.id);
+	}
+	drop(ev) {
+		ev.dataTransfer.clearData("text");
+	}
 };
 
 /****************
@@ -272,7 +286,6 @@ class Board extends Container {
 	dropMove(ev) {
 		ev.preventDefault();
 		if (ev.target) {
-			var square = ev.target['data-obj'];
 			var square = ev.target.obj;
 			var _board = square.parent;
 			var el = document.getElementById(ev.dataTransfer.getData("text"));
@@ -287,7 +300,7 @@ class Board extends Container {
 		}
 	}
 	clickAway(ev) {
-		ev.currentTarget['data-obj'].deselect();
+		ev.stopPropagation();
 		ev.currentTarget.obj.deselect();
 	};
 	clickMove(ev) {
@@ -334,23 +347,13 @@ class MoveablePiece extends Piece {
 	// actions on the piece
 	select() {
 		this.el.draggable = true;
-		this.el.ondragstart = this.pickUp;
-		this.el.ondragend = this.putDown;
 		return true;
 	}
 	deselect() {
 		this.el.draggable = false;
-		this.el.ondragstart = null;
-		this.el.ondragend = null;
 	}
 
 	// event handler functions
-	pickUp(ev) {
-		ev.dataTransfer.setData("text", ev.target.id);
-	}
-	putDown(ev) {
-		ev.dataTransfer.clearData("text");
-	}
 	click(ev) {
 		event.stopPropagation();
 		var _piece = ev.target.obj;
@@ -390,7 +393,7 @@ Game.globalKeyup = function(ev) {
 Game.start = function() {
 	document.addEventListener('keydown', Game.globalKeydown);
 	document.addEventListener('keyup', Game.globalKeyup);
-	
+
 	// TEMPORARY setup of the first board and some pieces
 	var gameBoard = new Board(9, 9);
 	gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
