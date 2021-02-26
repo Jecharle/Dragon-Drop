@@ -22,33 +22,15 @@ class ElObj {
 class Scene extends ElObj {
 	constructor() {
 		super();
-		this._containers = [];
 	}
 
 	// init and cleanup
 	start() { }
 	end() { }
 
-	// track the containers in the scene
-	containers() {
-		return this._containers;
-	}
-	addContainer(container) {
-		this._containers.push(container);
-		this.el.appendChild(container.el);
-	}
-
 	// handle key inputs
-	keydown(key) {
-		this._containers.forEach(function(container) {
-			container.keydown(key);
-		});
-	}
-	keyup(key) {
-		this._containers.forEach(function(container) {
-			container.keyup(key);
-		});
-	}
+	keydown(key) { }
+	keyup(key) { }
 }
 
 /***************************************************
@@ -292,6 +274,7 @@ class Board extends Container {
 			var adjacent = this._getAdjacent(edges[i].square);
 			// add all adjacent
 			for (var n = 0; n < adjacent.length; n++) {
+				if (adjacent.inRange) continue;
 				if (!this.canFit(piece, adjacent[n].x, adjacent[n].y)) {
 					continue;
 				}
@@ -441,13 +424,19 @@ class MoveablePiece extends Piece {
  Test scene
  ***************************************************/
 
+// Obviously, this is a temporary scene for testing mechanics and stuff
 class TestScene extends Scene {
 	constructor() {
 		super();
-		var gameBoard = new Board(9, 9);
-		gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
-		gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
-		this.addContainer(gameBoard);
+		this.el.classList.add("centered");
+		this._gameBoard = new Board(9, 9);
+		this._gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
+		this._gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
+		this.el.appendChild(this._gameBoard.el);
+	}
+	keydown(key) {
+		// TODO: Should we parse that "escape = deselect" at this level?
+		this._gameBoard.keydown(key);
 	}
 };
 
@@ -467,12 +456,12 @@ Game.setScene = function(scene) {
 	if (this._scene == scene) return;
 
 	if (this._scene != null) {
-		document.getElementById("canvas").removeChild(this._scene.el);
+		document.body.removeChild(this._scene.el);
 		this._scene.end();
 	}
 
 	this._scene = scene;
-	document.getElementById("canvas").appendChild(scene.el);
+	document.body.appendChild(scene.el);
 	this._scene.start();
 };
 
