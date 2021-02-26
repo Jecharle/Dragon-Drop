@@ -305,7 +305,14 @@ class Board extends Container {
 	};
 	clickMove(ev) {
 		ev.stopPropagation();
-		// TODO: Apply movement, similar to a drop
+		if (ev.target) {
+			var square = ev.target.obj;
+			var _board = square.parent;
+			var _piece = _board.selection;
+			if (_board.movePiece(_piece, square.x, square.y)) {
+				_board.deselect();
+			}
+		}
 	};
 };
 
