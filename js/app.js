@@ -6,7 +6,7 @@ class ElObj {
 	constructor() {
 		var el = document.createElement(this.elType());
 		this.el = el;
-		el['data-obj'] = this;
+		el.obj = this;
 	}
 
 	// type of root element
@@ -273,10 +273,11 @@ class Board extends Container {
 		ev.preventDefault();
 		if (ev.target) {
 			var square = ev.target['data-obj'];
+			var square = ev.target.obj;
 			var _board = square.parent;
 			var el = document.getElementById(ev.dataTransfer.getData("text"));
 			if (el) {
-				var _piece = el['data-obj'];
+				var _piece = el.obj;
 				if (_board.selection == _piece) {
 					if (_board.movePiece(_piece, square.x, square.y)) {
 						_board.deselect();
@@ -287,6 +288,7 @@ class Board extends Container {
 	}
 	clickAway(ev) {
 		ev.currentTarget['data-obj'].deselect();
+		ev.currentTarget.obj.deselect();
 	};
 	clickMove(ev) {
 		ev.stopPropagation();
@@ -351,7 +353,7 @@ class MoveablePiece extends Piece {
 	}
 	click(ev) {
 		event.stopPropagation();
-		var _piece = ev.target['data-obj'];
+		var _piece = ev.target.obj;
 		var _board = _piece.parent;
 		if (_board) _board.select(_piece);
 	}
