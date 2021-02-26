@@ -16,13 +16,15 @@ class ElObj {
 }
 
 /********************
- Root Container class
+ Root Scene class
  ********************/
 
-class Container extends ElObj {
+class Scene extends ElObj {
 	constructor() {
 		super();
 	}
+
+	end() { }
 
 	// remove a piece remotely
 	removePiece(piece) {
@@ -70,12 +72,12 @@ class Piece extends ElObj {
 	// size of the piece
 	size() { return this._size; }
 
-	// move the piece between containers
-	setParent(container) {
-		if (this.parent && this.parent != container) {
+	// move the piece between scenes
+	setParent(scene) {
+		if (this.parent && this.parent != scene) {
 			this.parent.removePiece(this);
 		}
-		this.parent = container;
+		this.parent = scene;
 	}
 
 	// piece can be selected or deselected
@@ -95,7 +97,7 @@ class Piece extends ElObj {
  Game board class
  ****************/
 
-class Board extends Container {
+class Board extends Scene {
 	constructor (w, h) {
 		super();
 		this._squares = [];
@@ -196,7 +198,7 @@ class Board extends Container {
 			return false;
 		}
 
-		// update the parent container
+		// update the parent scene
 		piece.setParent(this);
 
 		// update position
@@ -382,7 +384,13 @@ Game.scene = function() {
 };
 
 Game.setScene = function(scene) {
-	// TODO: Clear out the previous scene...?
+	if (this._scene == scene) return;
+
+	if (this._scene != null) {
+		document.getElementById("canvas").removeChild(this._scene.el);
+		this._scene.end();
+	}
+
 	this._scene = scene;
 	document.getElementById("canvas").appendChild(scene.el);
 };
