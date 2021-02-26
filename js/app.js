@@ -153,33 +153,31 @@ class Board extends Scene {
 		var area = [];
 		for (var x = left; x <= right; x++) {
 			for (var y = top; y <= bottom; y++) {
-				// TODO: Check if it fits the shape
-				area.push({x: x, y: y});
+				// TODO: Check if it fits in the shape
+				area.push(this.at(x, y));
 			}
 		}
 		return area;
 	}
 
-	// check if the area is clear and on the board
-	isClear(x, y, size, shape, direction) {
-		var area = this.getArea(x, y, size, shape, direction);
-		var that = this;
-		return area.every(function(pos) {
-			var square = that.at(pos.x, pos.y);
+	// check if a piece can fit in an area
+	canFit(piece, x, y, size) {
+		size = size || piece.size();
+		var area = this.getArea(x, y, size);
+		var board = this;
+		return area.every(function(square) {
 			if (!square) return false;
-			if (square.piece != null) return false;
+			if (square.piece != null && square.piece != piece) return false;
 			// TODO: Check for blocking terrain
 			return true;
 		});
 	}
 
 	// fill in the same piece in several squares
-	fillPiece(piece, x, y, size) {
+	_fillPiece(piece, x, y, size) {
 		size = size || piece.size();
 		var area = this.getArea(x, y, size);
-		var that = this;
-		area.forEach(function(pos) {
-			var square = that.at(pos.x, pos.y);
+		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
 	}
@@ -188,15 +186,13 @@ class Board extends Scene {
 	movePiece(piece, x, y) {
 		if (!piece) return false;
 
-		// lift it off the previous board space
-		if (piece.parent == this) this.fillPiece(null, piece.x, piece.y, piece.size());
-
 		// if the area is occupied, cancel the movement
-		if (!this.isClear(x, y, piece.size())) {
-			// put it back down
-			if (piece.parent == this) this.fillPiece(piece, piece.x, piece.y);
+		if (!this.canFit(piece, x, y)) {
 			return false;
 		}
+
+		// remove from the previous space on the board
+		if (piece.parent == this) this._fillPiece(null, piece.x, piece.y, piece.size());
 
 		// update the parent scene
 		piece.setParent(this);
@@ -207,7 +203,7 @@ class Board extends Scene {
 
 		// place the piece
 		this.at(x, y).el.appendChild(piece.el);
-		this.fillPiece(piece, x, y);
+		this._fillPiece(piece, x, y);
 
 		// movement success!
 		return true;
@@ -216,7 +212,7 @@ class Board extends Scene {
 	// remove a piece from the board
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
-			this.fillPiece(null, piece.x, piece.y, piece.size());
+			this._fillPiece(null, piece.x, piece.y, piece.size());
 			return true;
 		}
 		return false;
@@ -248,22 +244,57 @@ class Board extends Scene {
 	}
 
 	// set up the valid movement area
-	setMoveArea(origin) {
-		if (!origin || origin.x == null || origin.y == null) return;
+	setMoveArea(piece) {
+		if (!piece || piece.x == null || piece.y == null) return;
 
-		var range = origin.moveRange();
-		// TODO: This will be actual pathfinding stuff
-		for (var x = -range; x <= range; x++) {
-			for (var y = Math.abs(x)-range; y <= range-Math.abs(x); y++) {
-				var square = this.at(origin.x+x, origin.y+y);
-				if (square) {
-					square.el.classList.add('moveRange');
-					square.el.ondragover = this.allowDrop;
-					square.el.ondrop = this.dropMove;
-					square.el.onmousedown = this.clickMove;
+		// start with the origin
+		var origin = this.at(piece.x, piece.y);
+		this._paintSquare(origin);
+		var edges = [{ square: origin, range: piece.moveRange() }];
+
+		// expand the edges
+		for (var i = 0; i < edges.length; i++) {
+			var range = edges[i].range-1;
+			var adjacent = this._getAdjacent(edges[i].square);
+			// add all adjacent
+			for (var n = 0; n < adjacent.length; n++) {
+				if (!this.canFit(piece, adjacent[n].x, adjacent[n].y)) {
+					continue;
+				}
+				this._paintSquare(adjacent[n]);
+				if (range > 0) {
+					edges.push({ square: adjacent[n], range: range });
 				}
 			}
 		}
+	}
+
+	// mark a square as in-range
+	_paintSquare(square) {
+		square.el.classList.add('moveRange');
+		square.el.ondragover = this.allowDrop;
+		square.el.ondrop = this.dropMove;
+		square.el.onmousedown = this.clickMove;
+		square.inRange = true;
+	}
+
+	// get the adjacent squares
+	_getAdjacent(square) {
+		var adjacent = [];
+
+		var left = this.at(square.x-1, square.y);
+		if (left) adjacent.push(left);
+
+		var right = this.at(square.x+1, square.y);
+		if (right) adjacent.push(right);
+
+		var up = this.at(square.x, square.y-1);
+		if (up) adjacent.push(up);
+
+		var down = this.at(square.x, square.y+1);
+		if (down) adjacent.push(down);
+
+		return adjacent;
 	}
 
 	// clear all the pathfinding-related paint
@@ -276,6 +307,7 @@ class Board extends Scene {
 					square.el.ondragover = null;
 					square.el.ondrop = null;
 					square.el.onmousedown = null;
+					square.inRange = null;
 				}
 			}
 		}
