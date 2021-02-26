@@ -1,6 +1,6 @@
-/*************************
+/***************************************************
  Element-Object pair class
- *************************/
+ ***************************************************/
 
 class ElObj {
 	constructor() {
@@ -15,16 +15,50 @@ class ElObj {
 	}
 }
 
-/********************
+/***************************************************
  Root Scene class
- ********************/
+ ***************************************************/
 
 class Scene extends ElObj {
 	constructor() {
 		super();
+		this._containers = [];
 	}
 
+	// init and cleanup
+	start() { }
 	end() { }
+
+	// track the containers in the scene
+	containers() {
+		return this._containers;
+	}
+	addContainer(container) {
+		this._containers.push(container);
+		this.el.appendChild(container.el);
+	}
+
+	// handle key inputs
+	keydown(key) {
+		this._containers.forEach(function(container) {
+			container.keydown(key);
+		});
+	}
+	keyup(key) {
+		this._containers.forEach(function(container) {
+			container.keyup(key);
+		});
+	}
+}
+
+/***************************************************
+ Root Container class
+ ***************************************************/
+
+class Container extends ElObj {
+	constructor() {
+		super();
+	}
 
 	// remove a piece remotely
 	removePiece(piece) {
@@ -43,9 +77,9 @@ class Scene extends ElObj {
 	keyup (key) { }
 };
 
-/****************
+/***************************************************
  Root Piece class
- ****************/
+ ***************************************************/
 
 class Piece extends ElObj {
 	constructor(size) {
@@ -72,12 +106,12 @@ class Piece extends ElObj {
 	// size of the piece
 	size() { return this._size; }
 
-	// move the piece between scenes
-	setParent(scene) {
-		if (this.parent && this.parent != scene) {
+	// move the piece between containers
+	setParent(container) {
+		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
 		}
-		this.parent = scene;
+		this.parent = container;
 	}
 
 	// piece can be selected or deselected
@@ -93,11 +127,11 @@ class Piece extends ElObj {
 	}
 };
 
-/****************
+/***************************************************
  Game board class
- ****************/
+ ***************************************************/
 
-class Board extends Scene {
+class Board extends Container {
 	constructor (w, h) {
 		super();
 		this._squares = [];
@@ -194,7 +228,7 @@ class Board extends Scene {
 		// remove from the previous space on the board
 		if (piece.parent == this) this._fillPiece(null, piece.x, piece.y, piece.size());
 
-		// update the parent scene
+		// update the parent container
 		piece.setParent(this);
 
 		// update position
@@ -365,9 +399,9 @@ class Square extends ElObj {
 	}
 };
 
-/********************
+/***************************************************
  Moveable piece class
- ********************/
+ ***************************************************/
 
 class MoveablePiece extends Piece {
 	constructor(type, moveRange, size) {
@@ -403,9 +437,23 @@ class MoveablePiece extends Piece {
 	}
 };
 
-/******************
+/***************************************************
+ Test scene
+ ***************************************************/
+
+class TestScene extends Scene {
+	constructor() {
+		super();
+		var gameBoard = new Board(9, 9);
+		gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
+		gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
+		this.addContainer(gameBoard);
+	}
+};
+
+/***************************************************
  Static Game object
- ******************/
+ ***************************************************/
 
 function Game() {
 	console.log("Game object is static, do not instantiate");
@@ -425,6 +473,7 @@ Game.setScene = function(scene) {
 
 	this._scene = scene;
 	document.getElementById("canvas").appendChild(scene.el);
+	this._scene.start();
 };
 
 Game.globalKeydown = function(ev) {
@@ -441,11 +490,8 @@ Game.start = function() {
 	document.addEventListener('keydown', Game.globalKeydown);
 	document.addEventListener('keyup', Game.globalKeyup);
 
-	// TEMPORARY setup of the first board and some pieces
-	var gameBoard = new Board(9, 9);
-	gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
-	gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
-	this.setScene(gameBoard);
+	// TEMPORARY initialize to a test scene
+	this.setScene(new TestScene());
 };
 
 Game.start();
