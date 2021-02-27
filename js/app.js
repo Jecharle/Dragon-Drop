@@ -165,7 +165,7 @@ class Board extends Container {
 		var top = y-Math.floor((size-1)/2);
 		var bottom = y+Math.ceil((size-1)/2);
 
-		// fill in the area
+		// get every square in the area
 		var area = [];
 		for (var x = left; x <= right; x++) {
 			for (var y = top; y <= bottom; y++) {
@@ -177,9 +177,9 @@ class Board extends Container {
 	}
 
 	// check if a piece can fit in an area
-	canFit(piece, x, y, size) {
+	canFit(piece, centerSquare, size) {
 		size = size || piece.size();
-		var area = this.getArea(x, y, size);
+		var area = this.getArea(centerSquare.x, centerSquare.y, size);
 		var board = this;
 		return area.every(function(square) {
 			if (!square) return false;
@@ -190,38 +190,37 @@ class Board extends Container {
 	}
 
 	// fill in the same piece in several squares
-	_fillPiece(piece, x, y, size) {
+	_fillPiece(piece, centerSquare, size) {
+		if (!centerSquare) return;
+
 		size = size || piece.size();
-		var area = this.getArea(x, y, size);
+		var area = this.getArea(centerSquare.x, centerSquare.y, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
 	}
 
 	// place a piece on the board (vacates previous position)
-	movePiece(piece, x, y) {
-		if (!piece) return false;
+	movePiece(piece, targetSquare) {
+		if (!piece || !targetSquare) return false;
 
-		// if the area is occupied, cancel the movement
-		if (!this.canFit(piece, x, y)) {
+		// if the piece won't fit, cancel the movement
+		if (!this.canFit(piece, targetSquare)) {
 			return false;
 		}
 
-		// remove from the previous space on the board
-		if (piece.parent == this) this._fillPiece(null, piece.x, piece.y, piece.size());
-
-		// update the parent container
-		piece.setParent(this);
-
-		// update position
-		piece.x = x;
-		piece.y = y;
+		// update parent or clear previous position
+		if (piece.parent != this) {
+			piece.setParent(this);
+		} else {
+			this._fillPiece(null, piece.square, piece.size());
+		}
 
 		// place the piece
-		this.at(x, y).el.appendChild(piece.el);
-		this._fillPiece(piece, x, y);
+		targetSquare.el.appendChild(piece.el);
+		piece.square = targetSquare;
+		this._fillPiece(piece, targetSquare);
 
-		// movement success!
 		return true;
 	}
 
@@ -261,10 +260,10 @@ class Board extends Container {
 
 	// set up the valid movement area
 	setMoveArea(piece) {
-		if (!piece || piece.x == null || piece.y == null) return;
+		if (!piece || !piece.square) return;
 
 		// start with the origin
-		var origin = this.at(piece.x, piece.y);
+		var origin = piece.square;
 		this._paintSquare(origin);
 		var edges = [{ square: origin, range: piece.moveRange() }];
 
@@ -275,7 +274,7 @@ class Board extends Container {
 			// add all adjacent
 			for (var n = 0; n < adjacent.length; n++) {
 				if (adjacent.inRange) continue;
-				if (!this.canFit(piece, adjacent[n].x, adjacent[n].y)) {
+				if (!this.canFit(piece, adjacent[n])) {
 					continue;
 				}
 				this._paintSquare(adjacent[n]);
@@ -343,7 +342,7 @@ class Board extends Container {
 			if (el) {
 				var _piece = el.obj;
 				if (_board.selection == _piece) {
-					if (_board.movePiece(_piece, square.x, square.y)) {
+					if (_board.movePiece(_piece, square)) {
 						_board.deselect();
 					}
 				}
@@ -360,7 +359,7 @@ class Board extends Container {
 			var square = ev.target.obj;
 			var _board = square.parent;
 			var _piece = _board.selection;
-			if (_board.movePiece(_piece, square.x, square.y)) {
+			if (_board.movePiece(_piece, square)) {
 				_board.deselect();
 			}
 		}
@@ -429,14 +428,21 @@ class TestScene extends Scene {
 	constructor() {
 		super();
 		this.el.classList.add("centered");
-		this._gameBoard = new Board(9, 9);
-		this._gameBoard.movePiece(new MoveablePiece("ball"),        4, 4);
-		this._gameBoard.movePiece(new MoveablePiece("ball2", 4, 3), 4, 6);
-		this.el.appendChild(this._gameBoard.el);
+		this._createBoard();
 	}
+
+	_createBoard() {
+		this._board = new Board(9, 9);
+		this._board.movePiece(new MoveablePiece("ball"),        this._board.at(4, 4));
+		this._board.movePiece(new MoveablePiece("ball2", 4, 3), this._board.at(4, 6));
+		this.el.appendChild(this._board.el);
+	}
+
+	// TODO: Route some of the piece -> board events through the scene
+
 	keydown(key) {
 		// TODO: Should we parse that "escape = deselect" at this level?
-		this._gameBoard.keydown(key);
+		this._board.keydown(key);
 	}
 };
 
