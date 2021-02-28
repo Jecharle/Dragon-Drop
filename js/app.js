@@ -42,9 +42,9 @@ class Scene extends ElObj {
  ***************************************************/
 
 class Container extends ElObj {
-	constructor() {
+	constructor(parent) {
 		super();
-		this.parent = null;
+		this.parent = parent;
 	}
 
 	// remove a piece remotely
@@ -111,8 +111,8 @@ class Piece extends ElObj {
  ***************************************************/
 
 class Board extends Container {
-	constructor(w, h) {
-		super();
+	constructor(w, h, parent) {
+		super(parent);
 		this._squares = [];
 		this.w = w;
 		this.h = h;
@@ -460,8 +460,7 @@ class TestScene extends BattleScene {
 	}
 
 	_createBoard() {
-		this._board = new Board(9, 9);
-		this._board.parent = this; // TODO: *should* I put this into a function, somehow?
+		this._board = new Board(9, 9, this);
 		this._board.movePiece(new MoveablePiece("ball"),        this._board.at(4, 4));
 		this._board.movePiece(new MoveablePiece("ball2", 4, 3), this._board.at(4, 6));
 		this.el.appendChild(this._board.el);
