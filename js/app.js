@@ -28,6 +28,10 @@ class Scene extends ElObj {
 	start() { }
 	end() { }
 
+	// handle mouse events
+	drop(piece, target) { }
+	click(piece, target) { }
+
 	// handle key inputs
 	keydown(key) { }
 	keyup(key) { }
@@ -40,6 +44,7 @@ class Scene extends ElObj {
 class Container extends ElObj {
 	constructor() {
 		super();
+		this.parent = null;
 	}
 
 	// remove a piece remotely
@@ -49,14 +54,6 @@ class Container extends ElObj {
 		if (parentEl) parentEl.removeChild(piece.el);
 		return true;
 	}
-
-	// pieces can be selected and deselected
-	select(piece) { return false; }
-	deselect() { }
-
-	// handle key inputs
-	keydown(key) { }
-	keyup (key) { }
 };
 
 /***************************************************
@@ -75,8 +72,8 @@ class Piece extends ElObj {
 		this.el.classList.add('x'+this._size); // crude way to set the size
 
 		// drag and drop handling
-		this.el.ondragstart = this.drag;
-		this.el.ondragend = this.drop;
+		this.el.ondragstart = this._drag;
+		this.el.ondragend = this._drop;
 	}
 
 	// static tracker for element IDs
@@ -88,7 +85,7 @@ class Piece extends ElObj {
 	// size of the piece
 	size() { return this._size; }
 
-	// move the piece between containers
+	// update the parent container
 	setParent(container) {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
@@ -101,10 +98,10 @@ class Piece extends ElObj {
 	deselect() { }
 
 	// handle drag and drop
-	drag(ev) {
+	_drag(ev) {
 		ev.dataTransfer.setData("text", ev.target.id);
 	}
-	drop(ev) {
+	_drop(ev) {
 		ev.dataTransfer.clearData("text");
 	}
 };
@@ -114,7 +111,7 @@ class Piece extends ElObj {
  ***************************************************/
 
 class Board extends Container {
-	constructor (w, h) {
+	constructor(w, h) {
 		super();
 		this._squares = [];
 		this.w = w;
@@ -134,13 +131,6 @@ class Board extends Container {
 	// base element is a table
 	elType() {
 		return 'table';
-	}
-
-	// key event handlers
-	keydown(key) {
-		if (this.selection && key === "Escape") {
-			this.deselect();
-		}
 	}
 
 	// access the individual grid squares
@@ -233,34 +223,12 @@ class Board extends Container {
 		return false;
 	}
 
-	// select a piece to move
-	select(piece) {
-		if (this.selection == piece) return false;
-		if (!piece.select()) return false;
-
-		this.deselect();
-
-		this.selection = piece;
-		this.selection.el.classList.add('selected');
-		this.setMoveArea(piece);
-		this.el.onmousedown = this.clickAway;
-		return true;
-	}
-
-	// clear current selection
-	deselect() {
-		if (this.selection) {
-			this.selection.deselect();
-			this.selection.el.classList.remove('selected');
-		}
-		this.selection = null;
-		this.resetMoveArea();
-		this.el.onmousedown = null;
-	}
-
 	// set up the valid movement area
 	setMoveArea(piece) {
 		if (!piece || !piece.square) return;
+
+		// add the deselect handler
+		this.el.onmousedown = this._click;
 
 		// start with the origin
 		var origin = piece.square;
@@ -288,9 +256,8 @@ class Board extends Container {
 	// mark a square as in-range
 	_paintSquare(square) {
 		square.el.classList.add('moveRange');
-		square.el.ondragover = this.allowDrop;
-		square.el.ondrop = this.dropMove;
-		square.el.onmousedown = this.clickMove;
+		square.el.ondragover = this._allowDrop;
+		square.el.ondrop = this._drop;
 		square.inRange = true;
 	}
 
@@ -322,48 +289,36 @@ class Board extends Container {
 					square.el.classList.remove('moveRange');
 					square.el.ondragover = null;
 					square.el.ondrop = null;
-					square.el.onmousedown = null;
 					square.inRange = null;
 				}
 			}
 		}
 	}
 
-	// handle events
-	allowDrop(ev) {
+	// event handlers
+	_allowDrop(ev) {
 		ev.preventDefault();
 	}
-	dropMove(ev) {
+	_drop(ev) {
 		ev.preventDefault();
 		if (ev.target) {
 			var square = ev.target.obj;
-			var _board = square.parent;
+			var scene = square.parent.parent;
 			var el = document.getElementById(ev.dataTransfer.getData("text"));
-			if (el) {
-				var _piece = el.obj;
-				if (_board.selection == _piece) {
-					if (_board.movePiece(_piece, square)) {
-						_board.deselect();
-					}
-				}
+			if (el && scene) {
+				var piece = el.obj;
+				scene.drop(piece, square);
 			}
 		}
 	}
-	clickAway(ev) {
-		ev.stopPropagation();
-		ev.currentTarget.obj.deselect();
-	};
-	clickMove(ev) {
+	_click(ev) {
 		ev.stopPropagation();
 		if (ev.target) {
 			var square = ev.target.obj;
-			var _board = square.parent;
-			var _piece = _board.selection;
-			if (_board.movePiece(_piece, square)) {
-				_board.deselect();
-			}
+			var scene = square.parent.parent;
+			if (scene) scene.click(null, square);
 		}
-	};
+	}
 };
 
 // bonus Square class
@@ -393,7 +348,7 @@ class MoveablePiece extends Piece {
 
 		// these will end up being state-dependent, and such
 		this.el.classList.add(type);
-		this.el.onmousedown = this.click;
+		this.el.onmousedown = this._click;
 	}
 
 	// the piece is now moveable
@@ -411,11 +366,87 @@ class MoveablePiece extends Piece {
 	}
 
 	// event handler functions
-	click(ev) {
+	_click(ev) {
 		event.stopPropagation();
-		var _piece = ev.target.obj;
-		var _board = _piece.parent;
-		if (_board) _board.select(_piece);
+		var piece = ev.target.obj;
+		var scene = piece.parent.parent;
+		if (scene) scene.click(piece);
+	}
+};
+
+/***************************************************
+ Battle scene
+ ***************************************************/
+
+// Obviously, this is a temporary scene for testing mechanics and stuff
+class BattleScene extends Scene {
+	constructor() {
+		super();
+		this.el.classList.add("centered");
+		this._createBoard();
+
+		this._selection = null;
+	}
+
+	// initialize the board and contents
+	_createBoard() { }
+
+	// select a piece to move
+	_select(piece) {
+		if (this._selection == piece) return false;
+		if (!piece.select()) return false;
+		if (this._selection != null) this._deselect();
+
+		this._selection = piece;
+		this._selection.el.classList.add('selected');
+		this._board.setMoveArea(piece);
+		return true;
+	}
+
+	// clear current selection
+	_deselect() {
+		if (this._selection) {
+			this._selection.deselect();
+			this._selection.el.classList.remove('selected');
+		}
+		this._selection = null;
+		this._board.resetMoveArea();
+		this._board.el.onmousedown = null;
+	}
+
+	// input handlers
+	drop(piece, target) {
+		if (piece && target && piece == this._selection) {
+			if (target.parent.movePiece(piece, target)) {
+				this._deselect();
+			}
+		}
+	}
+
+	click(piece, target) {
+		// select a piece
+		if (piece && !target) {
+			this._select(piece);
+		}
+		// move a selected piece
+		if (this._selection && target && !piece) {
+			if (!target.inRange) {
+				this._deselect();
+			} else if (target.parent.movePiece(this._selection, target)) {
+				this._deselect();
+			}
+		}
+		// deselect
+		if (!piece && !target) {
+			this._deselect();
+		}
+	}
+
+	keydown(key) {
+		// cancel selection when hitting escape
+		if (this._selection && key === "Escape") {
+			this._deselect();
+		}
 	}
 };
 
@@ -423,26 +454,17 @@ class MoveablePiece extends Piece {
  Test scene
  ***************************************************/
 
-// Obviously, this is a temporary scene for testing mechanics and stuff
-class TestScene extends Scene {
+class TestScene extends BattleScene {
 	constructor() {
 		super();
-		this.el.classList.add("centered");
-		this._createBoard();
 	}
 
 	_createBoard() {
 		this._board = new Board(9, 9);
+		this._board.parent = this; // TODO: *should* I put this into a function, somehow?
 		this._board.movePiece(new MoveablePiece("ball"),        this._board.at(4, 4));
 		this._board.movePiece(new MoveablePiece("ball2", 4, 3), this._board.at(4, 6));
 		this.el.appendChild(this._board.el);
-	}
-
-	// TODO: Route some of the piece -> board events through the scene
-
-	keydown(key) {
-		// TODO: Should we parse that "escape = deselect" at this level?
-		this._board.keydown(key);
 	}
 };
 
