@@ -4,24 +4,14 @@
 	align-items: center;
 }
 
-td {
+.square {
 	background-color: gray;
-	width: 64px;
-	height: 64px;
+	width: 62px;
+	height: 62px;
 }
 
 .moveRange {
 	background-color: blue;
-}
-
-.ball {
-	background-color: red;
-	border-radius: 50%;
-}
-
-.ball2 {
-	background-color: green;
-	border-radius: 50%;
 }
 
 .piece {
@@ -44,4 +34,14 @@ td {
 	width: 300%;
 	height: 300%;
 	right: 100%;
+}
+
+.ball {
+	background-color: red;
+	border-radius: 50%;
+}
+
+.ball2 {
+	background-color: green;
+	border-radius: 50%;
 }
