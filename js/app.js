@@ -366,10 +366,10 @@ class SkillTray extends Container {
 }
 
 /***************************************************
- Battle piece
+ Battler piece
  ***************************************************/
 
-class BattlePiece extends Piece {
+class BattlerPiece extends Piece {
 	constructor(size) {
 		super(size);
 	}
@@ -416,7 +416,7 @@ class BattlePiece extends Piece {
  Moveable piece
  ***************************************************/
 
-class MoveablePiece extends BattlePiece {
+class MoveablePiece extends BattlerPiece {
 	constructor(type, moveRange, size) {
 		super(size);
 		this.type = type;
@@ -467,7 +467,7 @@ class MoveablePiece extends BattlePiece {
 class Skill extends Piece {
 	constructor(user) {
 		super(1);
-		user = battlePiece;
+		user = user;
 	}
 
 	// TODO: It should return a range
