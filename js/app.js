@@ -135,6 +135,9 @@ class Board extends Container {
 			}
 			this.el.appendChild(row);
 		}
+
+		this.el.onclick = this._click;
+		this.el.ondrop = this._drop;
 	}
 
 	// base element is a table
@@ -237,10 +240,6 @@ class Board extends Container {
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
-		// enable mouse input
-		this.el.onclick = this._click;
-		this.el.ondrop = this._drop;
-
 		// start with the origin
 		var origin = piece.square;
 		this._paintSquare(origin, piece.moveRange());
@@ -293,10 +292,6 @@ class Board extends Container {
 
 	// clear all the pathfinding-related paint
 	resetMoveArea() {
-		// disable mouse input
-		this.el.onclick = null;
-		this.el.ondrop = null;
-
 		for (var x = 0; x < this.w; x++) {
 			for (var y = 0; y < this.h; y++) {
 				var square = this.at(x, y);
@@ -318,6 +313,7 @@ class Board extends Container {
 		ev.preventDefault();
 		if (ev.target) {
 			var square = ev.target.obj;
+			square = square.square || square;
 			var scene = square.parent.parent;
 			var el = document.getElementById(ev.dataTransfer.getData("text"));
 			var piece = el ? el.obj : null;
@@ -330,8 +326,10 @@ class Board extends Container {
 		ev.stopPropagation();
 		if (ev.target) {
 			var square = ev.target.obj;
-			var scene = square.parent.parent;
-			if (scene) scene.selectTarget(square);
+			if (square) {
+				var scene = square.parent.parent;
+				if (scene) scene.selectTarget(square);
+			}
 		}
 	}
 };
@@ -395,7 +393,7 @@ class BattlerPiece extends Piece {
 		console.log(power+" damage!");
 	}
 	heal(power, attr) {
-		console.log(power+" healing!");
+		console.log(power+" healed!");
 	}
 
 	// status effects
