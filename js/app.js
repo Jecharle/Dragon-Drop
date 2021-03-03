@@ -32,7 +32,7 @@ class Scene extends ElObj {
 	end() { }
 
 	// handle selections
-	selectPiece(piece) { }
+	selectPiece(piece, dragging) { }
 	selectTarget(target, piece) { }
 
 	// handle key inputs
@@ -79,6 +79,7 @@ class Piece extends ElObj {
 		this.el.classList.add('x'+this._size); // crude way to set the size
 
 		// drag and drop handling
+		this.el.draggable = false;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
 	}
@@ -103,6 +104,7 @@ class Piece extends ElObj {
 	// piece can be selected or deselected
 	select() { return false; }
 	deselect() { }
+	action() { return ""; }
 
 	// handle drag and drop
 	_drag(ev) {
@@ -225,6 +227,7 @@ class Board extends Container {
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
 			this._fillPiece(null, piece.x, piece.y, piece.size());
+			piece.square = null;
 			return true;
 		}
 		return false;
@@ -235,7 +238,7 @@ class Board extends Container {
 		if (!piece || !piece.square) return;
 
 		// enable mouse input
-		this.el.onmousedown = this._click;
+		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
 
 		// start with the origin
@@ -290,7 +293,7 @@ class Board extends Container {
 	// clear all the pathfinding-related paint
 	resetMoveArea() {
 		// disable mouse input
-		this.el.onmousedown = null;
+		this.el.onclick = null;
 		this.el.ondrop = null;
 
 		for (var x = 0; x < this.w; x++) {
@@ -359,7 +362,8 @@ class MoveablePiece extends Piece {
 
 		// these will end up being state-dependent, and such
 		this.el.classList.add(type);
-		this.el.onmousedown = this._click;
+		this.el.draggable = true;
+		this.el.onclick = this._click;
 	}
 
 	// the piece is now moveable
@@ -369,11 +373,14 @@ class MoveablePiece extends Piece {
 
 	// actions on the piece
 	select() {
-		this.el.draggable = true;
+		this.el.classList.add('selected');
 		return true;
 	}
 	deselect() {
-		this.el.draggable = false;
+		this.el.classList.remove('selected');
+	}
+	action() {
+		return "move";
 	}
 
 	// event handler functions
@@ -382,6 +389,12 @@ class MoveablePiece extends Piece {
 		var piece = ev.target.obj;
 		var scene = piece.parent.parent;
 		if (scene) scene.selectPiece(piece);
+	}
+	_drag(ev) {
+		super._drag(ev);
+		var piece = ev.target.obj;
+		var scene = piece.parent.parent;
+		if (scene) scene.selectPiece(piece, true);
 	}
 };
 
@@ -403,10 +416,9 @@ class BattleScene extends Scene {
 	_createBoard() { }
 
 	// select a piece to move
-	_select(piece) {
-		if (this._selection == piece) return false;
+	_selectMove(piece) {
 		if (!piece.select()) return false;
-		if (this._selection != null) this._deselect();
+		if (this._selection != null) this._deselectMove();
 
 		this._selection = piece;
 		this._selection.el.classList.add('selected');
@@ -415,7 +427,7 @@ class BattleScene extends Scene {
 	}
 
 	// clear current selection
-	_deselect() {
+	_deselectMove() {
 		if (this._selection) {
 			this._selection.deselect();
 			this._selection.el.classList.remove('selected');
@@ -426,10 +438,17 @@ class BattleScene extends Scene {
 
 	// input handlers
 
-	selectPiece(piece) {
+	selectPiece(piece, dragging) {
 		if (!piece) return;
+
 		// TODO: handle selection by piece type and current context
-		this._select(piece);
+
+		// click a selection again to deselect
+		if (this._selection != piece) {
+			this._selectMove(piece);
+		} else if (!dragging) {
+			this._deselectMove();
+		}
 	}
 
 	selectTarget(target, piece) {
@@ -440,9 +459,9 @@ class BattleScene extends Scene {
 		// moving pieces
 		if (this._selection && !piece || piece == this._selection) {
 			if (!target.inRange) {
-				this._deselect();
+				this._deselectMove();
 			} else if (target.parent.movePiece(this._selection, target)) {
-				this._deselect();
+				this._selectMove(this._selection); // TODO: Refresh move range
 			}
 		}
 	}
@@ -450,7 +469,7 @@ class BattleScene extends Scene {
 	keydown(key) {
 		// cancel selection when hitting escape
 		if (this._selection && key === "Escape") {
-			this._deselect();
+			this._deselectMove();
 		}
 	}
 };
@@ -466,8 +485,8 @@ class TestScene extends BattleScene {
 
 	_createBoard() {
 		this._board = new Board(9, 9, this);
-		this._board.movePiece(new MoveablePiece("ball"),        this._board.at(4, 4));
-		this._board.movePiece(new MoveablePiece("ball2", 4, 3), this._board.at(4, 6));
+		this._board.movePiece(new MoveablePiece("ball"),     this._board.at(4, 5));
+		this._board.movePiece(new MoveablePiece("ball2", 4), this._board.at(4, 4));
 		this.el.appendChild(this._board.el);
 	}
 };

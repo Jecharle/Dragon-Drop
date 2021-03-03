@@ -36,6 +36,11 @@
 	right: 100%;
 }
 
+.selected {
+	border: 2px solid white;
+	margin: -2px;
+}
+
 .ball {
 	background-color: red;
 	border-radius: 50%;
