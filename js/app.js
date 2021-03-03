@@ -235,7 +235,7 @@ class Board extends Container {
 
 	// set up the valid movement area
 	setMoveArea(piece) {
-		if (!piece || !piece.square) return;
+		if (!piece || !piece.square || piece.parent != this) return;
 
 		// enable mouse input
 		this.el.onclick = this._click;
@@ -243,32 +243,33 @@ class Board extends Container {
 
 		// start with the origin
 		var origin = piece.square;
-		this._paintSquare(origin);
-		var edges = [{ square: origin, range: piece.moveRange() }];
+		this._paintSquare(origin, piece.moveRange());
+		var edges = [origin];
 
 		// expand the edges
 		for (var i = 0; i < edges.length; i++) {
-			var range = edges[i].range-1;
-			var adjacent = this._getAdjacent(edges[i].square);
+			var adjacent = this._getAdjacent(edges[i]);
+			var movesLeft = edges[i].movesLeft-1;
 			// add all adjacent
 			for (var n = 0; n < adjacent.length; n++) {
 				if (adjacent.inRange) continue;
 				if (!this.canFit(piece, adjacent[n])) {
 					continue;
 				}
-				this._paintSquare(adjacent[n]);
-				if (range > 0) {
-					edges.push({ square: adjacent[n], range: range });
+				this._paintSquare(adjacent[n], movesLeft);
+				if (movesLeft) {
+					edges.push(adjacent[n]);
 				}
 			}
 		}
 	}
 
 	// mark a square as in-range
-	_paintSquare(square) {
+	_paintSquare(square, movesLeft) {
 		square.el.classList.add('moveRange');
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
+		square.movesLeft = movesLeft;
 	}
 
 	// get the adjacent squares
@@ -303,6 +304,7 @@ class Board extends Container {
 					square.el.classList.remove('moveRange');
 					square.el.ondragover = null;
 					square.inRange = null;
+					square.movesLeft = null;
 				}
 			}
 		}
