@@ -353,10 +353,70 @@ class Square extends ElObj {
 };
 
 /***************************************************
- Moveable piece class
+ Skill tray
  ***************************************************/
 
-class MoveablePiece extends Piece {
+class SkillTray extends Container {
+	constructor(scene) {
+		super(scene);
+	}
+
+	// TODO: It holds a series of Skill pieces
+	// TODO: Only shows up when you have someone selected
+}
+
+/***************************************************
+ Battle piece
+ ***************************************************/
+
+class BattlePiece extends Piece {
+	constructor(size) {
+		super(size);
+	}
+
+	/* TODO: Current stats and state are all stored on the piece
+		base stats and non-changing attributes come from a non-piece entity*/ 
+
+	// TODO: Lots
+
+	// stats
+	maxHp() {
+		return 1;
+	}
+	hp() {
+		return 0;
+	}
+	hpRate() {
+		return this.hp() / this.maxHp();
+	}
+
+	// damage and healing
+	damage(power, attr) {
+		console.log(power+" damage!");
+	}
+	heal(power, attr) {
+		console.log(power+" healing!");
+	}
+
+	// status effects
+	/*addEffect(effect) {
+	}
+	removeEffect(effect) {
+	}
+
+	// movement effects
+	push(dist, attr) {
+	}
+	pull(dist, attr) {
+		this.push(-dist, attr);
+	}*/
+};
+
+/***************************************************
+ Moveable piece
+ ***************************************************/
+
+class MoveablePiece extends BattlePiece {
 	constructor(type, moveRange, size) {
 		super(size);
 		this.type = type;
@@ -398,6 +458,19 @@ class MoveablePiece extends Piece {
 		var scene = piece.parent.parent;
 		if (scene) scene.selectPiece(piece, true);
 	}
+};
+
+/***************************************************
+ Skill icon piece
+ ***************************************************/
+
+class Skill extends Piece {
+	constructor(user) {
+		super(1);
+		user = battlePiece;
+	}
+
+	// TODO: It should return a range
 };
 
 /***************************************************
