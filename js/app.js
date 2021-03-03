@@ -1,5 +1,6 @@
 /***************************************************
- Root class for objects with associated elements
+ ElObj
+ The root class for objects linked to DOM elements
  ***************************************************/
 
 class ElObj {
@@ -16,7 +17,9 @@ class ElObj {
 }
 
 /***************************************************
- Root Scene class
+ Scene
+ The root class that responds to user interaction
+ and applies mechanics to the containers inside it
  ***************************************************/
 
 class Scene extends ElObj {
@@ -38,7 +41,9 @@ class Scene extends ElObj {
 }
 
 /***************************************************
- Root Container class
+ Container
+ The root class for boards, lists, maps, and such
+ that contain pieces and track their positions
  ***************************************************/
 
 class Container extends ElObj {
@@ -57,7 +62,9 @@ class Container extends ElObj {
 };
 
 /***************************************************
- Root Piece class
+ Piece
+ The root class for objects you can select, click,
+ and drag around between containers
  ***************************************************/
 
 class Piece extends ElObj {
@@ -107,7 +114,7 @@ class Piece extends ElObj {
 };
 
 /***************************************************
- Game board class
+ Game board
  ***************************************************/
 
 class Board extends Container {
