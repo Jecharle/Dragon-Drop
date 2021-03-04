@@ -14,6 +14,14 @@
 	background-color: blue;
 }
 
+.skillRange {
+	background-color: orange;
+}
+
+.skillList{
+	border: 1px solid black;
+}
+
 .piece {
 	position: relative;
 	z-index: 1;
@@ -49,4 +57,11 @@
 .ball2 {
 	background-color: green;
 	border-radius: 50%;
+}
+
+.skill {
+	width: 62px;
+	height: 62px;
+	border-radius: 25%;
+	background-color: red;
 }
