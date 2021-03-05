@@ -1,7 +1,7 @@
 /***************************************************
  Scene
  The root class that responds to user interaction
- and applies mechanics to the containers inside it
+ and applies rules to pieces and containers
  ***************************************************/
 class Scene extends ElObj {
 	constructor() {
@@ -14,7 +14,7 @@ class Scene extends ElObj {
 
 	// handle mouse selections
 	selectPiece(piece, dragging) { }
-	selectTarget(target, piece) { }
+	selectTarget(target, id) { }
 
 	// handle key inputs
 	keydown(key) { }
@@ -30,14 +30,21 @@ class BattleScene extends Scene {
 		this.el.classList.add("centered");
 		this._createBoard();
 		this._createSkillList();
-
-		this._unit = null;
-		this._skill = null;
 	}
+
+	start() {
+		this._phase = 1; // player phase
+		this._subphase = 0; // unit selection
+		this._deselectSkill()
+		this._deselectMove();
+		this._clearMoves();
+	}
+
+	// TODO: introduce phase / selection tiers to drive the event logic better?
 
 	// initialize the containers
 	_createBoard() { 
-
+		// TODO: Initialize from a "battle map" entity?
 	}
 	_createSkillList() {
 		this._skillList = new SkillList();
@@ -48,48 +55,58 @@ class BattleScene extends Scene {
 	_selectMove(piece) {
 		if (!piece.select()) return false;
 		if (this._skill) this._deselectSkill();
-		if (this._unit) this._deselectMove();
+		if (this._unit != piece) this._deselectMove();
 
 		this._unit = piece;
-		this._unit.el.classList.add('selected');
-		this._board.setMoveArea(piece);
 		this._skillList.setUser(piece);
 		return true;
 	}
 	_deselectMove() {
-		if (this._unit) {
-			this._unit.deselect();
-			this._unit.el.classList.remove('selected');
-		}
+		if (this._unit) this._unit.deselect();
 		this._unit = null;
-		this._board.resetAreas();
-		this._skillList.setUser();
+		this._skillList.setUser(null);
 	}
 
 	// select a skill piece
 	_selectSkill(piece) {
 		if (!piece.select()) return false;
-		if (this._skill) this._deselectSkill();
+		if (this._skill != piece) this._deselectSkill();
 
 		this._skill = piece;
-		this._skill.el.classList.add('selected');
-		this._board.setSkillArea(piece);
 		return true;
 	}
 	_deselectSkill() {
-		if (!this._skill) return;
-		this._skill.deselect();
-		this._skill.el.classList.remove('selected');
+		if (this._skill) this._skill.deselect();
 		this._skill = null;
+	}
+
+	// update the selection area
+	_refreshArea() {
+		this._board.resetAreas();
+
+		if (this._skill) {
+			this._board.setSkillArea(this._skill);
+		} else if (this._unit) {
+			this._board.setMoveArea(this._unit);
+		}
+	}
+
+	// undo movement
+	_addMove(piece) {
+		this._undoStack.push([piece, piece.square]);
+	}
+	_undoMove() {
+		var move = this._undoStack.pop();
+		if (move) move[1].parent.movePiece(move[0], move[1]);
+	}
+	_clearMoves() {
+		this._undoStack = [];
 	}
 
 	// input handlers
 
 	selectPiece(piece, dragging) {
 		if (!piece) return;
-
-		// TODO: handle selection by piece type and current context
-		// TODO: If you've got a skill selected, you MIGHT actually be targeting
 
 		// select a skill
 		if (piece.action() == "skill") {
@@ -99,7 +116,7 @@ class BattleScene extends Scene {
 				this._deselectSkill();
 				this._selectMove(this._unit);
 			}
-		} else if (this._skill && !dragging && piece.targetable) {
+		} else if (this._skill && !dragging && piece.square) {
 			// we're targeting a skill and wanted the piece's square
 			this.selectTarget(piece.square);
 			return;
@@ -113,29 +130,30 @@ class BattleScene extends Scene {
 				this._deselectMove();
 			}
 		}
+		this._refreshArea();
 	}
 
 	selectTarget(target, id) {
 		if (!target) return;
 
-		// TODO: handle target by selected piece type and current context
-
 		// targeting skills
-		if (this._skill && (!id || id == this._skill.el.id)) {
+		if (this._skill && this._skill.idMatch(id)) {
 			if (!target.inRange
 				|| this._skill.use(target)) {
 				this._deselectSkill();
-				this._selectMove(this._unit);
+				this._clearMoves();
 			}
 		}
 		// moving units
-		else if (this._unit && (!id || id == this._unit.el.id)) {
+		else if (this._unit && this._unit.idMatch(id)) {
 			if (!target.inRange) {
 				this._deselectMove();
-			} else if (target.parent.movePiece(this._unit, target)) {
-				this._selectMove(this._unit); // TODO: Refresh move range
+			} else if (target.parent.canFit(this._unit, target)) {
+				this._addMove(this._unit);
+				target.parent.movePiece(this._unit, target)
 			}
 		}
+		this._refreshArea();
 	}
 
 	keydown(key) {
@@ -143,10 +161,12 @@ class BattleScene extends Scene {
 		if (key === "Escape") {
 			if (this._skill) {
 				this._deselectSkill();
-				this._selectMove(this._unit);
 			} else if (this._unit) {
 				this._deselectMove();
+			} else {
+				this._undoMove();
 			}
+			this._refreshArea();
 		}
 	}
 };
@@ -163,7 +183,7 @@ class TestScene extends BattleScene {
 	_createBoard() {
 		this._board = new Board(9, 9);
 		this._board.movePiece(new ControllablePiece("ball"),     this._board.at(4, 5));
-		this._board.movePiece(new ControllablePiece("ball2", 0), this._board.at(4, 4));
+		this._board.movePiece(new ControllablePiece("ball2", 2), this._board.at(4, 4));
 		this.el.appendChild(this._board.el);
 	}
 };

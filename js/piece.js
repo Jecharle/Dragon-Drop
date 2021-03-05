@@ -26,6 +26,11 @@ class Piece extends ElObj {
 		return "piece" + Piece._id++;
 	}
 
+	// quick comparator for IDs
+	idMatch(id) {
+		return (!id || id == this.el.id);
+	}
+
 	// size of the piece
 	size() { return this._size; }
 
@@ -60,8 +65,8 @@ class TargetablePiece extends Piece {
 		this.targetable = true;
 	}
 
-	/* TODO: Current stats and state are all stored on the piece
-		base stats and non-changing attributes come from a non-piece entity*/ 
+	/* TODO: Volatile stats and statuses are all stored on the piece
+		base stats and unchangeable attributes come from a non-piece 'battler' entity */ 
 
 	// TODO: Lots
 
@@ -78,11 +83,11 @@ class TargetablePiece extends Piece {
 	}
 
 	takeDamage(power, attr) {
-		window.alert(power+" damage!");
+		alert(power+" damage!");
 		return power;
 	}
 	heal(power, attr) {
-		window.alert(power+" healed!");
+		alert(power+" healed!");
 		return power;
 	}
 
@@ -96,13 +101,14 @@ class TargetablePiece extends Piece {
 
 	// status effects
 	/*
-	// TODO: get current statuses
-	// TODO: check for a status?
-
+	TODO: statuses get stored by name in a dictionary
+	getStatus(name) {
+		return false;
+	}
 	addStatus(effect) {
 		return false;
 	}
-	removeStatus(effect) {
+	removeStatus(name) {
 		return false;
 	}*/
 };
@@ -174,15 +180,25 @@ class SkillPiece extends Piece {
 		return null; // TEMP
 	}
 
-	// TODO: Action requirements
+	// TODO: Skill use requirements
+	_canUse() {
+		return true;
+	}
 
-	// apply effects
-	use(target) {
+	// validate target
+	_canTarget(target) {
 		if (target.piece && target.piece.targetable) {
-			target.piece.takeDamage(1);
 			return true;
 		}
 		return false;
+	}
+
+	// apply effects
+	use(target) {
+		if (!this._canTarget(target)) return false;
+
+		target.piece.takeDamage(1);
+		return true;
 	}
 
 	// actions on the piece

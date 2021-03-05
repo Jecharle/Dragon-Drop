@@ -105,22 +105,11 @@ class Board extends Container {
 		});
 	}
 
-	// fill in the same piece in several squares
-	_fillPiece(piece, centerSquare, size) {
-		if (!centerSquare) return;
-
-		size = size || piece.size();
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
-		area.forEach(function(square) {
-			if (square) square.piece = piece;
-		});
-	}
-
 	// place a piece on the board (vacates previous position)
 	movePiece(piece, targetSquare) {
 		if (!piece || !targetSquare) return false;
 
-		// if the piece won't fit, cancel the movement
+		// if the piece won't fit, don't move
 		if (!this.canFit(piece, targetSquare)) {
 			return false;
 		}
@@ -206,14 +195,21 @@ class Board extends Container {
 			for (var y = 0; y < this.h; y++) {
 				var square = this.at(x, y);
 				if (square) {
-					square.el.classList.remove('moveRange');
-					square.el.classList.remove('skillRange');
-					square.el.ondragover = null;
-					square.inRange = null;
-					square.movesLeft = null;
+					this._clearPaint(square);
 				}
 			}
 		}
+	}
+
+	// fill in the same piece in several squares
+	_fillPiece(piece, centerSquare, size) {
+		if (!centerSquare) return;
+
+		size = size || piece.size();
+		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		area.forEach(function(square) {
+			if (square) square.piece = piece;
+		});
 	}
 
 	// mark a square as in-range
@@ -227,6 +223,13 @@ class Board extends Container {
 		square.el.classList.add('skillRange');
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
+	}
+	_clearPaint(square) {
+		square.el.classList.remove('moveRange');
+		square.el.classList.remove('skillRange');
+		square.el.ondragover = null;
+		square.inRange = null;
+		square.movesLeft = null;
 	}
 
 	// get the adjacent squares
@@ -301,7 +304,6 @@ class SkillList extends Container {
 		super();
 		this._user = null;
 		this.skills = [];
-		// TODO: element settings!
 		this.el.classList.add('skillList');
 	}
 
