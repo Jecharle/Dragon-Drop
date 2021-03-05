@@ -36,7 +36,7 @@ class BattleScene extends Scene {
 		this._phase = 1; // player phase
 		this._subphase = 0; // unit selection
 		this._deselectSkill()
-		this._deselectMove();
+		this._deselectUnit();
 		this._clearMoves();
 	}
 
@@ -51,23 +51,23 @@ class BattleScene extends Scene {
 		this.el.appendChild(this._skillList.el);
 	}
 
-	// select a piece to move
-	_selectMove(piece) {
-		if (!piece.select()) return false;
+	// select a unit to move
+	_selectUnit(piece) {
+		if (piece && !piece.select()) return false;
 		if (this._skill) this._deselectSkill();
-		if (this._unit != piece) this._deselectMove();
+		if (this._unit != piece) this._deselectUnit();
 
 		this._unit = piece;
 		this._skillList.setUser(piece);
 		return true;
 	}
-	_deselectMove() {
+	_deselectUnit() {
 		if (this._unit) this._unit.deselect();
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
 
-	// select a skill piece
+	// select a skill to target
 	_selectSkill(piece) {
 		if (!piece.select()) return false;
 		if (this._skill != piece) this._deselectSkill();
@@ -91,13 +91,20 @@ class BattleScene extends Scene {
 		}
 	}
 
-	// undo movement
-	_addMove(piece) {
-		this._undoStack.push([piece, piece.square]);
+	// move units around
+	_moveUnit(piece, target) {
+		if (target.parent.canFit(piece, target)) {
+			this._undoStack.push([piece, piece.square]);
+			target.parent.movePiece(piece, target);
+			piece.moved = true;
+		}
 	}
 	_undoMove() {
 		var move = this._undoStack.pop();
-		if (move) move[1].parent.movePiece(move[0], move[1]);
+		if (move) {
+			move[1].parent.movePiece(move[0], move[1]);
+			move[0].moved = false;
+		}
 	}
 	_clearMoves() {
 		this._undoStack = [];
@@ -108,13 +115,13 @@ class BattleScene extends Scene {
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
-		// select a skill
+		// select a skill to target
 		if (piece.action() == "skill") {
 			if (this._skill != piece) {
 				this._selectSkill(piece);
 			} else if (!dragging) {
 				this._deselectSkill();
-				this._selectMove(this._unit);
+				this._selectUnit(this._unit);
 			}
 		} else if (this._skill && !dragging && piece.square) {
 			// we're targeting a skill and wanted the piece's square
@@ -122,12 +129,12 @@ class BattleScene extends Scene {
 			return;
 		}
 
-		// select a moving unit
+		// select a unit to move
 		if (piece.action() == "move") {
 			if (this._unit != piece) {
-				this._selectMove(piece);
+				this._selectUnit(piece);
 			} else if (!dragging) {
-				this._deselectMove();
+				this._deselectUnit();
 			}
 		}
 		this._refreshArea();
@@ -138,8 +145,9 @@ class BattleScene extends Scene {
 
 		// targeting skills
 		if (this._skill && this._skill.idMatch(id)) {
-			if (!target.inRange
-				|| this._skill.use(target)) {
+			if (!target.inRange) {
+				this._deselectSkill();
+			} else if (this._skill.use(target)) {
 				this._deselectSkill();
 				this._clearMoves();
 			}
@@ -147,11 +155,8 @@ class BattleScene extends Scene {
 		// moving units
 		else if (this._unit && this._unit.idMatch(id)) {
 			if (!target.inRange) {
-				this._deselectMove();
-			} else if (target.parent.canFit(this._unit, target)) {
-				this._addMove(this._unit);
-				target.parent.movePiece(this._unit, target)
-			}
+				this._deselectUnit();
+			} else this._moveUnit(this._unit, target);
 		}
 		this._refreshArea();
 	}
@@ -162,7 +167,7 @@ class BattleScene extends Scene {
 			if (this._skill) {
 				this._deselectSkill();
 			} else if (this._unit) {
-				this._deselectMove();
+				this._deselectUnit();
 			} else {
 				this._undoMove();
 			}

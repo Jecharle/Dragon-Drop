@@ -132,16 +132,25 @@ class ControllablePiece extends TargetablePiece {
 			new TestAttackPiece(this),
 			new TestHealPiece(this)
 		];
+
+		this.startTurn();
 	}
 
 	// piece can move
 	moveRange() {
-		return this._moveRange;
+		if (this.moved) return 0;
+		else return this._moveRange;
 	}
 
 	// get your skill list
 	skills() {
 		return this._skills;
+	}
+
+	// update traits at the start of the turn
+	startTurn() {
+		this.moved = false;
+		this.acted = false;
 	}
 
 	// actions on the piece
@@ -186,28 +195,39 @@ class SkillPiece extends Piece {
 	range() {
 		return 0;
 	}
-
 	shape() {
 		return null; // TEMP
 	}
 
-	// requirements for using the skill
-	_canUse() {
+	// use the skill
+	use(target) {
+		if (!this._validTarget(target)) return false;
+
+		this._cost();
+		this._effects(target);
 		return true;
 	}
 
-	// validate target
-	_canTarget(target) {
-		return false;
+	// whether the skill is enabled or not
+	canUse() {
+		if (this.user.acted) return false;
+		else return true;
 	}
 
-	// apply effects
-	use(target) {
+	// overrideable skill aspects
+	_validTarget(target) {
 		return false;
+	}
+	_effects(target) {
+
+	}
+	_cost() {
+		this.user.acted = true;
 	}
 
 	// actions on the piece
 	select() {
+		if (!this.canUse()) return false;
 		this.el.classList.add('selected');
 		return true;
 	}
@@ -247,7 +267,7 @@ class SkillPiece extends Piece {
 	}
 
 	// validate target
-	_canTarget(target) {
+	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
 			return true;
 		}
@@ -255,11 +275,8 @@ class SkillPiece extends Piece {
 	}
 
 	// apply effects
-	use(target) {
-		if (!this._canTarget(target)) return false;
-
+	_effects(target) {
 		target.piece.takeDamage(1);
-		return true;
 	}
 };
 
@@ -277,18 +294,15 @@ class SkillPiece extends Piece {
 	}
 
 	// validate target
-	_canTarget(target) {
+	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
 			return true;
 		}
 		return false;
 	}
 
-	// apply effects
-	use(target) {
-		if (!this._canTarget(target)) return false;
-
+	//
+	_effects(target) {
 		target.piece.heal(1);
-		return true;
 	}
 };
