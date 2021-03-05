@@ -311,13 +311,22 @@ class SkillList extends Container {
 	setUser(user) {
 		this._clearSkills();
 		this._user = user;
-		if (user) {
-			var skill = new SkillPiece(user);
-			skill.setParent(this);
-			this.skills.push(skill);
-			this.el.appendChild(skill.el);
+		if (!user) return false;
+
+		var userSkills = user.skills();
+		for (var i = 0; i < userSkills.length; i++) {
+			this._addSkill(userSkills[i]);
 		}
 		return true;
+	}
+
+	// add a skill to the list
+	_addSkill(piece) {
+		if (piece) {
+			piece.setParent(this);
+			this.skills.push(piece);
+			this.el.appendChild(piece.el);
+		}
 	}
 
 	// remove all skills
@@ -325,6 +334,6 @@ class SkillList extends Container {
 		for (var i = 0; i < this.skills.length; i++) {
 			this.removePiece(this.skills[i]);
 		}
-		this.skills.length = 0;
+		this.skills = [];
 	}
 }

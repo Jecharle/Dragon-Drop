@@ -87,7 +87,7 @@ class TargetablePiece extends Piece {
 		return power;
 	}
 	heal(power, attr) {
-		alert(power+" healed!");
+		alert(power+" healing!");
 		return power;
 	}
 
@@ -114,7 +114,7 @@ class TargetablePiece extends Piece {
 };
 
 /***************************************************
- Moveable piece
+ Controllable piece
  ***************************************************/
 class ControllablePiece extends TargetablePiece {
 	constructor(type, moveRange, size) {
@@ -125,12 +125,23 @@ class ControllablePiece extends TargetablePiece {
 		// these will end up being state-dependent, and such
 		this.el.classList.add(type);
 		this.el.onclick = this._click;
-		if (this._moveRange) this.el.draggable = true; // TEMP
+		if (this._moveRange > 0) this.el.draggable = true; // TEMP
+
+		// TEMP
+		this._skills = [
+			new TestAttackPiece(this),
+			new TestHealPiece(this)
+		];
 	}
 
-	// the piece is now moveable
+	// piece can move
 	moveRange() {
 		return this._moveRange;
+	}
+
+	// get your skill list
+	skills() {
+		return this._skills;
 	}
 
 	// actions on the piece
@@ -173,32 +184,26 @@ class SkillPiece extends Piece {
 	}
 
 	range() {
-		return 1;
+		return 0;
 	}
 
 	shape() {
 		return null; // TEMP
 	}
 
-	// TODO: Skill use requirements
+	// requirements for using the skill
 	_canUse() {
 		return true;
 	}
 
 	// validate target
 	_canTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
 		return false;
 	}
 
 	// apply effects
 	use(target) {
-		if (!this._canTarget(target)) return false;
-
-		target.piece.takeDamage(1);
-		return true;
+		return false;
 	}
 
 	// actions on the piece
@@ -225,5 +230,65 @@ class SkillPiece extends Piece {
 		var piece = ev.target.obj;
 		var scene = Game.scene();
 		if (scene) scene.selectPiece(piece, true);
+	}
+};
+
+/***************************************************
+ Test attack skill
+ ***************************************************/
+ class TestAttackPiece extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.el.style.backgroundColor = 'red';
+	}
+
+	range() {
+		return 1; // TEMP
+	}
+
+	// validate target
+	_canTarget(target) {
+		if (target.piece && target.piece.targetable) {
+			return true;
+		}
+		return false;
+	}
+
+	// apply effects
+	use(target) {
+		if (!this._canTarget(target)) return false;
+
+		target.piece.takeDamage(1);
+		return true;
+	}
+};
+
+/***************************************************
+ Test heal skill
+ ***************************************************/
+ class TestHealPiece extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.el.style.backgroundColor = 'green';
+	}
+
+	range() {
+		return 2; // TEMP
+	}
+
+	// validate target
+	_canTarget(target) {
+		if (target.piece && target.piece.targetable) {
+			return true;
+		}
+		return false;
+	}
+
+	// apply effects
+	use(target) {
+		if (!this._canTarget(target)) return false;
+
+		target.piece.heal(1);
+		return true;
 	}
 };
