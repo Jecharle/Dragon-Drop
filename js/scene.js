@@ -152,24 +152,19 @@ class BattleScene extends Scene {
 	selectTarget(target, id) {
 		if (!target) return;
 
-		if (this._skill && this._skill.idMatch(id)) {
-			if (!target.inRange) {
-				this._deselectSkill();
-			} else {
-				this._useSkill(this._skill, target);
-			}
+		if (!target.inRange) {
+			this._deselectSkill();
+			this._deselectUnit();
+		} else if (this._skill && this._skill.idMatch(id)) {
+			this._useSkill(this._skill, target);
 		} else if (this._unit && this._unit.idMatch(id)) {
-			if (!target.inRange) {
-				this._deselectUnit();
-			} else {
-				this._moveUnit(this._unit, target);
-			}
+			this._moveUnit(this._unit, target);
 		}
 		this._refreshArea();
 	}
 
 	keydown(key) {
-		// cancel selection when hitting escape or backspace
+		// deselect / undo when hitting escape or backspace
 		if (key == "Escape" || key == "Backspace") {
 			if (this._skill) {
 				this._deselectSkill();
