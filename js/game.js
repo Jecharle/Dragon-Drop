@@ -41,6 +41,7 @@ Game.begin = function() {
 
 	this._gameDiv = document.createElement("div");
 	this._gameDiv.classList.add("centered");
+	this._gameDiv.id = "gameDiv";
 	document.body.appendChild(this._gameDiv);
 
 	this.setScene(new TestScene()); // TEMP

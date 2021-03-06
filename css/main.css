@@ -18,8 +18,8 @@
 	background-color: orange;
 }
 
-.skillList{
-	height: 64px;
+.skillList {
+	display: flex;
 }
 
 .piece {
