@@ -14,12 +14,12 @@ Game.setScene = function(scene) {
 	if (this._scene == scene) return;
 
 	if (this._scene != null) {
-		document.body.removeChild(this._scene.el);
+		this._gameDiv.removeChild(this._scene.el);
 		this._scene.end();
 	}
 
 	this._scene = scene;
-	document.body.appendChild(scene.el);
+	this._gameDiv.appendChild(scene.el);
 	this._scene.start();
 };
 
@@ -38,6 +38,10 @@ Game.globalKeyup = function(ev) {
 Game.begin = function() {
 	document.addEventListener('keydown', Game.globalKeydown);
 	document.addEventListener('keyup', Game.globalKeyup);
+
+	this._gameDiv = document.createElement("div");
+	this._gameDiv.classList.add("centered");
+	document.body.appendChild(this._gameDiv);
 
 	this.setScene(new TestScene()); // TEMP
 };

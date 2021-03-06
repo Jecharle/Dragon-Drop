@@ -27,9 +27,9 @@ class Scene extends ElObj {
 class BattleScene extends Scene {
 	constructor() {
 		super();
-		this.el.classList.add("centered");
-		this._createBoard();
-		this._createSkillList();
+		this._board = this._createBoard();
+		this._skillList = this._createSkillList();
+		this._buildDOM();
 	}
 
 	start() {
@@ -47,11 +47,15 @@ class BattleScene extends Scene {
 		// TODO: Initialize from a "battle map" entity?
 	}
 	_createSkillList() {
-		this._skillList = new SkillList();
+		return new SkillList();
+	}
+	_buildDOM() {
+		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
+		//this.el.appendChild(newDiv);
 	}
 
-	// select a unit to move
+	// select a unit
 	_selectUnit(piece) {
 		if (piece && !piece.select()) return false;
 		if (this._skill) this._deselectSkill();
@@ -67,31 +71,7 @@ class BattleScene extends Scene {
 		this._skillList.setUser(null);
 	}
 
-	// select a skill to target
-	_selectSkill(piece) {
-		if (!piece.select()) return false;
-		if (this._skill != piece) this._deselectSkill();
-
-		this._skill = piece;
-		return true;
-	}
-	_deselectSkill() {
-		if (this._skill) this._skill.deselect();
-		this._skill = null;
-	}
-
-	// update the selection area
-	_refreshArea() {
-		this._board.resetAreas();
-
-		if (this._skill) {
-			this._board.setSkillArea(this._skill);
-		} else if (this._unit) {
-			this._board.setMoveArea(this._unit);
-		}
-	}
-
-	// move units around
+	// move a unit
 	_moveUnit(piece, target) {
 		if (target.parent.canFit(piece, target)) {
 			this._undoStack.push([piece, piece.square]);
@@ -110,27 +90,56 @@ class BattleScene extends Scene {
 		this._undoStack = [];
 	}
 
+	// select a skill
+	_selectSkill(piece) {
+		if (!piece.select()) return false;
+		if (this._skill != piece) this._deselectSkill();
+
+		this._skill = piece;
+		return true;
+	}
+	_deselectSkill() {
+		if (this._skill) this._skill.deselect();
+		this._skill = null;
+	}
+
+	// use a skill
+	_useSkill(piece, target) {
+		if (piece.use(target)) {
+			this._deselectSkill();
+			this._clearMoves();
+		}
+	}
+
+	// update the selection area
+	_refreshArea() {
+		this._board.resetAreas();
+
+		if (this._skill) {
+			this._board.setSkillArea(this._skill);
+		} else if (this._unit) {
+			this._board.setMoveArea(this._unit);
+		}
+	}
+
 	// input handlers
 
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
-		// select a skill to target
-		if (piece.action() == "skill") {
+		if (piece.type() == Piece.Skill) {
 			if (this._skill != piece) {
 				this._selectSkill(piece);
 			} else if (!dragging) {
 				this._deselectSkill();
-				this._selectUnit(this._unit);
+				//this._selectUnit(this._unit);
 			}
-		} else if (this._skill && !dragging && piece.square) {
-			// we're targeting a skill and wanted the piece's square
+		} else if (this._skill && piece.square && !dragging) {
 			this.selectTarget(piece.square);
 			return;
 		}
 
-		// select a unit to move
-		if (piece.action() == "move") {
+		if (piece.type() == Piece.Unit) {
 			if (this._unit != piece) {
 				this._selectUnit(piece);
 			} else if (!dragging) {
@@ -143,27 +152,25 @@ class BattleScene extends Scene {
 	selectTarget(target, id) {
 		if (!target) return;
 
-		// targeting skills
 		if (this._skill && this._skill.idMatch(id)) {
 			if (!target.inRange) {
 				this._deselectSkill();
-			} else if (this._skill.use(target)) {
-				this._deselectSkill();
-				this._clearMoves();
+			} else {
+				this._useSkill(this._skill, target);
 			}
-		}
-		// moving units
-		else if (this._unit && this._unit.idMatch(id)) {
+		} else if (this._unit && this._unit.idMatch(id)) {
 			if (!target.inRange) {
 				this._deselectUnit();
-			} else this._moveUnit(this._unit, target);
+			} else {
+				this._moveUnit(this._unit, target);
+			}
 		}
 		this._refreshArea();
 	}
 
 	keydown(key) {
-		// cancel selection when hitting escape
-		if (key === "Escape") {
+		// cancel selection when hitting escape or backspace
+		if (key == "Escape" || key == "Backspace") {
 			if (this._skill) {
 				this._deselectSkill();
 			} else if (this._unit) {
@@ -186,9 +193,9 @@ class TestScene extends BattleScene {
 	}
 
 	_createBoard() {
-		this._board = new Board(9, 9);
-		this._board.movePiece(new ControllablePiece("ball"),     this._board.at(4, 5));
-		this._board.movePiece(new ControllablePiece("ball2", 2), this._board.at(4, 4));
-		this.el.appendChild(this._board.el);
+		var board = new Board(9, 9);
+		board.movePiece(new ControllablePiece("ball"),     board.at(4, 5));
+		board.movePiece(new ControllablePiece("ball2", 2), board.at(4, 4));
+		return board;
 	}
 };

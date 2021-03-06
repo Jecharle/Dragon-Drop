@@ -45,7 +45,7 @@ class Piece extends ElObj {
 	// piece can be selected or deselected
 	select() { return false; }
 	deselect() { }
-	action() { return ""; }
+	type() { return Piece.None; }
 
 	// handle drag and drop
 	_drag(ev) {
@@ -55,6 +55,11 @@ class Piece extends ElObj {
 		ev.dataTransfer.clearData("text");
 	}
 };
+
+// type constants
+Piece.None = 0;
+Piece.Unit = 1;
+Piece.Skill = 2;
 
 /***************************************************
  Targetable piece
@@ -117,13 +122,12 @@ class TargetablePiece extends Piece {
  Controllable piece
  ***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(type, moveRange, size) {
+	constructor(style, moveRange, size) {
 		super(size);
-		this.type = type;
 		this._moveRange = moveRange != undefined ? moveRange : 3; // TEMP
 
 		// these will end up being state-dependent, and such
-		this.el.classList.add(type);
+		this.el.classList.add(style);
 		this.el.onclick = this._click;
 		if (this._moveRange > 0) this.el.draggable = true; // TEMP
 
@@ -161,8 +165,8 @@ class ControllablePiece extends TargetablePiece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	action() {
-		return "move";
+	type() {
+		return Piece.Unit;
 	}
 
 	// event handler functions
@@ -234,8 +238,8 @@ class SkillPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	action() {
-		return "skill";
+	type() {
+		return Piece.Skill;
 	}
 
 	// event handler functions
