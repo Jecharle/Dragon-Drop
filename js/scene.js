@@ -175,6 +175,14 @@ class BattleScene extends Scene {
 			}
 			this._refreshArea();
 		}
+		// numeric shortcuts for skills
+		if (isFinite(key)) {
+			var num = Number(key);
+			if (this._skillList.skills && num > 0 && num <= this._skillList.skills.length) {
+				this._selectSkill(this._skillList.skills[num-1]);
+				this._refreshArea();
+			}
+		}
 	}
 };
 
