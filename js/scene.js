@@ -109,20 +109,13 @@ class BattleScene extends Scene {
 	}
 
 	_moveUnit(piece, target) {
-		if (target.parent.canFit(piece, target)) {
-			this._moveStack.push([piece, piece.square]);
-			target.parent.movePiece(piece, target);
-			piece.setMoved(true);
+		if (piece.move(target)) {
+			this._moveStack.push(piece);
 		}
-		piece.refresh();
 	}
 	_undoMove() {
-		var move = this._moveStack.pop();
-		if (move) {
-			move[1].parent.movePiece(move[0], move[1]);
-			move[0].setMoved(false);
-			move[0].refresh();
-		}
+		var piece = this._moveStack.pop();
+		if (piece) piece.undoMove();
 	}
 	_clearMoves() {
 		this._moveStack = [];

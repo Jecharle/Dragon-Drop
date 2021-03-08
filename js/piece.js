@@ -135,9 +135,11 @@ class TargetablePiece extends Piece {
 class ControllablePiece extends TargetablePiece {
 	constructor(style, moveRange, size) {
 		super(size);
+		this.square = null;
+
 		this._moveRange = moveRange != undefined ? moveRange : 3; // TEMP
 
-		// these will end up being state-dependent, and such
+		// TODO: these will end up being state-dependent, possibly?
 		this.el.classList.add(style);
 		this.el.onclick = this._click;
 
@@ -147,7 +149,7 @@ class ControllablePiece extends TargetablePiece {
 			new TestHealPiece(this)
 		];
 
-		this.endTurn();
+		this.endTurn(); // TEMP
 	}
 
 	// TODO: Update selectability routinely
@@ -160,19 +162,15 @@ class ControllablePiece extends TargetablePiece {
 	skills() {
 		return this._skills;
 	}
-	_refreshSkills() {
-		this._skills.forEach(skill => skill.setSelectable(skill.canUse()));
-	}
 
 	startTurn() {
-		this.moved = false;
-		this.acted = false;
 		this.setSelectable(true);
 	}
 	endTurn() {
-		this.moved = false;
-		this.acted = false;
+		this.setMoved(false);
+		this.setActed(false);
 		this.setSelectable(false);
+		this._startSquare = null;
 	}
 	setMoved(value) {
 		this.moved = value;
@@ -181,9 +179,36 @@ class ControllablePiece extends TargetablePiece {
 		this.acted = value;
 	}
 
+	move(target) {
+		if (this.moved || this.square == target) return false;
+
+		var startSquare = this.square;
+		if (target.parent.movePiece(this, target)) {
+			this.setMoved(true);
+			this._startSquare = startSquare;
+			this.refresh();
+			return true;
+		}
+		return false;
+	}
+	undoMove() {
+		if (!this.moved || !this._startSquare) return false;
+		
+		if (this._startSquare.parent.movePiece(this, this._startSquare)) {
+			this.setMoved(false);
+			this._startSquare = null;
+			this.refresh();
+			return true;
+		}
+		return false;
+	}
+
 	refresh() {
 		this._refreshSkills();
 		// TODO: Refresh your own selectability and styles?
+	}
+	_refreshSkills() {
+		this._skills.forEach(skill => skill.setSelectable(skill.canUse()));
 	}
 
 	select() {
