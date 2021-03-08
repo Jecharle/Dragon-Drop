@@ -112,14 +112,16 @@ class BattleScene extends Scene {
 		if (target.parent.canFit(piece, target)) {
 			this._moveStack.push([piece, piece.square]);
 			target.parent.movePiece(piece, target);
-			piece.moved = true;
+			piece.setMoved(true);
 		}
+		piece.refresh();
 	}
-	undoMove() {
+	_undoMove() {
 		var move = this._moveStack.pop();
 		if (move) {
 			move[1].parent.movePiece(move[0], move[1]);
-			move[0].moved = false;
+			move[0].setMoved(false);
+			move[0].refresh();
 		}
 	}
 	_clearMoves() {
@@ -202,7 +204,7 @@ class BattleScene extends Scene {
 			} else if (this._unit) {
 				this._deselectUnit();
 			} else {
-				this.undoMove();
+				this._undoMove();
 			}
 			this._refreshArea();
 		}
@@ -249,7 +251,10 @@ class TestScene extends BattleScene {
 		var undoButton = document.createElement("button");
 		undoButton.type = "button";
 		undoButton.innerText = "Undo Move";
-		undoButton.onclick = () => Game.scene().undoMove();
+		undoButton.onclick = () => { // TEMP
+			Game.scene()._undoMove();
+			Game.scene()._refreshArea();
+		}
 		this.el.appendChild(undoButton);
 
 		var endTurnButton = document.createElement("button");

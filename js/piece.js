@@ -39,6 +39,16 @@ class Piece extends ElObj {
 	deselect() { }
 	type() { return Piece.None; }
 
+	setSelectable(selectable) {
+		if (selectable) {
+			this.el.setAttribute("draggable", true);
+			this.el.classList.add('selectable');
+		} else {
+			this.el.setAttribute("draggable", false);
+			this.el.classList.remove('selectable');
+		}
+	}
+
 	_drag(ev) {
 		ev.dataTransfer.setData("text", ev.target.id);
 	}
@@ -150,6 +160,9 @@ class ControllablePiece extends TargetablePiece {
 	skills() {
 		return this._skills;
 	}
+	_refreshSkills() {
+		this._skills.forEach(skill => skill.setSelectable(skill.canUse()));
+	}
 
 	startTurn() {
 		this.moved = false;
@@ -161,6 +174,17 @@ class ControllablePiece extends TargetablePiece {
 		this.acted = false;
 		this.setSelectable(false);
 	}
+	setMoved(value) {
+		this.moved = value;
+	}
+	setActed(value) {
+		this.acted = value;
+	}
+
+	refresh() {
+		this._refreshSkills();
+		// TODO: Refresh your own selectability and styles?
+	}
 
 	select() {
 		this.el.classList.add('selected');
@@ -171,15 +195,6 @@ class ControllablePiece extends TargetablePiece {
 	}
 	type() {
 		return Piece.Unit;
-	}
-	setSelectable(selectable) {
-		if (selectable) {
-			this.el.setAttribute("draggable", true);
-			this.el.classList.add('selectable');
-		} else {
-			this.el.setAttribute("draggable", false);
-			this.el.classList.remove('selectable');
-		}
 	}
 
 	_click(ev) {
@@ -205,8 +220,7 @@ class SkillPiece extends Piece {
 		this.user = user;
 		this.el.classList.add('skill');
 		this.el.onclick = this._click;
-		this.el.setAttribute("draggable", true);
-		this.el.classList.add('selectable');
+		this.setSelectable(this.canUse());
 	}
 
 	range() {
@@ -215,8 +229,6 @@ class SkillPiece extends Piece {
 	shape() {
 		return Shape.Line;
 	}
-
-	// TODO: Update selectability routinely
 
 	canUse() {
 		if (this.user.acted) return false;
@@ -228,6 +240,7 @@ class SkillPiece extends Piece {
 
 		this._cost();
 		this._effects(target);
+		this.user.refresh();
 		return true;
 	}
 
@@ -238,10 +251,9 @@ class SkillPiece extends Piece {
 
 	}
 	_cost() {
-		this.user.acted = true;
+		this.user.setActed(true);
 	}
 
-	// actions on the piece
 	select() {
 		if (!this.canUse()) return false;
 		this.el.classList.add('selected');
@@ -279,10 +291,9 @@ class SkillPiece extends Piece {
 	}
 
 	range() {
-		return 1;
+		return 2;
 	}
 
-	// validate target
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
 			return true;
@@ -290,7 +301,6 @@ class SkillPiece extends Piece {
 		return false;
 	}
 
-	// apply effects
 	_effects(target) {
 		target.piece.takeDamage(1);
 	}
@@ -306,10 +316,9 @@ class SkillPiece extends Piece {
 	}
 
 	range() {
-		return 2;
+		return 1;
 	}
 
-	// validate target
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
 			return true;
@@ -317,7 +326,6 @@ class SkillPiece extends Piece {
 		return false;
 	}
 
-	// apply effects
 	_effects(target) {
 		target.piece.heal(1);
 	}
