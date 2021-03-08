@@ -105,7 +105,6 @@ class Board extends Container {
 			return false;
 		}
 
-		// update parent or clear previous position
 		if (piece.parent != this) {
 			piece.setParent(this);
 		} else {
@@ -118,7 +117,6 @@ class Board extends Container {
 
 		return true;
 	}
-
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
 			this._fillPiece(null, piece.x, piece.y, piece.size());
@@ -128,21 +126,56 @@ class Board extends Container {
 		return false;
 	}
 
+	slidePiece(piece, origin, dist, attr) {
+		var [dx, dy] = this._getDirection(origin, piece.square);
+		if (dist < 0) {
+			dist = -dist;
+			dx = -dx;
+			dy = -dy;
+		}
+		var x = piece.square.x;
+		var y = piece.square.y;
+		for (var i = 0; i < dist; i++) {
+			x += dx;
+			y += dy;
+			var square = this.at(x, y);
+
+			if (!this.movePiece(piece, square)) {
+				dist = i;
+				break;
+			}
+		}
+		//this.movePiece(piece, square);
+		return dist;
+	}
+	_getDirection(origin, target) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+		
+		if (dx == 0 && dy == 0) {
+			return [0, 0];
+		} else if (Math.abs(dx) > Math.abs(dy)) {
+			if (dx > 0) return [1, 0];
+			else return [-1, 0];
+		} else {
+			if (dy > 0) return [0, 1];
+			else return [0, -1];
+		}
+	}
+
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
 		if (!piece.moveRange()) return;
 
-		// start with the origin
 		var origin = piece.square;
 		this._paintMoveRange(origin, piece.moveRange());
 		var edges = [origin];
-
-		// expand the edges
+		
 		for (var i = 0; i < edges.length; i++) {
 			var adjacent = this._getAdjacent(edges[i]);
 			var movesLeft = edges[i].movesLeft-1;
-			// add all adjacent
+			
 			for (var n = 0; n < adjacent.length; n++) {
 				if (adjacent.inRange && adjacent.movesLeft >= movesLeft) {
 					continue;

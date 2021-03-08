@@ -107,13 +107,12 @@ class TargetablePiece extends Piece {
 		return power;
 	}
 
-	// movement effects
-	/*push(dist, dir, attr) {
-		return 0;
+	push(origin, dist, attr) {
+		return this.parent.slidePiece(this, origin, dist);
 	}
-	pull(dist, dir, attr) {
-		return -this.push(-dist, dir, attr);
-	}*/
+	pull(origin, dist, attr) {
+		return this.push(origin, -dist, attr);
+	}
 
 	// status effects
 	/*
@@ -182,10 +181,10 @@ class ControllablePiece extends TargetablePiece {
 	move(target) {
 		if (this.moved || this.square == target) return false;
 
-		var startSquare = this.square;
+		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
 			this.setMoved(true);
-			this._startSquare = startSquare;
+			this._startSquare = oldSquare;
 			this.refresh();
 			return true;
 		}
@@ -327,7 +326,9 @@ class SkillPiece extends Piece {
 	}
 
 	_effects(target) {
-		target.piece.takeDamage(1);
+		var targetPiece = target.piece;
+		targetPiece.takeDamage(1);
+		targetPiece.push(this.user.square, 1);
 	}
 };
 
