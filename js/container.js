@@ -8,7 +8,6 @@ class Container extends ElObj {
 		super();
 	}
 
-	// remove a piece remotely
 	removePiece(piece) {
 		if (!piece || piece.parent != this) return false;
 		var parentEl = piece.el.parentElement;
@@ -54,27 +53,21 @@ class Board extends Container {
 		this.el.ondrop = this._drop;
 	}
 
-	// base element is a table
 	elType() {
 		return 'table';
 	}
 
-	// access the individual grid squares
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-
-	// get an array of coordinates in the area centered on the origin
-	getArea(x, y, size, shape, direction) {
+	getArea(x, y, size, shape) {
 		x = x || 0;
 		y = y || 0;
-		size = Math.abs(size) || 1;
-		// TODO: default shape is a square
-		// TODO: default direction is... none?
-
+		size = Math.max(size || 0, 1);
+	
 		// calculate edges
 		var left = -Math.floor((size-1)/2);
 		var right = Math.ceil((size-1)/2);
@@ -85,14 +78,14 @@ class Board extends Container {
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				// TODO: Check if it fits in the shape
-				area.push(this.at(x+dx, y+dy));
+				if (!shape || shape(dx, dy, size)) {
+					area.push(this.at(x+dx, y+dy));
+				}
 			}
 		}
 		return area;
 	}
 
-	// check if a piece can fit in an area
 	canFit(piece, centerSquare, size) {
 		size = size || piece.size();
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
@@ -105,11 +98,9 @@ class Board extends Container {
 		});
 	}
 
-	// place a piece on the board (vacates previous position)
 	movePiece(piece, targetSquare) {
 		if (!piece || !targetSquare) return false;
 
-		// if the piece won't fit, don't move
 		if (!this.canFit(piece, targetSquare)) {
 			return false;
 		}
@@ -121,7 +112,6 @@ class Board extends Container {
 			this._fillPiece(null, piece.square, piece.size());
 		}
 
-		// place the piece
 		targetSquare.el.appendChild(piece.el);
 		piece.square = targetSquare;
 		this._fillPiece(piece, targetSquare);
@@ -129,7 +119,6 @@ class Board extends Container {
 		return true;
 	}
 
-	// remove a piece from the board
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
 			this._fillPiece(null, piece.x, piece.y, piece.size());
@@ -139,11 +128,8 @@ class Board extends Container {
 		return false;
 	}
 
-	// set up the valid movement area
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
-
-		this.resetAreas();
 
 		if (!piece.moveRange()) return;
 
@@ -172,24 +158,20 @@ class Board extends Container {
 		}
 	}
 
-	// set up the valid targeting area
 	setSkillArea(piece) {
 		if (!piece || !piece.user) return;
 		var user = piece.user;
 		if (!user.square || user.parent != this) return;
 
-		this.resetAreas();
-
 		// get the possible range
 		var range = 1 + 2*piece.range();
-		var area = this.getArea(user.square.x, user.square.y, range);
+		var area = this.getArea(user.square.x, user.square.y, range, piece.shape());
 		for (var i = 0; i < area.length; i++) {
 			if (area[i]) this._paintSkillRange(area[i]);
 		}
 		// TODO: Do extra if the user is a larger piece?
 	}
 
-	// clear all the pathfinding-related paint
 	resetAreas() {
 		for (var x = 0; x < this.w; x++) {
 			for (var y = 0; y < this.h; y++) {
@@ -201,7 +183,6 @@ class Board extends Container {
 		}
 	}
 
-	// fill in the same piece in several squares
 	_fillPiece(piece, centerSquare, size) {
 		if (!centerSquare) return;
 
@@ -212,7 +193,6 @@ class Board extends Container {
 		});
 	}
 
-	// mark a square as in-range
 	_paintMoveRange(square, movesLeft) {
 		square.el.classList.add('moveRange');
 		square.el.ondragover = this._allowDrop;
@@ -232,7 +212,6 @@ class Board extends Container {
 		square.movesLeft = null;
 	}
 
-	// get the adjacent squares
 	_getAdjacent(square) {
 		var adjacent = [];
 
@@ -251,7 +230,6 @@ class Board extends Container {
 		return adjacent;
 	}
 
-	// event handlers
 	_allowDrop(ev) {
 		ev.preventDefault();
 	}
@@ -290,7 +268,6 @@ class Square extends SubContainer {
 		this.y = y;
 	}
 
-	// base element is a table cell
 	elType() {
 		return 'td';
 	}
@@ -307,7 +284,6 @@ class SkillList extends Container {
 		this.el.classList.add('skillList');
 	}
 
-	// configure for a new skill user
 	setUser(user) {
 		this._clearSkills();
 		this._user = user;
@@ -320,7 +296,6 @@ class SkillList extends Container {
 		return true;
 	}
 
-	// add a skill to the list
 	_addSkill(piece) {
 		if (piece) {
 			piece.setParent(this);
@@ -329,7 +304,6 @@ class SkillList extends Container {
 		}
 	}
 
-	// remove all skills
 	_clearSkills() {
 		for (var i = 0; i < this.skills.length; i++) {
 			this.removePiece(this.skills[i]);

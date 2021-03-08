@@ -13,8 +13,14 @@
 .moveRange {
 	background-color: deepskyblue;
 }
+.moveRange:hover {
+	background-color: skyblue;
+}
 
 .skillRange {
+	background-color: darkorange;
+}
+.skillRange:hover {
 	background-color: orange;
 }
 
@@ -45,6 +51,14 @@
 }
 
 .selected {
+	border: 2px solid deepskyblue;
+	margin: -2px;
+}
+
+.selectable {
+	cursor: grab;
+}
+.selectable:hover {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }

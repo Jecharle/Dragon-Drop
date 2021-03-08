@@ -9,32 +9,25 @@ class Piece extends ElObj {
 		this.parent = null;
 		this._size = size || 1;
 
-		// advanced element setup
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
 		this.el.classList.add('x'+this._size); // crude way to set the size
 
-		// drag and drop handling
-		this.el.draggable = false;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
 	}
 
-	// static tracker for element IDs
 	static _id = Math.floor(Math.random()*1000);
 	static nextId() {
 		return "piece" + Piece._id++;
 	}
 
-	// quick comparator for IDs
 	idMatch(id) {
 		return (!id || id == this.el.id);
 	}
 
-	// size of the piece
 	size() { return this._size; }
 
-	// update the parent container
 	setParent(container) {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
@@ -42,12 +35,10 @@ class Piece extends ElObj {
 		this.parent = container;
 	}
 
-	// piece can be selected or deselected
 	select() { return false; }
 	deselect() { }
 	type() { return Piece.None; }
 
-	// handle drag and drop
 	_drag(ev) {
 		ev.dataTransfer.setData("text", ev.target.id);
 	}
@@ -75,7 +66,17 @@ class TargetablePiece extends Piece {
 
 	// TODO: Lots
 
-	// HP, damage, and healing
+	setTeam(team) {
+		if (this.team && this.team.contains(this)) {
+			var index = this.team.indexOf(this);
+			this.team.splice(index, 1);
+		}
+		this.team = team;
+		if (team) {
+			team.push(this);
+		}
+	}
+
 	maxHp() {
 		return 0;
 	}
@@ -129,7 +130,6 @@ class ControllablePiece extends TargetablePiece {
 		// these will end up being state-dependent, and such
 		this.el.classList.add(style);
 		this.el.onclick = this._click;
-		if (this._moveRange > 0) this.el.draggable = true; // TEMP
 
 		// TEMP
 		this._skills = [
@@ -137,27 +137,31 @@ class ControllablePiece extends TargetablePiece {
 			new TestHealPiece(this)
 		];
 
-		this.startTurn();
+		this.endTurn();
 	}
 
-	// piece can move
+	// TODO: Update selectability routinely
+
 	moveRange() {
 		if (this.moved) return 0;
 		else return this._moveRange;
 	}
 
-	// get your skill list
 	skills() {
 		return this._skills;
 	}
 
-	// update traits at the start of the turn
 	startTurn() {
 		this.moved = false;
 		this.acted = false;
+		this.setSelectable(true);
+	}
+	endTurn() {
+		this.moved = false;
+		this.acted = false;
+		this.setSelectable(false);
 	}
 
-	// actions on the piece
 	select() {
 		this.el.classList.add('selected');
 		return true;
@@ -168,8 +172,16 @@ class ControllablePiece extends TargetablePiece {
 	type() {
 		return Piece.Unit;
 	}
+	setSelectable(selectable) {
+		if (selectable) {
+			this.el.setAttribute("draggable", true);
+			this.el.classList.add('selectable');
+		} else {
+			this.el.setAttribute("draggable", false);
+			this.el.classList.remove('selectable');
+		}
+	}
 
-	// event handler functions
 	_click(ev) {
 		ev.stopPropagation();
 		var piece = ev.target.obj;
@@ -193,17 +205,24 @@ class SkillPiece extends Piece {
 		this.user = user;
 		this.el.classList.add('skill');
 		this.el.onclick = this._click;
-		this.el.draggable = true;
+		this.el.setAttribute("draggable", true);
+		this.el.classList.add('selectable');
 	}
 
 	range() {
-		return 0;
+		return 1;
 	}
 	shape() {
-		return null; // TEMP
+		return Shape.Line;
 	}
 
-	// use the skill
+	// TODO: Update selectability routinely
+
+	canUse() {
+		if (this.user.acted) return false;
+		else return true;
+	}
+
 	use(target) {
 		if (!this._validTarget(target)) return false;
 
@@ -212,13 +231,6 @@ class SkillPiece extends Piece {
 		return true;
 	}
 
-	// whether the skill is enabled or not
-	canUse() {
-		if (this.user.acted) return false;
-		else return true;
-	}
-
-	// overrideable skill aspects
 	_validTarget(target) {
 		return false;
 	}
@@ -267,7 +279,7 @@ class SkillPiece extends Piece {
 	}
 
 	range() {
-		return 1; // TEMP
+		return 1;
 	}
 
 	// validate target
@@ -294,7 +306,7 @@ class SkillPiece extends Piece {
 	}
 
 	range() {
-		return 2; // TEMP
+		return 2;
 	}
 
 	// validate target
@@ -305,7 +317,7 @@ class SkillPiece extends Piece {
 		return false;
 	}
 
-	//
+	// apply effects
 	_effects(target) {
 		target.piece.heal(1);
 	}
