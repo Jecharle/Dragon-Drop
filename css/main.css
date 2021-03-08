@@ -11,7 +11,21 @@
 }
 
 .moveRange {
-	background-color: blue;
+	background-color: deepskyblue;
+}
+.moveRange:hover {
+	background-color: skyblue;
+}
+
+.skillRange {
+	background-color: darkorange;
+}
+.skillRange:hover {
+	background-color: orange;
+}
+
+.skillList {
+	display: flex;
 }
 
 .piece {
@@ -36,12 +50,31 @@
 	right: 100%;
 }
 
+.selected {
+	border: 2px solid deepskyblue;
+	margin: -2px;
+}
+
+.selectable {
+	cursor: grab;
+}
+.selectable:hover {
+	border: 2px solid deepskyblue;
+	margin: -2px;
+}
+
 .ball {
 	background-color: red;
 	border-radius: 50%;
 }
 
 .ball2 {
-	background-color: green;
+	background-color: blue;
 	border-radius: 50%;
+}
+
+.skill {
+	width: 62px;
+	height: 62px;
+	border-radius: 25%;
 }
