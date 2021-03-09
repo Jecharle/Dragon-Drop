@@ -147,8 +147,8 @@ class ControllablePiece extends TargetablePiece {
 
 		// TEMP
 		this._skills = [
-			new TestAttackPiece(this),
-			new TestHealPiece(this)
+			new TestAttackSkill(this),
+			new TestHealSkill(this)
 		];
 
 		this.endTurn(); // TEMP
@@ -311,7 +311,7 @@ class SkillPiece extends Piece {
 /***************************************************
  Test attack skill
  ***************************************************/
- class TestAttackPiece extends SkillPiece {
+ class TestAttackSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'red';
@@ -338,7 +338,7 @@ class SkillPiece extends Piece {
 /***************************************************
  Test heal skill
  ***************************************************/
- class TestHealPiece extends SkillPiece {
+ class TestHealSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'green';
