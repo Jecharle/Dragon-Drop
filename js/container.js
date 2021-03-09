@@ -63,7 +63,7 @@ class Board extends Container {
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-	getArea(x, y, size, shape, minSize) {
+	getArea(x, y, size, shape, shapeProps) {
 		x = x || 0;
 		y = y || 0;
 		size = Math.max(size || 0, 1);
@@ -78,7 +78,7 @@ class Board extends Container {
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				if (!shape || shape(dx, dy, Math.floor(size/2), minSize)) {
+				if (!shape || shape(dx, dy, shapeProps)) {
 					area.push(this.at(x+dx, y+dy));
 				}
 			}
@@ -227,9 +227,8 @@ class Board extends Container {
 		if (!user.square || user.parent != this) return;
 
 		// get the possible range
-		var range = 1 + 2*piece.range();
-		var minRange = piece.minRange();
-		var area = this.getArea(user.square.x, user.square.y, range, piece.shape(), minRange);
+		var size = 1 + 2*piece.range();
+		var area = this.getArea(user.square.x, user.square.y, size, piece.shape(), piece.shapeProps);
 		for (var i = 0; i < area.length; i++) {
 			if (area[i]) this._paintSkillRange(area[i]);
 		}

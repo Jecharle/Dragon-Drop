@@ -1,33 +1,40 @@
 /***************************************************
  Static Shape library object
  ***************************************************/
-function Shape() {
-    console.log("Shape is a static object, do not instantiate");
-};
+class Shape {
+    constructor() {
+        console.log("Shape is a static object, do not instantiate");
+    }
 
-Shape.Square = function(x, y, size, minSize) {
-    if (Math.abs(x) < minSize && Math.abs(y) < minSize) return false;
-    return true;
-};
+    static Square(x, y, props) {
+        var minRange = props.minRange || 0;
+        if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+        return true;
+    }
 
-Shape.Line = function(x, y, size, minSize) {
-    if (x && y) return false;
-    if (Math.abs(x) < minSize && Math.abs(y) < minSize) return false;
-    return true;
-};
+    static Line(x, y, props) {
+        var minRange = props.minRange || 0;
+        if (x && y) return false;
+        if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+        return true;
+    }
 
-Shape.Cross = function(x, y, size, minSize) {
-    if (Math.abs(x) != Math.abs(y)) return false;
-    if (Math.abs(x) < minSize && Math.abs(y) < minSize) return false;
-    return true;
-};
+    static Cross(x, y, props) {
+        var minRange = props.minRange || 0;
+        if (Math.abs(x) != Math.abs(y)) return false;
+        if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+        return true;
+    }
 
-Shape.Star = function(x, y, size, minSize) {
-    return this.Line(x, y, size, minSize) || this.Cross(x, y, size, minSize);
-};
+    static Star(x, y, props) {
+        return Shape.Line(x, y, props) || Shape.Cross(x, y, props);
+    }
 
-Shape.Circle = function(x, y, size, minSize) {
-    if (Math.abs(x) + Math.abs(y) > size ) return false;
-    if (Math.abs(x) + Math.abs(y) < minSize ) return false;
-    return true;
-};
+    static Circle(x, y, props) {
+        var range = props.range || 1;
+        var minRange = props.minRange || 0;
+        if (Math.abs(x) + Math.abs(y) > range) return false;
+        if (Math.abs(x) + Math.abs(y) < minRange) return false;
+        return true;
+    }
+}

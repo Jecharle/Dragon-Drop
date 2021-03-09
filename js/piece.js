@@ -259,6 +259,12 @@ class SkillPiece extends Piece {
 	shape() {
 		return Shape.Line;
 	}
+	shapeProps() {
+		return {
+			range: this.range(),
+			minRange: this.minRange()
+		};
+	}
 
 	canUse() {
 		if (this.user.acted) return false;

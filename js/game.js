@@ -1,45 +1,46 @@
 /***************************************************
  Static Game object
  ***************************************************/
-function Game() {
-	console.log("Game object is static, do not instantiate");
-};
-
-Game.scene = function() {
-	return this._scene;
-};
-Game.setScene = function(scene) {
-	if (this._scene == scene) return;
-
-	if (this._scene != null) {
-		this._gameDiv.removeChild(this._scene.el);
-		this._scene.end();
+class Game {
+	constructor() {
+		console.log("Game object is static, do not instantiate");
 	}
 
-	this._scene = scene;
-	this._gameDiv.appendChild(scene.el);
-	this._scene.start();
-};
+	static scene = function() {
+		return Game._scene;
+	}
+	static setScene = function(scene) {
+		if (Game._scene == scene) return;
 
-Game.globalKeydown = function(ev) {
-	var scene = Game.scene();
-	if (scene && !ev.repeat) scene.keydown(ev.key);
-};
-Game.globalKeyup = function(ev) {
-	var scene = Game.scene();
-	if (scene && !ev.repeat) scene.keyup(ev.key);
-};
+		if (Game._scene != null) {
+			Game._gameDiv.removeChild(Game._scene.el);
+			Game._scene.end();
+		}
 
-Game.begin = function() {
-	document.addEventListener('keydown', Game.globalKeydown);
-	document.addEventListener('keyup', Game.globalKeyup);
+		Game._scene = scene;
+		Game._gameDiv.appendChild(scene.el);
+		Game._scene.start();
+	}
 
-	this._gameDiv = document.createElement("div");
-	this._gameDiv.classList.add("centered");
-	this._gameDiv.id = "gameDiv";
-	document.body.appendChild(this._gameDiv);
+	static globalKeydown = function(ev) {
+		var scene = Game.scene();
+		if (scene && !ev.repeat) scene.keydown(ev.key);
+	}
+	static globalKeyup = function(ev) {
+		var scene = Game.scene();
+		if (scene && !ev.repeat) scene.keyup(ev.key);
+	}
 
-	this.setScene(new TestScene()); // TEMP
-};
+	static begin = function() {
+		document.addEventListener('keydown', Game.globalKeydown);
+		document.addEventListener('keyup', Game.globalKeyup);
 
+		Game._gameDiv = document.createElement("div");
+		Game._gameDiv.classList.add("centered");
+		Game._gameDiv.id = "gameDiv";
+		document.body.appendChild(Game._gameDiv);
+
+		Game.setScene(new TestScene()); // TEMP
+	}
+}
 Game.begin();
