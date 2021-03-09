@@ -147,18 +147,21 @@ class Board extends Container {
 		}
 		var x = piece.square.x;
 		var y = piece.square.y;
-		for (var i = 0; i < dist; i++) {
+		var square = piece.square;
+		var distMoved = 0;
+		for (distMoved = 0; distMoved < dist; distMoved++) {
 			x += dx;
 			y += dy;
-			var square = this.at(x, y);
+			var newSquare = this.at(x, y);
 
-			if (square && this.canFit(piece, square)) {
-				this.movePiece(piece, square);
+			if (newSquare && this.canFit(piece, newSquare)) {
+				square = newSquare;
 			} else {
-				return i;
+				break;
 			}
 		}
-		return dist;
+		this.movePiece(piece, square);
+		return distMoved;
 	}
 	_getDirection(origin, target) {
 		var dx = target.x - origin.x;
@@ -228,7 +231,7 @@ class Board extends Container {
 
 		// get the possible range
 		var size = 1 + 2*piece.range();
-		var area = this.getArea(user.square.x, user.square.y, size, piece.shape(), piece.shapeProps);
+		var area = this.getArea(user.square.x, user.square.y, size, piece.shape(), piece.shapeProps());
 		for (var i = 0; i < area.length; i++) {
 			if (area[i]) this._paintSkillRange(area[i]);
 		}

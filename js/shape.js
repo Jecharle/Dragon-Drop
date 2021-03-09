@@ -31,7 +31,7 @@ class Shape {
     }
 
     static Circle(x, y, props) {
-        var range = props.range || 1;
+        var range = props.range;
         var minRange = props.minRange || 0;
         if (Math.abs(x) + Math.abs(y) > range) return false;
         if (Math.abs(x) + Math.abs(y) < minRange) return false;
