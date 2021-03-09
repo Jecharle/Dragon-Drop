@@ -253,6 +253,9 @@ class SkillPiece extends Piece {
 	range() {
 		return 1;
 	}
+	minRange() {
+		return 1;
+	}
 	shape() {
 		return Shape.Line;
 	}
