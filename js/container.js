@@ -89,10 +89,13 @@ class Board extends Container {
 	canFit(piece, centerSquare, size) {
 		size = size || piece.size();
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
-		var board = this;
 		return area.every(function(square) {
-			if (!square) return false;
-			if (square.piece != null && square.piece != piece) return false;
+			if (!square) {
+				return false;
+			}
+			if (square.piece != null && square.piece != piece) {
+				return false;
+			}
 			// TODO: Check for blocking terrain
 			return true;
 		});
@@ -119,11 +122,20 @@ class Board extends Container {
 	}
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
-			this._fillPiece(null, piece.x, piece.y, piece.size());
+			this._fillPiece(null, piece.square, piece.size());
 			piece.square = null;
 			return true;
 		}
 		return false;
+	}
+	_fillPiece(piece, centerSquare, size) {
+		if (!centerSquare) return;
+
+		size = size || piece.size();
+		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		area.forEach(function(square) {
+			if (square) square.piece = piece;
+		});
 	}
 
 	slidePiece(piece, origin, dist, attr) {
@@ -140,12 +152,12 @@ class Board extends Container {
 			y += dy;
 			var square = this.at(x, y);
 
+			// TODO: Could optimize by only moving at the end?
 			if (!this.movePiece(piece, square)) {
 				dist = i;
 				break;
 			}
 		}
-		//this.movePiece(piece, square);
 		return dist;
 	}
 	_getDirection(origin, target) {
@@ -163,6 +175,24 @@ class Board extends Container {
 		}
 	}
 
+	swapPieces(pieceA, pieceB) {
+		var squareA = pieceA.square;
+		var squareB = pieceB.square;
+
+		this.removePiece(pieceA);
+		this.removePiece(pieceB);
+
+		if (this.canFit(pieceA, squareB) && this.canFit(pieceB, squareA)) {
+			this.movePiece(pieceA, squareB);
+			this.movePiece(pieceB, squareA);
+			return true;
+		} else {
+			this.movePiece(pieceA, squareA);
+			this.movePiece(pieceB, squareB);
+			return false;
+		}
+	}
+
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
@@ -177,7 +207,7 @@ class Board extends Container {
 			var movesLeft = edges[i].movesLeft-1;
 			
 			for (var n = 0; n < adjacent.length; n++) {
-				if (adjacent.inRange && adjacent.movesLeft >= movesLeft) {
+				if (adjacent.inRange && adjacent.movesLeft > movesLeft) {
 					continue;
 				}
 				if (!this.canFit(piece, adjacent[n])) {
@@ -214,16 +244,6 @@ class Board extends Container {
 				}
 			}
 		}
-	}
-
-	_fillPiece(piece, centerSquare, size) {
-		if (!centerSquare) return;
-
-		size = size || piece.size();
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
-		area.forEach(function(square) {
-			if (square) square.piece = piece;
-		});
 	}
 
 	_paintMoveRange(square, movesLeft) {

@@ -113,6 +113,9 @@ class TargetablePiece extends Piece {
 	pull(origin, dist, attr) {
 		return this.push(origin, -dist, attr);
 	}
+	swap(piece) {
+		return this.parent.swapPieces(this, piece);
+	}
 
 	// status effects
 	/*
