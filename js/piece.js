@@ -73,10 +73,9 @@ class Piece extends ElObj {
  lifebars, and other displays on pieces
  ***************************************************/
 class ValueDisplay extends ElObj {
-	constructor(parent, startValue) {
+	constructor(startValue) {
 		super();
 		this.setValue(startValue);
-		this.parent = parent;
 	}
 
 	setValue(value) {
@@ -171,7 +170,7 @@ class TargetablePiece extends Piece {
  ***************************************************/
 class PopupText extends ValueDisplay {
 	constructor(startValue) {
-		super(null, startValue);
+		super(startValue);
 		this.el.classList.add('popup-text');
 		this.el.onanimationend = ev => {
 			ev.target.parentElement.removeChild(ev.target); // TEMP
@@ -331,6 +330,7 @@ class SkillPiece extends Piece {
 
 		this._cost();
 		this._effects(target);
+
 		this.user.refresh();
 		return true;
 	}

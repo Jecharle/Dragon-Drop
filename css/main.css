@@ -1,7 +1,6 @@
 .centered {
 	display: flex;
 	justify-content: center;
-	align-items: center;
 }
 
 .square {
@@ -62,7 +61,7 @@
 }
 
 .unselectable {
-	filter: grayscale(100%);
+	filter: grayscale(80%);
 }
 
 .ball {
@@ -85,9 +84,9 @@
 }
 
 .popup-text {
-	color: white;
 	font-size: 16pt;
 	font-weight: bold;
+	color: white;
 	text-shadow: 2px 2px black;
 	display: flex;
 	justify-content: center;
@@ -118,7 +117,7 @@
 	from {
 		bottom: 0px;
 	}
-	60% {
+	70% {
 		bottom: 32px;
 	}
 	to {
