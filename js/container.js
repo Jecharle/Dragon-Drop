@@ -223,7 +223,12 @@ class Board extends Container {
 			}
 		}
 	}
-
+	_paintMoveRange(square, movesLeft) {
+		square.el.classList.add('move-range');
+		square.el.ondragover = this._allowDrop;
+		square.inRange = true;
+		square.movesLeft = movesLeft;
+	}
 	setSkillArea(piece) {
 		if (!piece || !piece.user) return;
 		var user = piece.user;
@@ -237,7 +242,11 @@ class Board extends Container {
 		}
 		// TODO: Do extra if the user is a larger piece?
 	}
-
+	_paintSkillRange(square) {
+		square.el.classList.add('skill-range');
+		square.el.ondragover = this._allowDrop;
+		square.inRange = true;
+	}
 	resetAreas() {
 		for (var x = 0; x < this.w; x++) {
 			for (var y = 0; y < this.h; y++) {
@@ -248,21 +257,9 @@ class Board extends Container {
 			}
 		}
 	}
-
-	_paintMoveRange(square, movesLeft) {
-		square.el.classList.add('moveRange');
-		square.el.ondragover = this._allowDrop;
-		square.inRange = true;
-		square.movesLeft = movesLeft;
-	}
-	_paintSkillRange(square) {
-		square.el.classList.add('skillRange');
-		square.el.ondragover = this._allowDrop;
-		square.inRange = true;
-	}
 	_clearPaint(square) {
-		square.el.classList.remove('moveRange');
-		square.el.classList.remove('skillRange');
+		square.el.classList.remove('move-range');
+		square.el.classList.remove('skill-range');
 		square.el.ondragover = null;
 		square.inRange = null;
 		square.movesLeft = null;
@@ -337,7 +334,7 @@ class SkillList extends Container {
 		super();
 		this._user = null;
 		this.skills = [];
-		this.el.classList.add('skillList');
+		this.el.classList.add('skill-list');
 	}
 
 	setUser(user) {

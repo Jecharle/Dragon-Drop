@@ -10,21 +10,21 @@
 	height: 62px;
 }
 
-.moveRange {
+.move-range {
 	background-color: deepskyblue;
 }
-.moveRange:hover {
+.move-range:hover {
 	background-color: skyblue;
 }
 
-.skillRange {
+.skill-range {
 	background-color: darkorange;
 }
-.skillRange:hover {
+.skill-range:hover {
 	background-color: orange;
 }
 
-.skillList {
+.skill-list {
 	display: flex;
 }
 
@@ -37,13 +37,11 @@
 	width: 100%;
 	height: 100%;
 }
-
 .x2 {
 	width: 200%;
 	height: 200%;
 	top: 50%;
 }
-
 .x3 {
 	width: 300%;
 	height: 300%;
@@ -63,11 +61,14 @@
 	margin: -2px;
 }
 
+.unselectable {
+	filter: grayscale(100%);
+}
+
 .ball {
 	background-color: green;
 	border-radius: 50%;
 }
-
 .ball2 {
 	background-color: red;
 	border-radius: 50%;
@@ -77,4 +78,50 @@
 	width: 62px;
 	height: 62px;
 	border-radius: 25%;
+}
+
+.damaged {
+	animation: 150ms shake;
+}
+
+.popup-text {
+	color: white;
+	font-size: 16pt;
+	font-weight: bold;
+	text-shadow: 2px 2px black;
+	display: flex;
+	justify-content: center;
+	text-align: center;
+	position: relative;
+	animation: 1s float-up;
+}
+
+@keyframes shake {
+	from {
+		margin-left: 0px;
+		margin-right: 0px;
+	}
+	25% {
+		margin-left: -8px;
+		margin-right: 8px;
+	}
+	75% {
+		margin-left: 8px;
+		margin-right: -8px;
+	}
+	to {
+		margin-left: 0px;
+		margin-right: 0px;
+	}
+}
+@keyframes float-up {
+	from {
+		bottom: 0px;
+	}
+	60% {
+		bottom: 32px;
+	}
+	to {
+		bottom: 32px;
+	}
 }

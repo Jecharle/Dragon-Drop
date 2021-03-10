@@ -38,6 +38,9 @@ class Piece extends ElObj {
 	select() { return false; }
 	deselect() { }
 	type() { return Piece.None; }
+	static None = 0
+	static Unit = 1
+	static Skill = 2
 
 	setSelectable(selectable) {
 		if (selectable) {
@@ -46,6 +49,13 @@ class Piece extends ElObj {
 		} else {
 			this.el.setAttribute("draggable", false);
 			this.el.classList.remove('selectable');
+		}
+	}
+	setUnselectable(unselectable) {
+		if (unselectable) {
+			this.el.classList.add('unselectable');
+		} else {
+			this.el.classList.remove('unselectable');
 		}
 	}
 
@@ -57,10 +67,26 @@ class Piece extends ElObj {
 	}
 };
 
-// type constants
-Piece.None = 0;
-Piece.Unit = 1;
-Piece.Skill = 2;
+/***************************************************
+ ValueDisplay
+ The root class for popup numbers, cooldowns,
+ lifebars, and other displays on pieces
+ ***************************************************/
+class ValueDisplay extends ElObj {
+	constructor(parent, startValue) {
+		super();
+		this.setValue(startValue);
+		this.parent = parent;
+	}
+
+	setValue(value) {
+		this.el.innerHTML = ""+value;
+	}
+
+	elType() {
+		return 'span';
+	}
+};
 
 /***************************************************
  Targetable piece
@@ -99,12 +125,21 @@ class TargetablePiece extends Piece {
 	}
 
 	takeDamage(power, attr) {
-		alert(power+" damage!");
+		this.el.classList.add('damaged');
+		this.el.onanimationend = ev => { // TEMP?
+			ev.target.classList.remove('damaged');
+			ev.target.onanimationend = null;
+		};
+		this._showPopup(-power);
 		return power;
 	}
 	heal(power, attr) {
-		alert(power+" healing!");
+		this._showPopup("+"+power);
 		return power;
+	}
+	_showPopup(value) {
+		var popup = new PopupText(value);
+		this.el.appendChild(popup.el);
 	}
 
 	push(origin, dist, attr) {
@@ -130,6 +165,19 @@ class TargetablePiece extends Piece {
 		return false;
 	}*/
 };
+
+/***************************************************
+ TargetablePiece -> PopupText
+ ***************************************************/
+class PopupText extends ValueDisplay {
+	constructor(startValue) {
+		super(null, startValue);
+		this.el.classList.add('popup-text');
+		this.el.onanimationend = ev => {
+			ev.target.parentElement.removeChild(ev.target); // TEMP
+		};
+	}
+}
 
 /***************************************************
  Controllable piece
@@ -167,11 +215,13 @@ class ControllablePiece extends TargetablePiece {
 
 	startTurn() {
 		this.setSelectable(true);
+		this.setUnselectable(false);
 	}
 	endTurn() {
 		this.setMoved(false);
 		this.setActed(false);
 		this.setSelectable(false);
+		this.setUnselectable(false);
 		this._startSquare = null;
 	}
 	setMoved(value) {
@@ -207,10 +257,15 @@ class ControllablePiece extends TargetablePiece {
 
 	refresh() {
 		this._refreshSkills();
-		// TODO: Refresh your own selectability and styles?
+		this.setUnselectable(this.moved && this.acted);
+		// TODO: toggle Selectable, but only if you're in the active team?
 	}
 	_refreshSkills() {
-		this._skills.forEach(skill => skill.setSelectable(skill.canUse()));
+		this._skills.forEach(skill => {
+			var usable = skill.canUse();
+			skill.setSelectable(usable);
+			skill.setUnselectable(!usable);
+		});
 	}
 
 	select() {
