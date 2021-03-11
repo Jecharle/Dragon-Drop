@@ -94,12 +94,20 @@ class TargetablePiece extends Piece {
 	constructor(size) {
 		super(size);
 		this.targetable = true;
+		this._setStats();
+		this._lifebar = new Lifebar(this.hpRate());
+		this.el.appendChild(this._lifebar.el);
 	}
 
 	/* TODO: Volatile stats and statuses are all stored on the piece
 		base stats and unchangeable attributes come from a non-piece 'battler' entity */ 
 
 	// TODO: Lots
+
+	_setStats() {
+		this._maxHp = 5; // TEMP
+		this.hp = this.maxHp();
+	}
 
 	setTeam(team) {
 		if (this.team && this.team.contains(this)) {
@@ -113,27 +121,41 @@ class TargetablePiece extends Piece {
 	}
 
 	maxHp() {
-		return 0;
-	}
-	hp() {
-		return 0;
+		return this._maxHp;
 	}
 	hpRate() {
-		if (this.maxHp() == 0) return this.hp();
-		else return this.hp() / this.maxHp();
+		if (this.maxHp() == 0) return this.hp;
+		else return this.hp / this.maxHp();
+	}
+
+	refresh() {
+		this._lifebar.setValue(this.hpRate());
 	}
 
 	takeDamage(power, attr) {
+		this.hp -= power;
+		if (this.hp < 0) {
+			this.hp = 0;
+			// TODO: Die?
+		}
+
 		this.el.classList.add('damaged');
 		this.el.onanimationend = ev => { // TEMP?
 			ev.target.classList.remove('damaged');
 			ev.target.onanimationend = null;
 		};
+
 		this._showPopup(-power);
+		this.refresh();
 		return power;
 	}
 	heal(power, attr) {
+		this.hp += power;
+		if (this.hp > this.maxHp()) {
+			this.hp = this.maxHp();
+		}
 		this._showPopup("+"+power);
+		this.refresh();
 		return power;
 	}
 	_showPopup(value) {
@@ -166,6 +188,31 @@ class TargetablePiece extends Piece {
 };
 
 /***************************************************
+ TargetablePiece -> Lifebar
+ ***************************************************/
+ class Lifebar extends Detail {
+	constructor(startValue) {
+		super(-1);
+		this.el.classList.add('lifebar'); // TODO: Appropriate class
+
+		this._subEl = document.createElement(this.elType());
+		this._subEl.classList.add('inner-lifebar'); // TODO: Appropriate class
+		this.el.appendChild(this._subEl);
+		this.setValue(startValue);
+	}
+
+	elType() {
+		return 'div';
+	}
+
+	setValue(value) {
+		if (value >= 0 && value <= 1) {
+			this._subEl.style.width = String(Math.floor(value*100))+"%";
+		}
+	}
+}
+
+/***************************************************
  TargetablePiece -> PopupText
  ***************************************************/
 class PopupText extends Detail {
@@ -182,11 +229,10 @@ class PopupText extends Detail {
  Controllable piece
  ***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(style, moveRange, size) {
+	constructor(style, size) {
 		super(size);
 		this.square = null;
 
-		this._moveRange = moveRange != undefined ? moveRange : 3; // TEMP
 		this.el.classList.add(style); // TEMP
 		this.el.onclick = this._click;
 
@@ -197,6 +243,11 @@ class ControllablePiece extends TargetablePiece {
 		];
 
 		this.endTurn(); // TEMP
+	}
+
+	_setStats() {
+		super._setStats();
+		this._moveRange = 3; // TEMP
 	}
 
 	moveRange() {
@@ -252,6 +303,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	refresh() {
+		super.refresh();
 		this._refreshSkills();
 		this.setUnselectable(this.moved && this.acted);
 		// TODO: toggle Selectable, but only if you're in the active team?
@@ -314,7 +366,7 @@ class SkillPiece extends Piece {
 	shapeProps() {
 		return {
 			range: this.range(),
-			minRange: this.minRange()
+			minRange: this.minRange(),
 		};
 	}
 

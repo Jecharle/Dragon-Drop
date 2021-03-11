@@ -232,7 +232,7 @@ class TestScene extends BattleScene {
 		player.setTeam(this.playerTeam);
 		board.movePiece(player, board.at(4, 5));
 
-		var enemy = new ControllablePiece("ball2", 2);
+		var enemy = new ControllablePiece("ball2");
 		enemy.setTeam(this.enemyTeam);
 		board.movePiece(enemy, board.at(4, 4));
 

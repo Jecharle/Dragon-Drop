@@ -61,7 +61,7 @@
 }
 
 .unselectable {
-	filter: grayscale(80%);
+	filter: grayscale(100%);
 }
 
 .ball {
@@ -90,6 +90,26 @@
 
 .damaged {
 	animation: 150ms shake;
+}
+
+.lifebar {
+	visibility: hidden;
+	position: relative;
+	width: 100%;
+	height: 8px;
+	bottom: 10px;
+	outline: 1px solid black;
+	background-color: gray;
+}
+.inner-lifebar {
+	height: 100%;
+	background-color: red;
+}
+.piece:hover .lifebar {
+	visibility: visible;
+}
+.selected .lifebar {
+	visibility: visible;
 }
 
 .popup-text {
