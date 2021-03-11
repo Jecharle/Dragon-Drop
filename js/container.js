@@ -3,7 +3,7 @@
  The root class for boards, lists, maps, and such
  that contain pieces and track their positions
  ***************************************************/
-class Container extends ElObj {
+ class Container extends ElObj {
 	constructor() {
 		super();
 	}
@@ -21,7 +21,7 @@ class Container extends ElObj {
  The root class for squares, cells, and nodes other
  subdivisions or positions within a container
  ***************************************************/
-class SubContainer extends ElObj {
+ class SubContainer extends ElObj {
 	constructor(parent) {
 		super();
 		this.parent = parent;
@@ -32,7 +32,7 @@ class SubContainer extends ElObj {
 /***************************************************
  Game board
  ***************************************************/
-class Board extends Container {
+ class Board extends Container {
 	constructor(w, h) {
 		super();
 		this._squares = [];
@@ -313,7 +313,7 @@ class Board extends Container {
 /***************************************************
  Game board -> Square
  ***************************************************/
-class Square extends SubContainer {
+ class Square extends SubContainer {
 	constructor(x, y, parent) {
 		super(parent);
 		this.el.classList.add('square');
@@ -329,7 +329,7 @@ class Square extends SubContainer {
 /***************************************************
  Skill list
  ***************************************************/
-class SkillList extends Container {
+ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;

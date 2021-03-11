@@ -1,7 +1,7 @@
 /***************************************************
  Static Shape library object
  ***************************************************/
-class Shape {
+ class Shape {
     constructor() {
         console.log("Shape is a static object, do not instantiate");
     }

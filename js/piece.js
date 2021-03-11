@@ -3,7 +3,7 @@
  The root class for objects you can select, click,
  and drag around between containers
  ***************************************************/
-class Piece extends ElObj {
+ class Piece extends ElObj {
 	constructor(size) {
 		super();
 		this.parent = null;
@@ -72,7 +72,7 @@ class Piece extends ElObj {
  The root class for popup numbers, cooldowns,
  lifebars, and other displays on pieces
  ***************************************************/
-class Detail extends ElObj {
+ class Detail extends ElObj {
 	constructor(startValue) {
 		super();
 		this.setValue(startValue);
@@ -90,7 +90,7 @@ class Detail extends ElObj {
 /***************************************************
  Targetable piece
  ***************************************************/
-class TargetablePiece extends Piece {
+ class TargetablePiece extends Piece {
 	constructor(size) {
 		super(size);
 		this.targetable = true;
@@ -340,7 +340,7 @@ class ControllablePiece extends TargetablePiece {
 /***************************************************
  Skill use piece
  ***************************************************/
-class SkillPiece extends Piece {
+ class SkillPiece extends Piece {
 	constructor(user) {
 		super(1);
 		this.user = user;
@@ -348,10 +348,23 @@ class SkillPiece extends Piece {
 		this.el.classList.add('skill');
 		this.el.onclick = this._click;
 
-		this._useLabel = new Label("");
-		this.el.appendChild(this._useLabel.el);
+		this._cooldownLabel = new Label("");
+		this.el.appendChild(this._cooldownLabel.el);
+
+		this._tooltip = new Description(this.fullDescription());
+		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
+	}
+
+	fullDescription() {
+		return `<strong>${this._name()}</strong><br>${this._description()}`;
+	}
+	_name() {
+		return "Skill Name"
+	}
+	_description() {
+		return "Skill description"
 	}
 
 	range() {
@@ -406,7 +419,8 @@ class SkillPiece extends Piece {
 		var usable = this.canUse();
 		this.setSelectable(usable);
 		this.setUnselectable(!usable);
-		this._useLabel.setValue(this.cooldown || "");
+		this._cooldownLabel.setValue(this.cooldown || "");
+		this._tooltip.setValue(this.fullDescription());
 	}
 
 	select() {
@@ -447,12 +461,33 @@ class SkillPiece extends Piece {
 }
 
 /***************************************************
+ SkillPiece -> Skill Description
+ ***************************************************/
+ class Description extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.classList.add('skill-description');
+	}
+
+	elType() {
+		return 'div';
+	}
+}
+
+/***************************************************
  Test attack skill
  ***************************************************/
  class TestAttackSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'red';
+	}
+
+	_name() {
+		return "Attack"
+	}
+	_description() {
+		return "Deals 1 damage and pushes the target 1 space"
 	}
 
 	range() {
@@ -480,6 +515,13 @@ class SkillPiece extends Piece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'green';
+	}
+
+	_name() {
+		return "Heal"
+	}
+	_description() {
+		return "Restores 2 HP (2-turn cooldown)"
 	}
 
 	range() {
