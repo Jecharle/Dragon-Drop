@@ -68,11 +68,11 @@ class Piece extends ElObj {
 };
 
 /***************************************************
- ValueDisplay
+ Detail
  The root class for popup numbers, cooldowns,
  lifebars, and other displays on pieces
  ***************************************************/
-class ValueDisplay extends ElObj {
+class Detail extends ElObj {
 	constructor(startValue) {
 		super();
 		this.setValue(startValue);
@@ -168,12 +168,12 @@ class TargetablePiece extends Piece {
 /***************************************************
  TargetablePiece -> PopupText
  ***************************************************/
-class PopupText extends ValueDisplay {
+class PopupText extends Detail {
 	constructor(startValue) {
 		super(startValue);
 		this.el.classList.add('popup-text');
 		this.el.onanimationend = ev => {
-			ev.target.parentElement.removeChild(ev.target); // TEMP
+			ev.target.parentElement.removeChild(ev.target); // TEMP?
 		};
 	}
 }
@@ -187,9 +187,7 @@ class ControllablePiece extends TargetablePiece {
 		this.square = null;
 
 		this._moveRange = moveRange != undefined ? moveRange : 3; // TEMP
-
-		// TODO: these will end up being state-dependent, possibly?
-		this.el.classList.add(style);
+		this.el.classList.add(style); // TEMP
 		this.el.onclick = this._click;
 
 		// TEMP
@@ -200,8 +198,6 @@ class ControllablePiece extends TargetablePiece {
 
 		this.endTurn(); // TEMP
 	}
-
-	// TODO: Update selectability routinely
 
 	moveRange() {
 		if (this.moved) return 0;
@@ -214,7 +210,7 @@ class ControllablePiece extends TargetablePiece {
 
 	startTurn() {
 		this.setSelectable(true);
-		this.setUnselectable(false);
+		this.refresh();
 	}
 	endTurn() {
 		this.setMoved(false);
@@ -222,6 +218,7 @@ class ControllablePiece extends TargetablePiece {
 		this.setSelectable(false);
 		this.setUnselectable(false);
 		this._startSquare = null;
+		this._skills.forEach(skill => skill.endTurn());
 	}
 	setMoved(value) {
 		this.moved = value;
@@ -260,11 +257,7 @@ class ControllablePiece extends TargetablePiece {
 		// TODO: toggle Selectable, but only if you're in the active team?
 	}
 	_refreshSkills() {
-		this._skills.forEach(skill => {
-			var usable = skill.canUse();
-			skill.setSelectable(usable);
-			skill.setUnselectable(!usable);
-		});
+		this._skills.forEach(skill => skill.refresh());
 	}
 
 	select() {
@@ -299,9 +292,14 @@ class SkillPiece extends Piece {
 	constructor(user) {
 		super(1);
 		this.user = user;
+		this.cooldown = 0;
 		this.el.classList.add('skill');
 		this.el.onclick = this._click;
-		this.setSelectable(this.canUse());
+
+		this._useLabel = new Label("");
+		this.el.appendChild(this._useLabel.el);
+
+		this.refresh();
 	}
 
 	range() {
@@ -321,10 +319,9 @@ class SkillPiece extends Piece {
 	}
 
 	canUse() {
-		if (this.user.acted) return false;
+		if (this.user.acted || this.cooldown > 0) return false;
 		else return true;
 	}
-
 	use(target) {
 		if (!this._validTarget(target)) return false;
 
@@ -334,15 +331,30 @@ class SkillPiece extends Piece {
 		this.user.refresh();
 		return true;
 	}
-
 	_validTarget(target) {
 		return false;
 	}
-	_effects(target) {
-
-	}
+	_effects(target) { }
 	_cost() {
 		this.user.setActed(true);
+		this.cooldown = this._cooldownCost();
+	}
+	_cooldownCost() {
+		return 0;
+	}
+
+	endTurn() {
+		this.cooldown--;
+		if (this.cooldown < 0) {
+			this.cooldown = 0;
+		}
+	}
+
+	refresh() {
+		var usable = this.canUse();
+		this.setSelectable(usable);
+		this.setUnselectable(!usable);
+		this._useLabel.setValue(this.cooldown || "");
 	}
 
 	select() {
@@ -371,6 +383,16 @@ class SkillPiece extends Piece {
 		if (scene) scene.selectPiece(piece, true);
 	}
 };
+
+/***************************************************
+ SkillPiece -> Label
+ ***************************************************/
+ class Label extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.classList.add('skill-use-label');
+	}
+}
 
 /***************************************************
  Test attack skill
@@ -411,6 +433,9 @@ class SkillPiece extends Piece {
 	range() {
 		return 1;
 	}
+	minRange() {
+		return 0;
+	}
 
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -418,8 +443,10 @@ class SkillPiece extends Piece {
 		}
 		return false;
 	}
-
 	_effects(target) {
-		target.piece.heal(1);
+		target.piece.heal(2);
+	}
+	_cooldownCost() {
+		return 2;
 	}
 };

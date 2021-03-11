@@ -79,6 +79,15 @@
 	border-radius: 25%;
 }
 
+.skill-use-label {
+	font-size: 18px;
+	font-weight: bold;
+	color: white;
+	display: flex;
+	justify-content: center;
+	text-align: center;
+}
+
 .damaged {
 	animation: 150ms shake;
 }
