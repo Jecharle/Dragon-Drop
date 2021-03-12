@@ -91,10 +91,13 @@
  Targetable piece
  ***************************************************/
  class TargetablePiece extends Piece {
-	constructor(size) {
-		super(size);
+	constructor(battler) {
+		super(battler.Size());
+		this._battler = battler;
 		this.targetable = true;
+		this.square = null;
 		this._setStats();
+
 		this._lifebar = new Lifebar(this.hpRate());
 		this.el.appendChild(this._lifebar.el);
 	}
@@ -105,7 +108,7 @@
 	// TODO: Lots
 
 	_setStats() {
-		this._maxHp = 5; // TEMP
+		this._maxHp = this._battler.MaxHp();
 		this.hp = this.maxHp();
 	}
 
@@ -220,7 +223,7 @@ class PopupText extends Detail {
 		super(startValue);
 		this.el.classList.add('popup-text');
 		this.el.onanimationend = ev => {
-			ev.target.parentElement.removeChild(ev.target); // TEMP?
+			ev.target.parentElement.removeChild(ev.target);
 		};
 	}
 }
@@ -229,25 +232,24 @@ class PopupText extends Detail {
  Controllable piece
  ***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(style, size) {
-		super(size);
-		this.square = null;
+	constructor(battler) {
+		super(battler);
+		this._setSkills();
 
-		this.el.classList.add(style); // TEMP
+		this.el.classList.add(battler.Style()); // TEMP
 		this.el.onclick = this._click;
-
-		// TEMP
-		this._skills = [
-			new TestAttackSkill(this),
-			new TestHealSkill(this)
-		];
 
 		this.endTurn(); // TEMP
 	}
 
 	_setStats() {
 		super._setStats();
-		this._moveRange = 3; // TEMP
+		this._moveRange = this._battler.MoveRange();
+	}
+	_setSkills() {
+		this._skills = this._battler.SkillList().map(SkillType => {
+			return new SkillType(this);
+		});
 	}
 
 	moveRange() {

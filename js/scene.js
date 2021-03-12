@@ -43,6 +43,7 @@
 
 	_createBoard() { 
 		// TODO: Initialize from a "battle map" entity?
+		return null; // TEMP
 	}
 	_createSkillList() {
 		return new SkillList();
@@ -174,7 +175,6 @@
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
-		// TODO: Organize this better
 		if (this._phase == BattleScene.deployPhase) {
 			if (piece.type() == Piece.Unit && piece.team == this.playerTeam) {
 				if (!this._unit) {
@@ -185,26 +185,26 @@
 			}
 			this._refreshArea();
 			return;
-		}
-
-		if (piece.type() == Piece.Skill) {
-			if (this._skill != piece) {
-				this._selectSkill(piece);
-			} else if (!dragging) {
-				this._deselectSkill();
+		} else { // TODO: require playerphase
+			if (piece.type() == Piece.Skill) {
+				if (this._skill != piece) {
+					this._selectSkill(piece);
+				} else if (!dragging) {
+					this._deselectSkill();
+				}
+			} else if (this._skill && piece.square && !dragging) {
+				this.selectSquare(piece.square);
+				return;
 			}
-		} else if (this._skill && piece.square && !dragging) {
-			this.selectSquare(piece.square);
-			return;
-		}
 
-		if (piece.type() == Piece.Unit && piece.team == this._activeTeam) {
-			if (this._unit != piece) {
-				this._selectUnit(piece);
-			} else if (!dragging) {
-				this._deselectUnit();
-			} else if (this._skill) {
-				this._deselectSkill();
+			if (piece.type() == Piece.Unit && piece.team == this._activeTeam) {
+				if (this._unit != piece) {
+					this._selectUnit(piece);
+				} else if (!dragging) {
+					this._deselectUnit();
+				} else if (this._skill) {
+					this._deselectSkill();
+				}
 			}
 		}
 		this._refreshArea();
@@ -213,24 +213,21 @@
 	selectSquare(square, id) {
 		if (!square) return;
 
-		// TODO: Organize this better
 		if (this._phase == BattleScene.deployPhase)
 		{
 			if (this._unit && this._unit.idMatch(id) && square.inRange) {
 				this._moveUnitDeploy(this._unit, square);
 			}
 			this._deselectUnit();
-			this._refreshArea();
-			return;
-		}
-
-		if (!square.inRange) {
-			this._deselectSkill();
-			this._deselectUnit();
-		} else if (this._skill && this._skill.idMatch(id)) {
-			this._useSkill(this._skill, square);
-		} else if (this._unit && this._unit.idMatch(id)) {
-			this._moveUnit(this._unit, square);
+		} else { // TODO: once AI works, only work for player phase?
+			if (!square.inRange) {
+				this._deselectSkill();
+				this._deselectUnit();
+			} else if (this._skill && this._skill.idMatch(id)) {
+				this._useSkill(this._skill, square);
+			} else if (this._unit && this._unit.idMatch(id)) {
+				this._moveUnit(this._unit, square);
+			}
 		}
 		this._refreshArea();
 	}
@@ -270,38 +267,42 @@
 		super();
 	}
 
+	_addPiece(battler, square, team) {
+		var newPiece = new ControllablePiece(battler);
+		if (team) newPiece.setTeam(team);
+		square.parent.movePiece(newPiece, square);
+	}
+
 	_createBoard() {
 		var board = new Board(9, 9);
-		
-		var player = new ControllablePiece("ball");
-		player.setTeam(this.playerTeam);
-		board.movePiece(player, board.at(4, 5));
-
-		var enemy = new ControllablePiece("ball2");
-		enemy.setTeam(this.enemyTeam);
-		board.movePiece(enemy, board.at(4, 4));
+		this._addPiece(Ball, board.at(4,6), this.playerTeam);
+		this._addPiece(Ball2, board.at(4,4), this.enemyTeam);
 
 		return board;
 	}
 
-	_buildDOM() {
-		// TEMP buttons for flow control
+	_buildDOM() { // TEMP
+		var topDiv =  document.createElement("div");
+
 		var undoButton = document.createElement("button");
 		undoButton.type = "button";
 		undoButton.innerText = "Undo Move";
 		undoButton.onclick = () => { // TEMP
 			Game.scene()._undoMove();
 			Game.scene()._refreshArea();
-		}
-		this.el.appendChild(undoButton);
+		};
+		topDiv.appendChild(undoButton);
 
 		var endTurnButton = document.createElement("button");
 		endTurnButton.type = "button";
 		endTurnButton.innerText = "End Turn";
 		endTurnButton.style.float = "right";
-		endTurnButton.onclick = () => Game.scene().nextTurn();
-		this.el.appendChild(endTurnButton);
+		endTurnButton.onclick = () => {
+			Game.scene().nextTurn();
+		};
+		topDiv.appendChild(endTurnButton);
 
+		this.el.appendChild(topDiv);
 		super._buildDOM();
 	}
 
