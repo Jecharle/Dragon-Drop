@@ -134,10 +134,10 @@
 	}
 
 	_moveUnitDeploy(piece, square) {
-		if (square.piece) {
-			this._board.swapPieces(this._unit, square.piece);
+		if (square.piece && square.piece.team == piece.team) {
+			this._board.swapPieces(piece, square.piece);
 		} else {
-			this._board.movePiece(this._unit, square);
+			this._board.movePiece(piece, square);
 		}
 		this._deselectUnit();
 	}
@@ -283,10 +283,12 @@
 
 	_buildDOM() { // TEMP
 		var topDiv =  document.createElement("div");
+		topDiv.style.display = "flex";
 
 		var undoButton = document.createElement("button");
 		undoButton.type = "button";
 		undoButton.innerText = "Undo Move";
+		undoButton.style.marginRight = "auto";
 		undoButton.onclick = () => { // TEMP
 			Game.scene()._undoMove();
 			Game.scene()._refreshArea();
@@ -296,7 +298,7 @@
 		var endTurnButton = document.createElement("button");
 		endTurnButton.type = "button";
 		endTurnButton.innerText = "End Turn";
-		endTurnButton.style.float = "right";
+		endTurnButton.style.marginLeft = "auto";
 		endTurnButton.onclick = () => {
 			Game.scene().nextTurn();
 		};
