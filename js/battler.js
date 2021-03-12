@@ -6,6 +6,9 @@ class Battler {
         console.log("Battlers are static objects, do not instantiate");
     }
 
+    static Name() {
+        "Battler";
+    }
     static Size() {
         return 1;
     }
@@ -22,12 +25,14 @@ class Battler {
         ];
     }
     
-    // TODO: Other static properties?
+    // TODO: Other static properties, like attributes?
 
     static Style() { // TEMP
         return '';
     }
 };
+
+// TODO: Customizable, non-static battlers available for customizations
 
 /***************************************************
  Temporary battler objects
@@ -35,6 +40,14 @@ class Battler {
 class Ball extends Battler {
     static Style(){
         return 'ball';
+    }
+    static MoveRange() {
+        return 3;
+    }
+    static SkillList() {
+        return [
+            TestAttackSkill
+        ]
     }
 }
 class Ball2 extends Battler {
@@ -45,5 +58,13 @@ class Ball2 extends Battler {
         return [
             TestAttackSkill
         ]
+    }
+}
+class Ball3 extends Battler {
+    static Style(){
+        return 'ball3';
+    }
+    static MaxHp(){
+        return 3;
     }
 }

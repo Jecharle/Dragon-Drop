@@ -275,7 +275,10 @@
 
 	_createBoard() {
 		var board = new Board(9, 9);
-		this._addPiece(Ball, board.at(4,6), this.playerTeam);
+		
+		this._addPiece(Ball, board.at(5,6), this.playerTeam);
+		this._addPiece(Ball3, board.at(3,6), this.playerTeam);
+
 		this._addPiece(Ball2, board.at(4,4), this.enemyTeam);
 
 		return board;

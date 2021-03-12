@@ -102,6 +102,10 @@
 		this.el.appendChild(this._lifebar.el);
 	}
 
+	name() {
+		return this._battler.Name();
+	}
+
 	/* TODO: Volatile stats and statuses are all stored on the piece
 		base stats and unchangeable attributes come from a non-piece 'battler' entity */ 
 
@@ -129,6 +133,12 @@
 	hpRate() {
 		if (this.maxHp() == 0) return this.hp;
 		else return this.hp / this.maxHp();
+	}
+	dead() {
+		return this.hp <= 0;
+	}
+	alive() {
+		return !this.dead();
 	}
 
 	refresh() {
