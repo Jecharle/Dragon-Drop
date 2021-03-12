@@ -223,6 +223,15 @@
 			}
 		}
 	}
+	setDeployArea() {
+		// TODO: Load this from something
+		this._paintMoveRange(this.at(3, 5));
+		this._paintMoveRange(this.at(3, 6));
+		this._paintMoveRange(this.at(4, 5));
+		this._paintMoveRange(this.at(4, 6));
+		this._paintMoveRange(this.at(5, 5));
+		this._paintMoveRange(this.at(5, 6));
+	}
 	_paintMoveRange(square, movesLeft) {
 		square.el.classList.add('move-range');
 		square.el.ondragover = this._allowDrop;
@@ -294,7 +303,7 @@
 			var scene = Game.scene();
 			var elId = ev.dataTransfer.getData("text");
 			if (scene) {
-				scene.selectTarget(square, elId);
+				scene.selectSquare(square, elId);
 			}
 		}
 	}
@@ -304,7 +313,7 @@
 			var square = ev.target.obj;
 			if (square) {
 				var scene = Game.scene();
-				if (scene) scene.selectTarget(square);
+				if (scene) scene.selectSquare(square);
 			}
 		}
 	}

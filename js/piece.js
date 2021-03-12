@@ -145,7 +145,7 @@
 			ev.target.onanimationend = null;
 		};
 
-		this._showPopup(-power);
+		this._showPopup(power);
 		this.refresh();
 		return power;
 	}

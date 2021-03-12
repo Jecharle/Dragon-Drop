@@ -91,7 +91,7 @@
 
 .skill-description {
 	visibility: hidden;
-	/* Pick better colors */
+	/* Pick better colors? */
 	background-color: white;
 	border: 1px solid black;
 	position: absolute;

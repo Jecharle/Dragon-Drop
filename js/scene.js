@@ -12,7 +12,7 @@
 	end() { }
 
 	selectPiece(piece, dragging) { }
-	selectTarget(target, id) { }
+	selectSquare(target, id) { }
 
 	keydown(key) { }
 	keyup(key) { }
@@ -32,10 +32,13 @@
 
 	start() {
 		this._turn = 1;
-		this._phase = this._deployPhase;
-		this._deselectSkill()
+		this._phase = BattleScene.deployPhase;
+		this._setActiveTeam(this.playerTeam);
+
+		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
+		this._refreshArea();
 	}
 
 	_createBoard() { 
@@ -65,27 +68,27 @@
 
 	}
 
-	_deployPhase = 0;
-	_playerPhase = 1;
-	_enemyPhase = 2;
+	static deployPhase = 0;
+	static playerPhase = 1;
+	static enemyPhase = 2;
 	nextTurn() {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
 		switch (this._phase) {
-			case this._deployPhase:
-				this._phase = this._playerPhase;
+			case BattleScene.deployPhase:
+				this._phase = BattleScene.playerPhase;
 				this._setActiveTeam(this.playerTeam);
 				break;
 
-			case this._playerPhase:
-				this._phase = this._enemyPhase;
+			case BattleScene.playerPhase:
+				this._phase = BattleScene.enemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				break;
 
-			case this._enemyPhase:
+			case BattleScene.enemyPhase:
 				this._turn++;
-				this._phase = this._playerPhase;
+				this._phase = BattleScene.playerPhase;
 				this._setActiveTeam(this.playerTeam);
 				break;
 			
@@ -108,8 +111,8 @@
 		this._skillList.setUser(null);
 	}
 
-	_moveUnit(piece, target) {
-		if (piece.move(target)) {
+	_moveUnit(piece, square) {
+		if (piece.move(square)) {
 			this._moveStack.push(piece);
 		}
 	}
@@ -119,6 +122,23 @@
 	}
 	_clearMoves() {
 		this._moveStack = [];
+	}
+
+	_selectUnitDeploy(piece) {
+		if (piece && !piece.select()) return false;
+		if (this._unit != piece) this._deselectUnit();
+
+		this._unit = piece;
+		return true;
+	}
+
+	_moveUnitDeploy(piece, square) {
+		if (square.piece) {
+			this._board.swapPieces(this._unit, square.piece);
+		} else {
+			this._board.movePiece(this._unit, square);
+		}
+		this._deselectUnit();
 	}
 
 	_selectSkill(piece) {
@@ -133,8 +153,8 @@
 		this._skill = null;
 	}
 
-	_useSkill(piece, target) {
-		if (piece.use(target)) {
+	_useSkill(piece, square) {
+		if (piece.use(square)) {
 			this._deselectSkill();
 			this._clearMoves();
 		}
@@ -142,8 +162,9 @@
 
 	_refreshArea() {
 		this._board.resetAreas();
-
-		if (this._skill) {
+		if (this._phase == BattleScene.deployPhase) {
+			this._board.setDeployArea();
+		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
 			this._board.setMoveArea(this._unit);
@@ -153,6 +174,19 @@
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
+		// TODO: Organize this better
+		if (this._phase == BattleScene.deployPhase) {
+			if (piece.type() == Piece.Unit && piece.team == this.playerTeam) {
+				if (!this._unit) {
+					this._selectUnitDeploy(piece);
+				} else if (!dragging) {
+					this.selectSquare(piece.square);
+				}
+			}
+			this._refreshArea();
+			return;
+		}
+
 		if (piece.type() == Piece.Skill) {
 			if (this._skill != piece) {
 				this._selectSkill(piece);
@@ -160,7 +194,7 @@
 				this._deselectSkill();
 			}
 		} else if (this._skill && piece.square && !dragging) {
-			this.selectTarget(piece.square);
+			this.selectSquare(piece.square);
 			return;
 		}
 
@@ -176,16 +210,27 @@
 		this._refreshArea();
 	}
 
-	selectTarget(target, id) {
-		if (!target) return;
+	selectSquare(square, id) {
+		if (!square) return;
 
-		if (!target.inRange) {
+		// TODO: Organize this better
+		if (this._phase == BattleScene.deployPhase)
+		{
+			if (this._unit && this._unit.idMatch(id) && square.inRange) {
+				this._moveUnitDeploy(this._unit, square);
+			}
+			this._deselectUnit();
+			this._refreshArea();
+			return;
+		}
+
+		if (!square.inRange) {
 			this._deselectSkill();
 			this._deselectUnit();
 		} else if (this._skill && this._skill.idMatch(id)) {
-			this._useSkill(this._skill, target);
+			this._useSkill(this._skill, square);
 		} else if (this._unit && this._unit.idMatch(id)) {
-			this._moveUnit(this._unit, target);
+			this._moveUnit(this._unit, square);
 		}
 		this._refreshArea();
 	}
@@ -262,6 +307,5 @@
 
 	start() {
 		super.start();
-		this.nextTurn(); // skip deployment phase
 	}
 };
