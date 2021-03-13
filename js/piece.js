@@ -104,20 +104,20 @@ class Detail extends ElObj {
 ***************************************************/
 class TargetablePiece extends Piece {
 	constructor(battler) {
-		super(battler.Size());
+		super(battler.Size);
 		this._battler = battler;
 		this.targetable = true;
 		this.square = null;
 		this._setStats();
 
-		this.el.classList.add(battler.Style()); // TEMP
+		this.el.classList.add(battler.Style); // TEMP
 
 		this._lifebar = new Lifebar(this.hpRate());
 		this.el.appendChild(this._lifebar.el);
 	}
 
 	name() {
-		return this._battler.Name();
+		return this._battler.Name;
 	}
 
 	/* TODO: Volatile stats and statuses are all stored on the piece
@@ -126,7 +126,7 @@ class TargetablePiece extends Piece {
 	// TODO: Lots
 
 	_setStats() {
-		this._maxHp = this._battler.MaxHp();
+		this._maxHp = this._battler.MaxHp;
 		this.hp = this.maxHp();
 	}
 
@@ -265,10 +265,10 @@ class ControllablePiece extends TargetablePiece {
 
 	_setStats() {
 		super._setStats();
-		this._moveRange = this._battler.MoveRange();
+		this._moveRange = this._battler.MoveRange;
 	}
 	_setSkills() {
-		this._skills = this._battler.SkillList().map(SkillType => {
+		this._skills = this._battler.SkillList.map(SkillType => {
 			return new SkillType(this);
 		});
 	}
