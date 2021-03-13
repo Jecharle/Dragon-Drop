@@ -1,7 +1,7 @@
 /***************************************************
  Static Game object
- ***************************************************/
- class Game {
+***************************************************/
+class Game {
 	constructor() {
 		console.log("Game object is static, do not instantiate");
 	}

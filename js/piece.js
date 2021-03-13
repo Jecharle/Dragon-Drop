@@ -1,9 +1,9 @@
 /***************************************************
  Piece
- The root class for objects you can select, click,
- and drag around between containers
- ***************************************************/
- class Piece extends ElObj {
+The root class for objects you can select, click,
+and drag around between containers
+***************************************************/
+class Piece extends ElObj {
 	constructor(size) {
 		super();
 		this.parent = null;
@@ -81,10 +81,10 @@
 
 /***************************************************
  Detail
- The root class for popup numbers, cooldowns,
- lifebars, and other displays on pieces
- ***************************************************/
- class Detail extends ElObj {
+The root class for popup numbers, cooldowns,
+lifebars, and other displays on pieces
+***************************************************/
+class Detail extends ElObj {
 	constructor(startValue) {
 		super();
 		this.setValue(startValue);
@@ -101,8 +101,8 @@
 
 /***************************************************
  Targetable piece
- ***************************************************/
- class TargetablePiece extends Piece {
+***************************************************/
+class TargetablePiece extends Piece {
 	constructor(battler) {
 		super(battler.Size());
 		this._battler = battler;
@@ -216,8 +216,8 @@
 
 /***************************************************
  TargetablePiece -> Lifebar
- ***************************************************/
- class Lifebar extends Detail {
+***************************************************/
+class Lifebar extends Detail {
 	constructor(startValue) {
 		super(-1);
 		this.el.classList.add('lifebar'); // TODO: Appropriate class
@@ -241,7 +241,7 @@
 
 /***************************************************
  TargetablePiece -> PopupText
- ***************************************************/
+***************************************************/
 class PopupText extends Detail {
 	constructor(startValue) {
 		super(startValue);
@@ -254,7 +254,7 @@ class PopupText extends Detail {
 
 /***************************************************
  Controllable piece
- ***************************************************/
+***************************************************/
 class ControllablePiece extends TargetablePiece {
 	constructor(battler) {
 		super(battler);
@@ -349,8 +349,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  Skill use piece
- ***************************************************/
- class SkillPiece extends Piece {
+***************************************************/
+class SkillPiece extends Piece {
 	constructor(user) {
 		super(1);
 		this.user = user;
@@ -367,7 +367,11 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	fullDescription() {
-		return `<strong>${this._name()}</strong><br>${this._description()}`;
+		var desc = `<strong>${this._name()}</strong><br>${this._description()}`;
+		if (this._cooldownCost() > 0) {
+			desc += `<br><em>(${this._cooldownCost()} turn cooldown)</em>`;
+		}
+		return desc;
 	}
 	_name() {
 		return "Skill Name"
@@ -447,8 +451,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  SkillPiece -> Label
- ***************************************************/
- class Label extends Detail {
+***************************************************/
+class Label extends Detail {
 	constructor(startValue) {
 		super(startValue);
 		this.el.classList.add('skill-use-label');
@@ -457,8 +461,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  SkillPiece -> Skill Description
- ***************************************************/
- class Description extends Detail {
+***************************************************/
+class Description extends Detail {
 	constructor(startValue) {
 		super(startValue);
 		this.el.classList.add('skill-description');
@@ -471,8 +475,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  Test attack skill
- ***************************************************/
- class TestAttackSkill extends SkillPiece {
+***************************************************/
+class TestAttackSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'red';
@@ -482,7 +486,7 @@ class ControllablePiece extends TargetablePiece {
 		return "Attack";
 	}
 	_description() {
-		return `Deals 1 damage and pushes the target 1 space`;
+		return "Deal 1 damage and push the target 1 space";
 	}
 
 	range() {
@@ -505,8 +509,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  Test heal skill
- ***************************************************/
- class TestHealSkill extends SkillPiece {
+***************************************************/
+class TestHealSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'green';
@@ -516,7 +520,7 @@ class ControllablePiece extends TargetablePiece {
 		return "Heal";
 	}
 	_description() {
-		return `Restores 2 HP (${this._cooldownCost()}-turn cooldown)`;
+		return "Restore 2 HP";
 	}
 
 	range() {
@@ -542,8 +546,8 @@ class ControllablePiece extends TargetablePiece {
 
 /***************************************************
  Test build skill
- ***************************************************/
- class TestBuildSkill extends SkillPiece {
+***************************************************/
+class TestBuildSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
 		this.el.style.backgroundColor = 'purple';
@@ -553,7 +557,7 @@ class ControllablePiece extends TargetablePiece {
 		return "Build";
 	}
 	_description() {
-		return `Create a wall with 1 HP (${this._cooldownCost()}-turn cooldown)`;
+		return "Create a wall with 1 HP";
 	}
 
 	range() {

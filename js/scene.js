@@ -1,9 +1,9 @@
 /***************************************************
  Scene
- The root class that responds to user interaction
- and applies rules to pieces and containers
- ***************************************************/
- class Scene extends ElObj {
+The root class that responds to user interaction
+and applies rules to pieces and containers
+***************************************************/
+class Scene extends ElObj {
 	constructor() {
 		super();
 	}
@@ -20,8 +20,8 @@
 
 /***************************************************
  Battle scene
- ***************************************************/
- class BattleScene extends Scene {
+***************************************************/
+class BattleScene extends Scene {
 	constructor() {
 		super();
 		this._initTeams();
@@ -260,9 +260,9 @@
 
 /***************************************************
  Test scene
- The current scene used for debugging
- ***************************************************/
- class TestScene extends BattleScene {
+The current scene used for debugging
+***************************************************/
+class TestScene extends BattleScene {
 	constructor() {
 		super();
 	}
