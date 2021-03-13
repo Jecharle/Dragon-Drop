@@ -100,6 +100,21 @@
 			return true;
 		});
 	}
+	// TODO: Too much repeated code- refactor these into a single function with multiple settings?
+	canPass(piece, centerSquare, size) {
+		size = size || piece.size();
+		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		return area.every(function(square) {
+			if (!square) {
+				return false;
+			}
+			if (square.piece != null && piece != null && square.piece.team != piece.team) {
+				return false;
+			}
+			// TODO: Check for blocking terrain
+			return true;
+		});
+	}
 
 	movePiece(piece, targetSquare) {
 		if (!piece || !targetSquare) return false;
@@ -213,7 +228,7 @@
 				if (adjacent.inRange && adjacent.movesLeft > movesLeft) {
 					continue;
 				}
-				if (!this.canFit(piece, adjacent[n])) {
+				if (!this.canPass(piece, adjacent[n])) {
 					continue;
 				}
 				this._paintMoveRange(adjacent[n], movesLeft);
