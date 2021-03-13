@@ -76,6 +76,12 @@
 	background-color: greenyellow;
 	border-radius: 50%;
 }
+.rock {
+	background-color: purple;
+	height: 90%;
+	width: 90%;
+	margin: auto;
+}
 
 .skill {
 	width: 62px;

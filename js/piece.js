@@ -11,8 +11,10 @@
 
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
-		this.el.classList.add('x'+this._size); // crude way to set the size
+		this.el.classList.add('x'+this._size); // TEMP
 
+		// TODO: Safe to assume this is always viable?
+		this.el.onclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
 	}
@@ -59,11 +61,21 @@
 		}
 	}
 
+	_click(ev) {
+		ev.stopPropagation();
+		var piece = ev.target.obj;
+		var scene = Game.scene();
+		if (scene) scene.selectPiece(piece);
+	}
 	_drag(ev) {
 		ev.dataTransfer.setData("text", ev.target.id);
+		var piece = ev.target.obj;
+		var scene = Game.scene();
+		if (scene) scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("text");
+		// the drop target handles the rest
 	}
 };
 
@@ -97,6 +109,8 @@
 		this.targetable = true;
 		this.square = null;
 		this._setStats();
+
+		this.el.classList.add(battler.Style()); // TEMP
 
 		this._lifebar = new Lifebar(this.hpRate());
 		this.el.appendChild(this._lifebar.el);
@@ -246,9 +260,6 @@ class ControllablePiece extends TargetablePiece {
 		super(battler);
 		this._setSkills();
 
-		this.el.classList.add(battler.Style()); // TEMP
-		this.el.onclick = this._click;
-
 		this.endTurn(); // TEMP
 	}
 
@@ -334,19 +345,6 @@ class ControllablePiece extends TargetablePiece {
 	type() {
 		return Piece.Unit;
 	}
-
-	_click(ev) {
-		ev.stopPropagation();
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece);
-	}
-	_drag(ev) {
-		super._drag(ev);
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece, true);
-	}
 };
 
 /***************************************************
@@ -358,7 +356,6 @@ class ControllablePiece extends TargetablePiece {
 		this.user = user;
 		this.cooldown = 0;
 		this.el.classList.add('skill');
-		this.el.onclick = this._click;
 
 		this._cooldownLabel = new Label("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -446,20 +443,6 @@ class ControllablePiece extends TargetablePiece {
 	type() {
 		return Piece.Skill;
 	}
-
-	// event handler functions
-	_click(ev) {
-		ev.stopPropagation();
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece);
-	}
-	_drag(ev) {
-		super._drag(ev);
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece, true);
-	}
 };
 
 /***************************************************
@@ -496,10 +479,10 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	_name() {
-		return "Attack"
+		return "Attack";
 	}
 	_description() {
-		return "Deals 1 damage and pushes the target 1 space"
+		return `Deals 1 damage and pushes the target 1 space`;
 	}
 
 	range() {
@@ -530,10 +513,10 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	_name() {
-		return "Heal"
+		return "Heal";
 	}
 	_description() {
-		return "Restores 2 HP (2-turn cooldown)"
+		return `Restores 2 HP (${this._cooldownCost()}-turn cooldown)`;
 	}
 
 	range() {
@@ -554,5 +537,43 @@ class ControllablePiece extends TargetablePiece {
 	}
 	_cooldownCost() {
 		return 2;
+	}
+};
+
+/***************************************************
+ Test build skill
+ ***************************************************/
+ class TestBuildSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.el.style.backgroundColor = 'purple';
+	}
+
+	_name() {
+		return "Build";
+	}
+	_description() {
+		return `Create a wall with 1 HP (${this._cooldownCost()}-turn cooldown)`;
+	}
+
+	range() {
+		return 1;
+	}
+	shape() {
+		return Shape.Square;
+	}
+
+	_validTarget(target) {
+		if (!target.piece) {
+			return true;
+		}
+		return false;
+	}
+	_effects(target) {
+		var wall = new TargetablePiece(Rock);
+		return target.parent.movePiece(wall, target);
+	}
+	_cooldownCost() {
+		return 3;
 	}
 };
