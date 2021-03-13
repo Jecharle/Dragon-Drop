@@ -17,7 +17,7 @@ class Battler {
 	static Style = ''; // TEMP
 };
 
-// TODO: Customizable, non-static battlers available for customizations
+// TODO: Non-static battlers for customizable party members
 
 /***************************************************
  Temporary battler objects

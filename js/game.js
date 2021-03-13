@@ -6,10 +6,10 @@ class Game {
 		console.log("Game object is static, do not instantiate");
 	}
 
-	static scene = function() {
+	static get scene() {
 		return Game._scene;
 	}
-	static setScene = function(scene) {
+	static setScene(scene) {
 		if (Game._scene == scene) return;
 
 		if (Game._scene != null) {
@@ -22,16 +22,14 @@ class Game {
 		Game._scene.start();
 	}
 
-	static globalKeydown = function(ev) {
-		var scene = Game.scene();
-		if (scene && !ev.repeat) scene.keydown(ev.key);
+	static globalKeydown(ev) {
+		if (Game.scene && !ev.repeat) Game.scene.keydown(ev.key);
 	}
-	static globalKeyup = function(ev) {
-		var scene = Game.scene();
-		if (scene && !ev.repeat) scene.keyup(ev.key);
+	static globalKeyup(ev) {
+		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 
-	static begin = function() {
+	static begin() {
 		document.addEventListener('keydown', Game.globalKeydown);
 		document.addEventListener('keyup', Game.globalKeyup);
 

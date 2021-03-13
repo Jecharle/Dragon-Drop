@@ -6,7 +6,7 @@ and drag around between containers
 class Piece extends ElObj {
 	constructor(size) {
 		super();
-		this.parent = null;
+		this._parent = null;
 		this._size = size || 1;
 
 		this.el.id = Piece.nextId();
@@ -34,12 +34,15 @@ class Piece extends ElObj {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
 		}
-		this.parent = container;
+		this._parent = container;
+	}
+	get parent() {
+		return this._parent;
 	}
 
 	select() { return false; }
 	deselect() { }
-	type() { return Piece.None; }
+	get type() { return Piece.None; }
 	static None = 0
 	static Unit = 1
 	static Skill = 2
@@ -64,14 +67,12 @@ class Piece extends ElObj {
 	_click(ev) {
 		ev.stopPropagation();
 		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece);
+		if (Game.scene) Game.scene.selectPiece(piece);
 	}
 	_drag(ev) {
 		ev.dataTransfer.setData("text", ev.target.id);
 		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece, true);
+		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("text");
@@ -87,14 +88,14 @@ lifebars, and other displays on pieces
 class Detail extends ElObj {
 	constructor(startValue) {
 		super();
-		this.setValue(startValue);
+		this.value = startValue;
 	}
 
-	setValue(value) {
+	set value(value) {
 		this.el.innerHTML = ""+value;
 	}
 
-	elType() {
+	get elType() {
 		return 'span';
 	}
 };
@@ -127,7 +128,7 @@ class TargetablePiece extends Piece {
 
 	_setStats() {
 		this._maxHp = this._battler.MaxHp;
-		this.hp = this.maxHp();
+		this.hp = this.maxHp;
 	}
 
 	setTeam(team) {
@@ -141,12 +142,12 @@ class TargetablePiece extends Piece {
 		}
 	}
 
-	maxHp() {
+	get maxHp() {
 		return this._maxHp;
 	}
 	hpRate() {
-		if (this.maxHp() == 0) return this.hp;
-		else return this.hp / this.maxHp();
+		if (this.maxHp == 0) return this.hp;
+		else return this.hp / this.maxHp;
 	}
 	dead() {
 		return this.hp <= 0;
@@ -156,7 +157,7 @@ class TargetablePiece extends Piece {
 	}
 
 	refresh() {
-		this._lifebar.setValue(this.hpRate());
+		this._lifebar.value = this.hpRate();
 	}
 
 	takeDamage(power, attr) {
@@ -167,10 +168,7 @@ class TargetablePiece extends Piece {
 		}
 
 		this.el.classList.add('damaged');
-		this.el.onanimationend = ev => { // TEMP?
-			ev.target.classList.remove('damaged');
-			ev.target.onanimationend = null;
-		};
+		this.el.addEventListener('animationend', this._removeDamageAnimation);
 
 		this._showPopup(power);
 		this.refresh();
@@ -178,12 +176,16 @@ class TargetablePiece extends Piece {
 	}
 	heal(power, attr) {
 		this.hp += power;
-		if (this.hp > this.maxHp()) {
-			this.hp = this.maxHp();
+		if (this.hp > this.maxHp) {
+			this.hp = this.maxHp;
 		}
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
+	}
+	_removeDamageAnimation(ev) {
+		ev.target.classList.remove('damaged');
+		ev.target.removeEventListener('animationend', this._removeDamageAnimation);
 	}
 	_showPopup(value) {
 		var popup = new PopupText(value);
@@ -222,17 +224,17 @@ class Lifebar extends Detail {
 		super(-1);
 		this.el.classList.add('lifebar'); // TODO: Appropriate class
 
-		this._subEl = document.createElement(this.elType());
+		this._subEl = document.createElement(this.elType);
 		this._subEl.classList.add('inner-lifebar'); // TODO: Appropriate class
 		this.el.appendChild(this._subEl);
-		this.setValue(startValue);
+		this.value = startValue;
 	}
 
-	elType() {
+	get elType() {
 		return 'div';
 	}
 
-	setValue(value) {
+	set value(value) {
 		if (value >= 0 && value <= 1) {
 			this._subEl.style.width = String(Math.floor(value*100))+"%";
 		}
@@ -273,12 +275,12 @@ class ControllablePiece extends TargetablePiece {
 		});
 	}
 
-	moveRange() {
+	get moveRange() {
 		if (this.moved) return 0;
 		else return this._moveRange;
 	}
 
-	skills() {
+	get skills() {
 		return this._skills;
 	}
 
@@ -287,18 +289,26 @@ class ControllablePiece extends TargetablePiece {
 		this.refresh();
 	}
 	endTurn() {
-		this.setMoved(false);
-		this.setActed(false);
+		this.moved = false;
+		this.acted = false;
+		// TODO: This styling gets a bit weird
 		this.setSelectable(false);
 		this.setUnselectable(false);
 		this._startSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 	}
-	setMoved(value) {
-		this.moved = value;
+
+	get moved() {
+		return this._moved;
 	}
-	setActed(value) {
-		this.acted = value;
+	set moved(value) {
+		this._moved = value;
+	}
+	get acted() {
+		return this._acted;
+	}
+	set acted(value) {
+		this._acted = value;
 	}
 
 	move(target) {
@@ -306,7 +316,7 @@ class ControllablePiece extends TargetablePiece {
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			this.setMoved(true);
+			this.moved = true;
 			this._startSquare = oldSquare;
 			this.refresh();
 			return true;
@@ -317,7 +327,7 @@ class ControllablePiece extends TargetablePiece {
 		if (!this.moved || !this._startSquare) return false;
 		
 		if (this._startSquare.parent.movePiece(this, this._startSquare)) {
-			this.setMoved(false);
+			this.moved = false;
 			this._startSquare = null;
 			this.refresh();
 			return true;
@@ -342,7 +352,7 @@ class ControllablePiece extends TargetablePiece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	type() {
+	get type() {
 		return Piece.Unit;
 	}
 };
@@ -360,39 +370,39 @@ class SkillPiece extends Piece {
 		this._cooldownLabel = new Label("");
 		this.el.appendChild(this._cooldownLabel.el);
 
-		this._tooltip = new Description(this.fullDescription());
+		this._tooltip = new Description(this.fullDescription);
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
 	}
 
-	fullDescription() {
-		var desc = `<strong>${this._name()}</strong><br>${this._description()}`;
-		if (this._cooldownCost() > 0) {
-			desc += `<br><em>(${this._cooldownCost()} turn cooldown)</em>`;
+	get fullDescription() {
+		var desc = `<strong>${this._name}</strong><br>${this._description}`;
+		if (this._cooldownCost > 0) {
+			desc += `<br><em>(${this._cooldownCost} turn cooldown)</em>`;
 		}
 		return desc;
 	}
-	_name() {
+	get _name() {
 		return "Skill Name"
 	}
-	_description() {
+	get _description() {
 		return "Skill description"
 	}
 
-	range() {
+	get range() {
 		return 1;
 	}
-	minRange() {
+	get minRange() {
 		return 1;
 	}
-	shape() {
+	get shape() {
 		return Shape.Line;
 	}
-	shapeProps() {
+	get shapeProps() {
 		return {
-			range: this.range(),
-			minRange: this.minRange(),
+			range: this.range,
+			minRange: this.minRange,
 		};
 	}
 
@@ -403,7 +413,7 @@ class SkillPiece extends Piece {
 	use(target) {
 		if (!this._validTarget(target)) return false;
 
-		this._cost();
+		this._payCost();
 		this._effects(target);
 
 		this.user.refresh();
@@ -413,11 +423,11 @@ class SkillPiece extends Piece {
 		return false;
 	}
 	_effects(target) { }
-	_cost() {
-		this.user.setActed(true);
-		this.cooldown = this._cooldownCost();
+	_payCost() {
+		this.user.acted = true;
+		this.cooldown = this._cooldownCost;
 	}
-	_cooldownCost() {
+	get _cooldownCost() {
 		return 0;
 	}
 
@@ -432,8 +442,8 @@ class SkillPiece extends Piece {
 		var usable = this.canUse();
 		this.setSelectable(usable);
 		this.setUnselectable(!usable);
-		this._cooldownLabel.setValue(this.cooldown || "");
-		this._tooltip.setValue(this.fullDescription());
+		this._cooldownLabel.value = this.cooldown || "";
+		this._tooltip.value = this.fullDescription;
 	}
 
 	select() {
@@ -444,7 +454,7 @@ class SkillPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	type() {
+	get type() {
 		return Piece.Skill;
 	}
 };
@@ -468,7 +478,7 @@ class Description extends Detail {
 		this.el.classList.add('skill-description');
 	}
 
-	elType() {
+	get elType() {
 		return 'div';
 	}
 }
@@ -482,14 +492,14 @@ class TestAttackSkill extends SkillPiece {
 		this.el.style.backgroundColor = 'red';
 	}
 
-	_name() {
+	get _name() {
 		return "Attack";
 	}
-	_description() {
+	get _description() {
 		return "Deal 1 damage and push the target 1 space";
 	}
 
-	range() {
+	get range() {
 		return 2;
 	}
 
@@ -516,18 +526,22 @@ class TestHealSkill extends SkillPiece {
 		this.el.style.backgroundColor = 'green';
 	}
 
-	_name() {
+	get _name() {
 		return "Heal";
 	}
-	_description() {
+	get _description() {
 		return "Restore 2 HP";
 	}
 
-	range() {
+	get range() {
 		return 1;
 	}
-	minRange() {
+	get minRange() {
 		return 0;
+	}
+
+	get _cooldownCost() {
+		return 2;
 	}
 
 	_validTarget(target) {
@@ -538,9 +552,6 @@ class TestHealSkill extends SkillPiece {
 	}
 	_effects(target) {
 		target.piece.heal(2);
-	}
-	_cooldownCost() {
-		return 2;
 	}
 };
 
@@ -553,18 +564,22 @@ class TestBuildSkill extends SkillPiece {
 		this.el.style.backgroundColor = 'purple';
 	}
 
-	_name() {
+	get _name() {
 		return "Build";
 	}
-	_description() {
+	get _description() {
 		return "Create a wall with 1 HP";
 	}
 
-	range() {
+	get range() {
 		return 1;
 	}
-	shape() {
+	get shape() {
 		return Shape.Square;
+	}
+
+	get _cooldownCost() {
+		return 3;
 	}
 
 	_validTarget(target) {
@@ -576,8 +591,5 @@ class TestBuildSkill extends SkillPiece {
 	_effects(target) {
 		var wall = new TargetablePiece(Rock);
 		return target.parent.movePiece(wall, target);
-	}
-	_cooldownCost() {
-		return 3;
 	}
 };

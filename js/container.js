@@ -24,7 +24,10 @@ subdivisions or positions within a container
 class SubContainer extends ElObj {
 	constructor(parent) {
 		super();
-		this.parent = parent;
+		this._parent = parent;
+	}
+	get parent() {
+		return this._parent;
 	}
 };
 
@@ -36,8 +39,8 @@ class Board extends Container {
 	constructor(w, h) {
 		super();
 		this._squares = [];
-		this.w = w;
-		this.h = h;
+		this._w = w;
+		this._h = h;
 
 		for (var y = 0; y < h; y++) {
 			var row = document.createElement('tr');
@@ -53,8 +56,15 @@ class Board extends Container {
 		this.el.ondrop = this._drop;
 	}
 
-	elType() {
+	get elType() {
 		return 'table';
+	}
+
+	get w() {
+		return this._w;
+	}
+	get h() {
+		return this._h;
 	}
 
 	at(x, y) {
@@ -214,10 +224,10 @@ class Board extends Container {
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
-		if (!piece.moveRange()) return;
+		if (!piece.moveRange) return;
 
 		var origin = piece.square;
-		this._paintMoveRange(origin, piece.moveRange());
+		this._paintMoveRange(origin, piece.moveRange);
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
@@ -259,8 +269,8 @@ class Board extends Container {
 		if (!user.square || user.parent != this) return;
 
 		// get the possible range
-		var size = 1 + 2*piece.range();
-		var area = this.getArea(user.square.x, user.square.y, size, piece.shape(), piece.shapeProps());
+		var size = 1 + 2*piece.range;
+		var area = this.getArea(user.square.x, user.square.y, size, piece.shape, piece.shapeProps);
 		for (var i = 0; i < area.length; i++) {
 			if (area[i]) this._paintSkillRange(area[i]);
 		}
@@ -315,10 +325,9 @@ class Board extends Container {
 		if (ev.target) {
 			var square = ev.target.obj;
 			square = square.square || square;
-			var scene = Game.scene();
 			var elId = ev.dataTransfer.getData("text");
-			if (scene) {
-				scene.selectSquare(square, elId);
+			if (Game.scene) {
+				Game.scene.selectSquare(square, elId);
 			}
 		}
 	}
@@ -327,8 +336,7 @@ class Board extends Container {
 		if (ev.target) {
 			var square = ev.target.obj;
 			if (square) {
-				var scene = Game.scene();
-				if (scene) scene.selectSquare(square);
+				if (Game.scene) Game.scene.selectSquare(square);
 			}
 		}
 	}
@@ -341,12 +349,19 @@ class Square extends SubContainer {
 	constructor(x, y, parent) {
 		super(parent);
 		this.el.classList.add('square');
-		this.x = x;
-		this.y = y;
+		this._x = x;
+		this._y = y;
 	}
 
-	elType() {
+	get elType() {
 		return 'td';
+	}
+
+	get x() {
+		return this._x;
+	}
+	get y() {
+		return this._y;
 	}
 };
 
@@ -357,7 +372,7 @@ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
-		this.skills = [];
+		this._skills = [];
 		this.el.classList.add('skill-list');
 	}
 
@@ -366,11 +381,16 @@ class SkillList extends Container {
 		this._user = user;
 		if (!user) return false;
 
-		var userSkills = user.skills();
+		/*var userSkills = user.skills;
 		for (var i = 0; i < userSkills.length; i++) {
 			this._addSkill(userSkills[i]);
-		}
+		}*/
+		user.skills.forEach(skill => this._addSkill(skill));
 		return true;
+	}
+
+	get skills() {
+		return this._skills;
 	}
 
 	_addSkill(piece) {
@@ -382,9 +402,10 @@ class SkillList extends Container {
 	}
 
 	_clearSkills() {
-		for (var i = 0; i < this.skills.length; i++) {
+		this.skills.forEach(skill => this.removePiece(skill));
+		/*for (var i = 0; i < this.skills.length; i++) {
 			this.removePiece(this.skills[i]);
-		}
-		this.skills = [];
+		}*/
+		this._skills = [];
 	}
 }
