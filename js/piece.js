@@ -43,9 +43,9 @@ class Piece extends ElObj {
 	select() { return false; }
 	deselect() { }
 	get type() { return Piece.None; }
-	static None = 0
-	static Unit = 1
-	static Skill = 2
+	static get None() { return 0; }
+	static get Unit() { return 1; }
+	static get Skill() { return 2; }
 
 	_setSelectable(selectable) {
 		this.el.setAttribute("draggable", Boolean(selectable));
@@ -106,8 +106,8 @@ class TargetablePiece extends Piece {
 	constructor(battler) {
 		super(battler.Size);
 		this._battler = battler;
-		this._square = null;
 		this._team = null;
+		this.square = null;
 		this._setupStats();
 
 		this.el.classList.add(battler.Style); // TEMP
@@ -124,21 +124,11 @@ class TargetablePiece extends Piece {
 		return true;
 	}
 
-	/* TODO: Volatile stats and statuses are all stored on the piece
-		base stats and unchangeable attributes come from a non-piece 'battler' entity */ 
-
 	// TODO: Lots
 
 	_setupStats() {
 		this._maxHp = this._battler.MaxHp;
 		this.hp = this.maxHp;
-	}
-
-	get square() {
-		return this._square;
-	}
-	set square(value) {
-		this._square = value;
 	}
 
 	get team() {
@@ -175,13 +165,14 @@ class TargetablePiece extends Piece {
 
 	takeDamage(power, attr) {
 		this.hp -= power;
+
 		if (this.hp < 0) {
 			this.hp = 0;
 			// TODO: Die?
 		}
 
 		this.el.classList.add('damaged');
-		this.el.addEventListener('animationend', this._removeDamageAnimation);
+		this.el.addEventListener('animationend', this._removeDamagedAnimation);
 
 		this._showPopup(power);
 		this.refresh();
@@ -196,9 +187,9 @@ class TargetablePiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	_removeDamageAnimation(ev) {
+	_removeDamagedAnimation(ev) {
 		ev.target.classList.remove('damaged');
-		ev.target.removeEventListener('animationend', this._removeDamageAnimation);
+		ev.target.removeEventListener('animationend', this._removeDamagedAnimation);
 	}
 	_showPopup(value) {
 		var popup = new PopupText(value);
@@ -281,7 +272,7 @@ class ControllablePiece extends TargetablePiece {
 
 	_setupStats() {
 		super._setupStats();
-		this._moveRange = this._battler.MoveRange;
+		this._baseMoveRange = this._battler.MoveRange;
 	}
 	_setupSkills() {
 		this._skills = this._battler.SkillList.map(SkillType => {
@@ -291,7 +282,7 @@ class ControllablePiece extends TargetablePiece {
 
 	get moveRange() {
 		if (this.moved) return 0;
-		else return this._moveRange;
+		else return this._baseMoveRange;
 	}
 
 	get skills() {
@@ -309,25 +300,6 @@ class ControllablePiece extends TargetablePiece {
 		this._startSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
-	}
-
-	get moved() {
-		return this._moved;
-	}
-	set moved(value) {
-		this._moved = value;
-	}
-	get acted() {
-		return this._acted;
-	}
-	set acted(value) {
-		this._acted = value;
-	}
-	get myTurn() {
-		return this._myTurn;
-	}
-	set myTurn(value) {
-		this._myTurn = value;
 	}
 
 	move(target) {
@@ -425,6 +397,16 @@ class SkillPiece extends Piece {
 		};
 	}
 
+	_baseCooldown = 0;
+	get _cooldownCost() {
+		return this._baseCooldown;
+	}
+
+	_basePower = 1;
+	get power() {
+		return this._basePower;
+	}
+
 	canUse() {
 		if (this.user.acted || this.cooldown > 0) return false;
 		else return true;
@@ -445,9 +427,6 @@ class SkillPiece extends Piece {
 	_payCost() {
 		this.user.acted = true;
 		this.cooldown = this._cooldownCost;
-	}
-	get _cooldownCost() {
-		return 0;
 	}
 
 	endTurn() {
@@ -515,7 +494,7 @@ class TestAttackSkill extends SkillPiece {
 		return "Attack";
 	}
 	get _description() {
-		return "Deal 1 damage and push the target 1 space";
+		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
 	get range() {
@@ -531,7 +510,7 @@ class TestAttackSkill extends SkillPiece {
 
 	_effects(target) {
 		var targetPiece = target.piece;
-		targetPiece.takeDamage(1);
+		targetPiece.takeDamage(this.power);
 		targetPiece.push(this.user.square, 1);
 	}
 };
@@ -549,7 +528,7 @@ class TestHealSkill extends SkillPiece {
 		return "Heal";
 	}
 	get _description() {
-		return "Restore 2 HP";
+		return `Restore ${this.power} HP`;
 	}
 
 	get range() {
@@ -559,9 +538,8 @@ class TestHealSkill extends SkillPiece {
 		return 0;
 	}
 
-	get _cooldownCost() {
-		return 2;
-	}
+	_basePower = 2;
+	_baseCooldown = 2;
 
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -597,9 +575,7 @@ class TestBuildSkill extends SkillPiece {
 		return Shape.Square;
 	}
 
-	get _cooldownCost() {
-		return 3;
-	}
+	_baseCooldown = 3;
 
 	_validTarget(target) {
 		if (!target.piece) {
