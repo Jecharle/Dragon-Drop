@@ -52,6 +52,15 @@ class Board extends Container {
 			this.el.appendChild(row);
 		}
 
+		this._deployArea = [ // TEMP
+			this.at(3,5),
+			this.at(3,6),
+			this.at(4,5),
+			this.at(4,6),
+			this.at(5,5),
+			this.at(5,6)
+		];
+
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
 	}
@@ -249,13 +258,7 @@ class Board extends Container {
 		}
 	}
 	setDeployArea() {
-		// TODO: Load this from something
-		this._paintMoveRange(this.at(3, 5));
-		this._paintMoveRange(this.at(3, 6));
-		this._paintMoveRange(this.at(4, 5));
-		this._paintMoveRange(this.at(4, 6));
-		this._paintMoveRange(this.at(5, 5));
-		this._paintMoveRange(this.at(5, 6));
+		this._deployArea.forEach(square => this._paintMoveRange(square));
 	}
 	_paintMoveRange(square, movesLeft) {
 		square.el.classList.add('move-range');

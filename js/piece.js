@@ -80,30 +80,6 @@ class Piece extends ElObj {
 };
 
 /***************************************************
- Detail
-The root class for popup numbers, cooldowns,
-lifebars, and other displays on pieces
-***************************************************/
-class Detail extends ElObj {
-	constructor(startValue) {
-		super();
-		this.value = startValue;
-	}
-
-	get value() {
-		return this._value;
-	}
-	set value(value) {
-		this._value = value;
-		this.el.innerHTML = ""+value;
-	}
-
-	get elType() {
-		return 'span';
-	}
-};
-
-/***************************************************
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
@@ -227,45 +203,6 @@ class TargetablePiece extends Piece {
 };
 
 /***************************************************
- TargetablePiece -> Lifebar
-***************************************************/
-class Lifebar extends Detail {
-	constructor(startValue) {
-		super();
-		this.el.classList.add('lifebar');
-
-		this._subEl = document.createElement(this.elType); // TEMP?
-		this._subEl.classList.add('inner-lifebar');
-		this.el.appendChild(this._subEl);
-		this.value = startValue;
-	}
-
-	get elType() {
-		return 'div';
-	}
-
-	set value(value) {
-		if (value >= 0 && value <= 1 && this._subEl) {
-			this._value = value;
-			this._subEl.style.width = String(Math.floor(value*100))+"%";
-		}
-	}
-}
-
-/***************************************************
- TargetablePiece -> PopupText
-***************************************************/
-class PopupText extends Detail {
-	constructor(startValue) {
-		super(startValue);
-		this.el.classList.add('popup-text');
-		this.el.onanimationend = ev => {
-			ev.target.parentElement.removeChild(ev.target);
-		};
-	}
-}
-
-/***************************************************
  Controllable piece
 ***************************************************/
 class ControllablePiece extends TargetablePiece {
@@ -365,10 +302,10 @@ class SkillPiece extends Piece {
 		this.cooldown = 0;
 		this.el.classList.add('skill');
 
-		this._cooldownLabel = new Label("");
+		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
 
-		this._tooltip = new Description(this.fullDescription);
+		this._tooltip = new SkillDescription(this.fullDescription);
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
@@ -463,30 +400,6 @@ class SkillPiece extends Piece {
 		return Piece.Skill;
 	}
 };
-
-/***************************************************
- SkillPiece -> Label
-***************************************************/
-class Label extends Detail {
-	constructor(startValue) {
-		super(startValue);
-		this.el.classList.add('skill-use-label');
-	}
-}
-
-/***************************************************
- SkillPiece -> Skill Description
-***************************************************/
-class Description extends Detail {
-	constructor(startValue) {
-		super(startValue);
-		this.el.classList.add('skill-description');
-	}
-
-	get elType() {
-		return 'div';
-	}
-}
 
 /***************************************************
  Test attack skill
