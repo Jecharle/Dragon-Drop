@@ -31,6 +31,12 @@
 	position: relative;
 	z-index: 1;
 }
+.piece::after {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	content: "";
+}
 
 .x1 {
 	width: 100%;
@@ -47,7 +53,7 @@
 	right: 100%;
 }
 
-.selected {
+.selected::after {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
@@ -55,12 +61,12 @@
 .selectable {
 	cursor: grab;
 }
-.selectable:hover {
+.selectable:hover::after {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
 
-.unselectable {
+.unselectable::after {
 	filter: grayscale(100%);
 }
 
@@ -77,19 +83,19 @@
 	border-style: none;
 }
 
-.ball {
+.ball::after {
 	background-color: green;
 	border-radius: 50%;
 }
-.ball2 {
+.ball2::after {
 	background-color: red;
 	border-radius: 50%;
 }
-.ball3 {
+.ball3::after {
 	background-color: greenyellow;
 	border-radius: 50%;
 }
-.rock {
+.rock::after {
 	background-color: purple;
 	height: 90%;
 	width: 90%;
@@ -138,7 +144,7 @@
 	visibility: visible;
 }
 
-.damaged {
+.damaged::after {
 	animation: 150ms shake;
 }
 

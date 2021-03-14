@@ -211,7 +211,7 @@ class BattleScene extends Scene {
 			}
 			this._refreshArea();
 			return;
-		} else { // TODO: require playerphase
+		} else { // TODO: once AI works, only work for player phase?
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
