@@ -24,10 +24,15 @@ class Scene extends ElObj {
 class BattleScene extends Scene {
 	constructor() {
 		super();
+		this.el.classList.add("vertical");
 		this._initTeams();
-		this._uiEl = this._createTopMenu();
 		this._board = this._createBoard();
-		this._skillList = this._createSkillList(); // TEMP
+		this._skillList = this._createSkillList();
+
+		this._undoButtonEl = this._createUndoButton();
+		this._turnTitleEl = this._createTurnTitle();
+		this._endTurnButtonEl = this._createEndTurnButton();
+
 		this._buildDOM();
 	}
 
@@ -42,30 +47,32 @@ class BattleScene extends Scene {
 		this._refreshArea();
 	}
 
-	_createTopMenu() { // TEMP
-		var topDiv =  document.createElement("div");
-		topDiv.style.display = "flex";
-
-		var undoButton = document.createElement("button");
-		undoButton.type = "button";
-		undoButton.innerText = "Undo Move";
-		undoButton.style.marginRight = "auto";
-		undoButton.onclick = () => { // TEMP
-			Game.scene._undoMove();
-			Game.scene._refreshArea();
+	_createUndoButton() {
+		var button = document.createElement("button");
+		button.type = "button";
+		button.innerText = "Undo Move";
+		button.onclick = () => {
+			this._undoMove();
+			this._refreshArea();
 		};
-		topDiv.appendChild(undoButton);
-
-		var endTurnButton = document.createElement("button");
-		endTurnButton.type = "button";
-		endTurnButton.innerText = "End Turn";
-		endTurnButton.style.marginLeft = "auto";
-		endTurnButton.onclick = () => {
-			Game.scene.nextTurn();
-		};
-		topDiv.appendChild(endTurnButton);
-		return topDiv;
+		return button;
 	}
+	_createTurnTitle() {
+		var turnTitle = document.createElement("span");
+		turnTitle.innerText = "";
+		turnTitle.style.textAlign = "center";
+		return turnTitle;
+	}
+	_createEndTurnButton() {
+		var button = document.createElement("button");
+		button.type = "button";
+		button.innerText = "End Turn";
+		button.onclick = () => {
+			this._nextTurn();
+		};
+		return button;
+	}
+
 	_createBoard() { 
 		// TODO: Initialize from a "battle map" entity?
 		return null; // TEMP
@@ -74,7 +81,13 @@ class BattleScene extends Scene {
 		return new SkillList();
 	}
 	_buildDOM() {
-		this.el.appendChild(this._uiEl); // TEMP
+		var topDiv =  document.createElement("div");
+		topDiv.classList.add("top-bar");
+		topDiv.appendChild(this._undoButtonEl);
+		topDiv.appendChild(this._turnTitleEl);
+		topDiv.appendChild(this._endTurnButtonEl);
+		this.el.appendChild(topDiv);
+
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
 	}
@@ -98,7 +111,7 @@ class BattleScene extends Scene {
 	static deployPhase = 0;
 	static playerPhase = 1;
 	static enemyPhase = 2;
-	nextTurn() {
+	_nextTurn() {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -120,7 +133,30 @@ class BattleScene extends Scene {
 				break;
 			
 		}
+		this._refreshUi();
 		this._refreshArea();
+	}
+
+	_refreshUi() {
+		switch (this._phase) {
+			case BattleScene.deployPhase:
+				this._turnTitleEl.innerText = "Deployment";
+				break;
+			case BattleScene.playerPhase:
+				this._turnTitleEl.innerText = "Player turn " + this._turn;
+				break;
+			case BattleScene.enemyPhase:
+				this._turnTitleEl.innerText = "Enemy turn " + this._turn;
+				break;
+			default:
+				this._turnTitleEl.innerText = "";
+		}
+
+		if (this._moveStack.length > 0) {
+			this._undoButtonEl.disabled = false;
+		} else {
+			this._undoButtonEl.disabled = true;
+		}
 	}
 
 	_selectUnit(piece) {
@@ -142,13 +178,16 @@ class BattleScene extends Scene {
 		if (piece.move(square)) {
 			this._moveStack.push(piece);
 		}
+		this._refreshUi();
 	}
 	_undoMove() {
 		var piece = this._moveStack.pop();
 		if (piece) piece.undoMove();
+		this._refreshUi();
 	}
 	_clearMoves() {
 		this._moveStack = [];
+		this._refreshUi();
 	}
 
 	_selectUnitDeploy(piece) {
@@ -271,7 +310,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Spacebar" || key == " ") { // TEMP
-			this.nextTurn();
+			this._nextTurn();
 		}
 
 		if (isFinite(key)) {

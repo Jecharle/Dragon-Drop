@@ -1,6 +1,41 @@
 .centered {
 	display: flex;
 	justify-content: center;
+	align-content: center;
+}
+
+.vertical {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+	align-content: center;
+}
+
+.top-bar {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	align-items: center;
+}
+.top-bar button {
+	display: inline-block;
+	color: white;
+	background-color: deepskyblue;
+	border: none;
+	padding: 8px;
+	margin: 2px;
+	flex: 0 0 20%;
+}
+.top-bar button:hover {
+	background-color: skyblue;
+}
+.top-bar button:disabled {
+	color: lightgray;
+	background-color: gray;
+}
+.top-bar span {
+	flex: 0 1 100%;
+	font-size: 24px;
 }
 
 .square {
@@ -25,14 +60,17 @@
 
 .skill-list {
 	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
 }
 
 .piece {
 	position: relative;
 	z-index: 1;
 }
-.piece::after {
+.piece::before {
 	position: absolute;
+	top: 0px;
 	height: 100%;
 	width: 100%;
 	content: "";
@@ -53,7 +91,7 @@
 	right: 100%;
 }
 
-.selected::after {
+.selected::before {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
@@ -61,41 +99,41 @@
 .selectable {
 	cursor: grab;
 }
-.selectable:hover::after {
+.selectable:hover::before {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
 
-.unselectable::after {
+.unselectable::before {
 	filter: grayscale(100%);
 }
 
-.selectable.unit::before {
+.selectable.unit::after {
 	content: "";
 	position: absolute;
-	top: -24px;
-	left: 15px;
-	border-width: 16px;
+	top: -20px;
+	left: 19px;
+	border-width: 12px;
 	border-style: solid;
 	border-color: white transparent transparent transparent;
 }
-.selectable.selected.unit::before {
+.selectable.selected.unit::after {
 	border-style: none;
 }
 
-.ball::after {
+.ball::before {
 	background-color: green;
 	border-radius: 50%;
 }
-.ball2::after {
+.ball2::before {
 	background-color: red;
 	border-radius: 50%;
 }
-.ball3::after {
+.ball3::before {
 	background-color: greenyellow;
 	border-radius: 50%;
 }
-.rock::after {
+.rock::before {
 	background-color: purple;
 	height: 90%;
 	width: 90%;
@@ -148,7 +186,7 @@
 	visibility: visible;
 }
 
-.damaged::after {
+.damaged {
 	animation: 150ms shake;
 }
 
@@ -158,7 +196,7 @@
 	z-index: 2;
 	width: 100%;
 	height: 8px;
-	top: -1px;
+	bottom: -4px;
 	outline: 1px solid black;
 	background-color: gray;
 }
