@@ -90,7 +90,11 @@ class Detail extends ElObj {
 		this.value = startValue;
 	}
 
+	get value() {
+		return this._value;
+	}
 	set value(value) {
+		this._value = value;
 		this.el.innerHTML = ""+value;
 	}
 
@@ -207,9 +211,8 @@ class TargetablePiece extends Piece {
 	}
 
 	// status effects
-	/*
-	TODO: statuses get stored by name in a dictionary
-	getStatus(name) {
+	// TODO: status effects are stored in a dictionary, and occasionally looped through
+	/*hasStatus(name) {
 		return false;
 	}
 	addStatus(effect) {
@@ -217,6 +220,9 @@ class TargetablePiece extends Piece {
 	}
 	removeStatus(name) {
 		return false;
+	}
+	statusList() {
+
 	}*/
 };
 
@@ -225,11 +231,11 @@ class TargetablePiece extends Piece {
 ***************************************************/
 class Lifebar extends Detail {
 	constructor(startValue) {
-		super(-1);
-		this.el.classList.add('lifebar'); // TODO: Appropriate class
+		super();
+		this.el.classList.add('lifebar');
 
-		this._subEl = document.createElement(this.elType);
-		this._subEl.classList.add('inner-lifebar'); // TODO: Appropriate class
+		this._subEl = document.createElement(this.elType); // TEMP?
+		this._subEl.classList.add('inner-lifebar');
 		this.el.appendChild(this._subEl);
 		this.value = startValue;
 	}
@@ -239,7 +245,8 @@ class Lifebar extends Detail {
 	}
 
 	set value(value) {
-		if (value >= 0 && value <= 1) {
+		if (value >= 0 && value <= 1 && this._subEl) {
+			this._value = value;
 			this._subEl.style.width = String(Math.floor(value*100))+"%";
 		}
 	}
