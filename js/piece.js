@@ -47,16 +47,15 @@ class Piece extends ElObj {
 	static Unit = 1
 	static Skill = 2
 
-	setSelectable(selectable) {
+	_setSelectable(selectable) {
+		this.el.setAttribute("draggable", Boolean(selectable));
 		if (selectable) {
-			this.el.setAttribute("draggable", true);
 			this.el.classList.add('selectable');
 		} else {
-			this.el.setAttribute("draggable", false);
 			this.el.classList.remove('selectable');
 		}
 	}
-	setUnselectable(unselectable) {
+	_setUnselectable(unselectable) {
 		if (unselectable) {
 			this.el.classList.add('unselectable');
 		} else {
@@ -107,9 +106,9 @@ class TargetablePiece extends Piece {
 	constructor(battler) {
 		super(battler.Size);
 		this._battler = battler;
-		this.targetable = true;
-		this.square = null;
-		this._setStats();
+		this._square = null;
+		this._team = null;
+		this._setupStats();
 
 		this.el.classList.add(battler.Style); // TEMP
 
@@ -117,8 +116,12 @@ class TargetablePiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 	}
 
-	name() {
+	get name() {
 		return this._battler.Name;
+	}
+
+	get targetable() {
+		return true;
 	}
 
 	/* TODO: Volatile stats and statuses are all stored on the piece
@@ -126,20 +129,30 @@ class TargetablePiece extends Piece {
 
 	// TODO: Lots
 
-	_setStats() {
+	_setupStats() {
 		this._maxHp = this._battler.MaxHp;
 		this.hp = this.maxHp;
 	}
 
+	get square() {
+		return this._square;
+	}
+	set square(value) {
+		this._square = value;
+	}
+
+	get team() {
+		return this._team;
+	}
 	setTeam(team) {
-		if (this.team && this.team.contains(this)) {
-			var index = this.team.indexOf(this);
-			this.team.splice(index, 1);
+		if (this._team && this._team.contains(this)) {
+			var index = this._team.indexOf(this);
+			this._team.splice(index, 1);
 		}
-		this.team = team;
 		if (team) {
 			team.push(this);
 		}
+		this._team = team;
 	}
 
 	get maxHp() {
@@ -260,16 +273,17 @@ class PopupText extends Detail {
 class ControllablePiece extends TargetablePiece {
 	constructor(battler) {
 		super(battler);
-		this._setSkills();
+		this.el.classList.add('unit');
 
+		this._setupSkills();
 		this.endTurn(); // TEMP
 	}
 
-	_setStats() {
-		super._setStats();
+	_setupStats() {
+		super._setupStats();
 		this._moveRange = this._battler.MoveRange;
 	}
-	_setSkills() {
+	_setupSkills() {
 		this._skills = this._battler.SkillList.map(SkillType => {
 			return new SkillType(this);
 		});
@@ -285,17 +299,16 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	startTurn() {
-		this.setSelectable(true);
+		this.myTurn = true;
 		this.refresh();
 	}
 	endTurn() {
+		this.myTurn = false;
 		this.moved = false;
 		this.acted = false;
-		// TODO: This styling gets a bit weird
-		this.setSelectable(false);
-		this.setUnselectable(false);
 		this._startSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
+		this.refresh();
 	}
 
 	get moved() {
@@ -309,6 +322,12 @@ class ControllablePiece extends TargetablePiece {
 	}
 	set acted(value) {
 		this._acted = value;
+	}
+	get myTurn() {
+		return this._myTurn;
+	}
+	set myTurn(value) {
+		this._myTurn = value;
 	}
 
 	move(target) {
@@ -338,8 +357,8 @@ class ControllablePiece extends TargetablePiece {
 	refresh() {
 		super.refresh();
 		this._refreshSkills();
-		this.setUnselectable(this.moved && this.acted);
-		// TODO: toggle Selectable, but only if you're in the active team?
+		this._setUnselectable(this.moved && this.acted && this.myTurn);
+		this._setSelectable(this.myTurn && !(this.moved && this.acted));
 	}
 	_refreshSkills() {
 		this._skills.forEach(skill => skill.refresh());
@@ -440,8 +459,8 @@ class SkillPiece extends Piece {
 
 	refresh() {
 		var usable = this.canUse();
-		this.setSelectable(usable);
-		this.setUnselectable(!usable);
+		this._setSelectable(usable);
+		this._setUnselectable(!usable);
 		this._cooldownLabel.value = this.cooldown || "";
 		this._tooltip.value = this.fullDescription;
 	}

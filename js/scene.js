@@ -270,7 +270,7 @@ class BattleScene extends Scene {
 			this._refreshArea();
 		}
 
-		if (key == "Spacebar") {
+		if (key == "Spacebar" || key == " ") { // TEMP
 			this.nextTurn();
 		}
 
