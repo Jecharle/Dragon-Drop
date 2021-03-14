@@ -107,6 +107,10 @@
 	height: 62px;
 	border-radius: 25%;
 }
+/*TODO: this is honestly a bad workaround*/
+.unselectable.skill {
+	filter: grayscale(100%);
+}
 
 .cooldown-label {
 	font-size: 32px;

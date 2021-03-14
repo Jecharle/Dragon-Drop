@@ -62,7 +62,7 @@ class PopupText extends Detail {
 }
 
 /***************************************************
- Label
+ CooldownLabel
 ***************************************************/
 class CooldownLabel extends Detail {
 	constructor(startValue) {
