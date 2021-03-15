@@ -96,7 +96,7 @@
 	margin: -2px;
 }
 
-.selectable {
+.selectable::before {
 	cursor: grab;
 }
 .selectable:hover::before {
@@ -143,11 +143,20 @@
 .skill {
 	width: 62px;
 	height: 62px;
+	margin: 1px;
+}
+
+.attack-skill::before {
+	background-color: red;
 	border-radius: 25%;
 }
-/*TODO: this is honestly a bad workaround*/
-.unselectable.skill {
-	filter: grayscale(100%);
+.heal-skill::before {
+	background-color: green;
+	border-radius: 25%;
+}
+.build-skill::before {
+	background-color: purple;
+	border-radius: 25%;
 }
 
 .cooldown-label {

@@ -407,7 +407,7 @@ class SkillPiece extends Piece {
 class TestAttackSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
-		this.el.style.backgroundColor = 'red';
+		this.el.classList.add('attack-skill');
 	}
 
 	get _name() {
@@ -441,7 +441,7 @@ class TestAttackSkill extends SkillPiece {
 class TestHealSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
-		this.el.style.backgroundColor = 'green';
+		this.el.classList.add('heal-skill');
 	}
 
 	get _name() {
@@ -478,7 +478,7 @@ class TestHealSkill extends SkillPiece {
 class TestBuildSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
-		this.el.style.backgroundColor = 'purple';
+		this.el.classList.add('build-skill');
 	}
 
 	get _name() {
