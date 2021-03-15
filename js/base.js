@@ -13,4 +13,17 @@ class ElObj {
 	get elType() {
 		return 'div';
 	}
+
+	get style() {
+		return this._style;
+	}
+	set style(value) {
+		if (this._style) {
+			this.el.classList.remove(this._style);
+		}
+		if (value) {
+			this.el.classList.add(value);
+		}
+		this._style = value;
+	}
 }

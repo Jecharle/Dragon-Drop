@@ -106,7 +106,7 @@ class Board extends Container {
 	}
 
 	canFit(piece, centerSquare, size) {
-		size = size || piece.size();
+		size = size || piece.size;
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
 		return area.every(function(square) {
 			if (!square) {
@@ -121,7 +121,7 @@ class Board extends Container {
 	}
 	// TODO: Too much repeated code- refactor these into a single function with multiple settings?
 	canPass(piece, centerSquare, size) {
-		size = size || piece.size();
+		size = size || piece.size;
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
 		return area.every(function(square) {
 			if (!square) {
@@ -145,7 +145,7 @@ class Board extends Container {
 		if (piece.parent != this) {
 			piece.setParent(this);
 		} else {
-			this._fillPiece(null, piece.square, piece.size());
+			this._fillPiece(null, piece.square, piece.size);
 		}
 
 		targetSquare.el.appendChild(piece.el);
@@ -156,7 +156,7 @@ class Board extends Container {
 	}
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
-			this._fillPiece(null, piece.square, piece.size());
+			this._fillPiece(null, piece.square, piece.size);
 			piece.square = null;
 			return true;
 		}
@@ -165,7 +165,7 @@ class Board extends Container {
 	_fillPiece(piece, centerSquare, size) {
 		if (!centerSquare) return;
 
-		size = size || piece.size();
+		size = size || piece.size;
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;

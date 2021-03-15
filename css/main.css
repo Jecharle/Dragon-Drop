@@ -67,6 +67,9 @@
 .piece {
 	position: relative;
 	z-index: 1;
+	/*TODO: Is this the right place for this?*/
+	width: 100%;
+	height: 100%;
 }
 .piece::before {
 	position: absolute;
@@ -74,21 +77,6 @@
 	height: 100%;
 	width: 100%;
 	content: "";
-}
-
-.x1 {
-	width: 100%;
-	height: 100%;
-}
-.x2 {
-	width: 200%;
-	height: 200%;
-	top: 50%;
-}
-.x3 {
-	width: 300%;
-	height: 300%;
-	right: 100%;
 }
 
 .selected::before {
@@ -119,6 +107,17 @@
 }
 .selectable.selected.unit::after {
 	border-style: none;
+}
+
+.x2 {
+	width: 200%;
+	height: 200%;
+	top: 50%;
+}
+.x3 {
+	width: 300%;
+	height: 300%;
+	right: 100%;
 }
 
 .ball::before {

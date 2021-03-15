@@ -4,14 +4,12 @@ The root class for objects you can select, click,
 and drag around between containers
 ***************************************************/
 class Piece extends ElObj {
-	constructor(size) {
+	constructor() {
 		super();
 		this._parent = null;
-		this._size = size || 1;
 
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
-		this.el.classList.add('x'+this._size); // TEMP
 
 		// TODO: Safe to assume this is always viable?
 		this.el.onclick = this._click;
@@ -27,8 +25,6 @@ class Piece extends ElObj {
 	idMatch(id) {
 		return (!id || id == this.el.id);
 	}
-
-	size() { return this._size; }
 
 	setParent(container) {
 		if (this.parent && this.parent != container) {
@@ -83,31 +79,47 @@ class Piece extends ElObj {
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
-	constructor(battler) {
-		super(battler.Size);
-		this._battler = battler;
+	constructor(statBlock) {
+		super();
 		this._team = null;
 		this.square = null;
-		this._setupStats();
 
-		this.el.classList.add(battler.Style); // TEMP
+		this.setStatBlock(statBlock);
 
-		this._lifebar = new Lifebar(this.hpRate());
+		// TODO: Make a proper "initialize" method for this?
+		this.hp = this.maxHp;
+		this._lifebar = new Lifebar(this.hpRate);
 		this.el.appendChild(this._lifebar.el);
-	}
-
-	get name() {
-		return this._battler.Name;
 	}
 
 	get targetable() {
 		return true;
 	}
 
-	// TODO: Lots
+	get name() {
+		return this._name || "";
+	}
 
-	_setupStats() {
-		this._maxHp = this._battler.MaxHp;
+	get size() {
+		return this._size;
+	}
+	set size(value) {
+		if (this._size) {
+			this.el.classList.remove("x"+this.size);
+		}
+		if (value) {
+			this.el.classList.add("x"+this._size);
+		}
+		this._size = value;
+	}
+
+	setStatBlock(statBlock) {
+		this._statBlock = statBlock;
+		this._name = statBlock.Name;
+		this.size = statBlock.Size || 1;
+		this.style = statBlock.Style;
+		
+		this._maxHp = statBlock.MaxHp || 1;
 		this.hp = this.maxHp;
 	}
 
@@ -128,19 +140,19 @@ class TargetablePiece extends Piece {
 	get maxHp() {
 		return this._maxHp;
 	}
-	hpRate() {
+	get hpRate() {
 		if (this.maxHp == 0) return this.hp;
 		else return this.hp / this.maxHp;
 	}
-	dead() {
+	get dead() {
 		return this.hp <= 0;
 	}
-	alive() {
+	get alive() {
 		return !this.dead();
 	}
 
 	refresh() {
-		this._lifebar.value = this.hpRate();
+		this._lifebar.value = this.hpRate;
 	}
 
 	takeDamage(power, attr) {
@@ -210,18 +222,21 @@ class ControllablePiece extends TargetablePiece {
 		super(battler);
 		this.el.classList.add('unit');
 
-		this._setupSkills();
 		this.endTurn(); // TEMP
 	}
 
-	_setupStats() {
-		super._setupStats();
-		this._baseMoveRange = this._battler.MoveRange;
-	}
-	_setupSkills() {
-		this._skills = this._battler.SkillList.map(SkillType => {
-			return new SkillType(this);
-		});
+	setStatBlock(battler) {
+		super.setStatBlock(battler);
+		
+		this._baseMoveRange = battler.MoveRange || 0;
+
+		if (battler.Skills) {
+			this._skills = battler.Skills.map(SkillType => {
+				return new SkillType(this);
+			});
+		} else {
+			this._skills = [];
+		}
 	}
 
 	get moveRange() {
@@ -297,7 +312,7 @@ class ControllablePiece extends TargetablePiece {
 ***************************************************/
 class SkillPiece extends Piece {
 	constructor(user) {
-		super(1);
+		super();
 		this.user = user;
 		this.cooldown = 0;
 		this.el.classList.add('skill');
@@ -398,113 +413,5 @@ class SkillPiece extends Piece {
 	}
 	get type() {
 		return Piece.Skill;
-	}
-};
-
-/***************************************************
- Test attack skill
-***************************************************/
-class TestAttackSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('attack-skill');
-	}
-
-	get _name() {
-		return "Attack";
-	}
-	get _description() {
-		return `Deal ${this.power} damage and push the target 1 space`;
-	}
-
-	get range() {
-		return 2;
-	}
-
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-
-	_effects(target) {
-		var targetPiece = target.piece;
-		targetPiece.takeDamage(this.power);
-		targetPiece.push(this.user.square, 1);
-	}
-};
-
-/***************************************************
- Test heal skill
-***************************************************/
-class TestHealSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('heal-skill');
-	}
-
-	get _name() {
-		return "Heal";
-	}
-	get _description() {
-		return `Restore ${this.power} HP`;
-	}
-
-	get range() {
-		return 1;
-	}
-	get minRange() {
-		return 0;
-	}
-
-	_basePower = 2;
-	_baseCooldown = 2;
-
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-	_effects(target) {
-		target.piece.heal(2);
-	}
-};
-
-/***************************************************
- Test build skill
-***************************************************/
-class TestBuildSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('build-skill');
-	}
-
-	get _name() {
-		return "Build";
-	}
-	get _description() {
-		return "Create a wall with 1 HP";
-	}
-
-	get range() {
-		return 1;
-	}
-	get shape() {
-		return Shape.Square;
-	}
-
-	_baseCooldown = 3;
-
-	_validTarget(target) {
-		if (!target.piece) {
-			return true;
-		}
-		return false;
-	}
-	_effects(target) {
-		var wall = new TargetablePiece(Rock);
-		return target.parent.movePiece(wall, target);
 	}
 };

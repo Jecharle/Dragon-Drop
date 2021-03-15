@@ -262,7 +262,7 @@ class BattleScene extends Scene {
 				return;
 			}
 
-			if (piece.type == Piece.Unit && piece.team == this._activeTeam) {
+			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (this._unit != piece) {
 					this._selectUnit(piece);
 				} else if (!dragging) {
