@@ -79,12 +79,12 @@ class Piece extends ElObj {
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
-	constructor(statBlock) {
+	constructor() {
 		super();
 		this._team = null;
 		this.square = null;
 
-		this.setStatBlock(statBlock);
+		this._setStats();
 
 		// TODO: Make a proper "initialize" method for this?
 		this.hp = this.maxHp;
@@ -94,10 +94,6 @@ class TargetablePiece extends Piece {
 
 	get targetable() {
 		return true;
-	}
-
-	get name() {
-		return this._name || "";
 	}
 
 	get size() {
@@ -113,14 +109,8 @@ class TargetablePiece extends Piece {
 		this._size = value;
 	}
 
-	setStatBlock(statBlock) {
-		this._statBlock = statBlock;
-		this._name = statBlock.Name;
-		this.size = statBlock.Size || 1;
-		this.style = statBlock.Style;
-		
-		this._maxHp = statBlock.MaxHp || 1;
-		this.hp = this.maxHp;
+	_setStats() {
+		this._maxHp = 1;
 	}
 
 	get team() {
@@ -218,25 +208,21 @@ class TargetablePiece extends Piece {
  Controllable piece
 ***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(battler) {
-		super(battler);
+	constructor() {
+		super();
+		this._setSkills();
 		this.el.classList.add('unit');
 
-		this.endTurn(); // TEMP
+		this.endTurn(); // TEMP?
 	}
 
-	setStatBlock(battler) {
-		super.setStatBlock(battler);
-		
-		this._moveRange = battler.MoveRange || 0;
+	_setStats() {
+		super._setStats();
+		this._moveRange = 2;
+	}
 
-		if (battler.Skills) {
-			this._skills = battler.Skills.map(SkillType => {
-				return new SkillType(this);
-			});
-		} else {
-			this._skills = [];
-		}
+	_setSkills() {
+		this._skills = [];
 	}
 
 	get moveRange() {
@@ -333,21 +319,25 @@ class SkillPiece extends Piece {
 		}
 		return desc;
 	}
-	get _name() {
-		return "Skill Name"
-	}
+
+	_name = "Skill Name"
 	get _description() {
 		return "Skill description"
 	}
 
+	_range = 1
 	get range() {
-		return 1;
+		return this._range;
 	}
+
+	_minRange = 1
 	get minRange() {
-		return 1;
+		return this._minRange;
 	}
+
+	_shape = Shape.Line
 	get shape() {
-		return Shape.Line;
+		return this._shape;
 	}
 	get shapeProps() {
 		return {
@@ -356,12 +346,12 @@ class SkillPiece extends Piece {
 		};
 	}
 
-	_baseCooldown = 0;
+	_baseCooldown = 0
 	get _cooldownCost() {
 		return this._baseCooldown;
 	}
 
-	_basePower = 1;
+	_basePower = 1
 	get power() {
 		return this._basePower;
 	}

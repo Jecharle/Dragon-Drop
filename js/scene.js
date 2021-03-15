@@ -336,19 +336,18 @@ class TestScene extends BattleScene {
 		super();
 	}
 
-	_addPiece(battler, square, team) {
-		var newPiece = new ControllablePiece(battler);
-		if (team) newPiece.setTeam(team);
-		square.parent.movePiece(newPiece, square);
+	_addPiece(piece, square, team) {
+		if (team) piece.setTeam(team);
+		square.parent.movePiece(piece, square);
 	}
 
 	_createBoard() {
 		var board = new Board(9, 9);
 		
-		this._addPiece(Ball, board.at(5,6), this.playerTeam);
-		this._addPiece(Ball3, board.at(3,6), this.playerTeam);
+		this._addPiece(new TestMeleeUnit(), board.at(5,6), this.playerTeam);
+		this._addPiece(new TestSupportUnit(), board.at(3,6), this.playerTeam);
 
-		this._addPiece(Ball2, board.at(4,4), this.enemyTeam);
+		this._addPiece(new TestEnemyUnit(), board.at(4,4), this.enemyTeam);
 
 		return board;
 	}

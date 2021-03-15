@@ -7,16 +7,12 @@ class TestAttackSkill extends SkillPiece {
 		this.style = 'attack-skill';
 	}
 
-	get _name() {
-		return "Attack";
-	}
+	_name = "Attack"
 	get _description() {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	get range() {
-		return 2;
-	}
+	_range = 2
 
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -41,22 +37,15 @@ class TestHealSkill extends SkillPiece {
 		this.style = 'heal-skill';
 	}
 
-	get _name() {
-		return "Heal";
-	}
+	_name = "Heal";
 	get _description() {
 		return `Restore ${this.power} HP`;
 	}
 
-	get range() {
-		return 1;
-	}
-	get minRange() {
-		return 0;
-	}
-
 	_basePower = 2;
 	_baseCooldown = 2;
+	_range = 1;
+	_minRange = 0;
 
 	_validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -78,20 +67,13 @@ class TestBuildSkill extends SkillPiece {
 		this.style = 'build-skill';
 	}
 
-	get _name() {
-		return "Build";
-	}
+	_name = "Build";
 	get _description() {
 		return "Create a wall with 1 HP";
 	}
 
-	get range() {
-		return 1;
-	}
-	get shape() {
-		return Shape.Square;
-	}
-
+	_range = 1;
+	_shape = Shape.Square;
 	_baseCooldown = 3;
 
 	_validTarget(target) {
@@ -101,7 +83,7 @@ class TestBuildSkill extends SkillPiece {
 		return false;
 	}
 	_effects(target) {
-		var wall = new TargetablePiece(Rock);
+		var wall = new TargetablePiece(TestRockObject);
 		return target.parent.movePiece(wall, target);
 	}
 };
