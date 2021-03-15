@@ -228,7 +228,7 @@ class ControllablePiece extends TargetablePiece {
 	setStatBlock(battler) {
 		super.setStatBlock(battler);
 		
-		this._baseMoveRange = battler.MoveRange || 0;
+		this._moveRange = battler.MoveRange || 0;
 
 		if (battler.Skills) {
 			this._skills = battler.Skills.map(SkillType => {
@@ -241,7 +241,7 @@ class ControllablePiece extends TargetablePiece {
 
 	get moveRange() {
 		if (this.moved) return 0;
-		else return this._baseMoveRange;
+		else return this._moveRange;
 	}
 
 	get skills() {
