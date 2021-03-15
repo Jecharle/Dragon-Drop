@@ -24,7 +24,7 @@
 	border: none;
 	padding: 8px;
 	margin: 2px;
-	flex: 0 0 20%;
+	flex: 0 0 22%;
 }
 .top-bar button:hover {
 	background-color: skyblue;
@@ -216,6 +216,9 @@
 	visibility: visible;
 }
 .selected .lifebar {
+	visibility: visible;
+}
+.skill-range .lifebar {
 	visibility: visible;
 }
 
