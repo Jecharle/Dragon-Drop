@@ -52,7 +52,6 @@ class BattleScene extends Scene {
 	_createUndoButton() {
 		var button = document.createElement("button");
 		button.type = "button";
-		button.innerText = "Undo Move";
 		button.onclick = () => {
 			this._undoMove();
 			this._refresh();
@@ -61,14 +60,12 @@ class BattleScene extends Scene {
 	}
 	_createTurnTitle() {
 		var turnTitle = document.createElement("span");
-		turnTitle.innerText = "";
 		turnTitle.style.textAlign = "center";
 		return turnTitle;
 	}
 	_createEndTurnButton() {
 		var button = document.createElement("button");
 		button.type = "button";
-		button.innerText = "End Turn";
 		button.onclick = () => {
 			this._nextTurn();
 		};
@@ -76,18 +73,18 @@ class BattleScene extends Scene {
 	}
 
 	_createBoard() { 
-		return new Board(); // TEMP
+		return new Board(); // TEMP?
 	}
 	_createSkillList() {
 		return new SkillList();
 	}
 	_buildDOM() {
-		var topDiv =  document.createElement("div");
-		topDiv.classList.add("top-bar");
-		topDiv.appendChild(this._undoButtonEl);
-		topDiv.appendChild(this._turnTitleEl);
-		topDiv.appendChild(this._endTurnButtonEl);
-		this.el.appendChild(topDiv);
+		var navBar =  document.createElement("div");
+		navBar.classList.add("nav-bar");
+		navBar.appendChild(this._undoButtonEl);
+		navBar.appendChild(this._turnTitleEl);
+		navBar.appendChild(this._endTurnButtonEl);
+		this.el.appendChild(navBar);
 
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);

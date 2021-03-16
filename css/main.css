@@ -11,13 +11,13 @@
 	align-content: center;
 }
 
-.top-bar {
+.nav-bar {
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: space-between;
 	align-items: center;
 }
-.top-bar button {
+.nav-bar button {
 	display: inline-block;
 	color: white;
 	background-color: deepskyblue;
@@ -27,15 +27,15 @@
 	flex: 0 0 25%;
 	cursor: pointer;
 }
-.top-bar button:hover {
+.nav-bar button:hover {
 	background-color: skyblue;
 }
-.top-bar button:disabled {
+.nav-bar button:disabled {
 	color: lightgray;
 	background-color: gray;
 	cursor: default;
 }
-.top-bar span {
+.nav-bar span {
 	flex: 0 1 100%;
 	font-size: 24px;
 }
@@ -50,10 +50,7 @@
 	background-color: seagreen;
 	cursor: pointer;
 }
-.deploy-range:hover {
-	background-color: lightseagreen;
-}
-.deploy-range.selected {
+.deploy-range:hover, .deploy-range.selected {
 	background-color: lightseagreen;
 }
 .move-range {
@@ -96,15 +93,10 @@
 	content: "";
 }
 
-.selected::before {
-	border: 2px solid deepskyblue;
-	margin: -2px;
-}
-
 .selectable::before {
 	cursor: pointer;
 }
-.selectable:hover::before {
+.selectable:hover::before, .selected::before {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
@@ -198,7 +190,7 @@
 	border-radius: 4px;
 	padding: 5px;
 }
-.skill .skill-description::after {
+.skill-description::after {
 	content: "";
 	position: absolute;
 	top: 100%;
@@ -229,10 +221,7 @@
 	height: 100%;
 	background-color: red;
 }
-.piece:hover .lifebar {
-	visibility: visible;
-}
-.skill-range .lifebar {
+.piece:hover .lifebar, .skill-range .lifebar {
 	visibility: visible;
 }
 
