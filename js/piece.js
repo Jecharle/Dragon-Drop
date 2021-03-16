@@ -315,14 +315,16 @@ class SkillPiece extends Piece {
 	get fullDescription() {
 		var desc = `<strong>${this._name}</strong><br>${this._description}`;
 		if (this._cooldownCost > 0) {
-			desc += `<br><em>(${this._cooldownCost} turn cooldown)</em>`;
+			desc += `<br><em>${this._cooldownCost} turn cooldown</em>`;
 		}
 		return desc;
 	}
 
-	_name = "Skill Name"
+	get _name() {
+		return "[Skill name]";
+	}
 	get _description() {
-		return "Skill description"
+		return "[Skill description]";
 	}
 
 	_range = 1
@@ -361,7 +363,7 @@ class SkillPiece extends Piece {
 		else return true;
 	}
 	use(target) {
-		if (!this._validTarget(target)) return false;
+		if (!this.validTarget(target)) return false;
 
 		this._payCost();
 		this._effects(target);
@@ -369,7 +371,7 @@ class SkillPiece extends Piece {
 		this.user.refresh();
 		return true;
 	}
-	_validTarget(target) {
+	validTarget(target) {
 		return false;
 	}
 	_effects(target) { }

@@ -275,13 +275,17 @@ class Board extends Container {
 		var size = 1 + 2*piece.range;
 		var area = this.getArea(user.square.x, user.square.y, size, piece.shape, piece.shapeProps);
 		for (var i = 0; i < area.length; i++) {
-			if (area[i]) this._paintSkillRange(area[i]);
+			if (area[i]) this._paintSkillRange(area[i], piece.validTarget(area[i]));
 		}
 		// TODO: Do extra if the user is a larger piece?
 	}
-	_paintSkillRange(square) {
-		square.el.classList.add('skill-range');
-		square.el.ondragover = this._allowDrop;
+	_paintSkillRange(square, valid) {
+		if (valid) {
+			square.el.classList.add('skill-range');
+			square.el.ondragover = this._allowDrop;
+		} else {
+			square.el.classList.add('skill-range-invalid');
+		}
 		square.inRange = true;
 	}
 	resetAreas() {
@@ -297,6 +301,7 @@ class Board extends Container {
 	_clearPaint(square) {
 		square.el.classList.remove('move-range');
 		square.el.classList.remove('skill-range');
+		square.el.classList.remove('skill-range-invalid');
 		square.el.ondragover = null;
 		square.inRange = null;
 		square.movesLeft = null;
@@ -322,13 +327,14 @@ class Board extends Container {
 
 	_allowDrop(ev) {
 		ev.preventDefault();
+		// TODO: Reject if the data transfer is incorrect
 	}
 	_drop(ev) {
 		ev.preventDefault();
-		if (ev.target) {
+		var elId = ev.dataTransfer.getData("piece");
+		if (elId && ev.target) {
 			var square = ev.target.obj;
 			square = square.square || square;
-			var elId = ev.dataTransfer.getData("text");
 			if (Game.scene) {
 				Game.scene.selectSquare(square, elId);
 			}

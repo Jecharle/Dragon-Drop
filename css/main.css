@@ -48,6 +48,7 @@
 
 .move-range {
 	background-color: deepskyblue;
+	cursor: pointer;
 }
 .move-range:hover {
 	background-color: skyblue;
@@ -55,9 +56,15 @@
 
 .skill-range {
 	background-color: darkorange;
+	cursor: pointer;
 }
 .skill-range:hover {
 	background-color: orange;
+}
+
+.skill-range-invalid {
+	background-color: darkgoldenrod;
+	/*TODO: Probably just make it more transparent?*/
 }
 
 .skill-list {
@@ -101,14 +108,11 @@
 .selectable.unit::after {
 	content: "";
 	position: absolute;
-	top: -20px;
-	left: 19px;
-	border-width: 12px;
+	top: -15px;
+	left: 21px;
+	border-width: 10px;
 	border-style: solid;
 	border-color: white transparent transparent transparent;
-}
-.selectable.selected.unit::after {
-	border-style: none;
 }
 
 .x2 {
@@ -206,7 +210,7 @@
 	z-index: 2;
 	width: 100%;
 	height: 8px;
-	bottom: -4px;
+	bottom: 0px;
 	outline: 1px solid black;
 	background-color: gray;
 }
@@ -215,9 +219,6 @@
 	background-color: red;
 }
 .piece:hover .lifebar {
-	visibility: visible;
-}
-.selected .lifebar {
 	visibility: visible;
 }
 .skill-range .lifebar {
