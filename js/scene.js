@@ -41,10 +41,11 @@ class BattleScene extends Scene {
 		this._phase = BattleScene.deployPhase;
 		this._setActiveTeam(this.playerTeam);
 
+		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
-		this._refreshArea();
+		this._refresh();
 	}
 
 	_createUndoButton() {
@@ -53,7 +54,7 @@ class BattleScene extends Scene {
 		button.innerText = "Undo Move";
 		button.onclick = () => {
 			this._undoMove();
-			this._refreshArea();
+			this._refresh();
 		};
 		return button;
 	}
@@ -74,8 +75,7 @@ class BattleScene extends Scene {
 	}
 
 	_createBoard() { 
-		// TODO: Initialize from a "battle map" entity?
-		return null; // TEMP
+		return new Board(); // TEMP
 	}
 	_createSkillList() {
 		return new SkillList();
@@ -108,45 +108,67 @@ class BattleScene extends Scene {
 
 	}
 
+	_refresh() {
+		this._refreshArea();
+		this._refreshUi();
+	}
+
 	static deployPhase = 0;
 	static playerPhase = 1;
 	static enemyPhase = 2;
 	_nextTurn() {
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
 		switch (this._phase) {
 			case BattleScene.deployPhase:
 				this._phase = BattleScene.playerPhase;
 				this._setActiveTeam(this.playerTeam);
+				this._canRedeploy = true;
 				break;
 
 			case BattleScene.playerPhase:
 				this._phase = BattleScene.enemyPhase;
 				this._setActiveTeam(this.enemyTeam);
+				this._canRedeploy = false;
 				break;
 
 			case BattleScene.enemyPhase:
 				this._turn++;
 				this._phase = BattleScene.playerPhase;
 				this._setActiveTeam(this.playerTeam);
+				this._canRedeploy = false;
 				break;
 			
 		}
-		this._refreshUi();
-		this._refreshArea();
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this._refresh();
+	}
+	_redeploy() {
+		this._canRedeploy = false;
+		this._phase = BattleScene.deployPhase;
+		this._setActiveTeam(this.playerTeam);
+
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this._refresh();
 	}
 
 	_refreshUi() {
 		switch (this._phase) {
 			case BattleScene.deployPhase:
 				this._turnTitleEl.innerText = "Deployment";
+				this._endTurnButtonEl.innerText = "Start Battle";
 				break;
 			case BattleScene.playerPhase:
 				this._turnTitleEl.innerText = "Player turn " + this._turn;
+				this._endTurnButtonEl.innerText = "End Turn";
 				break;
 			case BattleScene.enemyPhase:
 				this._turnTitleEl.innerText = "Enemy turn " + this._turn;
+				this._endTurnButtonEl.innerText = "End Turn";
 				break;
 			default:
 				this._turnTitleEl.innerText = "";
@@ -154,8 +176,13 @@ class BattleScene extends Scene {
 
 		if (this._moveStack.length > 0) {
 			this._undoButtonEl.disabled = false;
+			this._undoButtonEl.innerText = "Undo Move";
+		} else if (this._canRedeploy) {
+			this._undoButtonEl.disabled = false;
+			this._undoButtonEl.innerText = "Redeploy";
 		} else {
 			this._undoButtonEl.disabled = true;
+			this._undoButtonEl.innerText = "Undo Move";
 		}
 	}
 
@@ -177,32 +204,17 @@ class BattleScene extends Scene {
 		if (piece.move(square)) {
 			this._moveStack.push(piece);
 		}
-		this._refreshUi();
 	}
 	_undoMove() {
 		var piece = this._moveStack.pop();
-		if (piece) piece.undoMove();
-		this._refreshUi();
+		if (piece) {
+			piece.undoMove();
+		} else if (this._canRedeploy) {
+			this._redeploy();
+		}
 	}
 	_clearMoves() {
 		this._moveStack = [];
-		this._refreshUi();
-	}
-
-	_selectUnitDeploy(piece) {
-		if (piece && !piece.select()) return false;
-		if (this._unit != piece) this._deselectUnit();
-
-		this._unit = piece;
-		return true;
-	}
-	_moveUnitDeploy(piece, square) {
-		if (square.piece && square.piece.team == piece.team) {
-			this._board.swapPieces(piece, square.piece);
-		} else {
-			this._board.movePiece(piece, square);
-		}
-		this._deselectUnit();
 	}
 
 	_selectSkill(piece) {
@@ -219,8 +231,31 @@ class BattleScene extends Scene {
 	_useSkill(piece, square) {
 		if (piece.use(square)) {
 			this._deselectSkill();
+			this._canRedeploy = false;
 			this._clearMoves();
 		}
+	}
+
+	_selectTarget(square) {
+		this._target = square;
+		this._target.el.classList.add('selected'); // TEMP
+		return true;
+	}
+	_deselectTarget() {
+		if (this._target) {
+			this._target.el.classList.remove('selected'); // TEMP
+		}
+		this._target = null;
+	}
+	_swapDeploySquares(square1, square2) {
+		if (square1.piece && square2.piece) {
+			this._board.swapPieces(square1.piece, square2.piece);
+		} else if (square1.piece && !square2.piece) {
+			this._board.movePiece(square1.piece, square2);
+		} else if (!square1.piece && square2.piece) {
+			this._board.movePiece(square2.piece, square1);
+		}
+		this._deselectTarget();
 	}
 
 	_refreshArea() {
@@ -238,16 +273,13 @@ class BattleScene extends Scene {
 		if (!piece) return;
 
 		if (this._phase == BattleScene.deployPhase) {
-			if (piece.type == Piece.Unit && piece.team == this.playerTeam) {
-				if (!this._unit) {
-					this._selectUnitDeploy(piece);
-				} else if (!dragging) {
-					this.selectSquare(piece.square);
+			if (piece.square) {
+				if (piece.square.inRange && dragging) {
+					this._deselectTarget();
 				}
+				this.selectSquare(piece.square);
 			}
-			this._refreshArea();
-			return;
-		} else { // TODO: once AI works, only work for player phase?
+		} else { // TODO: once AI works, only run for player phase
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
@@ -269,29 +301,32 @@ class BattleScene extends Scene {
 				}
 			}
 		}
-		this._refreshArea();
+		this._refresh();
 	}
 
-	selectSquare(square, id) {
+	selectSquare(square, dragId) {
 		if (!square) return;
 
 		if (this._phase == BattleScene.deployPhase)
 		{
-			if (this._unit && this._unit.idMatch(id) && square.inRange) {
-				this._moveUnitDeploy(this._unit, square);
+			if (square.inRange && this._target) {
+				this._swapDeploySquares(this._target, square);
+			} else if (square.inRange) {
+				this._selectTarget(square);
+			} else {
+				this._deselectTarget();
 			}
-			this._deselectUnit();
-		} else { // TODO: once AI works, only work for player phase?
+		} else { // TODO: once AI works, only run for player phase
 			if (!square.inRange) {
 				this._deselectSkill();
 				this._deselectUnit();
-			} else if (this._skill && this._skill.idMatch(id)) {
+			} else if (this._skill && this._skill.idMatch(dragId)) {
 				this._useSkill(this._skill, square);
-			} else if (this._unit && this._unit.idMatch(id)) {
+			} else if (this._unit && this._unit.idMatch(dragId)) {
 				this._moveUnit(this._unit, square);
 			}
 		}
-		this._refreshArea();
+		this._refresh();
 	}
 
 	keydown(key) {
@@ -303,10 +338,10 @@ class BattleScene extends Scene {
 			} else {
 				this._undoMove();
 			}
-			this._refreshArea();
+			this._refresh();
 		}
 
-		if (key == "Spacebar" || key == " ") { // TEMP
+		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
 			this._nextTurn();
 		}
 
@@ -318,7 +353,10 @@ class BattleScene extends Scene {
 				} else {
 					this._deselectSkill();
 				}
-				this._refreshArea();
+				this._refresh();
+			} else if (num == 0) {
+				this._deselectSkill();
+				this._refresh();
 			}
 		}
 	}
@@ -335,22 +373,31 @@ class TestScene extends BattleScene {
 
 	_addPiece(piece, square, team) {
 		if (team) piece.setTeam(team);
-		square.parent.movePiece(piece, square);
+		if (square) square.parent.movePiece(piece, square);
+	}
+	addPlayer(piece, board) {
+		var index = this.playerTeam.length;
+		var square = board.deployArea[index];
+		
+		this._addPiece(piece, square, this.playerTeam);
+	}
+	addEnemy(piece, square) {
+		this._addPiece(piece, square, this.enemyTeam);
 	}
 
 	// TODO: This is actually similar to how I want to load in maps, I think
 	_createBoard() {
-		var board = new Board(8, 8); // TODO: Should I go ahead and standardize board size?
+		var board = super._createBoard();
 		
 		board.addDeploySquare(board.at(2,5));
 		board.addDeploySquare(board.at(3,5));
 		board.addDeploySquare(board.at(4,5));
 		board.addDeploySquare(board.at(5,5));
 
-		this._addPiece(new TestMeleeUnit(), board.at(5,5), this.playerTeam);
-		this._addPiece(new TestSupportUnit(), board.at(3,5), this.playerTeam);
+		this.addPlayer(new TestMeleeUnit(), board);
+		this.addPlayer(new TestSupportUnit(), board);
 
-		this._addPiece(new TestEnemyUnit(), board.at(3,3), this.enemyTeam);
+		this.addEnemy(new TestEnemyUnit(), board.at(3,3));
 
 		return board;
 	}

@@ -36,15 +36,13 @@ class SubContainer extends ElObj {
  Game board
 ***************************************************/
 class Board extends Container {
-	constructor(w, h) {
+	constructor() {
 		super();
 		this._squares = [];
-		this._w = w;
-		this._h = h;
 
-		for (var y = 0; y < h; y++) {
+		for (var y = 0; y < this.h; y++) {
 			var row = document.createElement('tr');
-			for (var x = 0; x < w; x++) {
+			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
 				this._squares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
@@ -52,7 +50,7 @@ class Board extends Container {
 			this.el.appendChild(row);
 		}
 
-		this._deployArea = [];
+		this.deployArea = [];
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -63,17 +61,17 @@ class Board extends Container {
 	}
 
 	get w() {
-		return this._w;
+		return 8;
 	}
 	get h() {
-		return this._h;
+		return 8;
 	}
 
 	addDeploySquare(square) {
 		if (!square || square.parent != this) return;
 
-		if (!this._deployArea.includes(square)) {
-			this._deployArea.push(square);
+		if (!this.deployArea.includes(square)) {
+			this.deployArea.push(square);
 		}
 	}
 
@@ -230,6 +228,14 @@ class Board extends Container {
 		}
 	}
 
+	setDeployArea() {
+		this.deployArea.forEach(square => this._paintDeployRange(square));
+	}
+	_paintDeployRange(square) {
+		square.el.classList.add('deploy-range');
+		square.el.ondragover = this._allowDrop;
+		square.inRange = true;
+	}
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
@@ -257,9 +263,6 @@ class Board extends Container {
 			}
 		}
 	}
-	setDeployArea() {
-		this._deployArea.forEach(square => this._paintMoveRange(square));
-	}
 	_paintMoveRange(square, movesLeft) {
 		square.el.classList.add('move-range');
 		square.el.ondragover = this._allowDrop;
@@ -274,9 +277,9 @@ class Board extends Container {
 		// get the possible range
 		var size = 1 + 2*piece.range;
 		var area = this.getArea(user.square.x, user.square.y, size, piece.shape, piece.shapeProps);
-		for (var i = 0; i < area.length; i++) {
-			if (area[i]) this._paintSkillRange(area[i], piece.validTarget(area[i]));
-		}
+		area.forEach(square => {
+			if (square) this._paintSkillRange(square, piece.validTarget(square));
+		});
 		// TODO: Do extra if the user is a larger piece?
 	}
 	_paintSkillRange(square, valid) {
@@ -299,6 +302,7 @@ class Board extends Container {
 		}
 	}
 	_clearPaint(square) {
+		square.el.classList.remove('deploy-range');
 		square.el.classList.remove('move-range');
 		square.el.classList.remove('skill-range');
 		square.el.classList.remove('skill-range-invalid');
