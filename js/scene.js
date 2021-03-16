@@ -173,7 +173,6 @@ class BattleScene extends Scene {
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
-
 	_moveUnit(piece, square) {
 		if (piece.move(square)) {
 			this._moveStack.push(piece);
@@ -197,7 +196,6 @@ class BattleScene extends Scene {
 		this._unit = piece;
 		return true;
 	}
-
 	_moveUnitDeploy(piece, square) {
 		if (square.piece && square.piece.team == piece.team) {
 			this._board.swapPieces(piece, square.piece);
@@ -218,7 +216,6 @@ class BattleScene extends Scene {
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
-
 	_useSkill(piece, square) {
 		if (piece.use(square)) {
 			this._deselectSkill();
@@ -341,13 +338,19 @@ class TestScene extends BattleScene {
 		square.parent.movePiece(piece, square);
 	}
 
+	// TODO: This is actually similar to how I want to load in maps, I think
 	_createBoard() {
-		var board = new Board(9, 9);
+		var board = new Board(8, 8); // TODO: Should I go ahead and standardize board size?
 		
-		this._addPiece(new TestMeleeUnit(), board.at(5,6), this.playerTeam);
-		this._addPiece(new TestSupportUnit(), board.at(3,6), this.playerTeam);
+		board.addDeploySquare(board.at(2,5));
+		board.addDeploySquare(board.at(3,5));
+		board.addDeploySquare(board.at(4,5));
+		board.addDeploySquare(board.at(5,5));
 
-		this._addPiece(new TestEnemyUnit(), board.at(4,4), this.enemyTeam);
+		this._addPiece(new TestMeleeUnit(), board.at(5,5), this.playerTeam);
+		this._addPiece(new TestSupportUnit(), board.at(3,5), this.playerTeam);
+
+		this._addPiece(new TestEnemyUnit(), board.at(3,3), this.enemyTeam);
 
 		return board;
 	}

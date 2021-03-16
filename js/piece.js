@@ -65,12 +65,12 @@ class Piece extends ElObj {
 		if (Game.scene) Game.scene.selectPiece(piece);
 	}
 	_drag(ev) {
-		ev.dataTransfer.setData("text", ev.target.id);
+		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
-		ev.dataTransfer.clearData("text");
+		ev.dataTransfer.clearData("piece");
 		// the drop target handles the rest
 	}
 };

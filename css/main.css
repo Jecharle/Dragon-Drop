@@ -24,7 +24,8 @@
 	border: none;
 	padding: 8px;
 	margin: 2px;
-	flex: 0 0 22%;
+	flex: 0 0 25%;
+	cursor: pointer;
 }
 .top-bar button:hover {
 	background-color: skyblue;
@@ -32,6 +33,7 @@
 .top-bar button:disabled {
 	color: lightgray;
 	background-color: gray;
+	cursor: default;
 }
 .top-bar span {
 	flex: 0 1 100%;
@@ -85,7 +87,7 @@
 }
 
 .selectable::before {
-	cursor: grab;
+	cursor: pointer;
 }
 .selectable:hover::before {
 	border: 2px solid deepskyblue;

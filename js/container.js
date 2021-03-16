@@ -52,14 +52,7 @@ class Board extends Container {
 			this.el.appendChild(row);
 		}
 
-		this._deployArea = [ // TEMP
-			this.at(3,5),
-			this.at(3,6),
-			this.at(4,5),
-			this.at(4,6),
-			this.at(5,5),
-			this.at(5,6)
-		];
+		this._deployArea = [];
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -76,6 +69,14 @@ class Board extends Container {
 		return this._h;
 	}
 
+	addDeploySquare(square) {
+		if (!square || square.parent != this) return;
+
+		if (!this._deployArea.includes(square)) {
+			this._deployArea.push(square);
+		}
+	}
+
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
@@ -87,17 +88,16 @@ class Board extends Container {
 		y = y || 0;
 		size = Math.max(size || 0, 1);
 	
-		// calculate edges
 		var left = -Math.floor((size-1)/2);
 		var right = Math.ceil((size-1)/2);
 		var top = -Math.floor((size-1)/2);
 		var bottom = Math.ceil((size-1)/2);
 
-		// get every square in the area
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
 				if (!shape || shape(dx, dy, shapeProps)) {
+					// TODO: the rule isn't just about shapes
 					area.push(this.at(x+dx, y+dy));
 				}
 			}
