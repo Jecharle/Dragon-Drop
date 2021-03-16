@@ -37,14 +37,15 @@ class BattleScene extends Scene {
 	}
 
 	start() {
-		this._turn = 1;
-		this._phase = BattleScene.deployPhase;
-		this._setActiveTeam(this.playerTeam);
-
 		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
+
+		this._turn = 1;
+		this._phase = BattleScene.deployPhase;
+		this._setActiveTeam(this.playerTeam);
+
 		this._refresh();
 	}
 
@@ -117,6 +118,10 @@ class BattleScene extends Scene {
 	static playerPhase = 1;
 	static enemyPhase = 2;
 	_nextTurn() {
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
 		switch (this._phase) {
 			case BattleScene.deployPhase:
 				this._phase = BattleScene.playerPhase;
@@ -127,25 +132,18 @@ class BattleScene extends Scene {
 			case BattleScene.playerPhase:
 				this._phase = BattleScene.enemyPhase;
 				this._setActiveTeam(this.enemyTeam);
-				this._canRedeploy = false;
 				break;
 
 			case BattleScene.enemyPhase:
 				this._turn++;
 				this._phase = BattleScene.playerPhase;
 				this._setActiveTeam(this.playerTeam);
-				this._canRedeploy = false;
 				break;
 			
 		}
-		this._deselectTarget();
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
 		this._refresh();
 	}
 	_redeploy() {
-		this._canRedeploy = false;
 		this._phase = BattleScene.deployPhase;
 		this._setActiveTeam(this.playerTeam);
 
@@ -161,17 +159,18 @@ class BattleScene extends Scene {
 			case BattleScene.deployPhase:
 				this._turnTitleEl.innerText = "Deployment";
 				this._endTurnButtonEl.innerText = "Start Battle";
+				this._undoButtonEl.style.visibility = "hidden";
 				break;
 			case BattleScene.playerPhase:
 				this._turnTitleEl.innerText = "Player turn " + this._turn;
 				this._endTurnButtonEl.innerText = "End Turn";
+				this._undoButtonEl.style.visibility = "visible";
 				break;
 			case BattleScene.enemyPhase:
 				this._turnTitleEl.innerText = "Enemy turn " + this._turn;
 				this._endTurnButtonEl.innerText = "End Turn";
+				this._undoButtonEl.style.visibility = "visible";
 				break;
-			default:
-				this._turnTitleEl.innerText = "";
 		}
 
 		if (this._moveStack.length > 0) {
@@ -215,6 +214,7 @@ class BattleScene extends Scene {
 	}
 	_clearMoves() {
 		this._moveStack = [];
+		this._canRedeploy = false;
 	}
 
 	_selectSkill(piece) {
@@ -231,7 +231,6 @@ class BattleScene extends Scene {
 	_useSkill(piece, square) {
 		if (piece.use(square)) {
 			this._deselectSkill();
-			this._canRedeploy = false;
 			this._clearMoves();
 		}
 	}
@@ -331,7 +330,9 @@ class BattleScene extends Scene {
 
 	keydown(key) {
 		if (key == "Escape" || key == "Backspace") {
-			if (this._skill) {
+			if (this._target) {
+				this._deselectTarget();
+			} else if (this._skill) {
 				this._deselectSkill();
 			} else if (this._unit) {
 				this._deselectUnit();
