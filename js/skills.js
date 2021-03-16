@@ -89,7 +89,7 @@ class TestBuildSkill extends SkillPiece {
 		return false;
 	}
 	_effects(target) {
-		var wall = new TargetablePiece(TestRockObject);
+		var wall = new TestRockObject();
 		return target.parent.movePiece(wall, target);
 	}
 };
