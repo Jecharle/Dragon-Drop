@@ -47,10 +47,6 @@ class BattleScene extends Scene {
 		this._buildDOM();
 	}
 
-	get elClass() {
-		return 'vertical';
-	}
-
 	get unsaved() {
 		return true;
 	}

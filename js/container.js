@@ -41,7 +41,8 @@ class Board extends Container {
 		this._squares = [];
 
 		for (var y = 0; y < this.h; y++) {
-			var row = document.createElement('tr');
+			var row = document.createElement('div');
+			row.classList.add('row');
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
 				this._squares[(y * this.w) + x] = square;
@@ -57,7 +58,10 @@ class Board extends Container {
 	}
 
 	get elType() {
-		return 'table';
+		return 'div';
+	}
+	get elClass() {
+		return 'board';
 	}
 
 	get w() {
@@ -366,7 +370,7 @@ class Square extends SubContainer {
 	}
 
 	get elType() {
-		return 'td';
+		return 'div';
 	}
 	get elClass() {
 		return 'square';
