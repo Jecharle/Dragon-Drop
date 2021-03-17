@@ -13,12 +13,12 @@ class Game {
 		if (Game._scene == scene) return;
 
 		if (Game._scene != null) {
-			Game._gameDiv.removeChild(Game._scene.el);
+			Game.el.removeChild(Game._scene.el);
 			Game._scene.end();
 		}
 
 		Game._scene = scene;
-		Game._gameDiv.appendChild(scene.el);
+		Game.el.appendChild(scene.el);
 		Game._scene.start();
 	}
 
@@ -29,17 +29,17 @@ class Game {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 	static beforeUnload(ev) {
-		return ""//Game.scene.unsaved || ""; // DISABLED FOR TESTING
+		return null//Game.scene.unsaved || null; // DISABLED FOR TESTING
 	}
 
 	static begin() {
 		document.addEventListener('keydown', Game.globalKeydown);
 		document.addEventListener('keyup', Game.globalKeyup);
 
-		Game._gameDiv = document.createElement("div");
-		Game._gameDiv.classList.add("game-window");
-		Game._gameDiv.id = "gameDiv";
-		document.body.appendChild(Game._gameDiv);
+		Game.el = document.createElement("div");
+		Game.el.classList.add("game-window");
+		Game.el.id = "gameDiv";
+		document.body.appendChild(Game.el);
 
 		Game.setScene(new TestScene()); // TEMP
 	}

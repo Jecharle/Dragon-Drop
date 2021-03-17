@@ -31,18 +31,24 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor() {
+	constructor(mapModel) {
 		super();
-		this.el.classList.add("vertical");
 		this._initTeams();
 		this._board = this._createBoard();
 		this._skillList = this._createSkillList();
+
+		this._applyMapModel(mapModel);
+		this._addPlayers(); // TODO: Load the party from elsewhere?
 
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
 		this._buildDOM();
+	}
+
+	get elClass() {
+		return 'vertical';
 	}
 
 	get unsaved() {
@@ -84,13 +90,13 @@ class BattleScene extends Scene {
 		};
 		return button;
 	}
-
 	_createBoard() { 
-		return new Board(); // TEMP?
+		return new Board();
 	}
 	_createSkillList() {
 		return new SkillList();
 	}
+
 	_buildDOM() {
 		var navBar =  document.createElement("div");
 		navBar.classList.add("nav-bar");
@@ -117,6 +123,31 @@ class BattleScene extends Scene {
 		}
 		this._activeTeam = team;
 
+	}
+
+	_applyMapModel(mapModel) {
+		if (!mapModel) return;
+
+		mapModel.deployment.forEach(data => {
+			this._board.addDeploySquare(this._board.at(data.x, data.y));
+		});
+		// TODO: Terrain
+		mapModel.pieces.forEach(data => {
+			var newPiece = new data.type();
+			if (data.enemy) newPiece.setTeam(this.enemyTeam);
+			this._board.movePiece(newPiece, this._board.at(data.x, data.y));
+		});
+	}
+
+	_addPlayers(party) {
+		if (!party) return;
+
+		party.forEach(piece => {
+			var index = this.playerTeam.length;
+			var square = this._board.deployArea[index];
+			if (square) this._board.movePiece(piece, square);
+			piece.setTeam(this.playerTeam);
+		});
 	}
 
 	refresh() {
@@ -377,38 +408,15 @@ The current scene used for debugging
 ***************************************************/
 class TestScene extends BattleScene {
 	constructor() {
-		super();
+		super(new TestMap());
 	}
 
-	_addPiece(piece, square, team) {
-		if (team) piece.setTeam(team);
-		if (square) square.parent.movePiece(piece, square);
-	}
-	addPlayer(piece, board) {
-		var index = this.playerTeam.length;
-		var square = board.deployArea[index];
-		
-		this._addPiece(piece, square, this.playerTeam);
-	}
-	addEnemy(piece, square) {
-		this._addPiece(piece, square, this.enemyTeam);
-	}
 
-	// TODO: This is actually similar to how I want to load in maps, I think
-	_createBoard() {
-		var board = super._createBoard();
-		
-		board.addDeploySquare(board.at(2,5));
-		board.addDeploySquare(board.at(3,5));
-		board.addDeploySquare(board.at(4,5));
-		board.addDeploySquare(board.at(5,5));
-
-		this.addPlayer(new TestMeleeUnit(), board);
-		this.addPlayer(new TestSupportUnit(), board);
-
-		this.addEnemy(new TestEnemyUnit(), board.at(3,3));
-
-		return board;
+	_addPlayers() {
+		super._addPlayers([
+			new TestMeleeUnit(),
+			new TestSupportUnit()
+		]);
 	}
 
 	start() {

@@ -361,13 +361,15 @@ class Board extends Container {
 class Square extends SubContainer {
 	constructor(x, y, parent) {
 		super(parent);
-		this.el.classList.add('square');
 		this._x = x;
 		this._y = y;
 	}
 
 	get elType() {
 		return 'td';
+	}
+	get elClass() {
+		return 'square';
 	}
 
 	get x() {

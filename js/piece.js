@@ -211,9 +211,12 @@ class ControllablePiece extends TargetablePiece {
 	constructor() {
 		super();
 		this._setSkills();
-		this.el.classList.add('unit');
 
 		this.endTurn(); // TEMP?
+	}
+
+	get elClass() {
+		return 'unit';
 	}
 
 	_setStats() {
@@ -301,7 +304,6 @@ class SkillPiece extends Piece {
 		super();
 		this.user = user;
 		this.cooldown = 0;
-		this.el.classList.add('skill');
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -310,6 +312,10 @@ class SkillPiece extends Piece {
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
+	}
+
+	get elClass() {
+		return 'skill';
 	}
 
 	get fullDescription() {
