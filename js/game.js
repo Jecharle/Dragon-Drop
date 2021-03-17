@@ -37,7 +37,7 @@ class Game {
 		document.addEventListener('keyup', Game.globalKeyup);
 
 		Game._gameDiv = document.createElement("div");
-		Game._gameDiv.classList.add("centered");
+		Game._gameDiv.classList.add("game-window");
 		Game._gameDiv.id = "gameDiv";
 		document.body.appendChild(Game._gameDiv);
 
