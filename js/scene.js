@@ -8,6 +8,10 @@ class Scene extends ElObj {
 		super();
 	}
 
+	get unsaved() {
+		return false;
+	}
+
 	start() { }
 	end() { }
 
@@ -34,6 +38,10 @@ class BattleScene extends Scene {
 		this._endTurnButtonEl = this._createEndTurnButton();
 
 		this._buildDOM();
+	}
+
+	get unsaved() {
+		return true;
 	}
 
 	start() {

@@ -28,6 +28,9 @@ class Game {
 	static globalKeyup(ev) {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
+	static beforeUnload(ev) {
+		return Game.scene.unsaved ? "Unsaved progress will be lost" : null;
+	}
 
 	static begin() {
 		document.addEventListener('keydown', Game.globalKeydown);
