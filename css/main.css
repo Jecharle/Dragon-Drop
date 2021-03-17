@@ -114,7 +114,7 @@
 	border-style: solid;
 	border-color: white transparent transparent transparent;
 }
-.selectable.unit:hover::after {
+.selectable.unit:hover::after, .skill-range .selectable.unit::after {
 	top: -25px;
 }
 

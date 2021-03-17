@@ -4,8 +4,13 @@ The root class that responds to user interaction
 and applies rules to pieces and containers
 ***************************************************/
 class Scene extends ElObj {
-	constructor() {
+	constructor(lastScene) {
 		super();
+		this._lastScene = lastScene || null;
+	}
+
+	get lastScene() {
+		this._lastScene;
 	}
 
 	get unsaved() {
@@ -16,7 +21,7 @@ class Scene extends ElObj {
 	end() { }
 
 	selectPiece(piece, dragging) { }
-	selectSquare(target, id) { }
+	selectSquare(square, dragId) { }
 
 	keydown(key) { }
 	keyup(key) { }
@@ -54,7 +59,7 @@ class BattleScene extends Scene {
 		this._phase = BattleScene.deployPhase;
 		this._setActiveTeam(this.playerTeam);
 
-		this._refresh();
+		this.refresh();
 	}
 
 	_createUndoButton() {
@@ -62,7 +67,7 @@ class BattleScene extends Scene {
 		button.type = "button";
 		button.onclick = () => {
 			this._undoMove();
-			this._refresh();
+			this.refresh();
 		};
 		return button;
 	}
@@ -114,7 +119,7 @@ class BattleScene extends Scene {
 
 	}
 
-	_refresh() {
+	refresh() {
 		this._refreshArea();
 		this._refreshUi();
 	}
@@ -146,7 +151,7 @@ class BattleScene extends Scene {
 				break;
 			
 		}
-		this._refresh();
+		this.refresh();
 	}
 	_redeploy() {
 		this._phase = BattleScene.deployPhase;
@@ -156,7 +161,7 @@ class BattleScene extends Scene {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
-		this._refresh();
+		this.refresh();
 	}
 
 	_refreshUi() {
@@ -305,7 +310,7 @@ class BattleScene extends Scene {
 				}
 			}
 		}
-		this._refresh();
+		this.refresh();
 	}
 
 	selectSquare(square, dragId) {
@@ -313,12 +318,13 @@ class BattleScene extends Scene {
 
 		if (this._phase == BattleScene.deployPhase)
 		{
-			if (square.inRange && this._target) {
-				this._swapDeploySquares(this._target, square);
-			} else if (square.inRange) {
-				this._selectTarget(square);
-			} else {
+			if (!square.inRange) {
 				this._deselectTarget();
+			}
+			else if (this._target) {
+				this._swapDeploySquares(this._target, square);
+			} else {
+				this._selectTarget(square);
 			}
 		} else { // TODO: once AI works, only run for player phase
 			if (!square.inRange) {
@@ -330,7 +336,7 @@ class BattleScene extends Scene {
 				this._moveUnit(this._unit, square);
 			}
 		}
-		this._refresh();
+		this.refresh();
 	}
 
 	keydown(key) {
@@ -344,7 +350,7 @@ class BattleScene extends Scene {
 			} else {
 				this._undoMove();
 			}
-			this._refresh();
+			this.refresh();
 		}
 
 		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
@@ -353,16 +359,13 @@ class BattleScene extends Scene {
 
 		if (isFinite(key)) {
 			var num = Number(key);
-			if (this._skillList.skills && num > 0 && num <= this._skillList.skills.length) {
-				if (this._skill != this._skillList.skills[num-1]) {
-					this._selectSkill(this._skillList.skills[num-1]);
-				} else {
-					this._deselectSkill();
-				}
-				this._refresh();
-			} else if (num == 0) {
+			var skills = this._skillList.skills;
+			if (num == 0 || this._skill == skills[num-1]) {
 				this._deselectSkill();
-				this._refresh();
+				this.refresh();
+			} else if (skills && num <= skills.length) {
+				this._selectSkill(skills[num-1]);
+				this.refresh();
 			}
 		}
 	}

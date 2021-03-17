@@ -29,7 +29,7 @@ class Game {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 	static beforeUnload(ev) {
-		return Game.scene.unsaved ? "Unsaved progress will be lost" : null;
+		return ""//Game.scene.unsaved || ""; // DISABLED FOR TESTING
 	}
 
 	static begin() {
