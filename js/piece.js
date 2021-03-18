@@ -150,6 +150,10 @@ class TargetablePiece extends Piece {
 	}
 
 	refresh() {
+		if (this.dead) { // TEMP
+			this.setParent(null);
+			this.setTeam(null);
+		}
 		this._lifebar.value = this.hpRate;
 	}
 

@@ -8,30 +8,30 @@ class Shape {
 
 	static Square(origin, target, props) {
 		if (!origin || !target) return false;
-		var x = origin.x - target.x;
-		var y = origin.y - target.y;
+		var dx = origin.x - target.x;
+		var dy = origin.y - target.y;
 		var minRange = props.minRange || 0;
-		if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+		if (Math.abs(dx) < minRange && Math.abs(dy) < minRange) return false;
 		return true;
 	}
 
 	static Line(origin, target, props) {
 		if (!origin || !target) return false;
-		var x = origin.x - target.x;
-		var y = origin.y - target.y;
+		var dx = origin.x - target.x;
+		var dy = origin.y - target.y;
 		var minRange = props.minRange || 0;
-		if (x && y) return false;
-		if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+		if (dx && dy) return false;
+		if (Math.abs(dx) < minRange && Math.abs(dy) < minRange) return false;
 		return true;
 	}
 
 	static Cross(origin, target, props) {
 		if (!origin || !target) return false;
-		var x = origin.x - target.x;
-		var y = origin.y - target.y;
+		var dx = origin.x - target.x;
+		var dy = origin.y - target.y;
 		var minRange = props.minRange || 0;
-		if (Math.abs(x) != Math.abs(y)) return false;
-		if (Math.abs(x) < minRange && Math.abs(y) < minRange) return false;
+		if (Math.abs(dx) != Math.abs(dy)) return false;
+		if (Math.abs(dx) < minRange && Math.abs(dy) < minRange) return false;
 		return true;
 	}
 
@@ -41,17 +41,16 @@ class Shape {
 
 	static Circle(origin, target, props) {
 		if (!origin || !target) return false;
-		var x = origin.x - target.x;
-		var y = origin.y - target.y;
+		var dx = origin.x - target.x;
+		var dy = origin.y - target.y;
 		var range = props.range;
 		var minRange = props.minRange || 0;
-		if (Math.abs(x) + Math.abs(y) > range) return false;
-		if (Math.abs(x) + Math.abs(y) < minRange) return false;
+		if (Math.abs(dx) + Math.abs(dy) > range) return false;
+		if (Math.abs(dx) + Math.abs(dy) < minRange) return false;
 		return true;
 	}
 
 	static LineOfSight(origin, target, props) {
-		// TODO: Props can specify what counts as blocking?
 		return origin.parent.canSee(origin, target, props);
 	}
 }
