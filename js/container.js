@@ -114,14 +114,16 @@ class Board extends Container {
 			if (!square) {
 				return false;
 			}
+			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
+				return false;
+			}
 			if (square.piece != null && square.piece != piece) {
 				return false;
 			}
-			// TODO: Check for blocking terrain
 			return true;
 		});
 	}
-	// TODO: Too much repeated code- refactor these into a single function with multiple settings?
+	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
 	canPass(piece, centerSquare, size) {
 		size = size || piece.size;
 		var area = this.getArea(centerSquare.x, centerSquare.y, size);
@@ -129,10 +131,12 @@ class Board extends Container {
 			if (!square) {
 				return false;
 			}
+			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
+				return false; // TODO: Depends on movement settings?
+			}
 			if (square.piece != null && piece != null && square.piece.team != piece.team) {
 				return false;
 			}
-			// TODO: Check for blocking terrain
 			return true;
 		});
 	}
@@ -367,6 +371,8 @@ class Square extends SubContainer {
 		super(parent);
 		this._x = x;
 		this._y = y;
+		this.piece = null;
+		this.terrain = Square.Flat;
 	}
 
 	get elType() {
@@ -382,7 +388,35 @@ class Square extends SubContainer {
 	get y() {
 		return this._y;
 	}
+
+	get terrain() {
+		return this._terrain;
+	}
+	set terrain(value) {
+		switch (this._terrain) {
+			case Square.Wall:
+				this.el.classList.remove('wall');
+				break;
+			case Square.Pit:
+				this.el.classList.remove('pit');
+				break;
+		}
+
+		this._terrain = value;
+
+		switch (this._terrain) {
+			case Square.Wall:
+				this.el.classList.add('wall');
+				break;
+			case Square.Pit:
+				this.el.classList.add('pit');
+				break;
+		}
+	}
 };
+Square.Flat = 0;
+Square.Wall = 1;
+Square.Pit = 2;
 
 /***************************************************
  Skill list

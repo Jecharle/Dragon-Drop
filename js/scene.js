@@ -124,10 +124,13 @@ class BattleScene extends Scene {
 	_applyMapModel(mapModel) {
 		if (!mapModel) return;
 
+		// TODO: Move some of this into the board class, for better locality?
 		mapModel.deployment.forEach(data => {
 			this._board.addDeploySquare(this._board.at(data.x, data.y));
 		});
-		// TODO: Terrain
+		mapModel.terrain.forEach(data => {
+			this._board.at(data.x, data.y).terrain = data.type;
+		});
 		mapModel.pieces.forEach(data => {
 			var newPiece = new data.type();
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
@@ -212,13 +215,13 @@ class BattleScene extends Scene {
 
 		if (this._moveStack.length > 0) {
 			this._undoButtonEl.disabled = false;
-			this._undoButtonEl.innerText = "Undo Move";
+			this._undoButtonEl.innerText = "Undo";
 		} else if (this._canRedeploy) {
 			this._undoButtonEl.disabled = false;
 			this._undoButtonEl.innerText = "Redeploy";
 		} else {
 			this._undoButtonEl.disabled = true;
-			this._undoButtonEl.innerText = "Undo Move";
+			this._undoButtonEl.innerText = "Undo";
 		}
 	}
 
@@ -413,9 +416,5 @@ class TestScene extends BattleScene {
 			new TestMeleeUnit(),
 			new TestSupportUnit()
 		]);
-	}
-
-	start() {
-		super.start();
 	}
 };

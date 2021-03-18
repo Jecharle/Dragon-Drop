@@ -83,7 +83,7 @@ class TestBuildSkill extends SkillPiece {
 	_baseCooldown = 3;
 
 	validTarget(target) {
-		if (!target.piece) {
+		if (target.parent.canFit(null, target, 1)) {
 			return true;
 		}
 		return false;
