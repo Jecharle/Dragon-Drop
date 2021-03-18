@@ -15,6 +15,9 @@ class TestAttackSkill extends SkillPiece {
 	}
 
 	_range = 2
+	_shape = function(origin, target, props) {
+		return Shape.Line(origin, target, props) && Shape.LineOfSight(origin, target, props);
+	}
 
 	validTarget(target) {
 		if (target.piece && target.piece.targetable) {

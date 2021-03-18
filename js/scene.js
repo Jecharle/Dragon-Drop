@@ -410,7 +410,6 @@ class TestScene extends BattleScene {
 		super(new TestMap());
 	}
 
-
 	_addPlayers() {
 		super._addPlayers([
 			new TestMeleeUnit(),

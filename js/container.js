@@ -85,22 +85,20 @@ class Board extends Container {
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-	getArea(x, y, size, shape, shapeProps) {
-		x = x || 0;
-		y = y || 0;
+	getArea(origin, size, rule, ruleProps) {
 		size = Math.max(size || 0, 1);
 	
-		var left = -Math.floor((size-1)/2);
-		var right = Math.ceil((size-1)/2);
-		var top = -Math.floor((size-1)/2);
-		var bottom = Math.ceil((size-1)/2);
+		var left = origin.x - Math.floor((size-1)/2);
+		var right = origin.x + Math.ceil((size-1)/2);
+		var top = origin.y - Math.floor((size-1)/2);
+		var bottom = origin.y + Math.ceil((size-1)/2);
 
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				if (!shape || shape(dx, dy, shapeProps)) {
-					// TODO: the rule isn't just about shapes
-					area.push(this.at(x+dx, y+dy));
+				var square = this.at(dx, dy);
+				if (!rule || rule(origin, square, ruleProps)) {
+					area.push(square);
 				}
 			}
 		}
@@ -109,7 +107,7 @@ class Board extends Container {
 
 	canFit(piece, centerSquare, size) {
 		size = size || piece.size;
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		var area = this.getArea(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
@@ -126,7 +124,7 @@ class Board extends Container {
 	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
 	canPass(piece, centerSquare, size) {
 		size = size || piece.size;
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		var area = this.getArea(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
@@ -139,6 +137,28 @@ class Board extends Container {
 			}
 			return true;
 		});
+	}
+	canSee(origin, target, props) {
+		if (!origin || !target) return true;
+
+		var x = Number(origin.x);
+		var y = Number(origin.y);
+		var tx = Number(target.x);
+		var ty = Number(target.y);
+		while (x != tx || y != ty) {
+			// TODO: Replace with a proper fast line algorithm
+			if (x < tx) x++;
+			else if (x > tx) x--;
+			if (y < ty) y++;
+			else if (y > ty) y--;
+
+			var square = this.at(x, y);
+			// TODO: Determine blockage using props
+			if (square && square.terrain == Square.Wall) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	movePiece(piece, targetSquare) {
@@ -172,7 +192,7 @@ class Board extends Container {
 		if (!centerSquare) return;
 
 		size = size || piece.size;
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		var area = this.getArea(centerSquare, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
@@ -284,7 +304,7 @@ class Board extends Container {
 
 		// get the possible range
 		var size = 1 + 2*piece.range;
-		var area = this.getArea(user.square.x, user.square.y, size, piece.shape, piece.shapeProps);
+		var area = this.getArea(user.square, size, piece.shape, piece.shapeProps);
 		area.forEach(square => {
 			if (square) this._paintSkillRange(square, piece.validTarget(square));
 		});
