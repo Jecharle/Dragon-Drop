@@ -127,11 +127,19 @@ class TargetablePiece extends Piece {
 		this._team = team;
 	}
 
+	get hp() {
+		return Math.max(Math.min(this._hp, this.maxHp), 0);
+	}
+	set hp(value) {
+		this._hp = value;
+		if (this._hp > this.maxHp) this._hp = this.maxHp;
+		if (this._hp < 0) this._hp = 0;
+	}
 	get maxHp() {
-		return this._maxHp;
+		return Math.max(this._maxHp, 0);
 	}
 	get hpRate() {
-		if (this.maxHp == 0) return this.hp;
+		if (this.maxHp == 0) return 0;
 		else return this.hp / this.maxHp;
 	}
 	get dead() {
@@ -148,8 +156,7 @@ class TargetablePiece extends Piece {
 	takeDamage(power, attr) {
 		this.hp -= power;
 
-		if (this.hp < 0) {
-			this.hp = 0;
+		if (this.dead) {
 			// TODO: Die?
 		}
 
@@ -162,9 +169,6 @@ class TargetablePiece extends Piece {
 	}
 	heal(power, attr) {
 		this.hp += power;
-		if (this.hp > this.maxHp) {
-			this.hp = this.maxHp;
-		}
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
