@@ -46,37 +46,49 @@
 }
 .square {
 	flex: 0 0 64px;
+	position: relative;
 	background-color: gray;
 	border-top: 1px solid white;
 	border-left: 1px solid white;
 	width: 64px;
 	height: 64px;
 }
+.square::before {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 65%;
+	content: "";
+}
+.square:hover::before, .selected.square::before {
+	opacity: 100%;
+}
+.wall {
+	background-color: darkslategray;
+}
+.pit {
+	background-color: transparent;
+}
 
-.deploy-range {
-	background-color: seagreen;
+.deploy-range, .move-range, .skill-range {
 	cursor: pointer;
 }
-.deploy-range:hover, .deploy-range.selected {
+.deploy-range::before {
 	background-color: lightseagreen;
 }
-.move-range {
+.move-range::before {
 	background-color: deepskyblue;
-	cursor: pointer;
 }
-.move-range:hover {
-	background-color: skyblue;
-}
-.skill-range {
-	background-color: darkorange;
-	cursor: pointer;
-}
-.skill-range:hover {
+.skill-range::before {
 	background-color: orange;
 }
-.skill-range-invalid {
-	background-color: darkgoldenrod;
-	/*TODO: Probably just make it more transparent?*/
+.skill-range-invalid::before {
+	background-color: orange;
+	opacity: 50%;
+}
+.skill-range-invalid:hover::before {
+	opacity: 50%; /*don't change opacity*/
 }
 
 .piece {
@@ -97,7 +109,7 @@
 .selectable::before {
 	cursor: pointer;
 }
-.selectable:hover::before, .selected::before {
+.selectable:hover::before, .piece.selected::before {
 	border: 2px solid deepskyblue;
 	margin: -2px;
 }
