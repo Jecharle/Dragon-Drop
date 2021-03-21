@@ -23,6 +23,22 @@ class Detail extends ElObj {
 };
 
 /***************************************************
+ Phase change banner
+***************************************************/
+class PhaseBanner extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.addEventListener('animationend', ev => {
+			ev.target.parentElement.removeChild(ev.target);
+		});
+	}
+
+	get elClass() {
+		return 'phase-banner';
+	}
+}
+
+/***************************************************
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {
@@ -51,7 +67,7 @@ class Lifebar extends Detail {
 }
 
 /***************************************************
- PopupText
+ Popup text
 ***************************************************/
 class PopupText extends Detail {
 	constructor(startValue) {
@@ -67,7 +83,7 @@ class PopupText extends Detail {
 }
 
 /***************************************************
- CooldownLabel
+ Cooldown label
 ***************************************************/
 class CooldownLabel extends Detail {
 	get elClass() {
@@ -76,7 +92,7 @@ class CooldownLabel extends Detail {
 }
 
 /***************************************************
- Skill Description
+ Skill description
 ***************************************************/
 class SkillDescription extends Detail {
 	get elType() {

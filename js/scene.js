@@ -52,16 +52,7 @@ class BattleScene extends Scene {
 	}
 
 	start() {
-		this._deselectTarget();
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-
-		this._turn = 1;
-		this._phase = BattleScene.deployPhase;
-		this._setActiveTeam(this.playerTeam);
-
-		this.refresh();
+		this._deploy();
 	}
 
 	_createUndoButton() {
@@ -106,19 +97,18 @@ class BattleScene extends Scene {
 	}
 
 	_initTeams() {
-		this.playerTeam = [];
-		this.enemyTeam = [];
+		this.playerTeam = new Team(0);
+		this.enemyTeam = new Team(1);
 		this._setActiveTeam(null);
 	}
 	_setActiveTeam(team) {
 		if (this._activeTeam) {
-			this._activeTeam.forEach(piece => piece.endTurn());
-		}
-		if (team) {
-			team.forEach(piece => piece.startTurn());
+			this._activeTeam.endTurn();
 		}
 		this._activeTeam = team;
-
+		if (this._activeTeam) {
+			this._activeTeam.startTurn();
+		}
 	}
 
 	_applyMapModel(mapModel) {
@@ -142,7 +132,7 @@ class BattleScene extends Scene {
 		if (!party) return;
 
 		party.forEach(piece => {
-			var index = this.playerTeam.length;
+			var index = this.playerTeam.size;
 			var square = this._board.deployArea[index];
 			if (square) this._board.movePiece(piece, square);
 			piece.setTeam(this.playerTeam);
@@ -157,33 +147,10 @@ class BattleScene extends Scene {
 	static deployPhase = 0;
 	static playerPhase = 1;
 	static enemyPhase = 2;
-	_nextTurn() {
-		this._deselectTarget();
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-		switch (this._phase) {
-			case BattleScene.deployPhase:
-				this._phase = BattleScene.playerPhase;
-				this._setActiveTeam(this.playerTeam);
-				this._canRedeploy = true;
-				break;
-
-			case BattleScene.playerPhase:
-				this._phase = BattleScene.enemyPhase;
-				this._setActiveTeam(this.enemyTeam);
-				break;
-
-			case BattleScene.enemyPhase:
-				this._turn++;
-				this._phase = BattleScene.playerPhase;
-				this._setActiveTeam(this.playerTeam);
-				break;
-			
-		}
-		this.refresh();
-	}
-	_redeploy() {
+	static victoryPhase = 3;
+	static defeatPhase = -1;
+	_deploy() {
+		this._turn = 0;
 		this._phase = BattleScene.deployPhase;
 		this._setActiveTeam(this.playerTeam);
 
@@ -193,24 +160,78 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		this.refresh();
 	}
+	_nextTurn() {
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		switch (this._phase) {
+			case BattleScene.playerPhase:
+				this._phase = BattleScene.enemyPhase;
+				this._setActiveTeam(this.enemyTeam);
+				this._showPhaseBanner("Enemy Phase");
+				break;
+
+			case BattleScene.deployPhase:
+				this._canRedeploy = true;
+			case BattleScene.enemyPhase:
+				this._phase = BattleScene.playerPhase;
+				this._setActiveTeam(this.playerTeam);
+				this._showPhaseBanner("Player Phase");
+				this._turn++;
+				break;
+		}
+		this.refresh();
+	}
+	_win() {
+		this._phase = BattleScene.victoryPhase;
+		this._setActiveTeam(null);
+
+		// TODO: Add the victory interface?
+		this._showPhaseBanner("Victory");
+
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this.refresh();
+	}
+	_lose() {
+		this._phase = BattleScene.defeatPhase;
+		this._setActiveTeam(null);
+
+		// TODO: Add the loss interface?
+		this._showPhaseBanner("Defeat");
+
+		this._deselectTarget();
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this.refresh();
+	}
+	_checkForEnd() {
+		if (this.playerTeam.size <= 0) {
+			this._lose();
+		} else if (this.enemyTeam.size <= 0) {
+			this._win();
+		}
+		// TODO: Timed victory / defeat?
+	}
+
+	_showPhaseBanner(value) {
+		var banner = new PhaseBanner(value);
+		this.el.appendChild(banner.el);
+	}
 
 	_refreshUi() {
-		switch (this._phase) {
-			case BattleScene.deployPhase:
-				this._turnTitleEl.innerText = "Deployment";
-				this._endTurnButtonEl.innerText = "Start Battle";
-				this._undoButtonEl.style.visibility = "hidden";
-				break;
-			case BattleScene.playerPhase:
-				this._turnTitleEl.innerText = "Player turn " + this._turn;
-				this._endTurnButtonEl.innerText = "End Turn";
-				this._undoButtonEl.style.visibility = "visible";
-				break;
-			case BattleScene.enemyPhase:
-				this._turnTitleEl.innerText = "Enemy turn " + this._turn;
-				this._endTurnButtonEl.innerText = "End Turn";
-				this._undoButtonEl.style.visibility = "visible";
-				break;
+		if (this._phase == BattleScene.deployPhase) {
+			this._turnTitleEl.innerText = "";
+			this._endTurnButtonEl.innerText = "Start Battle";
+			this._undoButtonEl.style.visibility = "hidden";
+		} else {
+			this._turnTitleEl.innerText = "Turn " + this._turn;
+			this._endTurnButtonEl.innerText = "End Turn";
+			this._undoButtonEl.style.visibility = "visible";
 		}
 
 		if (this._moveStack.length > 0) {
@@ -249,7 +270,7 @@ class BattleScene extends Scene {
 		if (piece) {
 			piece.undoMove();
 		} else if (this._canRedeploy) {
-			this._redeploy();
+			this._deploy();
 		}
 	}
 	_clearMoves() {
@@ -272,6 +293,7 @@ class BattleScene extends Scene {
 		if (piece.use(square)) {
 			this._deselectSkill();
 			this._clearMoves();
+			this._checkForEnd(); // TEMP?
 		}
 	}
 
@@ -400,6 +422,50 @@ class BattleScene extends Scene {
 		}
 	}
 };
+
+/***************************************************
+ Battle scene -> Team
+***************************************************/
+class Team {
+	constructor(group) {
+		this.group = group;
+		this.members = [];
+	}
+
+	get size() {
+		return this.members.length;
+	}
+
+	add(piece) {
+		if (!this.members.includes(piece)) {
+			this.members.push(piece);
+		}
+	}
+
+	remove(piece) {
+		var index = this.members.indexOf(piece);
+		if (index > 0) {
+			this.members.splice(index, 1);
+		}
+	}
+
+	startTurn() {
+		this.members.forEach(piece => piece.startTurn());
+	}
+
+	endTurn() {
+		this.members.forEach(piece => piece.endTurn());
+	}
+
+	isAlly(otherTeam) {
+		if (!otherTeam) return false;
+		return otherTeam.group == this.group;
+	}
+	isEnemy(otherTeam) {
+		if (!otherTeam) return false;
+		return otherTeam.group != this.group;
+	}
+}
 
 /***************************************************
  Test scene

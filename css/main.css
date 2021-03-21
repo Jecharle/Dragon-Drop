@@ -162,7 +162,7 @@
 }
 
 .damaged {
-	animation: 150ms shake;
+	animation: shake 150ms;
 }
 
 .skill-list {
@@ -246,15 +246,31 @@
 }
 
 .popup-text {
-	font-size: 16pt;
+	font-size: 24px;
 	font-weight: bold;
 	color: white;
 	text-shadow: 2px 2px black;
 	display: flex;
 	justify-content: center;
-	text-align: center;
+	align-items: center;
 	position: relative;
-	animation: 1s float-up;
+	z-index: 4;
+	animation: float-up 1s ease-out;
+}
+
+.phase-banner {
+	font-size: 40px;
+	font-weight: bold;
+	background-color: white;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	width: 100%;
+	position: relative;
+	bottom: 50%;
+	z-index: 5;
+	display: flex;
+	justify-content: center;
+	animation: banner-display 800ms ease-out 0s 2 alternate;
 }
 
 @keyframes shake {
@@ -277,12 +293,30 @@
 }
 @keyframes float-up {
 	from {
-		bottom: 0px;
+		top: 0px;
 	}
 	70% {
-		bottom: 32px;
+		top: -32px;
 	}
 	to {
-		bottom: 32px;
+		top: -32px;
+	}
+}
+@keyframes banner-display {
+	from {
+		height: 0px;
+		color: transparent;
+	}
+	40% {
+		height: 48px;
+		color: transparent;
+	}
+	80% {
+		height: 48px;
+		color: black;
+	}
+	to {
+		height: 48px;
+		color: black;
 	}
 }

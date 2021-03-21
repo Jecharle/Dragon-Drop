@@ -117,14 +117,21 @@ class TargetablePiece extends Piece {
 		return this._team;
 	}
 	setTeam(team) {
-		if (this._team && this._team.contains(this)) {
-			var index = this._team.indexOf(this);
-			this._team.splice(index, 1);
-		}
-		if (team) {
-			team.push(this);
+		if (this._team) {
+			this._team.remove(this);
 		}
 		this._team = team;
+		if (this._team) {
+			this._team.add(this);
+		}
+	}
+	isAlly(piece) {
+		if (!this.team) return false;
+		return this.team.isAlly(piece.team);
+	}
+	isEnemy(piece) {
+		if (!this.team) return false;
+		return this.team.isEnemy(piece.team);
 	}
 
 	get hp() {
@@ -157,21 +164,19 @@ class TargetablePiece extends Piece {
 		this._lifebar.value = this.hpRate;
 	}
 
-	takeDamage(power, attr) {
+	takeDamage(power, props) {
 		this.hp -= power;
 
-		if (this.dead) {
-			// TODO: Die?
+		if (!props || !props.noAnimation) {
+			this.el.classList.add('damaged');
+			this.el.addEventListener('animationend', this._removeDamagedAnimation);
 		}
-
-		this.el.classList.add('damaged');
-		this.el.addEventListener('animationend', this._removeDamagedAnimation);
 
 		this._showPopup(power);
 		this.refresh();
 		return power;
 	}
-	heal(power, attr) {
+	heal(power, props) {
 		this.hp += power;
 		this._showPopup("+"+power);
 		this.refresh();
@@ -186,13 +191,15 @@ class TargetablePiece extends Piece {
 		this.el.appendChild(popup.el);
 	}
 
-	push(origin, dist, attr) {
+	push(origin, dist, props) {
+		if (!this.parent) return 0;
 		return this.parent.slidePiece(this, origin, dist);
 	}
-	pull(origin, dist, attr) {
-		return this.push(origin, -dist, attr);
+	pull(origin, dist, props) {
+		return this.push(origin, -dist, props);
 	}
 	swap(piece) {
+		if (!this.parent) return false;
 		return this.parent.swapPieces(this, piece);
 	}
 
@@ -305,7 +312,7 @@ class ControllablePiece extends TargetablePiece {
 };
 
 /***************************************************
- Skill use piece
+ Skill piece
 ***************************************************/
 class SkillPiece extends Piece {
 	constructor(user) {

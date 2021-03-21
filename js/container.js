@@ -17,11 +17,11 @@ class Container extends ElObj {
 };
 
 /***************************************************
- SubContainer
+ Position
 The root class for squares, cells, and nodes other
 subdivisions or positions within a container
 ***************************************************/
-class SubContainer extends ElObj {
+class Position extends ElObj {
 	constructor(parent) {
 		super();
 		this._parent = parent;
@@ -132,33 +132,36 @@ class Board extends Container {
 			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
 				return false; // TODO: Depends on movement settings?
 			}
-			if (square.piece != null && piece != null && square.piece.team != piece.team) {
+			if (square.piece != null && piece != null && !square.piece.isAlly(piece)) {
 				return false;
 			}
 			return true;
 		});
 	}
 	canSee(origin, target, props) {
-		if (!origin || !target) return true;
+		if (!origin || !target || origin.parent != target.parent) return false;
+		
+		if (origin == target) return true;
 
-		var x = Number(origin.x);
-		var y = Number(origin.y);
-		var tx = Number(target.x);
-		var ty = Number(target.y);
-		while (x != tx || y != ty) {
-			// TODO: Replace with a proper fast line algorithm
+		var x = origin.x;
+		var y = origin.y;
+		var tx = target.x;
+		var ty = target.y;
+		while (true) {
+			// It's not a straight line, but close enough for how I'm using it
 			if (x < tx) x++;
 			else if (x > tx) x--;
 			if (y < ty) y++;
 			else if (y > ty) y--;
 
 			var square = this.at(x, y);
-			// TODO: Determine blockage using props
 			if (square && square.terrain == Square.Wall) {
 				return false;
 			}
+			if (x == tx && y == ty) return true;
+			// TODO: Use props to specify which pieces block LoS and which don't
+			if (square.piece) return false;
 		}
-		return true;
 	}
 
 	movePiece(piece, targetSquare) {
@@ -198,7 +201,7 @@ class Board extends Container {
 		});
 	}
 
-	slidePiece(piece, origin, dist, attr) {
+	slidePiece(piece, origin, dist, props) {
 		var [dx, dy] = this._getDirection(origin, piece.square);
 		if (dist < 0) {
 			dist = -dist;
@@ -386,7 +389,7 @@ class Board extends Container {
 /***************************************************
  Game board -> Square
 ***************************************************/
-class Square extends SubContainer {
+class Square extends Position {
 	constructor(x, y, parent) {
 		super(parent);
 		this._x = x;
