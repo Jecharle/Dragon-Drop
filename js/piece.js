@@ -1,18 +1,18 @@
 /***************************************************
  Piece
- The root class for objects you can select, click,
- and drag around between containers
- ***************************************************/
+The root class for objects you can select, click,
+and drag around between containers
+***************************************************/
 class Piece extends ElObj {
-	constructor(size) {
+	constructor() {
 		super();
-		this.parent = null;
-		this._size = size || 1;
+		this._parent = null;
 
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
-		this.el.classList.add('x'+this._size); // crude way to set the size
 
+		// TODO: Safe to assume this is always viable?
+		this.el.onclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
 	}
@@ -26,99 +26,186 @@ class Piece extends ElObj {
 		return (!id || id == this.el.id);
 	}
 
-	size() { return this._size; }
-
 	setParent(container) {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
 		}
-		this.parent = container;
+		this._parent = container;
+	}
+	get parent() {
+		return this._parent;
 	}
 
 	select() { return false; }
 	deselect() { }
-	type() { return Piece.None; }
+	get type() { return Piece.None; }
+	static get None() { return 0; }
+	static get Unit() { return 1; }
+	static get Skill() { return 2; }
 
-	setSelectable(selectable) {
+	_setSelectable(selectable) {
+		this.el.setAttribute("draggable", Boolean(selectable));
 		if (selectable) {
-			this.el.setAttribute("draggable", true);
 			this.el.classList.add('selectable');
 		} else {
-			this.el.setAttribute("draggable", false);
 			this.el.classList.remove('selectable');
 		}
 	}
+	_setUnselectable(unselectable) {
+		if (unselectable) {
+			this.el.classList.add('unselectable');
+		} else {
+			this.el.classList.remove('unselectable');
+		}
+	}
 
+	_click(ev) {
+		ev.stopPropagation();
+		var piece = ev.target.obj;
+		if (Game.scene) Game.scene.selectPiece(piece);
+	}
 	_drag(ev) {
-		ev.dataTransfer.setData("text", ev.target.id);
+		ev.dataTransfer.setData("piece", ev.target.id);
+		var piece = ev.target.obj;
+		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
-		ev.dataTransfer.clearData("text");
+		ev.dataTransfer.clearData("piece");
+		// the drop target handles the rest
 	}
 };
 
-// type constants
-Piece.None = 0;
-Piece.Unit = 1;
-Piece.Skill = 2;
-
 /***************************************************
  Targetable piece
- ***************************************************/
+***************************************************/
 class TargetablePiece extends Piece {
-	constructor(size) {
-		super(size);
-		this.targetable = true;
+	constructor() {
+		super();
+		this._team = null;
+		this.square = null;
+
+		this._setStats();
+
+		// TODO: Make a proper "initialize" method for this?
+		this.hp = this.maxHp;
+		this._lifebar = new Lifebar(this.hpRate);
+		this.el.appendChild(this._lifebar.el);
 	}
 
-	/* TODO: Volatile stats and statuses are all stored on the piece
-		base stats and unchangeable attributes come from a non-piece 'battler' entity */ 
+	get targetable() {
+		return true;
+	}
 
-	// TODO: Lots
+	get size() {
+		return this._size;
+	}
+	set size(value) {
+		if (this._size) {
+			this.el.classList.remove("x"+this.size);
+		}
+		if (value) {
+			this.el.classList.add("x"+this._size);
+		}
+		this._size = value;
+	}
 
+	_setStats() {
+		this._maxHp = 1;
+	}
+
+	get team() {
+		return this._team;
+	}
 	setTeam(team) {
-		if (this.team && this.team.contains(this)) {
-			var index = this.team.indexOf(this);
-			this.team.splice(index, 1);
+		if (this._team) {
+			this._team.remove(this);
 		}
-		this.team = team;
-		if (team) {
-			team.push(this);
+		this._team = team;
+		if (this._team) {
+			this._team.add(this);
 		}
+	}
+	isAlly(piece) {
+		if (!this.team) return false;
+		return this.team.isAlly(piece.team);
+	}
+	isEnemy(piece) {
+		if (!this.team) return false;
+		return this.team.isEnemy(piece.team);
 	}
 
-	maxHp() {
-		return 0;
+	get hp() {
+		return Math.max(Math.min(this._hp, this.maxHp), 0);
 	}
-	hp() {
-		return 0;
+	set hp(value) {
+		this._hp = value;
+		if (this._hp > this.maxHp) this._hp = this.maxHp;
+		if (this._hp < 0) this._hp = 0;
 	}
-	hpRate() {
-		if (this.maxHp() == 0) return this.hp();
-		else return this.hp() / this.maxHp();
+	get maxHp() {
+		return Math.max(this._maxHp, 0);
+	}
+	get hpRate() {
+		if (this.maxHp == 0) return 0;
+		else return this.hp / this.maxHp;
+	}
+	get dead() {
+		return this.hp <= 0;
+	}
+	get alive() {
+		return !this.dead();
 	}
 
-	takeDamage(power, attr) {
-		alert(power+" damage!");
+	refresh() {
+		if (this.dead) { // TEMP
+			this.setParent(null);
+			this.setTeam(null);
+		}
+		this._lifebar.value = this.hpRate;
+	}
+
+	takeDamage(power, props) {
+		this.hp -= power;
+
+		if (!props || !props.noAnimation) {
+			this.el.classList.add('damaged');
+			this.el.addEventListener('animationend', this._removeDamagedAnimation);
+		}
+
+		this._showPopup(power);
+		this.refresh();
 		return power;
 	}
-	heal(power, attr) {
-		alert(power+" healing!");
+	heal(power, props) {
+		this.hp += power;
+		this._showPopup("+"+power);
+		this.refresh();
 		return power;
 	}
-
-	// movement effects
-	/*push(dist, dir, attr) {
-		return 0;
+	_removeDamagedAnimation(ev) {
+		ev.target.classList.remove('damaged');
+		ev.target.removeEventListener('animationend', this._removeDamagedAnimation);
 	}
-	pull(dist, dir, attr) {
-		return -this.push(-dist, dir, attr);
-	}*/
+	_showPopup(value) {
+		var popup = new PopupText(value);
+		this.el.appendChild(popup.el);
+	}
+
+	push(origin, dist, props) {
+		if (!this.parent) return 0;
+		return this.parent.slidePiece(this, origin, dist);
+	}
+	pull(origin, dist, props) {
+		return this.push(origin, -dist, props);
+	}
+	swap(piece) {
+		if (!this.parent) return false;
+		return this.parent.swapPieces(this, piece);
+	}
 
 	// status effects
-	/*
-	TODO: statuses get stored by name in a dictionary
-	getStatus(name) {
+	// TODO: status effects are stored in a dictionary, and occasionally looped through
+	/*hasStatus(name) {
 		return false;
 	}
 	addStatus(effect) {
@@ -126,64 +213,90 @@ class TargetablePiece extends Piece {
 	}
 	removeStatus(name) {
 		return false;
+	}
+	statusList() {
+
 	}*/
 };
 
 /***************************************************
  Controllable piece
- ***************************************************/
+***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(style, moveRange, size) {
-		super(size);
-		this._moveRange = moveRange != undefined ? moveRange : 3; // TEMP
+	constructor() {
+		super();
+		this._setSkills();
 
-		// these will end up being state-dependent, and such
-		this.el.classList.add(style);
-		this.el.onclick = this._click;
-
-		// TEMP
-		this._skills = [
-			new TestAttackPiece(this),
-			new TestHealPiece(this)
-		];
-
-		this.endTurn();
+		this.endTurn(); // TEMP?
 	}
 
-	// TODO: Update selectability routinely
+	get elClass() {
+		return 'unit';
+	}
 
-	moveRange() {
+	_setStats() {
+		super._setStats();
+		this._moveRange = 2;
+	}
+
+	_setSkills() {
+		this._skills = [];
+	}
+
+	get moveRange() {
 		if (this.moved) return 0;
 		else return this._moveRange;
 	}
 
-	skills() {
+	get skills() {
 		return this._skills;
-	}
-	_refreshSkills() {
-		this._skills.forEach(skill => skill.setSelectable(skill.canUse()));
 	}
 
 	startTurn() {
-		this.moved = false;
-		this.acted = false;
-		this.setSelectable(true);
+		this.myTurn = true;
+		this.refresh();
 	}
 	endTurn() {
+		this.myTurn = false;
 		this.moved = false;
 		this.acted = false;
-		this.setSelectable(false);
+		this._startSquare = null;
+		this._skills.forEach(skill => skill.endTurn());
+		this.refresh();
 	}
-	setMoved(value) {
-		this.moved = value;
+
+	move(target) {
+		if (this.moved || this.square == target) return false;
+
+		var oldSquare = this.square;
+		if (target.parent.movePiece(this, target)) {
+			this.moved = true;
+			this._startSquare = oldSquare;
+			this.refresh();
+			return true;
+		}
+		return false;
 	}
-	setActed(value) {
-		this.acted = value;
+	undoMove() {
+		if (!this.moved || !this._startSquare) return false;
+		
+		if (this._startSquare.parent.movePiece(this, this._startSquare)) {
+			this.moved = false;
+			this._startSquare = null;
+			this.refresh();
+			return true;
+		}
+		return false;
 	}
 
 	refresh() {
+		super.refresh();
 		this._refreshSkills();
-		// TODO: Refresh your own selectability and styles?
+		this._setUnselectable(this.moved && this.acted && this.myTurn);
+		this._setSelectable(this.myTurn && !(this.moved && this.acted));
+	}
+	_refreshSkills() {
+		this._skills.forEach(skill => skill.refresh());
 	}
 
 	select() {
@@ -193,65 +306,114 @@ class ControllablePiece extends TargetablePiece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	type() {
+	get type() {
 		return Piece.Unit;
-	}
-
-	_click(ev) {
-		ev.stopPropagation();
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece);
-	}
-	_drag(ev) {
-		super._drag(ev);
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece, true);
 	}
 };
 
 /***************************************************
- Skill use piece
- ***************************************************/
+ Skill piece
+***************************************************/
 class SkillPiece extends Piece {
 	constructor(user) {
-		super(1);
+		super();
 		this.user = user;
-		this.el.classList.add('skill');
-		this.el.onclick = this._click;
-		this.setSelectable(this.canUse());
+		this.cooldown = 0;
+
+		this._cooldownLabel = new CooldownLabel("");
+		this.el.appendChild(this._cooldownLabel.el);
+
+		this._tooltip = new SkillDescription(this.fullDescription);
+		this.el.appendChild(this._tooltip.el);
+
+		this.refresh();
 	}
 
-	range() {
-		return 1;
+	get elClass() {
+		return 'skill';
 	}
-	shape() {
-		return Shape.Line;
+
+	get fullDescription() {
+		var desc = `<strong>${this._name}</strong><br>${this._description}`;
+		if (this._cooldownCost > 0) {
+			desc += `<br><em>${this._cooldownCost} turn cooldown</em>`;
+		}
+		return desc;
+	}
+
+	get _name() {
+		return "[Skill name]";
+	}
+	get _description() {
+		return "[Skill description]";
+	}
+
+	_range = 1
+	get range() {
+		return this._range;
+	}
+	_minRange = 1
+	get minRange() {
+		return this._minRange;
+	}
+	inRange(origin, target) {
+		return this._inCircle(origin, target, this.range)
+			&& !this._inCircle(origin, target, this.minRange-1);
+	}
+
+	_area = 0;
+	get area() {
+		return this._area;
+	}
+	inArea(origin, target) {
+		return this._inCircle(origin, target, this.area);
+	}
+
+	_baseCooldown = 0
+	get _cooldownCost() {
+		return this._baseCooldown;
+	}
+
+	_basePower = 1
+	get power() {
+		return this._basePower;
 	}
 
 	canUse() {
-		if (this.user.acted) return false;
+		if (this.user.acted || this.cooldown > 0) return false;
 		else return true;
 	}
-
 	use(target) {
-		if (!this._validTarget(target)) return false;
+		if (!this.validTarget(target)) return false;
 
-		this._cost();
+		this._payCost();
 		this._effects(target);
+
 		this.user.refresh();
 		return true;
 	}
-
-	_validTarget(target) {
-		return false;
+	validTarget(target) {
+		return true;
 	}
-	_effects(target) {
-
+	_effects(target) { }
+	_payCost() {
+		this.user.acted = true;
+		this.cooldown = this._cooldownCost;
 	}
-	_cost() {
-		this.user.setActed(true);
+
+	endTurn() {
+		this.cooldown--;
+		if (this.cooldown < 0) {
+			this.cooldown = 0;
+		}
+	}
+
+	refresh() {
+		var usable = this.canUse();
+		this._setSelectable(usable);
+		this._setUnselectable(!usable);
+		this._cooldownLabel.value = this.cooldown || "";
+		this._tooltip.value = this.fullDescription;
 	}
 
 	select() {
@@ -262,71 +424,63 @@ class SkillPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	type() {
+	get type() {
 		return Piece.Skill;
 	}
 
-	// event handler functions
-	_click(ev) {
-		ev.stopPropagation();
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece);
-	}
-	_drag(ev) {
-		super._drag(ev);
-		var piece = ev.target.obj;
-		var scene = Game.scene();
-		if (scene) scene.selectPiece(piece, true);
-	}
-};
+	// targeting rules
 
-/***************************************************
- Test attack skill
- ***************************************************/
- class TestAttackPiece extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.style.backgroundColor = 'red';
+	_inCircle(origin, target, size) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx + dy <= size);
 	}
-
-	range() {
-		return 2;
+	_inSquare(origin, target, size) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx <= size && dy <= size);
+	}
+	_inLine(origin, target) {
+		if (!origin || !target) return false;
+		return (origin.x == target.x || origin.y == target.y);
+	}
+	_inCross(origin, target) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx == dy);
 	}
 
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
+	_canSee(origin, target, props) {
+		if (!origin || !target || origin.parent != target.parent) return false;
+		if (origin == target) return true;
+		
+		var board = origin.parent;
+
+		var x = origin.x;
+		var y = origin.y;
+		var tx = target.x;
+		var ty = target.y;
+		while (true) {
+			// It's not a straight line, but close enough for how I'm using it
+			if (x < tx) x++;
+			else if (x > tx) x--;
+			if (y < ty) y++;
+			else if (y > ty) y--;
+
+			var square = board.at(x, y);
+			if (square && (square.terrain & Square.BlockSight)) return false; // TODO: Use props to decide which terrain blocks?
+			if (x == tx && y == ty) return true;
+			if (square.piece) return false; // TODO: Use props to decide which pieces block
 		}
-		return false;
 	}
-
-	_effects(target) {
-		target.piece.takeDamage(1);
-	}
-};
-
-/***************************************************
- Test heal skill
- ***************************************************/
- class TestHealPiece extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.style.backgroundColor = 'green';
-	}
-
-	range() {
-		return 1;
-	}
-
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-
-	_effects(target) {
-		target.piece.heal(1);
+	_nearPiece(_origin, target, props) {
+		if (!target) return false;
+		return target.parent.getAdjacent(target).some(square => {
+			if (square.piece) return true; // TODO: Use props to decide which pieces count
+			else return false;
+		});
 	}
 };
