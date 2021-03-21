@@ -35,7 +35,7 @@ class TestSupportUnit extends ControllablePiece {
 
 	_setSkills() {
 		this._skills = [
-			new TestAttackSkill(this),
+			new TestAreaSkill(this),
 			new TestHealSkill(this),
 			new TestBuildSkill(this),
 		]

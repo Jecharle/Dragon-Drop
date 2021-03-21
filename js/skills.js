@@ -18,8 +18,8 @@ class TestAttackSkill extends SkillPiece {
 
 	inRange(origin, target) {
 		return super.inRange(origin, target)
-		&& this._inLine(origin, target)
-		&& this._canSee(origin, target);
+			&& this._inLine(origin, target)
+			&& this._canSee(origin, target);
 	}
 
 	validTarget(target) {
@@ -89,7 +89,7 @@ class TestBuildSkill extends SkillPiece {
 
 	inRange(origin, target) {
 		return this._inSquare(origin, target, this.range)
-		&& !this._inSquare(origin, target, this.minRange-1);
+			&& !this._inSquare(origin, target, this.minRange-1);
 	}
 	validTarget(target) {
 		if (target.parent.canFit(null, target, 1)) {
@@ -133,5 +133,40 @@ class TestMoveSkill extends SkillPiece {
 	}
 	_effects(target) {
 		return target.parent.movePiece(this.user, target);
+	}
+};
+
+/***************************************************
+ Test area skill
+***************************************************/
+class TestAreaSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	get _name() {
+		return "Area Attack";
+	}
+	get _description() {
+		return `Deal ${this.power} damage to all targets in a small area`;
+	}
+
+	_range = 3
+	_minRange = 2
+	_area = 1
+
+	inRange(origin, target) {
+		return super.inRange(origin, target)
+			&& this._inLine(origin, target);
+	}
+
+	_effects(target) {
+		// TODO: Standardize this for use with future AoE skills?
+		target.parent.getAoE(this, target).forEach(square => {
+			if (square && square.piece && square.piece.targetable) {
+				piece.takeDamage(this.power);
+			}
+		});
 	}
 };

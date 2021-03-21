@@ -243,7 +243,7 @@ class Board extends Container {
 		square.inRange = true;
 	}
 	setMoveArea(piece) {
-		if (!piece || !piece.square || piece.parent != this) return;
+		if (!piece || !piece.square || piece.square.parent != this) return;
 
 		if (!piece.moveRange) return;
 
@@ -276,16 +276,14 @@ class Board extends Container {
 		square.movesLeft = movesLeft;
 	}
 	setSkillArea(skill) {
-		if (!skill || !skill.user) return;
+		if (!skill || !skill.user) return [];
 		var user = skill.user;
-		if (!user.square || user.parent != this) return;
+		if (!user.square || user.square.parent != this) return [];
 		var origin = user.square;
 
 		// for a map this small, it's easiest to check every square
 		this._squares.forEach(square => {
-			if (skill.inRange(origin, square)) {
-				this._paintSkillRange(square, skill.validTarget(square));
-			}
+			if (skill.inRange(origin, square)) this._paintSkillRange(square, skill.validTarget(square));
 		});
 		// TODO: More possible origins for larger units?
 	}
@@ -299,15 +297,9 @@ class Board extends Container {
 			square.inRange = true;
 		}
 	}
+
 	resetAreas() {
-		for (var x = 0; x < this.w; x++) {
-			for (var y = 0; y < this.h; y++) {
-				var square = this.at(x, y);
-				if (square) {
-					this._clearPaint(square);
-				}
-			}
-		}
+		this._squares.forEach(square => this._clearPaint(square));
 	}
 	_clearPaint(square) {
 		square.el.classList.remove('deploy-range');
@@ -317,6 +309,17 @@ class Board extends Container {
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.movesLeft = null;
+	}
+
+	getAoE(skill, origin) {
+		if (!skill || !origin) return [];
+		return this._squares.filter(square => skill.inArea(origin, square));
+	}
+	showAoE(skill, origin) {
+		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
+	}
+	clearAoE() {
+		this._squares.forEach(square => square.el.classList.remove('skill-aoe'));
 	}
 
 	getAdjacent(square) {

@@ -352,14 +352,21 @@ class SkillPiece extends Piece {
 	get range() {
 		return this._range;
 	}
-
 	_minRange = 1
 	get minRange() {
 		return this._minRange;
 	}
-
 	inRange(origin, target) {
-		return this._inCircle(origin, target, this.range) && !this._inCircle(origin, target, this.minRange-1);
+		return this._inCircle(origin, target, this.range)
+			&& !this._inCircle(origin, target, this.minRange-1);
+	}
+
+	_area = 0;
+	get area() {
+		return this._area;
+	}
+	inArea(origin, target) {
+		return this._inCircle(origin, target, this.area);
 	}
 
 	_baseCooldown = 0
@@ -386,7 +393,7 @@ class SkillPiece extends Piece {
 		return true;
 	}
 	validTarget(target) {
-		return false;
+		return true;
 	}
 	_effects(target) { }
 	_payCost() {
