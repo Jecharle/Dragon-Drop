@@ -23,12 +23,27 @@ class Detail extends ElObj {
 };
 
 /***************************************************
+ Phase change banner
+***************************************************/
+class PhaseBanner extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.addEventListener('animationend', ev => {
+			ev.target.parentElement.removeChild(ev.target);
+		});
+	}
+
+	get elClass() {
+		return 'phase-banner';
+	}
+}
+
+/***************************************************
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {
 	constructor(startValue) {
 		super();
-		this.el.classList.add('lifebar');
 
 		this._subEl = document.createElement(this.elType); // TEMP?
 		this._subEl.classList.add('inner-lifebar');
@@ -38,6 +53,9 @@ class Lifebar extends Detail {
 
 	get elType() {
 		return 'div';
+	}
+	get elClass() {
+		return 'lifebar';
 	}
 
 	set value(value) {
@@ -49,38 +67,38 @@ class Lifebar extends Detail {
 }
 
 /***************************************************
- PopupText
+ Popup text
 ***************************************************/
 class PopupText extends Detail {
 	constructor(startValue) {
 		super(startValue);
-		this.el.classList.add('popup-text');
 		this.el.addEventListener('animationend', ev => {
 			ev.target.parentElement.removeChild(ev.target);
 		});
 	}
+
+	get elClass() {
+		return 'popup-text';
+	}
 }
 
 /***************************************************
- CooldownLabel
+ Cooldown label
 ***************************************************/
 class CooldownLabel extends Detail {
-	constructor(startValue) {
-		super(startValue);
-		this.el.classList.add('cooldown-label');
+	get elClass() {
+		return 'cooldown-label';
 	}
 }
 
 /***************************************************
- Skill Description
+ Skill description
 ***************************************************/
 class SkillDescription extends Detail {
-	constructor(startValue) {
-		super(startValue);
-		this.el.classList.add('skill-description');
-	}
-
 	get elType() {
 		return 'div';
+	}
+	get elClass() {
+		return 'skill-description';
 	}
 }

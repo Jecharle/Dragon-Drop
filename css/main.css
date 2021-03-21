@@ -1,72 +1,102 @@
-.centered {
+.game-window {
 	display: flex;
 	justify-content: center;
 	align-content: center;
 }
 
-.vertical {
-	display: flex;
-	flex-flow: column nowrap;
-	justify-content: flex-start;
-	align-content: center;
-}
-
-.top-bar {
+.nav-bar {
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: space-between;
 	align-items: center;
+	margin: 1px;
 }
-.top-bar button {
+.nav-bar button {
 	display: inline-block;
 	color: white;
 	background-color: deepskyblue;
 	border: none;
 	padding: 8px;
-	margin: 2px;
-	flex: 0 0 20%;
+	flex: 0 0 25%;
+	cursor: pointer;
 }
-.top-bar button:hover {
+.nav-bar button:hover {
 	background-color: skyblue;
 }
-.top-bar button:disabled {
+.nav-bar button:disabled {
 	color: lightgray;
 	background-color: gray;
+	cursor: default;
 }
-.top-bar span {
+.nav-bar span {
 	flex: 0 1 100%;
 	font-size: 24px;
 }
 
+.board {
+	display: flex;
+	flex-flow: column nowrap;
+	border-bottom: 1px solid white;
+	border-right: 1px solid white;
+}
+.row {
+	flex: 0 0 auto;
+	display: flex;
+	flex-flow: row nowrap;
+}
 .square {
+	flex: 0 0 64px;
+	position: relative;
 	background-color: gray;
-	width: 62px;
-	height: 62px;
+	border-top: 1px solid white;
+	border-left: 1px solid white;
+	width: 64px;
+	height: 64px;
+}
+.square::before {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 65%;
+	content: "";
+}
+.square:hover::before, .selected.square::before {
+	opacity: 100%;
+}
+.wall {
+	background-color: darkslategray;
+}
+.pit {
+	background-color: transparent;
 }
 
-.move-range {
+.deploy-range, .move-range, .skill-range {
+	cursor: pointer;
+}
+.deploy-range::before {
+	background-color: lightseagreen;
+}
+.move-range::before {
 	background-color: deepskyblue;
 }
-.move-range:hover {
-	background-color: skyblue;
-}
-
-.skill-range {
-	background-color: darkorange;
-}
-.skill-range:hover {
+.skill-range::before {
 	background-color: orange;
 }
-
-.skill-list {
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: flex-start;
+.skill-range-invalid::before {
+	background-color: orange;
+	opacity: 50%;
+}
+.skill-range-invalid:hover::before {
+	opacity: 50%; /*don't change opacity*/
 }
 
 .piece {
 	position: relative;
 	z-index: 1;
+	/*TODO: Is this the right place for this?*/
+	width: 100%;
+	height: 100%;
 }
 .piece::before {
 	position: absolute;
@@ -76,10 +106,18 @@
 	content: "";
 }
 
-.x1 {
-	width: 100%;
-	height: 100%;
+.selectable::before {
+	cursor: pointer;
 }
+.selectable:hover::before, .piece.selected::before {
+	border: 2px solid deepskyblue;
+	margin: -2px;
+}
+
+.unselectable::before {
+	filter: grayscale(100%);
+}
+
 .x2 {
 	width: 200%;
 	height: 200%;
@@ -91,38 +129,21 @@
 	right: 100%;
 }
 
-.selected::before {
-	border: 2px solid deepskyblue;
-	margin: -2px;
-}
-
-.selectable::before {
-	cursor: grab;
-}
-.selectable:hover::before {
-	border: 2px solid deepskyblue;
-	margin: -2px;
-}
-
-.unselectable::before {
-	filter: grayscale(100%);
-}
-
-.selectable.unit::after {
+.unit.selectable::after {
 	content: "";
 	position: absolute;
-	top: -20px;
-	left: 19px;
-	border-width: 12px;
+	top: -16px;
+	left: 21px;
+	border-width: 10px;
 	border-style: solid;
 	border-color: white transparent transparent transparent;
 }
-.selectable.selected.unit::after {
-	border-style: none;
+.unit.selectable:hover::after, .skill-range .unit.selectable::after {
+	top: -25px;
 }
 
 .ball::before {
-	background-color: green;
+	background-color: darkgreen;
 	border-radius: 50%;
 }
 .ball2::before {
@@ -137,13 +158,24 @@
 	background-color: purple;
 	height: 90%;
 	width: 90%;
-	margin: auto;
+	margin: 5%;
+}
+
+.damaged {
+	animation: shake 150ms;
+}
+
+.skill-list {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	margin-top: 1px;
 }
 
 .skill {
-	width: 62px;
-	height: 62px;
-	margin: 1px;
+	width: 64px;
+	height: 64px;
+	margin-left: 1px;
 }
 
 .attack-skill::before {
@@ -182,7 +214,7 @@
 	border-radius: 4px;
 	padding: 5px;
 }
-.skill .skill-description::after {
+.skill-description::after {
 	content: "";
 	position: absolute;
 	top: 100%;
@@ -195,17 +227,13 @@
 	visibility: visible;
 }
 
-.damaged {
-	animation: 150ms shake;
-}
-
 .lifebar {
 	visibility: hidden;
 	position: absolute;
 	z-index: 2;
 	width: 100%;
 	height: 8px;
-	bottom: -4px;
+	top: -12px;
 	outline: 1px solid black;
 	background-color: gray;
 }
@@ -213,23 +241,36 @@
 	height: 100%;
 	background-color: red;
 }
-.piece:hover .lifebar {
-	visibility: visible;
-}
-.selected .lifebar {
+.piece:hover .lifebar, .skill-range .lifebar {
 	visibility: visible;
 }
 
 .popup-text {
-	font-size: 16pt;
+	font-size: 24px;
 	font-weight: bold;
 	color: white;
 	text-shadow: 2px 2px black;
 	display: flex;
 	justify-content: center;
-	text-align: center;
+	align-items: center;
 	position: relative;
-	animation: 1s float-up;
+	z-index: 4;
+	animation: float-up 1s ease-out;
+}
+
+.phase-banner {
+	font-size: 40px;
+	font-weight: bold;
+	background-color: white;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	width: 100%;
+	position: relative;
+	bottom: 50%;
+	z-index: 5;
+	display: flex;
+	justify-content: center;
+	animation: banner-display 800ms ease-out 0s 2 alternate;
 }
 
 @keyframes shake {
@@ -252,12 +293,30 @@
 }
 @keyframes float-up {
 	from {
-		bottom: 0px;
+		top: 0px;
 	}
 	70% {
-		bottom: 32px;
+		top: -32px;
 	}
 	to {
-		bottom: 32px;
+		top: -32px;
+	}
+}
+@keyframes banner-display {
+	from {
+		height: 0px;
+		color: transparent;
+	}
+	40% {
+		height: 48px;
+		color: transparent;
+	}
+	80% {
+		height: 48px;
+		color: black;
+	}
+	to {
+		height: 48px;
+		color: black;
 	}
 }

@@ -17,11 +17,11 @@ class Container extends ElObj {
 };
 
 /***************************************************
- SubContainer
+ Position
 The root class for squares, cells, and nodes other
 subdivisions or positions within a container
 ***************************************************/
-class SubContainer extends ElObj {
+class Position extends ElObj {
 	constructor(parent) {
 		super();
 		this._parent = parent;
@@ -36,15 +36,14 @@ class SubContainer extends ElObj {
  Game board
 ***************************************************/
 class Board extends Container {
-	constructor(w, h) {
+	constructor() {
 		super();
 		this._squares = [];
-		this._w = w;
-		this._h = h;
 
-		for (var y = 0; y < h; y++) {
-			var row = document.createElement('tr');
-			for (var x = 0; x < w; x++) {
+		for (var y = 0; y < this.h; y++) {
+			var row = document.createElement('div');
+			row.classList.add('row');
+			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
 				this._squares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
@@ -52,28 +51,32 @@ class Board extends Container {
 			this.el.appendChild(row);
 		}
 
-		this._deployArea = [ // TEMP
-			this.at(3,5),
-			this.at(3,6),
-			this.at(4,5),
-			this.at(4,6),
-			this.at(5,5),
-			this.at(5,6)
-		];
+		this.deployArea = [];
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
 	}
 
 	get elType() {
-		return 'table';
+		return 'div';
+	}
+	get elClass() {
+		return 'board';
 	}
 
 	get w() {
-		return this._w;
+		return 8;
 	}
 	get h() {
-		return this._h;
+		return 8;
+	}
+
+	addDeploySquare(square) {
+		if (!square || square.parent != this) return;
+
+		if (!this.deployArea.includes(square)) {
+			this.deployArea.push(square);
+		}
 	}
 
 	at(x, y) {
@@ -82,23 +85,20 @@ class Board extends Container {
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-	getArea(x, y, size, shape, shapeProps) {
-		x = x || 0;
-		y = y || 0;
+	getArea(origin, size, rule, ruleProps) {
 		size = Math.max(size || 0, 1);
 	
-		// calculate edges
-		var left = -Math.floor((size-1)/2);
-		var right = Math.ceil((size-1)/2);
-		var top = -Math.floor((size-1)/2);
-		var bottom = Math.ceil((size-1)/2);
+		var left = origin.x - Math.floor((size-1)/2);
+		var right = origin.x + Math.ceil((size-1)/2);
+		var top = origin.y - Math.floor((size-1)/2);
+		var bottom = origin.y + Math.ceil((size-1)/2);
 
-		// get every square in the area
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				if (!shape || shape(dx, dy, shapeProps)) {
-					area.push(this.at(x+dx, y+dy));
+				var square = this.at(dx, dy);
+				if (!rule || rule(origin, square, ruleProps)) {
+					area.push(square);
 				}
 			}
 		}
@@ -106,33 +106,62 @@ class Board extends Container {
 	}
 
 	canFit(piece, centerSquare, size) {
-		size = size || piece.size();
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		size = size || piece.size;
+		var area = this.getArea(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
+				return false;
+			}
+			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
 				return false;
 			}
 			if (square.piece != null && square.piece != piece) {
 				return false;
 			}
-			// TODO: Check for blocking terrain
 			return true;
 		});
 	}
-	// TODO: Too much repeated code- refactor these into a single function with multiple settings?
+	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
 	canPass(piece, centerSquare, size) {
-		size = size || piece.size();
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		size = size || piece.size;
+		var area = this.getArea(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
 			}
-			if (square.piece != null && piece != null && square.piece.team != piece.team) {
+			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
+				return false; // TODO: Depends on movement settings?
+			}
+			if (square.piece != null && piece != null && !square.piece.isAlly(piece)) {
 				return false;
 			}
-			// TODO: Check for blocking terrain
 			return true;
 		});
+	}
+	canSee(origin, target, props) {
+		if (!origin || !target || origin.parent != target.parent) return false;
+		
+		if (origin == target) return true;
+
+		var x = origin.x;
+		var y = origin.y;
+		var tx = target.x;
+		var ty = target.y;
+		while (true) {
+			// It's not a straight line, but close enough for how I'm using it
+			if (x < tx) x++;
+			else if (x > tx) x--;
+			if (y < ty) y++;
+			else if (y > ty) y--;
+
+			var square = this.at(x, y);
+			if (square && square.terrain == Square.Wall) {
+				return false;
+			}
+			if (x == tx && y == ty) return true;
+			// TODO: Use props to specify which pieces block LoS and which don't
+			if (square.piece) return false;
+		}
 	}
 
 	movePiece(piece, targetSquare) {
@@ -145,7 +174,7 @@ class Board extends Container {
 		if (piece.parent != this) {
 			piece.setParent(this);
 		} else {
-			this._fillPiece(null, piece.square, piece.size());
+			this._fillPiece(null, piece.square, piece.size);
 		}
 
 		targetSquare.el.appendChild(piece.el);
@@ -156,7 +185,7 @@ class Board extends Container {
 	}
 	removePiece(piece) {
 		if (super.removePiece(piece)) {
-			this._fillPiece(null, piece.square, piece.size());
+			this._fillPiece(null, piece.square, piece.size);
 			piece.square = null;
 			return true;
 		}
@@ -165,14 +194,14 @@ class Board extends Container {
 	_fillPiece(piece, centerSquare, size) {
 		if (!centerSquare) return;
 
-		size = size || piece.size();
-		var area = this.getArea(centerSquare.x, centerSquare.y, size);
+		size = size || piece.size;
+		var area = this.getArea(centerSquare, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
 	}
 
-	slidePiece(piece, origin, dist, attr) {
+	slidePiece(piece, origin, dist, props) {
 		var [dx, dy] = this._getDirection(origin, piece.square);
 		if (dist < 0) {
 			dist = -dist;
@@ -230,6 +259,14 @@ class Board extends Container {
 		}
 	}
 
+	setDeployArea() {
+		this.deployArea.forEach(square => this._paintDeployRange(square));
+	}
+	_paintDeployRange(square) {
+		square.el.classList.add('deploy-range');
+		square.el.ondragover = this._allowDrop;
+		square.inRange = true;
+	}
 	setMoveArea(piece) {
 		if (!piece || !piece.square || piece.parent != this) return;
 
@@ -257,9 +294,6 @@ class Board extends Container {
 			}
 		}
 	}
-	setDeployArea() {
-		this._deployArea.forEach(square => this._paintMoveRange(square));
-	}
 	_paintMoveRange(square, movesLeft) {
 		square.el.classList.add('move-range');
 		square.el.ondragover = this._allowDrop;
@@ -273,15 +307,19 @@ class Board extends Container {
 
 		// get the possible range
 		var size = 1 + 2*piece.range;
-		var area = this.getArea(user.square.x, user.square.y, size, piece.shape, piece.shapeProps);
-		for (var i = 0; i < area.length; i++) {
-			if (area[i]) this._paintSkillRange(area[i]);
-		}
+		var area = this.getArea(user.square, size, piece.shape, piece.shapeProps);
+		area.forEach(square => {
+			if (square) this._paintSkillRange(square, piece.validTarget(square));
+		});
 		// TODO: Do extra if the user is a larger piece?
 	}
-	_paintSkillRange(square) {
-		square.el.classList.add('skill-range');
-		square.el.ondragover = this._allowDrop;
+	_paintSkillRange(square, valid) {
+		if (valid) {
+			square.el.classList.add('skill-range');
+			square.el.ondragover = this._allowDrop;
+		} else {
+			square.el.classList.add('skill-range-invalid');
+		}
 		square.inRange = true;
 	}
 	resetAreas() {
@@ -295,8 +333,10 @@ class Board extends Container {
 		}
 	}
 	_clearPaint(square) {
+		square.el.classList.remove('deploy-range');
 		square.el.classList.remove('move-range');
 		square.el.classList.remove('skill-range');
+		square.el.classList.remove('skill-range-invalid');
 		square.el.ondragover = null;
 		square.inRange = null;
 		square.movesLeft = null;
@@ -322,13 +362,14 @@ class Board extends Container {
 
 	_allowDrop(ev) {
 		ev.preventDefault();
+		// TODO: Reject if the data transfer is incorrect
 	}
 	_drop(ev) {
 		ev.preventDefault();
-		if (ev.target) {
+		var elId = ev.dataTransfer.getData("piece");
+		if (elId && ev.target) {
 			var square = ev.target.obj;
 			square = square.square || square;
-			var elId = ev.dataTransfer.getData("text");
 			if (Game.scene) {
 				Game.scene.selectSquare(square, elId);
 			}
@@ -348,16 +389,20 @@ class Board extends Container {
 /***************************************************
  Game board -> Square
 ***************************************************/
-class Square extends SubContainer {
+class Square extends Position {
 	constructor(x, y, parent) {
 		super(parent);
-		this.el.classList.add('square');
 		this._x = x;
 		this._y = y;
+		this.piece = null;
+		this.terrain = Square.Flat;
 	}
 
 	get elType() {
-		return 'td';
+		return 'div';
+	}
+	get elClass() {
+		return 'square';
 	}
 
 	get x() {
@@ -366,7 +411,35 @@ class Square extends SubContainer {
 	get y() {
 		return this._y;
 	}
+
+	get terrain() {
+		return this._terrain;
+	}
+	set terrain(value) {
+		switch (this._terrain) {
+			case Square.Wall:
+				this.el.classList.remove('wall');
+				break;
+			case Square.Pit:
+				this.el.classList.remove('pit');
+				break;
+		}
+
+		this._terrain = value;
+
+		switch (this._terrain) {
+			case Square.Wall:
+				this.el.classList.add('wall');
+				break;
+			case Square.Pit:
+				this.el.classList.add('pit');
+				break;
+		}
+	}
 };
+Square.Flat = 0;
+Square.Wall = 1;
+Square.Pit = 2;
 
 /***************************************************
  Skill list

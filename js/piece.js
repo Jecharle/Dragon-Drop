@@ -4,14 +4,12 @@ The root class for objects you can select, click,
 and drag around between containers
 ***************************************************/
 class Piece extends ElObj {
-	constructor(size) {
+	constructor() {
 		super();
 		this._parent = null;
-		this._size = size || 1;
 
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
-		this.el.classList.add('x'+this._size); // TEMP
 
 		// TODO: Safe to assume this is always viable?
 		this.el.onclick = this._click;
@@ -27,8 +25,6 @@ class Piece extends ElObj {
 	idMatch(id) {
 		return (!id || id == this.el.id);
 	}
-
-	size() { return this._size; }
 
 	setParent(container) {
 		if (this.parent && this.parent != container) {
@@ -69,12 +65,12 @@ class Piece extends ElObj {
 		if (Game.scene) Game.scene.selectPiece(piece);
 	}
 	_drag(ev) {
-		ev.dataTransfer.setData("text", ev.target.id);
+		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
-		ev.dataTransfer.clearData("text");
+		ev.dataTransfer.clearData("piece");
 		// the drop target handles the rest
 	}
 };
@@ -83,86 +79,105 @@ class Piece extends ElObj {
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
-	constructor(battler) {
-		super(battler.Size);
-		this._battler = battler;
+	constructor() {
+		super();
 		this._team = null;
 		this.square = null;
-		this._setupStats();
 
-		this.el.classList.add(battler.Style); // TEMP
+		this._setStats();
 
-		this._lifebar = new Lifebar(this.hpRate());
+		// TODO: Make a proper "initialize" method for this?
+		this.hp = this.maxHp;
+		this._lifebar = new Lifebar(this.hpRate);
 		this.el.appendChild(this._lifebar.el);
-	}
-
-	get name() {
-		return this._battler.Name;
 	}
 
 	get targetable() {
 		return true;
 	}
 
-	// TODO: Lots
+	get size() {
+		return this._size;
+	}
+	set size(value) {
+		if (this._size) {
+			this.el.classList.remove("x"+this.size);
+		}
+		if (value) {
+			this.el.classList.add("x"+this._size);
+		}
+		this._size = value;
+	}
 
-	_setupStats() {
-		this._maxHp = this._battler.MaxHp;
-		this.hp = this.maxHp;
+	_setStats() {
+		this._maxHp = 1;
 	}
 
 	get team() {
 		return this._team;
 	}
 	setTeam(team) {
-		if (this._team && this._team.contains(this)) {
-			var index = this._team.indexOf(this);
-			this._team.splice(index, 1);
-		}
-		if (team) {
-			team.push(this);
+		if (this._team) {
+			this._team.remove(this);
 		}
 		this._team = team;
+		if (this._team) {
+			this._team.add(this);
+		}
+	}
+	isAlly(piece) {
+		if (!this.team) return false;
+		return this.team.isAlly(piece.team);
+	}
+	isEnemy(piece) {
+		if (!this.team) return false;
+		return this.team.isEnemy(piece.team);
 	}
 
-	get maxHp() {
-		return this._maxHp;
+	get hp() {
+		return Math.max(Math.min(this._hp, this.maxHp), 0);
 	}
-	hpRate() {
-		if (this.maxHp == 0) return this.hp;
+	set hp(value) {
+		this._hp = value;
+		if (this._hp > this.maxHp) this._hp = this.maxHp;
+		if (this._hp < 0) this._hp = 0;
+	}
+	get maxHp() {
+		return Math.max(this._maxHp, 0);
+	}
+	get hpRate() {
+		if (this.maxHp == 0) return 0;
 		else return this.hp / this.maxHp;
 	}
-	dead() {
+	get dead() {
 		return this.hp <= 0;
 	}
-	alive() {
+	get alive() {
 		return !this.dead();
 	}
 
 	refresh() {
-		this._lifebar.value = this.hpRate();
+		if (this.dead) { // TEMP
+			this.setParent(null);
+			this.setTeam(null);
+		}
+		this._lifebar.value = this.hpRate;
 	}
 
-	takeDamage(power, attr) {
+	takeDamage(power, props) {
 		this.hp -= power;
 
-		if (this.hp < 0) {
-			this.hp = 0;
-			// TODO: Die?
+		if (!props || !props.noAnimation) {
+			this.el.classList.add('damaged');
+			this.el.addEventListener('animationend', this._removeDamagedAnimation);
 		}
-
-		this.el.classList.add('damaged');
-		this.el.addEventListener('animationend', this._removeDamagedAnimation);
 
 		this._showPopup(power);
 		this.refresh();
 		return power;
 	}
-	heal(power, attr) {
+	heal(power, props) {
 		this.hp += power;
-		if (this.hp > this.maxHp) {
-			this.hp = this.maxHp;
-		}
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
@@ -176,13 +191,15 @@ class TargetablePiece extends Piece {
 		this.el.appendChild(popup.el);
 	}
 
-	push(origin, dist, attr) {
+	push(origin, dist, props) {
+		if (!this.parent) return 0;
 		return this.parent.slidePiece(this, origin, dist);
 	}
-	pull(origin, dist, attr) {
-		return this.push(origin, -dist, attr);
+	pull(origin, dist, props) {
+		return this.push(origin, -dist, props);
 	}
 	swap(piece) {
+		if (!this.parent) return false;
 		return this.parent.swapPieces(this, piece);
 	}
 
@@ -206,27 +223,29 @@ class TargetablePiece extends Piece {
  Controllable piece
 ***************************************************/
 class ControllablePiece extends TargetablePiece {
-	constructor(battler) {
-		super(battler);
-		this.el.classList.add('unit');
+	constructor() {
+		super();
+		this._setSkills();
 
-		this._setupSkills();
-		this.endTurn(); // TEMP
+		this.endTurn(); // TEMP?
 	}
 
-	_setupStats() {
-		super._setupStats();
-		this._baseMoveRange = this._battler.MoveRange;
+	get elClass() {
+		return 'unit';
 	}
-	_setupSkills() {
-		this._skills = this._battler.SkillList.map(SkillType => {
-			return new SkillType(this);
-		});
+
+	_setStats() {
+		super._setStats();
+		this._moveRange = 2;
+	}
+
+	_setSkills() {
+		this._skills = [];
 	}
 
 	get moveRange() {
 		if (this.moved) return 0;
-		else return this._baseMoveRange;
+		else return this._moveRange;
 	}
 
 	get skills() {
@@ -293,14 +312,13 @@ class ControllablePiece extends TargetablePiece {
 };
 
 /***************************************************
- Skill use piece
+ Skill piece
 ***************************************************/
 class SkillPiece extends Piece {
 	constructor(user) {
-		super(1);
+		super();
 		this.user = user;
 		this.cooldown = 0;
-		this.el.classList.add('skill');
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -311,28 +329,38 @@ class SkillPiece extends Piece {
 		this.refresh();
 	}
 
+	get elClass() {
+		return 'skill';
+	}
+
 	get fullDescription() {
 		var desc = `<strong>${this._name}</strong><br>${this._description}`;
 		if (this._cooldownCost > 0) {
-			desc += `<br><em>(${this._cooldownCost} turn cooldown)</em>`;
+			desc += `<br><em>${this._cooldownCost} turn cooldown</em>`;
 		}
 		return desc;
 	}
+
 	get _name() {
-		return "Skill Name"
+		return "[Skill name]";
 	}
 	get _description() {
-		return "Skill description"
+		return "[Skill description]";
 	}
 
+	_range = 1
 	get range() {
-		return 1;
+		return this._range;
 	}
+
+	_minRange = 1
 	get minRange() {
-		return 1;
+		return this._minRange;
 	}
+
+	_shape = Shape.Line
 	get shape() {
-		return Shape.Line;
+		return this._shape;
 	}
 	get shapeProps() {
 		return {
@@ -341,12 +369,12 @@ class SkillPiece extends Piece {
 		};
 	}
 
-	_baseCooldown = 0;
+	_baseCooldown = 0
 	get _cooldownCost() {
 		return this._baseCooldown;
 	}
 
-	_basePower = 1;
+	_basePower = 1
 	get power() {
 		return this._basePower;
 	}
@@ -356,7 +384,7 @@ class SkillPiece extends Piece {
 		else return true;
 	}
 	use(target) {
-		if (!this._validTarget(target)) return false;
+		if (!this.validTarget(target)) return false;
 
 		this._payCost();
 		this._effects(target);
@@ -364,7 +392,7 @@ class SkillPiece extends Piece {
 		this.user.refresh();
 		return true;
 	}
-	_validTarget(target) {
+	validTarget(target) {
 		return false;
 	}
 	_effects(target) { }
@@ -398,113 +426,5 @@ class SkillPiece extends Piece {
 	}
 	get type() {
 		return Piece.Skill;
-	}
-};
-
-/***************************************************
- Test attack skill
-***************************************************/
-class TestAttackSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('attack-skill');
-	}
-
-	get _name() {
-		return "Attack";
-	}
-	get _description() {
-		return `Deal ${this.power} damage and push the target 1 space`;
-	}
-
-	get range() {
-		return 2;
-	}
-
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-
-	_effects(target) {
-		var targetPiece = target.piece;
-		targetPiece.takeDamage(this.power);
-		targetPiece.push(this.user.square, 1);
-	}
-};
-
-/***************************************************
- Test heal skill
-***************************************************/
-class TestHealSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('heal-skill');
-	}
-
-	get _name() {
-		return "Heal";
-	}
-	get _description() {
-		return `Restore ${this.power} HP`;
-	}
-
-	get range() {
-		return 1;
-	}
-	get minRange() {
-		return 0;
-	}
-
-	_basePower = 2;
-	_baseCooldown = 2;
-
-	_validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-	_effects(target) {
-		target.piece.heal(2);
-	}
-};
-
-/***************************************************
- Test build skill
-***************************************************/
-class TestBuildSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.el.classList.add('build-skill');
-	}
-
-	get _name() {
-		return "Build";
-	}
-	get _description() {
-		return "Create a wall with 1 HP";
-	}
-
-	get range() {
-		return 1;
-	}
-	get shape() {
-		return Shape.Square;
-	}
-
-	_baseCooldown = 3;
-
-	_validTarget(target) {
-		if (!target.piece) {
-			return true;
-		}
-		return false;
-	}
-	_effects(target) {
-		var wall = new TargetablePiece(Rock);
-		return target.parent.movePiece(wall, target);
 	}
 };
