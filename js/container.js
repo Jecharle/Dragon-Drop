@@ -293,10 +293,11 @@ class Board extends Container {
 		if (valid) {
 			square.el.classList.add('skill-range');
 			square.el.ondragover = this._allowDrop;
+			square.inRange = true;
 		} else {
 			square.el.classList.add('skill-range-invalid');
+			square.inRange = true;
 		}
-		square.inRange = true;
 	}
 	resetAreas() {
 		for (var x = 0; x < this.w; x++) {
@@ -314,7 +315,7 @@ class Board extends Container {
 		square.el.classList.remove('skill-range');
 		square.el.classList.remove('skill-range-invalid');
 		square.el.ondragover = null;
-		square.inRange = null;
+		square.inRange = false;
 		square.movesLeft = null;
 	}
 
@@ -347,7 +348,7 @@ class Board extends Container {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
-				Game.scene.selectSquare(square, elId);
+				Game.scene.selectPosition(square, elId);
 			}
 		}
 	}
@@ -356,7 +357,7 @@ class Board extends Container {
 		if (ev.target) {
 			var square = ev.target.obj;
 			if (square) {
-				if (Game.scene) Game.scene.selectSquare(square);
+				if (Game.scene) Game.scene.selectPosition(square);
 			}
 		}
 	}
@@ -372,6 +373,11 @@ class Square extends Position {
 		this._y = y;
 		this.piece = null;
 		this.terrain = Square.Flat;
+		this.inRange = false;
+		this.el.onmouseenter = this._mouseEnter;
+		this.el.ondragenter = this._mouseEnter;
+		this.el.onmouseleave = this._mouseLeave;
+		this.el.ondragleave = this._mouseLeave;
 	}
 
 	get elType() {
@@ -399,6 +405,12 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.remove('pit');
 				break;
+			case Square.Bush:
+				this.el.classList.remove('bush');
+				break;
+			case Square.Mud:
+				this.el.classList.remove('mud');
+				break;
 		}
 
 		this._terrain = value;
@@ -410,6 +422,33 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.add('pit');
 				break;
+			case Square.Bush:
+				this.el.classList.add('bush');
+				break;
+			case Square.Mud:
+				this.el.classList.add('mud');
+				break;
+		}
+	}
+
+	_mouseEnter(ev) {
+		ev.stopPropagation();
+		if (ev.target) {
+			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.target.obj;
+			if (square && square.inRange) {
+				if (Game.scene) Game.scene.mouseEnter(square, elId);
+			}
+		}
+	}
+	_mouseLeave(ev) {
+		ev.stopPropagation();
+		if (ev.target) {
+			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.target.obj;
+			if (square && square.inRange) {
+				if (Game.scene) Game.scene.mouseLeave(square, elId);
+			}
 		}
 	}
 };

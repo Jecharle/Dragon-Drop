@@ -91,7 +91,6 @@ class TestBuildSkill extends SkillPiece {
 		return this._inSquare(origin, target, this.range)
 		&& !this._inSquare(origin, target, this.minRange-1);
 	}
-
 	validTarget(target) {
 		if (target.parent.canFit(null, target, 1)) {
 			return true;
@@ -114,13 +113,12 @@ class TestMoveSkill extends SkillPiece {
 	}
 
 	get _name() {
-		return "Regroup";
+		return "Teleport";
 	}
 	get _description() {
-		return "Teleport adjacent to another unit";
+		return "Move to a square adjacent to another unit";
 	}
 
-	_range = 7;
 	_baseCooldown = 3;
 
 	inRange(origin, target) {

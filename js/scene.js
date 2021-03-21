@@ -21,7 +21,9 @@ class Scene extends ElObj {
 	end() { }
 
 	selectPiece(piece, dragging) { }
-	selectSquare(square, dragId) { }
+	selectPosition(position, dragId) { }
+	mouseEnter(position, dragId) { }
+	mouseLeave(position, dragId) { }
 
 	keydown(key) { }
 	keyup(key) { }
@@ -144,14 +146,9 @@ class BattleScene extends Scene {
 		this._refreshUi();
 	}
 
-	static deployPhase = 0;
-	static playerPhase = 1;
-	static enemyPhase = 2;
-	static victoryPhase = 3;
-	static defeatPhase = -1;
 	_deploy() {
 		this._turn = 0;
-		this._phase = BattleScene.deployPhase;
+		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
 
 		this._deselectTarget();
@@ -166,16 +163,16 @@ class BattleScene extends Scene {
 		this._deselectUnit();
 		this._clearMoves();
 		switch (this._phase) {
-			case BattleScene.playerPhase:
-				this._phase = BattleScene.enemyPhase;
+			case BattleScene.PlayerPhase:
+				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
 				break;
 
-			case BattleScene.deployPhase:
+			case BattleScene.DeployPhase:
 				this._canRedeploy = true;
-			case BattleScene.enemyPhase:
-				this._phase = BattleScene.playerPhase;
+			case BattleScene.EnemyPhase:
+				this._phase = BattleScene.PlayerPhase;
 				this._setActiveTeam(this.playerTeam);
 				this._showPhaseBanner("Player Phase");
 				this._turn++;
@@ -184,7 +181,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_win() {
-		this._phase = BattleScene.victoryPhase;
+		this._phase = BattleScene.VictoryPhase;
 		this._setActiveTeam(null);
 
 		// TODO: Add the victory interface?
@@ -197,7 +194,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_lose() {
-		this._phase = BattleScene.defeatPhase;
+		this._phase = BattleScene.DefeatPhase;
 		this._setActiveTeam(null);
 
 		// TODO: Add the loss interface?
@@ -224,7 +221,7 @@ class BattleScene extends Scene {
 	}
 
 	_refreshUi() {
-		if (this._phase == BattleScene.deployPhase) {
+		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "";
 			this._endTurnButtonEl.innerText = "Start Battle";
 			this._undoButtonEl.style.visibility = "hidden";
@@ -321,7 +318,7 @@ class BattleScene extends Scene {
 
 	_refreshArea() {
 		this._board.resetAreas();
-		if (this._phase == BattleScene.deployPhase) {
+		if (this._phase == BattleScene.DeployPhase) {
 			this._board.setDeployArea();
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
@@ -333,12 +330,12 @@ class BattleScene extends Scene {
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
-		if (this._phase == BattleScene.deployPhase) {
+		if (this._phase == BattleScene.DeployPhase) {
 			if (piece.square) {
 				if (piece.square.inRange && dragging) {
 					this._deselectTarget();
 				}
-				this.selectSquare(piece.square);
+				this.selectPosition(piece.square);
 			}
 		} else { // TODO: once AI works, only run for player phase
 			if (piece.type == Piece.Skill) {
@@ -348,7 +345,7 @@ class BattleScene extends Scene {
 					this._deselectSkill();
 				}
 			} else if (this._skill && piece.square && !dragging) {
-				this.selectSquare(piece.square);
+				this.selectPosition(piece.square);
 				return;
 			}
 
@@ -365,10 +362,10 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 
-	selectSquare(square, dragId) {
+	selectPosition(square, dragId) {
 		if (!square) return;
 
-		if (this._phase == BattleScene.deployPhase)
+		if (this._phase == BattleScene.DeployPhase)
 		{
 			if (!square.inRange) {
 				this._deselectTarget();
@@ -426,6 +423,12 @@ class BattleScene extends Scene {
 		}
 	}
 };
+BattleScene.DeployPhase = 0;
+BattleScene.PlayerPhase = 1;
+BattleScene.EnemyPhase = 2;
+BattleScene.VictoryPhase = 3;
+BattleScene.DefeatPhase = -1;
+
 
 /***************************************************
  Battle scene -> Team
