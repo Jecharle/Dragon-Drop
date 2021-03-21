@@ -15,8 +15,11 @@ class TestAttackSkill extends SkillPiece {
 	}
 
 	_range = 2
-	_shape = function(origin, target, props) {
-		return Shape.Line(origin, target, props) && Shape.CanSee(origin, target, props);
+
+	inRange(origin, target) {
+		return super.inRange(origin, target)
+		&& this._inLine(origin, target)
+		&& this._canSee(origin, target);
 	}
 
 	validTarget(target) {
@@ -82,8 +85,12 @@ class TestBuildSkill extends SkillPiece {
 	}
 
 	_range = 1;
-	_shape = Shape.Square;
 	_baseCooldown = 3;
+
+	inRange(origin, target) {
+		return this._inSquare(origin, target, this.range)
+		&& !this._inSquare(origin, target, this.minRange-1);
+	}
 
 	validTarget(target) {
 		if (target.parent.canFit(null, target, 1)) {
@@ -114,8 +121,11 @@ class TestMoveSkill extends SkillPiece {
 	}
 
 	_range = 7;
-	_shape = Shape.NearPiece;
 	_baseCooldown = 3;
+
+	inRange(origin, target) {
+		return this._nearPiece(origin, target)
+	}
 
 	validTarget(target) {
 		if (target.parent.canFit(this.user, target)) {

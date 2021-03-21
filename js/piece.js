@@ -358,15 +358,8 @@ class SkillPiece extends Piece {
 		return this._minRange;
 	}
 
-	_shape = Shape.Line
-	get shape() {
-		return this._shape;
-	}
-	get shapeProps() {
-		return {
-			range: this.range,
-			minRange: this.minRange,
-		};
+	inRange(origin, target) {
+		return this._inCircle(origin, target, this.range) && !this._inCircle(origin, target, this.minRange-1);
 	}
 
 	_baseCooldown = 0
@@ -426,5 +419,61 @@ class SkillPiece extends Piece {
 	}
 	get type() {
 		return Piece.Skill;
+	}
+
+	// targeting rules
+
+	_inCircle(origin, target, size) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx + dy <= size);
+	}
+	_inSquare(origin, target, size) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx <= size && dy <= size);
+	}
+	_inLine(origin, target) {
+		if (!origin || !target) return false;
+		return (origin.x == target.x || origin.y == target.y);
+	}
+	_inCross(origin, target) {
+		if (!origin || !target) return false;
+		var dx = Math.abs(origin.x - target.x);
+		var dy = Math.abs(origin.y - target.y);
+		return (dx == dy);
+	}
+
+	_canSee(origin, target, props) {
+		if (!origin || !target || origin.parent != target.parent) return false;
+		if (origin == target) return true;
+		
+		var board = origin.parent;
+
+		var x = origin.x;
+		var y = origin.y;
+		var tx = target.x;
+		var ty = target.y;
+		while (true) {
+			// It's not a straight line, but close enough for how I'm using it
+			if (x < tx) x++;
+			else if (x > tx) x--;
+			if (y < ty) y++;
+			else if (y > ty) y--;
+
+			var square = board.at(x, y);
+			if (square && (square.terrain & Square.BlockSight)) return false; // TODO: Use props to decide which terrain blocks?
+			if (x == tx && y == ty) return true;
+			if (square.piece) return false; // TODO: Use props to decide which pieces block
+		}
+	}
+	_nearPiece(_origin, target, props) {
+		if (!target) return false;
+		return target.parent.getAdjacent(target).some(square => {
+			if (square.piece) return true; // TODO: Use props to decide which pieces count
+			else return false;
+		});
 	}
 };

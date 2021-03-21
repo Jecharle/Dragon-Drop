@@ -275,18 +275,19 @@ class Board extends Container {
 		square.inRange = true;
 		square.movesLeft = movesLeft;
 	}
-	setSkillArea(piece) {
-		if (!piece || !piece.user) return;
-		var user = piece.user;
+	setSkillArea(skill) {
+		if (!skill || !skill.user) return;
+		var user = skill.user;
 		if (!user.square || user.parent != this) return;
+		var origin = user.square;
 
-		// get the possible range
-		var size = 1 + 2*piece.range;
-		var area = this.getArea(user.square, size, piece.shape, piece.shapeProps);
-		area.forEach(square => {
-			if (square) this._paintSkillRange(square, piece.validTarget(square));
+		// for a map this small, it's easiest to check every square
+		this._squares.forEach(square => {
+			if (skill.inRange(origin, square)) {
+				this._paintSkillRange(square, skill.validTarget(square));
+			}
 		});
-		// TODO: Do extra if the user is a larger piece?
+		// TODO: More possible origins for larger units?
 	}
 	_paintSkillRange(square, valid) {
 		if (valid) {

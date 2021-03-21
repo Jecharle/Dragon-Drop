@@ -392,16 +392,20 @@ class BattleScene extends Scene {
 	}
 
 	keydown(key) {
-		if (key == "Escape" || key == "Backspace") {
+		if (key == "Escape") {
 			if (this._target) {
 				this._deselectTarget();
 			} else if (this._skill) {
 				this._deselectSkill();
 			} else if (this._unit) {
 				this._deselectUnit();
-			} else {
-				this._undoMove();
 			}
+			// TODO: Open a menu?
+			this.refresh();
+		}
+
+		if (key == "Delete" || key == "Backspace" || key == "z" || key == "Z") {
+			this._undoMove();
 			this.refresh();
 		}
 
