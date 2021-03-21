@@ -16,7 +16,7 @@ class TestAttackSkill extends SkillPiece {
 
 	_range = 2
 	_shape = function(origin, target, props) {
-		return Shape.Line(origin, target, props) && Shape.LineOfSight(origin, target, props);
+		return Shape.Line(origin, target, props) && Shape.CanSee(origin, target, props);
 	}
 
 	validTarget(target) {
@@ -94,5 +94,36 @@ class TestBuildSkill extends SkillPiece {
 	_effects(target) {
 		var wall = new TestRockObject();
 		return target.parent.movePiece(wall, target);
+	}
+};
+
+/***************************************************
+ Test move skill
+***************************************************/
+class TestMoveSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'move-skill';
+	}
+
+	get _name() {
+		return "Regroup";
+	}
+	get _description() {
+		return "Teleport adjacent to another unit";
+	}
+
+	_range = 7;
+	_shape = Shape.NearPiece;
+	_baseCooldown = 3;
+
+	validTarget(target) {
+		if (target.parent.canFit(this.user, target)) {
+			return true;
+		}
+		return false;
+	}
+	_effects(target) {
+		return target.parent.movePiece(this.user, target);
 	}
 };

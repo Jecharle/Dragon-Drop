@@ -42,6 +42,7 @@ class TestMap extends MapModel { // TEMP
 		this._terrain.push({type: Square.Wall, x: 1, y: 4});
 		this._terrain.push({type: Square.Wall, x: 2, y: 4});
 		this._terrain.push({type: Square.Wall, x: 3, y: 4});
+		this._terrain.push({type: Square.Pit, x: 4, y: 4});
 
 		this._pieces.push({type: TestEnemyUnit, x: 3, y: 3, enemy: true});
 	}

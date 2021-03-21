@@ -112,7 +112,7 @@ class Board extends Container {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
+			if (square.terrain & Square.BlockMove) {
 				return false;
 			}
 			if (square.piece != null && square.piece != piece) {
@@ -129,7 +129,7 @@ class Board extends Container {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain == Square.Wall || square.terrain == Square.Pit) {
+			if (square.terrain & Square.BlockMove) {
 				return false; // TODO: Depends on movement settings?
 			}
 			if (square.piece != null && piece != null && !square.piece.isAlly(piece)) {
@@ -137,31 +137,6 @@ class Board extends Container {
 			}
 			return true;
 		});
-	}
-	canSee(origin, target, props) {
-		if (!origin || !target || origin.parent != target.parent) return false;
-		
-		if (origin == target) return true;
-
-		var x = origin.x;
-		var y = origin.y;
-		var tx = target.x;
-		var ty = target.y;
-		while (true) {
-			// It's not a straight line, but close enough for how I'm using it
-			if (x < tx) x++;
-			else if (x > tx) x--;
-			if (y < ty) y++;
-			else if (y > ty) y--;
-
-			var square = this.at(x, y);
-			if (square && square.terrain == Square.Wall) {
-				return false;
-			}
-			if (x == tx && y == ty) return true;
-			// TODO: Use props to specify which pieces block LoS and which don't
-			if (square.piece) return false;
-		}
 	}
 
 	movePiece(piece, targetSquare) {
@@ -277,7 +252,7 @@ class Board extends Container {
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
-			var adjacent = this._getAdjacent(edges[i]);
+			var adjacent = this.getAdjacent(edges[i]);
 			var movesLeft = edges[i].movesLeft-1;
 			
 			for (var n = 0; n < adjacent.length; n++) {
@@ -342,7 +317,7 @@ class Board extends Container {
 		square.movesLeft = null;
 	}
 
-	_getAdjacent(square) {
+	getAdjacent(square) {
 		var adjacent = [];
 
 		var left = this.at(square.x-1, square.y);
@@ -437,9 +412,15 @@ class Square extends Position {
 		}
 	}
 };
+Square.BlockMove = 1;
+Square.BlockSight = 2;
+Square.SlowMove = 4;
+
 Square.Flat = 0;
-Square.Wall = 1;
-Square.Pit = 2;
+Square.Pit = Square.BlockMove;
+Square.Bush = Square.BlockSight;
+Square.Wall = Square.BlockMove | Square.BlockSight;
+Square.Mud = Square.SlowMove;
 
 /***************************************************
  Skill list

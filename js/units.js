@@ -16,6 +16,7 @@ class TestMeleeUnit extends ControllablePiece {
 	_setSkills() {
 		this._skills = [
 			new TestAttackSkill(this),
+			new TestMoveSkill(this),
 		]
 	}
 };
