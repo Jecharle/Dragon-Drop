@@ -53,6 +53,7 @@
 .square::before {
 	position: absolute;
 	top: 0px;
+	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
 	opacity: 75%;
@@ -80,19 +81,20 @@
 .move-range:hover::before {
 	background-color: skyblue;
 }
+.move-origin::before {
+	border: 8px solid skyblue;
+}
 .skill-range::before {
 	background-color: orange;
 }
 .skill-range:hover::before {
 	background-color: yellow;
 }
+.skill-aoe::before {
+	border: 8px solid yellow;
+}
 .skill-range-invalid::before {
 	background-color: darkgoldenrod;
-}
-
-.skill-aoe::before {
-	box-sizing: border-box;
-	border: 4px solid black;
 }
 
 .piece {
