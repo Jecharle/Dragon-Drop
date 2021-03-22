@@ -440,9 +440,9 @@ class Square extends Position {
 
 	_mouseEnter(ev) {
 		ev.stopPropagation();
-		if (ev.target) {
+		if (ev.currentTarget) { // mouse-in counts pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.target.obj;
+			var square = ev.currentTarget.obj;
 			if (square && square.inRange) {
 				if (Game.scene) Game.scene.mouseEnter(square, elId);
 			}
@@ -450,7 +450,7 @@ class Square extends Position {
 	}
 	_mouseLeave(ev) {
 		ev.stopPropagation();
-		if (ev.target) {
+		if (ev.target) { // mouse-out does NOT count pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.target.obj;
 			if (square && square.inRange) {
