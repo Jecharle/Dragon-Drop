@@ -8,6 +8,8 @@ class MapModel {
 		this._deployment = []; // x, y
 		this._terrain = []; // x, y, terrainType
 		this._pieces = []; // x, y, pieceType, enemy/object
+		this._turnLimit = 0;
+		this._defaultVictory = false;
 	}
 
 	get deployment() {
@@ -22,8 +24,13 @@ class MapModel {
 		return this._pieces;
 	}
 
+	get turnLimit() {
+		return this._turnLimit;
+	}
+	get defaultVictory() {
+		return this._defaultVictory;
+	}
 	// TODO: Sets of pieces to add on subsequent turns?
-	// TODO: Time limit?
 	// TODO: Tileset?
 }
 
@@ -34,6 +41,8 @@ class TestMap extends MapModel { // TEMP
 	constructor() {
 		super();
 		
+		this._turnLimit = 2;
+
 		this._deployment.push({x: 2, y: 5});
 		this._deployment.push({x: 3, y: 5});
 		this._deployment.push({x: 4, y: 5});

@@ -45,7 +45,7 @@ class BattleScene extends Scene {
 		this._skillList = this._createSkillList();
 
 		this._applyMapModel(mapModel);
-		this._addPlayers(); // TODO: Load the party from elsewhere?
+		this._addParty(); // TODO: Load the party from elsewhere?
 
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
@@ -133,9 +133,12 @@ class BattleScene extends Scene {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
 			this._board.movePiece(newPiece, this._board.at(data.x, data.y));
 		});
+
+		this._turnLimit = mapModel.turnLimit;
+		this._defaultVictory = mapModel.defaultVictory;
 	}
 
-	_addPlayers(party) {
+	_addParty(party) {
 		if (!party) return;
 
 		party.forEach(piece => {
@@ -152,7 +155,7 @@ class BattleScene extends Scene {
 	}
 
 	_deploy() {
-		this._turn = 0;
+		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(null);
 
@@ -165,21 +168,28 @@ class BattleScene extends Scene {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
-		// TODO: Timed victory / defeat?
 		switch (this._phase) {
+			case BattleScene.DeployPhase:
+				this._canRedeploy = true;
+				this._phase = BattleScene.PlayerPhase;
+				this._setActiveTeam(this.playerTeam);
+				this._showPhaseBanner("Battle Start");
+				break;
+
 			case BattleScene.PlayerPhase:
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
 				break;
 
-			case BattleScene.DeployPhase:
-				this._canRedeploy = true;
 			case BattleScene.EnemyPhase:
+				this._turn++;	
+
+				if (this._checkForEnd()) break;
+
 				this._phase = BattleScene.PlayerPhase;
 				this._setActiveTeam(this.playerTeam);
 				this._showPhaseBanner("Player Phase");
-				this._turn++;
 				break;
 		}
 		this.refresh();
@@ -187,16 +197,29 @@ class BattleScene extends Scene {
 	_checkForEnd() {
 		if (this.playerTeam.size <= 0) {
 			this._lose();
+			return true;
 		} else if (this.enemyTeam.size <= 0) {
 			this._win();
+			return true;
 		}
+
+		if (this._turnLimit && this._turn > this._turnLimit) {
+			if (this._defaultVictory) {
+				this._win();
+			} else {
+				this._lose();
+			}
+			return true;
+		}
+
+		return false;
 	}
 	_win() {
 		this._phase = BattleScene.EndPhase;
 		this._setActiveTeam(null);
-
 		this._showPhaseBanner("Victory");
 
+		// TODO: Do I actually need all of this?
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -209,9 +232,9 @@ class BattleScene extends Scene {
 	_lose() {
 		this._phase = BattleScene.EndPhase;
 		this._setActiveTeam(null);
-
 		this._showPhaseBanner("Defeat");
 
+		// TODO: Do I actually need all of this?
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -228,26 +251,33 @@ class BattleScene extends Scene {
 	}
 
 	_refreshUi() {
+		// turn counter
 		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "";
-			this._endTurnButtonEl.innerText = "Start Battle";
-			this._undoButtonEl.style.visibility = "hidden";
-		} else if (this._phase != BattleScene.EndPhase) {
-			this._turnTitleEl.innerText = "Turn " + this._turn;
-			this._endTurnButtonEl.innerText = "End Turn";
-			this._undoButtonEl.style.visibility = "visible";
+		} else if (this._turnLimit && this._turn >= this._turnLimit) {
+			this._turnTitleEl.innerText = "Last turn";
+		} else if (this._turnLimit) {
+			this._turnTitleEl.innerText = (1 + this._turnLimit - this._turn)+" turns left";
 		} else {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
-			this._endTurnButtonEl.style.visibility = "hidden";
-			this._undoButtonEl.style.visibility = "hidden";
 		}
 
-		if (this._lastMove) {
+		// button display
+		if (this._phase == BattleScene.DeployPhase) {
+			this._endTurnButtonEl.innerText = "Start Battle";
+			this._undoButtonEl.style.visibility = "hidden";
+		} else {
+			this._endTurnButtonEl.innerText = "End Turn";
+			this._undoButtonEl.style.visibility = "visible";
+		}
+
+		// enable / disable the undo button
+		if (this._lastMove != null) {
 			this._undoButtonEl.disabled = false;
 			this._undoButtonEl.innerText = "Undo";
 		} else if (this._canRedeploy) {
 			this._undoButtonEl.disabled = false;
-			this._undoButtonEl.innerText = "Redeploy";
+			this._undoButtonEl.innerText = "Switch";
 		} else {
 			this._undoButtonEl.disabled = true;
 			this._undoButtonEl.innerText = "Undo";
@@ -524,8 +554,8 @@ class TestScene extends BattleScene {
 		super(new TestMap());
 	}
 
-	_addPlayers() {
-		super._addPlayers([
+	_addParty() {
+		super._addParty([
 			new TestMeleeUnit(),
 			new TestSupportUnit()
 		]);
