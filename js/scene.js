@@ -130,7 +130,7 @@ class BattleScene extends Scene {
 		});
 		this._reinforcements = [];
 		mapModel.pieces.forEach(data => {
-			if (data.turn > 1) {
+			if (data.turn > 0) {
 				this._reinforcements.push(data);
 			} else {
 				var newPiece = new data.type();
@@ -202,7 +202,6 @@ class BattleScene extends Scene {
 			case BattleScene.EnemyPhase:
 				this._phase = BattleScene.PlayerPhase;
 				this._turn++;
-				this._addReinforcements(); // TEMP? (move to the end of AI handling?)
 				this._checkForEnd();
 				break;
 		}
@@ -217,6 +216,7 @@ class BattleScene extends Scene {
 
 			case BattleScene.EnemyPhase:
 				this._setActiveTeam(this.enemyTeam);
+				this._addReinforcements(); // TEMP?
 				this._showPhaseBanner("Enemy Phase");
 				break;
 		}
