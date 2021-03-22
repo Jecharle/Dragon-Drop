@@ -7,6 +7,7 @@ class Scene extends ElObj {
 	constructor(lastScene) {
 		super();
 		this._lastScene = lastScene || null;
+		this._dataIn = null;
 	}
 
 	get lastScene() {
@@ -19,6 +20,10 @@ class Scene extends ElObj {
 
 	start() { }
 	end() { }
+
+	sendData(data) {
+		this._dataIn = data;
+	}
 
 	selectPiece(piece, dragging) { }
 	selectPosition(position, dragId) { }
@@ -160,6 +165,7 @@ class BattleScene extends Scene {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
+		// TODO: Timed victory / defeat?
 		switch (this._phase) {
 			case BattleScene.PlayerPhase:
 				this._phase = BattleScene.EnemyPhase;
@@ -178,37 +184,42 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	}
-	_win() {
-		this._phase = BattleScene.EndPhase;
-		this._setActiveTeam(null);
-
-		// TODO: Add the victory interface?
-		this._showPhaseBanner("Victory");
-
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-		this.refresh();
-	}
-	_lose() {
-		this._phase = BattleScene.EndPhase;
-		this._setActiveTeam(null);
-
-		// TODO: Add the loss interface?
-		this._showPhaseBanner("Defeat");
-
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-		this.refresh();
-	}
 	_checkForEnd() {
 		if (this.playerTeam.size <= 0) {
 			this._lose();
 		} else if (this.enemyTeam.size <= 0) {
 			this._win();
 		}
-		// TODO: Timed victory / defeat?
+	}
+	_win() {
+		this._phase = BattleScene.EndPhase;
+		this._setActiveTeam(null);
+
+		this._showPhaseBanner("Victory");
+
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this.refresh();
+
+		if (this.lastScene) this.lastScene.sendData({ victory: true });
+		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
+		// TODO: End the scene after that?
+	}
+	_lose() {
+		this._phase = BattleScene.EndPhase;
+		this._setActiveTeam(null);
+
+		this._showPhaseBanner("Defeat");
+
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this.refresh();
+
+		if (this.lastScene) this.lastScene.sendData({ victory: false });
+		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
+		// TODO: End the scene after that?
 	}
 
 	_showPhaseBanner(value) {
@@ -221,10 +232,14 @@ class BattleScene extends Scene {
 			this._turnTitleEl.innerText = "";
 			this._endTurnButtonEl.innerText = "Start Battle";
 			this._undoButtonEl.style.visibility = "hidden";
-		} else {
+		} else if (this._phase != BattleScene.EndPhase) {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
 			this._endTurnButtonEl.innerText = "End Turn";
 			this._undoButtonEl.style.visibility = "visible";
+		} else {
+			this._turnTitleEl.innerText = "Turn " + this._turn;
+			this._endTurnButtonEl.style.visibility = "hidden";
+			this._undoButtonEl.style.visibility = "hidden";
 		}
 
 		if (this._lastMove) {
@@ -476,7 +491,7 @@ class Team {
 
 	remove(piece) {
 		var index = this.members.indexOf(piece);
-		if (index > 0) {
+		if (index > -1) {
 			this.members.splice(index, 1);
 		}
 	}

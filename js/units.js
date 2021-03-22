@@ -9,7 +9,7 @@ class TestMeleeUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 5;
+		this._maxHp = 3;
 		this._moveRange = 3;
 	}
 
@@ -29,7 +29,7 @@ class TestSupportUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 3;
+		this._maxHp = 2;
 		this._moveRange = 2;
 	}
 
@@ -50,7 +50,7 @@ class TestEnemyUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 5;
+		this._maxHp = 3;
 		this._moveRange = 2;
 	}
 
