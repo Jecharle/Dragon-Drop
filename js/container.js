@@ -71,6 +71,17 @@ class Board extends Container {
 		return 8;
 	}
 
+	applyMapModel(mapModel) {
+		if (!mapModel) return;
+
+		mapModel.terrain.forEach(data => {
+			this.at(data.x, data.y).terrain = data.type;
+		});
+		mapModel.deployment.forEach(data => {
+			this.addDeploySquare(this.at(data.x, data.y));
+		});
+	}
+
 	addDeploySquare(square) {
 		if (!square || square.parent != this) return;
 

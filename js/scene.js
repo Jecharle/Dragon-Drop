@@ -38,14 +38,14 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(mapModel) {
+	constructor(mapModel, party) {
 		super();
 		this._initTeams();
 		this._board = this._createBoard();
 		this._skillList = this._createSkillList();
 
 		this._applyMapModel(mapModel);
-		this._addParty(); // TODO: Load the party from elsewhere?
+		this._addParty(party); // TODO: Load the party from elsewhere?
 
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
@@ -121,28 +121,25 @@ class BattleScene extends Scene {
 	_applyMapModel(mapModel) {
 		if (!mapModel) return;
 
-		// TODO: Move some of this into the board class, for better locality?
-		mapModel.deployment.forEach(data => {
-			this._board.addDeploySquare(this._board.at(data.x, data.y));
-		});
-		mapModel.terrain.forEach(data => {
-			this._board.at(data.x, data.y).terrain = data.type;
-		});
+		this._board.applyMapModel(mapModel);
+
 		this._reinforcements = [];
 		mapModel.pieces.forEach(data => {
-			if (data.turn > 0) {
-				this._reinforcements.push(data);
-			} else {
-				var newPiece = new data.type();
-				if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
-					if (data.enemy) newPiece.setTeam(this.enemyTeam);
-				}
-			}
+			if (data.turn > 0) this._reinforcements.push(data);
+			else this._addUnit(data);
 		});
 
 		this._maxTurns = mapModel.maxTurns;
 		this._minTurns = mapModel.minTurns;
 		this._defaultVictory = mapModel.defaultVictory;
+	}
+	_addUnit(data) {
+		var newPiece = new data.type();
+		if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
+			if (data.enemy) newPiece.setTeam(this.enemyTeam);
+			return true;
+		}
+		return false;
 	}
 
 	_addParty(party) {
@@ -155,16 +152,11 @@ class BattleScene extends Scene {
 			piece.setTeam(this.playerTeam);
 		});
 	}
-
 	_addReinforcements() {
-		// this removes anything that was successfully added
+		// this removes the data for anything successfully added
 		this._reinforcements = this._reinforcements.filter(data => {
 			if (data.turn <= this._turn) {
-				var newPiece = new data.type();
-				if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
-					if (data.enemy) newPiece.setTeam(this.enemyTeam);
-					return false;
-				}
+				return !this._addUnit(data);
 			}
 			return true;
 		});
@@ -580,11 +572,8 @@ The current scene used for debugging
 ***************************************************/
 class TestScene extends BattleScene {
 	constructor() {
-		super(new TestMap());
-	}
-
-	_addParty() {
-		super._addParty([
+		super(new TestMap(),
+		[
 			new TestMeleeUnit(),
 			new TestSupportUnit()
 		]);
