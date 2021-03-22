@@ -156,6 +156,13 @@ class TestAreaSkill extends SkillPiece {
 	_minRange = 2
 	_area = 1
 
+	inArea(origin, target) {
+		var direction = origin.parent.getDirection(this.user.square, origin);
+		return this._inSquare(origin, target, this.area)
+			&& this._inLine(origin, target)
+			&& this._beside(origin, target, direction);
+	}
+
 	inRange(origin, target) {
 		return super.inRange(origin, target)
 			&& this._inLine(origin, target);
@@ -165,7 +172,7 @@ class TestAreaSkill extends SkillPiece {
 		// TODO: Standardize this for use with future AoE skills?
 		target.parent.getAoE(this, target).forEach(square => {
 			if (square && square.piece && square.piece.targetable) {
-				piece.takeDamage(this.power);
+				square.piece.takeDamage(this.power);
 			}
 		});
 	}

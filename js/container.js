@@ -176,8 +176,12 @@ class Board extends Container {
 		});
 	}
 
-	slidePiece(piece, origin, dist, props) {
-		var [dx, dy] = this._getDirection(origin, piece.square);
+	shiftPiece(piece, origin, dist, props) {
+		var direction = this.getDirection(origin, piece.square);
+		return this.shiftPieceDirection(piece, direction, dist, props);
+	}
+	shiftPieceDirection(piece, direction, dist, props) {
+		var [dx, dy] = direction;
 		if (dist < 0) {
 			dist = -dist;
 			dx = -dx;
@@ -201,7 +205,7 @@ class Board extends Container {
 		this.movePiece(piece, square);
 		return distMoved;
 	}
-	_getDirection(origin, target) {
+	getDirection(origin, target) {
 		var dx = target.x - origin.x;
 		var dy = target.y - origin.y;
 		
