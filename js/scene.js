@@ -331,7 +331,9 @@ class BattleScene extends Scene {
 			if (this._target) {
 				this._board.showAoE(this._skill, this._target);
 			}
-		} else if (this._unit && (!this._unit.moved || this._lastMove == this._unit)) {
+		} else if (this._unit && !this._unit.moved) {
+			this._board.setMoveArea(this._unit);
+		} else if (this._unit && this._lastMove == this._unit && this._dragging) {
 			this._board.setMoveArea(this._unit);
 		}
 	}
@@ -368,6 +370,7 @@ class BattleScene extends Scene {
 				}
 			}
 		}
+		this._dragging = dragging;
 		this.refresh();
 	}
 	selectPosition(square, dragId) {
@@ -392,6 +395,7 @@ class BattleScene extends Scene {
 				this._moveUnit(this._unit, square);
 			}
 		}
+		this._dragging = false;
 		this.refresh();
 	}
 
