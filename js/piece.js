@@ -193,7 +193,7 @@ class TargetablePiece extends Piece {
 
 	push(origin, dist, props) {
 		if (!this.parent) return 0;
-		return this.parent.slidePiece(this, origin, dist);
+		return this.parent.shiftPiece(this, origin, dist);
 	}
 	pull(origin, dist, props) {
 		return this.push(origin, -dist, props);
@@ -428,7 +428,7 @@ class SkillPiece extends Piece {
 		return Piece.Skill;
 	}
 
-	// targeting rules
+	// targeting shapes
 
 	_inCircle(origin, target, size) {
 		if (!origin || !target) return false;
@@ -452,6 +452,35 @@ class SkillPiece extends Piece {
 		var dy = Math.abs(origin.y - target.y);
 		return (dx == dy);
 	}
+
+	// targeting directions
+
+	_ahead(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = dx * direction[0] + dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (forward >= 0 && forward >= sideways);
+	}
+	_behind(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var backward = -dx * direction[0] - dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (backward >= 0 && backward >= sideways);
+	}
+	_beside(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = Math.abs(dx * direction[0] + dy * direction[1]);
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (sideways >= 0 && sideways >= forward);
+	}
+
+	// other targeting rules
 
 	_canSee(origin, target, props) {
 		if (!origin || !target || origin.parent != target.parent) return false;

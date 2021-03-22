@@ -249,7 +249,7 @@
 	height: 100%;
 	background-color: red;
 }
-.piece:hover .lifebar, .skill-range .lifebar {
+.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar {
 	visibility: visible;
 }
 

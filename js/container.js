@@ -176,8 +176,12 @@ class Board extends Container {
 		});
 	}
 
-	slidePiece(piece, origin, dist, props) {
-		var [dx, dy] = this._getDirection(origin, piece.square);
+	shiftPiece(piece, origin, dist, props) {
+		var direction = this.getDirection(origin, piece.square);
+		return this.shiftPieceDirection(piece, direction, dist, props);
+	}
+	shiftPieceDirection(piece, direction, dist, props) {
+		var [dx, dy] = direction;
 		if (dist < 0) {
 			dist = -dist;
 			dx = -dx;
@@ -201,7 +205,7 @@ class Board extends Container {
 		this.movePiece(piece, square);
 		return distMoved;
 	}
-	_getDirection(origin, target) {
+	getDirection(origin, target) {
 		var dx = target.x - origin.x;
 		var dy = target.y - origin.y;
 		
@@ -436,9 +440,9 @@ class Square extends Position {
 
 	_mouseEnter(ev) {
 		ev.stopPropagation();
-		if (ev.target) {
+		if (ev.currentTarget) { // mouse-in counts pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.target.obj;
+			var square = ev.currentTarget.obj;
 			if (square && square.inRange) {
 				if (Game.scene) Game.scene.mouseEnter(square, elId);
 			}
@@ -446,7 +450,7 @@ class Square extends Position {
 	}
 	_mouseLeave(ev) {
 		ev.stopPropagation();
-		if (ev.target) {
+		if (ev.target) { // mouse-out does NOT count pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.target.obj;
 			if (square && square.inRange) {
