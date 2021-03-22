@@ -80,7 +80,7 @@ class BattleScene extends Scene {
 		var button = document.createElement("button");
 		button.type = "button";
 		button.onclick = () => {
-			this._nextTurn();
+			this._endTurn();
 		};
 		return button;
 	}
@@ -128,13 +128,20 @@ class BattleScene extends Scene {
 		mapModel.terrain.forEach(data => {
 			this._board.at(data.x, data.y).terrain = data.type;
 		});
+		this._reinforcements = [];
 		mapModel.pieces.forEach(data => {
-			var newPiece = new data.type();
-			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			this._board.movePiece(newPiece, this._board.at(data.x, data.y));
+			if (data.turn > 1) {
+				this._reinforcements.push(data);
+			} else {
+				var newPiece = new data.type();
+				if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
+					if (data.enemy) newPiece.setTeam(this.enemyTeam);
+				}
+			}
 		});
 
-		this._turnLimit = mapModel.turnLimit;
+		this._maxTurns = mapModel.maxTurns;
+		this._minTurns = mapModel.minTurns;
 		this._defaultVictory = mapModel.defaultVictory;
 	}
 
@@ -146,6 +153,20 @@ class BattleScene extends Scene {
 			var square = this._board.deployArea[index];
 			if (square) this._board.movePiece(piece, square);
 			piece.setTeam(this.playerTeam);
+		});
+	}
+
+	_addReinforcements() {
+		// this removes anything that was successfully added
+		this._reinforcements = this._reinforcements.filter(data => {
+			if (data.turn <= this._turn) {
+				var newPiece = new data.type();
+				if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
+					if (data.enemy) newPiece.setTeam(this.enemyTeam);
+					return false;
+				}
+			}
+			return true;
 		});
 	}
 
@@ -164,46 +185,54 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		this.refresh();
 	}
-	_nextTurn() {
+	_endTurn() {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
 		switch (this._phase) {
 			case BattleScene.DeployPhase:
-				this._canRedeploy = true;
 				this._phase = BattleScene.PlayerPhase;
-				this._setActiveTeam(this.playerTeam);
-				this._showPhaseBanner("Battle Start");
+				this._canRedeploy = true;
 				break;
 
 			case BattleScene.PlayerPhase:
 				this._phase = BattleScene.EnemyPhase;
-				this._setActiveTeam(this.enemyTeam);
-				this._showPhaseBanner("Enemy Phase");
 				break;
 
 			case BattleScene.EnemyPhase:
-				this._turn++;	
-
-				if (this._checkForEnd()) break;
-
 				this._phase = BattleScene.PlayerPhase;
+				this._turn++;
+				this._addReinforcements(); // TEMP? (move to the end of AI handling?)
+				this._checkForEnd();
+				break;
+		}
+		this._startTurn();
+	}
+	_startTurn() {
+		switch (this._phase) {
+			case BattleScene.PlayerPhase:
 				this._setActiveTeam(this.playerTeam);
-				this._showPhaseBanner("Player Phase");
+				this._showPhaseBanner("Turn "+this._turn);
+				break;
+
+			case BattleScene.EnemyPhase:
+				this._setActiveTeam(this.enemyTeam);
+				this._showPhaseBanner("Enemy Phase");
 				break;
 		}
 		this.refresh();
 	}
+
 	_checkForEnd() {
 		if (this.playerTeam.size <= 0) {
 			this._lose();
 			return true;
-		} else if (this.enemyTeam.size <= 0) {
+		} else if (this.enemyTeam.size <= 0 && this._turn >= this._minTurns) {
 			this._win();
 			return true;
 		}
 
-		if (this._turnLimit && this._turn > this._turnLimit) {
+		if (this._maxTurns && this._turn > this._maxTurns) {
 			if (this._defaultVictory) {
 				this._win();
 			} else {
@@ -254,10 +283,10 @@ class BattleScene extends Scene {
 		// turn counter
 		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "";
-		} else if (this._turnLimit && this._turn >= this._turnLimit) {
+		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
-		} else if (this._turnLimit) {
-			this._turnTitleEl.innerText = (1 + this._turnLimit - this._turn)+" turns left";
+		} else if (this._maxTurns) {
+			this._turnTitleEl.innerText = (1 + this._maxTurns - this._turn)+" turns left";
 		} else {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
 		}
@@ -479,7 +508,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
-			this._nextTurn();
+			this._endTurn();
 		}
 
 		if (isFinite(key)) {
