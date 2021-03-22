@@ -244,8 +244,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get moveRange() {
-		if (this.moved) return 0;
-		else return this._moveRange;
+		return this._moveRange;
 	}
 
 	get skills() {
@@ -260,29 +259,34 @@ class ControllablePiece extends TargetablePiece {
 		this.myTurn = false;
 		this.moved = false;
 		this.acted = false;
-		this._startSquare = null;
+		this.originSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
 
 	move(target) {
-		if (this.moved || this.square == target) return false;
+		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			this.moved = true;
-			this._startSquare = oldSquare;
+			if (!this.moved) {
+				this.moved = true;
+				this.originSquare = oldSquare;
+			} else if (target == this.originSquare) {
+				this.moved = false;
+				this.originSquare = null;
+			}
 			this.refresh();
 			return true;
 		}
 		return false;
 	}
 	undoMove() {
-		if (!this.moved || !this._startSquare) return false;
+		if (!this.moved || !this.originSquare) return false;
 		
-		if (this._startSquare.parent.movePiece(this, this._startSquare)) {
+		if (this.originSquare.parent.movePiece(this, this.originSquare)) {
 			this.moved = false;
-			this._startSquare = null;
+			this.originSquare = null;
 			this.refresh();
 			return true;
 		}

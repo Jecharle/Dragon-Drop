@@ -149,16 +149,14 @@ class BattleScene extends Scene {
 	_deploy() {
 		this._turn = 0;
 		this._phase = BattleScene.DeployPhase;
-		this._setActiveTeam(this.playerTeam);
+		this._setActiveTeam(null);
 
-		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
 		this.refresh();
 	}
 	_nextTurn() {
-		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -181,26 +179,24 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_win() {
-		this._phase = BattleScene.VictoryPhase;
+		this._phase = BattleScene.EndPhase;
 		this._setActiveTeam(null);
 
 		// TODO: Add the victory interface?
 		this._showPhaseBanner("Victory");
 
-		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
 		this.refresh();
 	}
 	_lose() {
-		this._phase = BattleScene.DefeatPhase;
+		this._phase = BattleScene.EndPhase;
 		this._setActiveTeam(null);
 
 		// TODO: Add the loss interface?
 		this._showPhaseBanner("Defeat");
 
-		this._deselectTarget();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -231,7 +227,7 @@ class BattleScene extends Scene {
 			this._undoButtonEl.style.visibility = "visible";
 		}
 
-		if (this._moveStack.length > 0) {
+		if (this._lastMove) {
 			this._undoButtonEl.disabled = false;
 			this._undoButtonEl.innerText = "Undo";
 		} else if (this._canRedeploy) {
@@ -259,7 +255,11 @@ class BattleScene extends Scene {
 	}
 	_moveUnit(piece, square) {
 		if (piece.move(square)) {
-			this._moveStack.push(piece);
+			if (piece != this._lastMove) {
+				this._moveStack.push(piece);
+			} else if (!piece.moved) {
+				this._moveStack.pop();
+			}
 		}
 	}
 	_undoMove() {
@@ -274,6 +274,10 @@ class BattleScene extends Scene {
 		this._moveStack = [];
 		this._canRedeploy = false;
 	}
+	get _lastMove() {
+		if (this._moveStack.length > 0) return this._moveStack[this._moveStack.length-1];
+		else return null;
+	}
 
 	_selectSkill(piece) {
 		if (!piece.select()) return false;
@@ -283,6 +287,7 @@ class BattleScene extends Scene {
 		return true;
 	}
 	_deselectSkill() {
+		this._deselectTarget();
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
@@ -326,7 +331,9 @@ class BattleScene extends Scene {
 			if (this._target) {
 				this._board.showAoE(this._skill, this._target);
 			}
-		} else if (this._unit) {
+		} else if (this._unit && !this._unit.moved) {
+			this._board.setMoveArea(this._unit);
+		} else if (this._unit && this._lastMove == this._unit && this._dragging) {
 			this._board.setMoveArea(this._unit);
 		}
 	}
@@ -363,6 +370,7 @@ class BattleScene extends Scene {
 				}
 			}
 		}
+		this._dragging = dragging;
 		this.refresh();
 	}
 	selectPosition(square, dragId) {
@@ -372,8 +380,7 @@ class BattleScene extends Scene {
 		{
 			if (!square.inRange) {
 				this._deselectTarget();
-			}
-			else if (this._target) {
+			} else if (this._target) {
 				this._swapDeploySquares(this._target, square);
 			} else {
 				this._selectTarget(square);
@@ -388,6 +395,7 @@ class BattleScene extends Scene {
 				this._moveUnit(this._unit, square);
 			}
 		}
+		this._dragging = false;
 		this.refresh();
 	}
 
@@ -408,7 +416,7 @@ class BattleScene extends Scene {
 
 	keydown(key) {
 		if (key == "Escape") {
-			if (this._target) {
+			if (this._target && this._phase == BattleScene.DeployPhase) {
 				this._deselectTarget();
 			} else if (this._skill) {
 				this._deselectSkill();
@@ -444,8 +452,7 @@ class BattleScene extends Scene {
 BattleScene.DeployPhase = 0;
 BattleScene.PlayerPhase = 1;
 BattleScene.EnemyPhase = 2;
-BattleScene.VictoryPhase = 3;
-BattleScene.DefeatPhase = -1;
+BattleScene.EndPhase = -1;
 
 
 /***************************************************

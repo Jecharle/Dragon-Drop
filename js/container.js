@@ -247,12 +247,12 @@ class Board extends Container {
 		square.inRange = true;
 	}
 	setMoveArea(piece) {
-		if (!piece || !piece.square || piece.square.parent != this) return;
+		if (!piece || !piece.moveRange) return;
 
-		if (!piece.moveRange) return;
+		var origin = piece.moved ? piece.originSquare : piece.square;
+		if (!origin || origin.parent != this) return;
 
-		var origin = piece.square;
-		this._paintMoveRange(origin, piece.moveRange);
+		this._paintMoveRange(origin, piece.moveRange, true);
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
@@ -273,8 +273,9 @@ class Board extends Container {
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft) {
+	_paintMoveRange(square, movesLeft, isOrigin) {
 		square.el.classList.add('move-range');
+		if (isOrigin) square.el.classList.add('move-origin');
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
 		square.movesLeft = movesLeft;
@@ -308,6 +309,7 @@ class Board extends Container {
 	_clearPaint(square) {
 		square.el.classList.remove('deploy-range');
 		square.el.classList.remove('move-range');
+		square.el.classList.remove('move-origin');
 		square.el.classList.remove('skill-range');
 		square.el.classList.remove('skill-range-invalid');
 		square.el.ondragover = null;
