@@ -170,7 +170,7 @@ class BattleScene extends Scene {
 	_deploy() {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
-		this._setActiveTeam(null);
+		this._setActiveTeam(this.playerTeam);
 
 		this._deselectSkill();
 		this._deselectUnit();
