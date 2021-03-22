@@ -259,7 +259,7 @@ class ControllablePiece extends TargetablePiece {
 		this.myTurn = false;
 		this.moved = false;
 		this.acted = false;
-		this.originSquare = null;
+		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
@@ -271,10 +271,10 @@ class ControllablePiece extends TargetablePiece {
 		if (target.parent.movePiece(this, target)) {
 			if (!this.moved) {
 				this.moved = true;
-				this.originSquare = oldSquare;
-			} else if (target == this.originSquare) {
+				this.homeSquare = oldSquare;
+			} else if (target == this.homeSquare) {
 				this.moved = false;
-				this.originSquare = null;
+				this.homeSquare = null;
 			}
 			this.refresh();
 			return true;
@@ -282,11 +282,11 @@ class ControllablePiece extends TargetablePiece {
 		return false;
 	}
 	undoMove() {
-		if (!this.moved || !this.originSquare) return false;
+		if (!this.moved || !this.homeSquare) return false;
 		
-		if (this.originSquare.parent.movePiece(this, this.originSquare)) {
+		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
 			this.moved = false;
-			this.originSquare = null;
+			this.homeSquare = null;
 			this.refresh();
 			return true;
 		}

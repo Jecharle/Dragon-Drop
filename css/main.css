@@ -82,7 +82,7 @@
 	background-color: skyblue;
 }
 .move-origin::before {
-	border: 8px solid skyblue;
+	border-radius: 50%;
 }
 .skill-range::before {
 	background-color: orange;

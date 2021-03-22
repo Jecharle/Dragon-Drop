@@ -274,6 +274,7 @@ class BattleScene extends Scene {
 				this._moveStack.push(piece);
 			} else if (!piece.moved) {
 				this._moveStack.pop();
+				this._deselectUnit();
 			}
 		}
 	}
@@ -348,7 +349,7 @@ class BattleScene extends Scene {
 			}
 		} else if (this._unit && !this._unit.moved) {
 			this._board.setMoveArea(this._unit);
-		} else if (this._unit && this._lastMove == this._unit && this._dragging) {
+		} else if (this._unit && this._lastMove == this._unit) {
 			this._board.setMoveArea(this._unit);
 		}
 	}
