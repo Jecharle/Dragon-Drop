@@ -38,14 +38,19 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(mapModel, party) {
+	constructor(mapData, party) {
 		super();
 		this._initTeams();
-		this._board = this._createBoard();
-		this._skillList = this._createSkillList();
+		this._board = new Board(mapData);
+		this._skillList = new SkillList();
 
-		this._applyMapModel(mapModel);
-		this._addParty(party); // TODO: Load the party from elsewhere?
+		if (mapData) this._addMapUnits(mapData.pieces);
+		this._addParty(party);
+
+		// TODO: Box these up somewhere as well?
+		this._maxTurns = mapData.maxTurns;
+		this._minTurns = mapData.minTurns;
+		this._defaultVictory = mapData.defaultVictory;
 
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
@@ -92,12 +97,6 @@ class BattleScene extends Scene {
 		};
 		return button;
 	}
-	_createBoard() { 
-		return new Board();
-	}
-	_createSkillList() {
-		return new SkillList();
-	}
 
 	_buildDOM() {
 		var navBar =  document.createElement("div");
@@ -126,20 +125,14 @@ class BattleScene extends Scene {
 		}
 	}
 
-	_applyMapModel(mapModel) {
-		if (!mapModel) return;
-
-		this._board.applyMapModel(mapModel);
+	_addMapUnits(unitData) {
+		if (!unitData) return;
 
 		this._reinforcements = [];
-		mapModel.pieces.forEach(data => {
+		unitData.forEach(data => {
 			if (data.turn > 0) this._reinforcements.push(data);
 			else this._addMapUnit(data);
 		});
-
-		this._maxTurns = mapModel.maxTurns;
-		this._minTurns = mapModel.minTurns;
-		this._defaultVictory = mapModel.defaultVictory;
 	}
 	_addMapUnit(data) {
 		var newPiece = new data.type();

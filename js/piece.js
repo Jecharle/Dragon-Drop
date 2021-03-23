@@ -457,33 +457,6 @@ class SkillPiece extends Piece {
 		return (dx == dy);
 	}
 
-	// targeting directions
-
-	_ahead(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var forward = dx * direction[0] + dy * direction[1];
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (forward >= 0 && forward >= sideways);
-	}
-	_behind(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var backward = -dx * direction[0] - dy * direction[1];
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (backward >= 0 && backward >= sideways);
-	}
-	_beside(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var forward = Math.abs(dx * direction[0] + dy * direction[1]);
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (sideways >= 0 && sideways >= forward);
-	}
-
 	// other targeting rules
 
 	_canSee(origin, target, props) {
@@ -516,4 +489,31 @@ class SkillPiece extends Piece {
 			else return false;
 		});
 	}
+
+		// targeting directions (for area effects)
+
+		_ahead(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var forward = dx * direction[0] + dy * direction[1];
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (forward >= 0 && forward >= sideways);
+		}
+		_behind(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var backward = -dx * direction[0] - dy * direction[1];
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (backward >= 0 && backward >= sideways);
+		}
+		_beside(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var forward = Math.abs(dx * direction[0] + dy * direction[1]);
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (sideways >= 0 && sideways >= forward);
+		}
 };

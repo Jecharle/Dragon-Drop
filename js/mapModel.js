@@ -34,7 +34,6 @@ class MapModel {
 	get defaultVictory() {
 		return this._defaultVictory;
 	}
-	// TODO: Sets of pieces to add on subsequent turns?
 	// TODO: Tileset?
 }
 

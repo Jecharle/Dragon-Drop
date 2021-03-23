@@ -36,7 +36,7 @@ class Position extends ElObj {
  Game board
 ***************************************************/
 class Board extends Container {
-	constructor() {
+	constructor(mapData) {
 		super();
 		this._squares = [];
 
@@ -50,8 +50,10 @@ class Board extends Container {
 			}
 			this.el.appendChild(row);
 		}
+		if (mapData) this._loadTerrain(mapData.terrain);
 
 		this.deployArea = [];
+		if (mapData) this._loadDeployArea(mapData.deployment);
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -71,13 +73,15 @@ class Board extends Container {
 		return 8;
 	}
 
-	applyMapModel(mapModel) {
-		if (!mapModel) return;
-
-		mapModel.terrain.forEach(data => {
+	_loadTerrain(terrainData) {
+		if (!terrainData) return;
+		terrainData.forEach(data => {
 			this.at(data.x, data.y).terrain = data.type;
 		});
-		mapModel.deployment.forEach(data => {
+	}
+	_loadDeployArea(deployData) {
+		if (!deployData) return;
+		deployData.forEach(data => {
 			this.addDeploySquare(this.at(data.x, data.y));
 		});
 	}

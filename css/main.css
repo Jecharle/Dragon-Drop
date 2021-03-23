@@ -52,6 +52,7 @@
 }
 .square::before {
 	position: absolute;
+	z-index: 0;
 	top: 0px;
 	box-sizing: border-box;
 	width: 100%;
