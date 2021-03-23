@@ -38,14 +38,14 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(mapData, party) {
+	constructor(mapData, partyUnits) {
 		super();
 		this._initTeams();
 		this._board = new Board(mapData);
 		this._skillList = new SkillList();
 
 		if (mapData) this._addMapUnits(mapData.units);
-		this._addParty(party);
+		this._addParty(partyUnits);
 
 		// TODO: Box these up somewhere as well?
 		this._maxTurns = mapData.maxTurns;
@@ -144,10 +144,10 @@ class BattleScene extends Scene {
 		return false;
 	}
 
-	_addParty(party) {
-		if (!party) return;
+	_addParty(partyUnits) {
+		if (!partyUnits) return;
 
-		party.forEach(piece => {
+		partyUnits.forEach(piece => {
 			var index = this.playerTeam.size;
 			var square = this._board.deployArea[index];
 			if (square) this._board.movePiece(piece, square);
@@ -253,7 +253,6 @@ class BattleScene extends Scene {
 	}
 
 	_refreshUi() {
-		// turn counter
 		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
@@ -264,7 +263,6 @@ class BattleScene extends Scene {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
 		}
 
-		// button display
 		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Start Battle";
 			this._undoButtonEl.style.visibility = "hidden";
@@ -273,7 +271,6 @@ class BattleScene extends Scene {
 			this._undoButtonEl.style.visibility = "visible";
 		}
 
-		// enable / disable the undo button
 		if (this._lastMove != null) {
 			this._undoButtonEl.disabled = false;
 			this._undoButtonEl.innerText = "Undo";
@@ -544,17 +541,3 @@ class Team {
 		return otherTeam.group != this.group;
 	}
 }
-
-/***************************************************
- Test scene
-The current scene used for debugging
-***************************************************/
-class TestScene extends BattleScene {
-	constructor() {
-		super(new TestMap(),
-		[
-			new TestMeleeUnit(),
-			new TestSupportUnit()
-		]);
-	}
-};

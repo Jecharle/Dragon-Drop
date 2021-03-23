@@ -41,7 +41,10 @@ class Game {
 		Game.el.id = "gameDiv";
 		document.body.appendChild(Game.el);
 
-		Game.setScene(new TestScene()); // TEMP
+		Party.add(new TestMeleePartyMember());
+		Party.add(new TestSupportPartyMember());
+
+		Game.setScene(new BattleScene( new TestMap(), Party.getPieces() )); // TEMP
 	}
 }
 Game.begin();

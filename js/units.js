@@ -2,8 +2,8 @@
  Subtypes of ControllablePiece
 ***************************************************/
 class TestMeleeUnit extends ControllablePiece {
-	constructor() {
-		super();
+	constructor(partyMember) {
+		super(partyMember);
 		this.style = 'ball';
 		this.size = 1;
 	}
@@ -22,8 +22,8 @@ class TestMeleeUnit extends ControllablePiece {
 };
 
 class TestSupportUnit extends ControllablePiece {
-	constructor() {
-		super();
+	constructor(partyMember) {
+		super(partyMember);
 		this.style = 'ball3';
 		this.size = 1;
 	}
@@ -43,8 +43,8 @@ class TestSupportUnit extends ControllablePiece {
 };
 
 class TestEnemyUnit extends ControllablePiece {
-	constructor() {
-		super();
+	constructor(partyMember) {
+		super(partyMember);
 		this.style = 'ball2';
 		this.size = 1;
 	}

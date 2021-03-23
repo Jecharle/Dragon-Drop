@@ -79,9 +79,10 @@ class Piece extends ElObj {
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
-	constructor() {
+	constructor(partyMember) {
 		super();
 		this._team = null;
+		this._partyMember = partyMember;
 		this.square = null;
 
 		this._setStats();
@@ -163,6 +164,7 @@ class TargetablePiece extends Piece {
 		if (this.dead) {
 			this.setParent(null);
 			this.setTeam(null);
+			if (this._partyMember) this._partyMember.alive = false;
 		}
 	}
 
