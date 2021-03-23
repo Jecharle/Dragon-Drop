@@ -156,11 +156,17 @@ class TargetablePiece extends Piece {
 		return !this.dead();
 	}
 
-	refresh() {
-		if (this.dead) { // TEMP
+	// TODO: Call this from somewhere standardized
+		// But how to know which units to affect?
+		// Separate "affected unit list" system for skills? Might help for AoE standardizing too
+	dieIfDead() {
+		if (this.dead) {
 			this.setParent(null);
 			this.setTeam(null);
 		}
+	}
+
+	refresh() {
 		this._lifebar.value = this.hpRate;
 	}
 

@@ -33,6 +33,7 @@ class TestAttackSkill extends SkillPiece {
 		var targetPiece = target.piece;
 		targetPiece.takeDamage(this.power);
 		targetPiece.push(this.user.square, 1);
+		targetPiece.dieIfDead();
 	}
 };
 
@@ -99,7 +100,7 @@ class TestBuildSkill extends SkillPiece {
 	}
 	_effects(target) {
 		var wall = new TestRockObject();
-		return target.parent.movePiece(wall, target);
+		target.parent.movePiece(wall, target);
 	}
 };
 
@@ -132,7 +133,7 @@ class TestMoveSkill extends SkillPiece {
 		return false;
 	}
 	_effects(target) {
-		return target.parent.movePiece(this.user, target);
+		target.parent.movePiece(this.user, target);
 	}
 };
 
@@ -173,6 +174,7 @@ class TestAreaSkill extends SkillPiece {
 		target.parent.getAoE(this, target).forEach(square => {
 			if (square && square.piece && square.piece.targetable) {
 				square.piece.takeDamage(this.power);
+				square.piece.dieIfDead();
 			}
 		});
 	}
