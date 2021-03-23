@@ -233,12 +233,14 @@ class BattleScene extends Scene {
 		}
 	}
 	_win() {
+		// TODO: Make a better victory screen
 		this._showPhaseBanner("Victory");
 		if (this.lastScene) this.lastScene.sendData({ victory: true });
 
 		this.end(); // TEMP?
 	}
 	_lose() {
+		// TODO: Make a better defeat screen
 		this._showPhaseBanner("Defeat");
 		if (this.lastScene) this.lastScene.sendData({ victory: false });
 		

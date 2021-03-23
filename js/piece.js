@@ -398,11 +398,12 @@ class SkillPiece extends Piece {
 
 		this._payCost();
 
-		var squares = this._targetSquares(target);
-		var units = this._targetUnits(squares);
-		this._globalEffects(target, squares, units);
+		var squares = this._affectedSquares(target);
+		var units = this._affectedUnits(squares);
+		this._startEffects(target, squares, units);
 		squares.forEach(square => this._squareEffects(square, target));
 		units.forEach(piece => this._unitEffects(piece, target));
+		this._endEffects(target, squares, units);
 
 		units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
@@ -412,11 +413,12 @@ class SkillPiece extends Piece {
 	validTarget(target) {
 		return true;
 	}
-	_targetSquares(target) {
+	_affectedSquares(target) {
 		if (!target) return [];
 		return target.parent.getAoE(this, target);
 	}
-	_targetUnits(squares) {
+	_affectedUnits(squares) {
+		// TODO: Include a "validTargetUnit" logic in here somehow as well...?
 		if (!squares) return [];
 		var units = [];
 		squares.forEach(square => {
@@ -426,10 +428,12 @@ class SkillPiece extends Piece {
 		});
 		return units;
 	}
-	// TODO: Include "validTarget" logic in here somehow as well...?
-	_globalEffects(target, squares, pieces) { }
-	_unitEffects(unit, target) { }
+
+	_startEffects(target, squares, units) { }
 	_squareEffects(square, target) { }
+	_unitEffects(unit, target) { }
+	_endEffects(target, squares, units) { }
+
 	_payCost() {
 		this.user.acted = true;
 		this.cooldown = this._cooldownCost;

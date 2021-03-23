@@ -130,7 +130,7 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_globalEffects(target, _squares, _pieces) {
+	_startEffects(target, _squares, _pieces) {
 		target.parent.movePiece(this.user, target);
 	}
 };
