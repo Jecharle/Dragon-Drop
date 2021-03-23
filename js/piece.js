@@ -397,15 +397,39 @@ class SkillPiece extends Piece {
 		if (!this.validTarget(target)) return false;
 
 		this._payCost();
-		this._effects(target);
 
+		var squares = this._targetSquares(target);
+		var units = this._targetUnits(squares);
+		this._globalEffects(target, squares, units);
+		squares.forEach(square => this._squareEffects(square, target));
+		units.forEach(piece => this._unitEffects(piece, target));
+
+		units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
 		return true;
 	}
+
 	validTarget(target) {
 		return true;
 	}
-	_effects(target) { }
+	_targetSquares(target) {
+		if (!target) return [];
+		return target.parent.getAoE(this, target);
+	}
+	_targetUnits(squares) {
+		if (!squares) return [];
+		var units = [];
+		squares.forEach(square => {
+			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
+				units.push(square.piece);
+			}
+		});
+		return units;
+	}
+	// TODO: Include "validTarget" logic in here somehow as well...?
+	_globalEffects(target, squares, pieces) { }
+	_unitEffects(unit, target) { }
+	_squareEffects(square, target) { }
 	_payCost() {
 		this.user.acted = true;
 		this.cooldown = this._cooldownCost;

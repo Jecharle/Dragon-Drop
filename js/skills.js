@@ -29,11 +29,9 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_effects(target) {
-		var targetPiece = target.piece;
-		targetPiece.takeDamage(this.power);
-		targetPiece.push(this.user.square, 1);
-		targetPiece.dieIfDead();
+	_unitEffects(unit, _target) {
+		unit.takeDamage(this.power);
+		unit.push(this.user.square, 1);
 	}
 };
 
@@ -64,8 +62,8 @@ class TestHealSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
-		target.piece.heal(2);
+	_unitEffects(unit, _target) {
+		unit.heal(this.power);
 	}
 };
 
@@ -98,9 +96,9 @@ class TestBuildSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
+	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
-		target.parent.movePiece(wall, target);
+		square.parent.movePiece(wall, square);
 	}
 };
 
@@ -132,7 +130,7 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
+	_globalEffects(target, _squares, _pieces) {
 		target.parent.movePiece(this.user, target);
 	}
 };
@@ -169,13 +167,8 @@ class TestAreaSkill extends SkillPiece {
 			&& this._inLine(origin, target);
 	}
 
-	_effects(target) {
-		// TODO: Standardize this for use with future AoE skills?
-		target.parent.getAoE(this, target).forEach(square => {
-			if (square && square.piece && square.piece.targetable) {
-				square.piece.takeDamage(this.power);
-				square.piece.dieIfDead();
-			}
-		});
+	_unitEffects(unit, _target) {
+		unit.takeDamage(this.power);
+		unit.push(this.user.square, 1);
 	}
 };
