@@ -7,7 +7,7 @@ class MapModel {
 		// TODO: Load from an XML file?
 		this._deployment = []; // x, y
 		this._terrain = []; // x, y, terrainType
-		this._pieces = []; // x, y, turn, pieceType, enemy/object
+		this._units = []; // x, y, turn, pieceType, enemy/object
 		this._maxTurns = 0;
 		this._minTurns = 0;
 		this._defaultVictory = false;
@@ -21,8 +21,8 @@ class MapModel {
 		return this._terrain;
 	}
 
-	get pieces() {
-		return this._pieces;
+	get units() {
+		return this._units;
 	}
 
 	get minTurns() {
@@ -60,7 +60,7 @@ class TestMap extends MapModel { // TEMP
 			{type: Square.Pit, x: 4, y: 4}
 		);
 
-		this._pieces.push(
+		this._units.push(
 			{turn: 0, type: TestEnemyUnit, x: 3, y: 3, enemy: true},
 
 			// reinforcements

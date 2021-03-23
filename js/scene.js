@@ -44,7 +44,7 @@ class BattleScene extends Scene {
 		this._board = new Board(mapData);
 		this._skillList = new SkillList();
 
-		if (mapData) this._addMapUnits(mapData.pieces);
+		if (mapData) this._addMapUnits(mapData.units);
 		this._addParty(party);
 
 		// TODO: Box these up somewhere as well?
@@ -128,9 +128,9 @@ class BattleScene extends Scene {
 	_addMapUnits(unitData) {
 		if (!unitData) return;
 
-		this._reinforcements = [];
+		this._reinforcementData = [];
 		unitData.forEach(data => {
-			if (data.turn > 0) this._reinforcements.push(data);
+			if (data.turn > 0) this._reinforcementData.push(data);
 			else this._addMapUnit(data);
 		});
 	}
@@ -156,7 +156,7 @@ class BattleScene extends Scene {
 	}
 	_addReinforcements() {
 		// this removes the data for anything successfully added
-		this._reinforcements = this._reinforcements.filter(data => {
+		this._reinforcementData = this._reinforcementData.filter(data => {
 			if (data.turn <= this._turn) {
 				return !this._addMapUnit(data);
 			}
