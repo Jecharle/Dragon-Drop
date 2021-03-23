@@ -61,6 +61,14 @@ class BattleScene extends Scene {
 	start() {
 		this._deploy();
 	}
+	// TEMP
+	end() {
+		this._phase = BattleScene.EndPhase;
+		this._setActiveTeam(null);
+		this.refresh();
+
+		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
+	}
 
 	_createUndoButton() {
 		var button = document.createElement("button");
@@ -126,16 +134,17 @@ class BattleScene extends Scene {
 		this._reinforcements = [];
 		mapModel.pieces.forEach(data => {
 			if (data.turn > 0) this._reinforcements.push(data);
-			else this._addUnit(data);
+			else this._addMapUnit(data);
 		});
 
 		this._maxTurns = mapModel.maxTurns;
 		this._minTurns = mapModel.minTurns;
 		this._defaultVictory = mapModel.defaultVictory;
 	}
-	_addUnit(data) {
+	_addMapUnit(data) {
 		var newPiece = new data.type();
-		if (this._board.movePiece(newPiece, this._board.at(data.x, data.y))) {
+		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
+		if (this._board.movePiece(newPiece, square)) {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
 			return true;
 		}
@@ -156,7 +165,7 @@ class BattleScene extends Scene {
 		// this removes the data for anything successfully added
 		this._reinforcements = this._reinforcements.filter(data => {
 			if (data.turn <= this._turn) {
-				return !this._addUnit(data);
+				return !this._addMapUnit(data);
 			}
 			return true;
 		});
@@ -208,7 +217,7 @@ class BattleScene extends Scene {
 
 			case BattleScene.EnemyPhase:
 				this._setActiveTeam(this.enemyTeam);
-				this._addReinforcements(); // TEMP?
+				this._addReinforcements(); // new spawns aren't active on their first turn
 				this._showPhaseBanner("Enemy Phase");
 				break;
 		}
@@ -216,12 +225,10 @@ class BattleScene extends Scene {
 	}
 
 	_checkForEnd() {
-		if (this.playerTeam.size <= 0) {
+		if (this.playerTeam.size == 0) {
 			this._lose();
-			return true;
-		} else if (this.enemyTeam.size <= 0 && this._turn >= this._minTurns) {
+		} else if (this.enemyTeam.size == 0 && this._turn >= this._minTurns) {
 			this._win();
-			return true;
 		}
 
 		if (this._maxTurns && this._turn > this._maxTurns) {
@@ -230,40 +237,19 @@ class BattleScene extends Scene {
 			} else {
 				this._lose();
 			}
-			return true;
 		}
-
-		return false;
 	}
 	_win() {
-		this._phase = BattleScene.EndPhase;
-		this._setActiveTeam(null);
 		this._showPhaseBanner("Victory");
-
-		// TODO: Do I actually need all of this?
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-		this.refresh();
-
 		if (this.lastScene) this.lastScene.sendData({ victory: true });
-		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
-		// TODO: End the scene after that?
+
+		this.end(); // TEMP?
 	}
 	_lose() {
-		this._phase = BattleScene.EndPhase;
-		this._setActiveTeam(null);
 		this._showPhaseBanner("Defeat");
-
-		// TODO: Do I actually need all of this?
-		this._deselectSkill();
-		this._deselectUnit();
-		this._clearMoves();
-		this.refresh();
-
 		if (this.lastScene) this.lastScene.sendData({ victory: false });
-		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
-		// TODO: End the scene after that?
+		
+		this.end(); // TEMP?
 	}
 
 	_showPhaseBanner(value) {
@@ -532,7 +518,7 @@ class Team {
 	}
 
 	get size() {
-		return this.members.length;
+		return this.members.length; // TODO: Exclude dead / unimportant members
 	}
 
 	add(piece) {
@@ -540,7 +526,6 @@ class Team {
 			this.members.push(piece);
 		}
 	}
-
 	remove(piece) {
 		var index = this.members.indexOf(piece);
 		if (index > -1) {
@@ -551,7 +536,6 @@ class Team {
 	startTurn() {
 		this.members.forEach(piece => piece.startTurn());
 	}
-
 	endTurn() {
 		this.members.forEach(piece => piece.endTurn());
 	}

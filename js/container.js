@@ -150,6 +150,21 @@ class Board extends Container {
 		});
 	}
 
+	getNearestFit(piece, centerSquare) {
+		if (this.canFit(piece, centerSquare)) return centerSquare;
+		var minDistance = null;
+		var nearestSquare = null;
+		this._squares.forEach(square => {
+			var distance = this.getDistance(centerSquare, square);
+			if (minDistance && distance >= minDistance) return;
+			if (this.canFit(piece, square)) {
+				nearestSquare = square;
+				minDistance = distance;
+			}
+		});
+		return nearestSquare;
+	}
+
 	movePiece(piece, targetSquare) {
 		if (!piece || !targetSquare) return false;
 
@@ -215,6 +230,9 @@ class Board extends Container {
 		}
 		this.movePiece(piece, square);
 		return distMoved;
+	}
+	getDistance(origin, target) {
+		return Math.abs(target.x - origin.x) + Math.abs(target.y - origin.y);
 	}
 	getDirection(origin, target) {
 		var dx = target.x - origin.x;
