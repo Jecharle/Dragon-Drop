@@ -1,5 +1,6 @@
 /***************************************************
- Static Party object
+(Static) Stores the player's party members and
+resources between stages
 ***************************************************/
 class Party {
 	constructor() {
