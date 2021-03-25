@@ -104,10 +104,10 @@ class TargetablePiece extends Piece {
 		if (this._size) {
 			this.el.classList.remove("x"+this.size);
 		}
-		if (value) {
-			this.el.classList.add("x"+this._size);
-		}
 		this._size = value;
+		if (this._size) {
+			this.el.classList.add("x"+this.size);
+		}
 	}
 
 	_setStats() {
@@ -272,8 +272,18 @@ class ControllablePiece extends TargetablePiece {
 		this.refresh();
 	}
 
+	face(target) {
+		if (!this.square || !target || this.square.parent != target.parent) return;
+		var facing = (target.x + target.y) - (this.square.x + this.square.y);
+		if (facing < 0) {
+			this.el.classList.add('left');
+		} else if (facing > 0) {
+			this.el.classList.remove('left');
+		}
+	}
 	move(target) {
 		if (this.square == target) return false;
+		this.face(target);
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
@@ -397,7 +407,8 @@ class SkillPiece extends Piece {
 	}
 	use(target) {
 		if (!this.validTarget(target)) return false;
-
+		this.user.face(target);
+		
 		this._payCost();
 
 		var squares = this._affectedSquares(target);

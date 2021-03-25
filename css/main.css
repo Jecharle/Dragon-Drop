@@ -33,15 +33,21 @@
 }
 
 /*Special thanks to @Jordan on codepen!*/
+.isometric .board {
+	transform: rotateX(45deg) rotateZ(-45deg);
+	transform-style: preserve-3d;
+}
+.isometric .board .piece {
+	transform: translateY(-25%) translateX(-25%) rotateZ(45deg) rotateX(-45deg);
+	transform-origin: 50% 100%;
+}
+.isometric .board .wall {
+	transform: translateZ(16px);
+}
+
 .board {
 	display: flex;
 	flex-flow: column nowrap;
-	transform: rotateX(45deg) rotateZ(45deg);
-	transform-style: preserve-3d;
-}
-.board .piece {
-	transform: translateY(-25%) translateX(25%) rotateZ(-45deg) rotateX(-45deg);
-	transform-origin: 50% 100%;
 }
 .row {
 	flex: 0 0 auto;
@@ -111,10 +117,12 @@
 }
 .piece::before {
 	position: absolute;
-	top: 0px;
+	bottom: 0px;
 	height: 100%;
 	width: 100%;
 	content: "";
+	box-sizing: border-box;
+	border: 1px solid black;
 }
 
 .selectable::before {
@@ -122,24 +130,25 @@
 }
 .selectable:hover::before, .piece.selected::before {
 	border: 2px solid deepskyblue;
-	margin: -2px;
 }
 
 .unselectable::before {
 	filter: grayscale(100%);
 }
 
+/*TODO: Should I bother keeping these?*/
 .x2 {
 	width: 200%;
 	height: 200%;
-	top: 50%;
 }
 .x3 {
 	width: 300%;
 	height: 300%;
-	right: 100%;
 }
 
+.left.unit::before {
+	transform:scaleX(-1.0);
+}
 .unit.selectable::after {
 	content: "";
 	position: absolute;
@@ -147,7 +156,7 @@
 	left: 21px;
 	border-width: 10px;
 	border-style: solid;
-	border-color: white transparent transparent transparent;
+	border-color: gold transparent transparent transparent;
 }
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
 	top: -25px;
@@ -290,20 +299,16 @@
 
 @keyframes shake {
 	from {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin: 0px;
 	}
 	25% {
-		margin-left: -8px;
-		margin-right: 8px;
+		margin: 8px 8px -8px -8px;
 	}
 	75% {
-		margin-left: 8px;
-		margin-right: -8px;
+		margin: -8px -8px 8px 8px;
 	}
 	to {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin: 0px;
 	}
 }
 @keyframes rise-up {

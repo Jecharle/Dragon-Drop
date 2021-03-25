@@ -43,6 +43,7 @@ class BattleScene extends Scene {
 		this._initTeams();
 		this._board = new Board(mapData);
 		this._skillList = new SkillList();
+		this.el.classList.add('isometric');
 
 		if (mapData) this._addMapUnits(mapData.units);
 		this._addParty(partyUnits);
@@ -445,7 +446,7 @@ class BattleScene extends Scene {
 	}
 
 	mouseEnter(position, dragId) {
-		if (this._skill && this._skill.idMatch(dragId)) {
+		if (position != this._target && this._skill && this._skill.idMatch(dragId)) {
 			// TODO: don't trigger for invalid squares somehow?
 			this._selectTarget(position);
 			this._board.clearAoE();

@@ -100,21 +100,18 @@ class Board extends Container {
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-	getArea(origin, size, rule, ruleProps) {
+	getFootprint(origin, size) {
 		size = Math.max(size || 0, 1);
 	
-		var left = origin.x - Math.floor((size-1)/2);
-		var right = origin.x + Math.ceil((size-1)/2);
-		var top = origin.y - Math.floor((size-1)/2);
-		var bottom = origin.y + Math.ceil((size-1)/2);
+		var left = origin.x - (size-1);
+		var right = origin.x;
+		var top = origin.y - (size-1);
+		var bottom = origin.y;
 
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				var square = this.at(dx, dy);
-				if (!rule || rule(origin, square, ruleProps)) {
-					area.push(square);
-				}
+				area.push(this.at(dx, dy));
 			}
 		}
 		return area;
@@ -122,7 +119,7 @@ class Board extends Container {
 
 	canFit(piece, centerSquare, size) {
 		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
@@ -139,7 +136,7 @@ class Board extends Container {
 	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
 	canPass(piece, centerSquare, size) {
 		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
@@ -200,7 +197,7 @@ class Board extends Container {
 		if (!centerSquare) return;
 
 		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+		var area = this.getFootprint(centerSquare, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
