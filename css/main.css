@@ -32,9 +32,16 @@
 	font-size: 24px;
 }
 
+/*Special thanks to @Jordan on codepen!*/
 .board {
 	display: flex;
 	flex-flow: column nowrap;
+	transform: rotateX(45deg) rotateZ(45deg);
+	transform-style: preserve-3d;
+}
+.board .piece {
+	transform: translateY(-25%) translateX(25%) rotateZ(-45deg) rotateX(-45deg);
+	transform-origin: 50% 100%;
 }
 .row {
 	flex: 0 0 auto;
@@ -87,9 +94,6 @@
 }
 .skill-range::before {
 	background-color: orange;
-}
-.skill-range:hover::before {
-	background-color: yellow;
 }
 .skill-aoe::before {
 	border: 8px solid yellow;
@@ -266,7 +270,7 @@
 	align-items: center;
 	position: relative;
 	z-index: 4;
-	animation: float-up 1s ease-out;
+	animation: rise-up 1s ease-out;
 }
 
 .phase-banner {
@@ -302,7 +306,7 @@
 		margin-right: 0px;
 	}
 }
-@keyframes float-up {
+@keyframes rise-up {
 	from {
 		top: 0px;
 	}
