@@ -272,9 +272,11 @@ class ControllablePiece extends TargetablePiece {
 		this.refresh();
 	}
 
-	face(target) {
-		if (!this.square || !target || this.square.parent != target.parent) return;
-		var facing = (target.x - target.y) - (this.square.x - this.square.y);
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent) return;
+
+		var facing = (target.x - target.y) - (from.x - from.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
 		} else if (facing > 0) {
@@ -283,7 +285,6 @@ class ControllablePiece extends TargetablePiece {
 	}
 	move(target) {
 		if (this.square == target) return false;
-		this.face(target);
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
@@ -294,6 +295,7 @@ class ControllablePiece extends TargetablePiece {
 				this.moved = false;
 				this.homeSquare = null;
 			}
+			this.face(target, this.homeSquare);
 			this.refresh();
 			return true;
 		}
