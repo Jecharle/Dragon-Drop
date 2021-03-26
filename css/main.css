@@ -41,8 +41,11 @@
 	transform: translateX(50%) rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 100%;
 }
+.isometric .board .square {
+	transform: translateZ(1px);
+}
 .isometric .board .square::before {
-	transform: translateX(-50%) rotateZ(-45deg) rotateX(-60deg);
+	transform: translateX(-50%) translateZ(-2px) rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 0%;
 }
 .isometric .board .wall {
