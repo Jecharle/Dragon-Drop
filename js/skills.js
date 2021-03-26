@@ -156,10 +156,7 @@ class TestAreaSkill extends SkillPiece {
 	_area = 1
 
 	inArea(origin, target) {
-		var direction = origin.parent.getDirection(this.user.square, origin);
-		return this._inSquare(origin, target, this.area)
-			&& this._inLine(origin, target)
-			&& this._beside(origin, target, direction);
+		return this._inCircle(origin, target, this.area);
 	}
 
 	inRange(origin, target) {

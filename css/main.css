@@ -49,8 +49,12 @@
 	transform-origin: 50% 0%;
 }
 .isometric .board .wall {
-	transform: translateZ(32px);
+	transform: translateZ(45px);
 }
+/*
+TODO: Flatten up the whole square, use bitmaps for the range indicators too?
+I'm a bit worried about how mouse detection will work, though, given all the overlapping rectangles
+*/
 
 .board {
 	display: flex;
@@ -77,9 +81,9 @@
 	width: 128px;
 	height: 128px;
 	content: "";
-	background-image: url(../img/cube.png);
+	background-image: url(../img/testTileset.png);
 	background-repeat: no-repeat;
-	background-position: top;
+	background-position: 0 0;
 }
 .square::after {
 	position: absolute;
@@ -92,7 +96,10 @@
 	content: "";
 }
 .pit::before {
-	background-image: none;
+	background-position-x: -128px;
+}
+.wall::before {
+	background-position-x: -384px;
 }
 
 .deploy-range, .move-range, .skill-range {
@@ -187,6 +194,7 @@
 	border: hidden;
 	background-image: url("../img/testUnit.png");
 	background-repeat: no-repeat;
+	
 	background-position: center;
 }
 .ball2::before {
