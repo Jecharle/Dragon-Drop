@@ -274,7 +274,7 @@ class ControllablePiece extends TargetablePiece {
 
 	face(target) {
 		if (!this.square || !target || this.square.parent != target.parent) return;
-		var facing = (target.x + target.y) - (this.square.x + this.square.y);
+		var facing = (target.x - target.y) - (this.square.x - this.square.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
 		} else if (facing > 0) {
