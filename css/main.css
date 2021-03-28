@@ -43,8 +43,14 @@
 	/*border: 1px solid red;/*For debug use*/
 }
 .isometric .board .piece {
-	transform: translateX(45px) translateY(45px) rotateZ(-45deg) rotateX(-60deg);
+	transform: rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 100%;
+	transform-style: preserve-3d;
+}
+.isometric .board .piece::before {
+	transform: translateZ(-64px);
+	/*box-sizing: border-box;
+	border: 1px solid black;/*For debug use*/
 }
 .isometric .board .square::before {
 	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
@@ -157,19 +163,18 @@
 	height: 64px;
 }
 .board .piece {
-	top: -64px;
-	left: -32px;
+	top: 26px;
+	left: 58px;
 }
 .piece::before {
 	position: absolute;
 	bottom: 0px;
 	height: 100%;
 	width: 100%;
+	box-sizing: border-box;
 	content: "";
 	background-repeat: no-repeat;
 	background-position: 0px 0px;
-	/*box-sizing: border-box;
-	border: 1px solid black;/*For debugging*/
 }
 
 .selectable::before {
