@@ -36,20 +36,39 @@
 .isometric .board {
 	transform: rotateX(60deg) rotateZ(45deg);
 	transform-style: preserve-3d;
-}
-.isometric .board .piece {
-	transform: translateX(50%) rotateZ(-45deg) rotateX(-60deg);
-	transform-origin: 50% 100%;
+	/*animation: rotate-3D 15s ease-in-out infinite;/*For debug use*/
 }
 .isometric .board .square {
-	transform: translateZ(1px);
+	transform: translateZ(32px);
+	/*border: 1px solid red;/*For debug use*/
+}
+.isometric .board .piece {
+	transform: translateX(45px) translateY(45px) rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 100%;
 }
 .isometric .board .square::before {
-	transform: translateX(-50%) translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 0%;
+}
+.isometric .board .square::after {
+	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 0%;
 }
 .isometric .board .wall {
-	transform: translateZ(45px);
+	transform: translateZ(64px);
+}
+
+/*3D debugging rotation animation*/
+@keyframes rotate-3D {
+	from {
+		transform: rotateX(60deg) rotateZ(45deg);
+	}
+	50% {
+		transform: rotateX(60deg) rotateZ(225deg);
+	}
+	to {
+		transform: rotateX(60deg) rotateZ(405deg);
+	}
 }
 
 .board {
@@ -71,9 +90,9 @@
 }
 .square::before {
 	position: absolute;
-	z-index: -1;
+	z-index: -2;
 	top: 0px;
-	left: 0px;
+	left: -64px;
 	width: 128px;
 	height: 128px;
 	content: "";
@@ -83,13 +102,16 @@
 }
 .square::after {
 	position: absolute;
-	z-index: 0;
+	z-index: -1;
 	top: 0px;
-	box-sizing: border-box;
-	width: 100%;
-	height: 100%;
+	left: -64px;
 	opacity: 50%;
+	width: 128px;
+	height: 64px;
 	content: "";
+	background-image: url(../img/tileHighlights.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
 }
 .pit::before {
 	background-position-x: -128px;
@@ -102,28 +124,30 @@
 	cursor: pointer;
 }
 .deploy-range::after {
-	background-color: yellow;
+	background-position-x: -384px;
 }
 .deploy-range:hover::after, .selected.deploy-range::after {
-	background-color: lightyellow;
+	background-position-y: -64px;
 }
 .move-range::after {
-	background-color: deepskyblue;
+	background-position-x: -128px;
 }
 .move-range:hover::after {
-	background-color: skyblue;
+	background-position-y: -64px;
 }
-.move-origin::after {
+/*.move-origin::after {
 	border-radius: 50%;
-}
+	TODO: Make a replacement for the move-origin detail
+}*/
 .skill-range::after {
-	background-color: orange;
+	background-position-x: -256px;
 }
 .skill-aoe::after {
-	border: 8px solid yellow;
+	background-position-y: -64px;
 }
 .skill-range-invalid::after {
-	background-color: darkgoldenrod;
+	background-position-x: -256px;
+	background-position-y: -128px;
 }
 
 .piece {
@@ -132,23 +156,25 @@
 	width: 64px;
 	height: 64px;
 }
+.board .piece {
+	top: -64px;
+	left: -32px;
+}
 .piece::before {
 	position: absolute;
 	bottom: 0px;
 	height: 100%;
 	width: 100%;
 	content: "";
-	box-sizing: border-box;
 	background-repeat: no-repeat;
 	background-position: 0px 0px;
+	/*box-sizing: border-box;
+	border: 1px solid black;/*For debugging*/
 }
 
 .selectable::before {
 	cursor: pointer;
 }
-/*.selectable:hover::before, .piece.selected::before {
-	border: 2px solid deepskyblue;
-}*/
 
 .unselectable::before {
 	filter: grayscale(100%);
@@ -185,7 +211,7 @@
 	border-color: gold transparent transparent transparent;
 }
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
-	top: -12px;
+	top: -14px;
 }
 
 .ball::before {
