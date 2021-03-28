@@ -45,16 +45,12 @@
 	transform: translateZ(1px);
 }
 .isometric .board .square::before {
-	transform: translateX(-50%) translateZ(-2px) rotateZ(-45deg) rotateX(-60deg);
+	transform: translateX(-50%) translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 0%;
 }
 .isometric .board .wall {
 	transform: translateZ(45px);
 }
-/*
-TODO: Flatten up the whole square, use bitmaps for the range indicators too?
-I'm a bit worried about how mouse detection will work, though, given all the overlapping rectangles
-*/
 
 .board {
 	display: flex;
@@ -92,7 +88,7 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
-	opacity: 75%;
+	opacity: 50%;
 	content: "";
 }
 .pit::before {
@@ -133,8 +129,6 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 .piece {
 	position: relative;
 	z-index: 1;
-	/*width: 100%;
-	height: 100%;*/
 	width: 64px;
 	height: 64px;
 }
@@ -145,15 +139,16 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 	width: 100%;
 	content: "";
 	box-sizing: border-box;
-	border: 1px solid black;
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
 }
 
 .selectable::before {
 	cursor: pointer;
 }
-.selectable:hover::before, .piece.selected::before {
+/*.selectable:hover::before, .piece.selected::before {
 	border: 2px solid deepskyblue;
-}
+}*/
 
 .unselectable::before {
 	filter: grayscale(100%);
@@ -176,40 +171,35 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 .left.unit::before {
 	transform:scaleX(-1.0);
 }
+
+.unit.selectable:hover::before, .unit.selected::before {
+	background-position-y: -64px;
+}
 .unit.selectable::after {
 	content: "";
 	position: absolute;
-	top: -16px;
-	left: 21px;
+	top: 0px;
+	left: 22px;
 	border-width: 10px;
 	border-style: solid;
 	border-color: gold transparent transparent transparent;
 }
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
-	top: -25px;
+	top: -12px;
 }
 
 .ball::before {
-	/*background-color: darkgreen;*/
-	border: hidden;
 	background-image: url("../img/testUnit.png");
-	background-repeat: no-repeat;
-	
-	background-position: center;
 }
 .ball2::before {
-	background-color: red;
-	border-radius: 50%;
+	background-image: url("../img/testUnit.png");
 }
 .ball3::before {
-	background-color: greenyellow;
-	border-radius: 50%;
+	background-image: url("../img/testUnit.png");
 }
 .rock::before {
-	background-color: purple;
-	height: 90%;
-	width: 90%;
-	margin: 5%;
+	border: hidden;
+	background-image: url("../img/testObject.png");
 }
 
 .damaged::before {
@@ -227,6 +217,10 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 	width: 64px;
 	height: 64px;
 	margin-left: 1px;
+}
+
+.selectable.skill:hover::before, .skill.selected::before {
+	border: 2px solid deepskyblue;
 }
 
 .attack-skill::before {
@@ -288,7 +282,7 @@ I'm a bit worried about how mouse detection will work, though, given all the ove
 	z-index: 2;
 	width: 100%;
 	height: 8px;
-	top: -12px;
+	top: 0px;
 	outline: 1px solid black;
 	background-color: gray;
 }
