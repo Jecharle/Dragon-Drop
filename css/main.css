@@ -132,9 +132,9 @@
 .move-range:hover::after {
 	background-position-y: -64px;
 }
-/*.move-origin::after {
-	TODO: Make a sprite for the move-origin detail
-}*/
+.move-origin::after {
+	background-position-x: -512px;
+}
 .skill-range::after {
 	background-position-x: -256px;
 }
