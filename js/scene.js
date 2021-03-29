@@ -194,6 +194,7 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.EnemyPhase:
+				this._addReinforcements(); // TODO: Put this at the end of the enemy AI action processing
 				this._phase = BattleScene.PlayerPhase;
 				this._turn++;
 				this._checkForEnd();
@@ -210,7 +211,6 @@ class BattleScene extends Scene {
 
 			case BattleScene.EnemyPhase:
 				this._setActiveTeam(this.enemyTeam);
-				this._addReinforcements(); // new spawns aren't active on their first turn
 				this._showPhaseBanner("Enemy Phase");
 				break;
 		}
