@@ -43,7 +43,6 @@ class BattleScene extends Scene {
 		this._initTeams();
 		this._board = new Board(mapData);
 		this._skillList = new SkillList();
-		this.el.classList.add('isometric');
 
 		if (mapData) this._addMapUnits(mapData.units);
 		this._addParty(partyUnits);

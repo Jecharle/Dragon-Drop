@@ -276,13 +276,13 @@ class Board extends Container {
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
 	}
-	setMoveArea(piece) {
-		if (!piece || !piece.moveRange) return;
+	setMoveArea(unit) {
+		if (!unit || !unit.moveRange) return;
 
-		var origin = piece.moved ? piece.homeSquare : piece.square;
+		var origin = unit.moved ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, piece.moveRange, true);
+		this._paintMoveRange(origin, unit.moveRange, true, true);
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
@@ -293,20 +293,24 @@ class Board extends Container {
 				if (adjacent.inRange && adjacent.movesLeft > movesLeft) {
 					continue;
 				}
-				if (!this.canPass(piece, adjacent[n])) {
+				if (!this.canPass(unit, adjacent[n])) {
 					continue;
 				}
-				this._paintMoveRange(adjacent[n], movesLeft);
+				this._paintMoveRange(adjacent[n], movesLeft, false, this.canFit(unit, adjacent[n]));
 				if (movesLeft) {
 					edges.push(adjacent[n]);
 				}
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft, isOrigin) {
+	_paintMoveRange(square, movesLeft, isOrigin, valid) {
 		square.el.classList.add('move-range');
 		if (isOrigin) square.el.classList.add('move-origin');
-		square.el.ondragover = this._allowDrop;
+		if (valid) {
+			square.el.ondragover = this._allowDrop;
+		} else {
+			square.el.classList.add('invalid');
+		}
 		square.inRange = true;
 		square.movesLeft = movesLeft;
 	}
@@ -323,13 +327,12 @@ class Board extends Container {
 		// TODO: More possible origins for larger units?
 	}
 	_paintSkillRange(square, valid) {
+		square.el.classList.add('skill-range');
+		square.inRange = true;
 		if (valid) {
-			square.el.classList.add('skill-range');
 			square.el.ondragover = this._allowDrop;
-			square.inRange = true;
 		} else {
-			square.el.classList.add('skill-range-invalid');
-			square.inRange = true;
+			square.el.classList.add('invalid');
 		}
 	}
 
@@ -341,7 +344,7 @@ class Board extends Container {
 		square.el.classList.remove('move-range');
 		square.el.classList.remove('move-origin');
 		square.el.classList.remove('skill-range');
-		square.el.classList.remove('skill-range-invalid');
+		square.el.classList.remove('invalid');
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.movesLeft = null;

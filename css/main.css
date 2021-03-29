@@ -141,8 +141,10 @@
 .skill-aoe::after {
 	background-position-y: -64px;
 }
-.skill-range-invalid::after {
-	background-position-x: -256px;
+.invalid {
+	cursor: unset;
+}
+.invalid::after, .invalid:hover::after {
 	background-position-y: -128px;
 }
 
