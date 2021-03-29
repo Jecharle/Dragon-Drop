@@ -61,7 +61,7 @@ class Lifebar extends Detail {
 	set value(value) {
 		if (value >= 0 && this.maxValue > 0 && this._subEl) {
 			this._value = value;
-			this._subEl.style.width = String(value*10)+"px";
+			this._subEl.style.width = String(value*6+2)+"px";
 		}
 	}
 
@@ -71,7 +71,7 @@ class Lifebar extends Detail {
 	set maxValue(value) {
 		if (value > 0) {
 			this._maxValue = value;
-			this.el.style.width = String(value*10)+"px";
+			this.el.style.width = String(value*6+2)+"px";
 		}
 	}
 }
