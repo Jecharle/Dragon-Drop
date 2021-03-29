@@ -133,8 +133,7 @@
 	background-position-y: -64px;
 }
 /*.move-origin::after {
-	border-radius: 50%;
-	TODO: Make a replacement for the move-origin detail
+	TODO: Make a sprite for the move-origin detail
 }*/
 .skill-range::after {
 	background-position-x: -256px;
@@ -208,14 +207,16 @@
 .unit.selectable::after {
 	content: "";
 	position: absolute;
+	width: 16px;
+	height: 16px;
 	top: 0px;
-	left: 22px;
-	border-width: 10px;
-	border-style: solid;
-	border-color: gold transparent transparent transparent;
+	left: 24px;
+	background-image: url("../img/uiMarkers.png");
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
 }
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
-	top: -14px;
+	top: -12px;
 }
 
 .ball::before {
