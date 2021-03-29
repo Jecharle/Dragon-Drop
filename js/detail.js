@@ -42,12 +42,12 @@ class PhaseBanner extends Detail {
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {
-	constructor(startValue) {
+	constructor(startValue, startMaxValue) {
 		super();
 
-		this._subEl = document.createElement(this.elType); // TEMP?
-		this._subEl.classList.add('inner-lifebar');
+		this._subEl = document.createElement(this.elType);
 		this.el.appendChild(this._subEl);
+		this.maxValue = startMaxValue;
 		this.value = startValue;
 	}
 
@@ -59,9 +59,19 @@ class Lifebar extends Detail {
 	}
 
 	set value(value) {
-		if (value >= 0 && value <= 1 && this._subEl) {
+		if (value >= 0 && this.maxValue > 0 && this._subEl) {
 			this._value = value;
-			this._subEl.style.width = String(Math.floor(value*100))+"%";
+			this._subEl.style.width = String(value*10)+"px";
+		}
+	}
+
+	get maxValue() {
+		return this._maxValue;
+	}
+	set maxValue(value) {
+		if (value > 0) {
+			this._maxValue = value;
+			this.el.style.width = String(value*10)+"px";
 		}
 	}
 }

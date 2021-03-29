@@ -89,7 +89,7 @@ class TargetablePiece extends Piece {
 
 		// TODO: Make a proper "initialize" method for this?
 		this.hp = this.maxHp;
-		this._lifebar = new Lifebar(this.hpRate);
+		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
 	}
 
@@ -169,7 +169,8 @@ class TargetablePiece extends Piece {
 	}
 
 	refresh() {
-		this._lifebar.value = this.hpRate;
+		this._lifebar.maxValue = this.maxHp;
+		this._lifebar.value = this.hp;
 	}
 
 	takeDamage(power, props) {
