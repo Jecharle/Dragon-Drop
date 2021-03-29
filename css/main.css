@@ -32,39 +32,20 @@
 	font-size: 24px;
 }
 
-/*Special thanks to @Jordan on codepen!*/
-.isometric .board {
-	transform: rotateX(60deg) rotateZ(45deg);
-	transform-style: preserve-3d;
-	/*animation: rotate-3D 15s ease-in-out infinite;/*For debug use*/
+/*3D debugging assistance*/
+/*
+.board {
+	animation: rotate-3D 15s ease-in-out infinite;
 }
-.isometric .board .square {
-	transform: translateZ(32px);
-	/*border: 1px solid red;/*For debug use*/
+.board .square {
+	border: 1px solid red;
 }
-.isometric .board .piece {
-	transform: rotateZ(-45deg) rotateX(-60deg);
-	transform-origin: 50% 100%;
-	transform-style: preserve-3d;
+.board .piece {
+	border: 1px solid black;
 }
-.isometric .board .piece::before {
-	transform: translateZ(-64px);
-	/*box-sizing: border-box;
-	border: 1px solid black;/*For debug use*/
+.board .piece::before {
+	border: 1px solid black;
 }
-.isometric .board .square::before {
-	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
-	transform-origin: 50% 0%;
-}
-.isometric .board .square::after {
-	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
-	transform-origin: 50% 0%;
-}
-.isometric .board .wall {
-	transform: translateZ(64px);
-}
-
-/*3D debugging rotation animation*/
 @keyframes rotate-3D {
 	from {
 		transform: rotateX(60deg) rotateZ(45deg);
@@ -75,11 +56,13 @@
 	to {
 		transform: rotateX(60deg) rotateZ(405deg);
 	}
-}
+}*/
 
 .board {
 	display: flex;
 	flex-flow: column nowrap;
+	transform: rotateX(60deg) rotateZ(45deg);
+	transform-style: preserve-3d;
 }
 .row {
 	flex: 0 0 auto;
@@ -92,6 +75,7 @@
 	box-sizing: border-box;
 	width: 90px;
 	height: 90px;
+	transform: translateZ(32px);
 	transform-style: preserve-3d;
 }
 .square::before {
@@ -105,6 +89,8 @@
 	background-image: url(../img/testTileset.png);
 	background-repeat: no-repeat;
 	background-position: 0 0;
+	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 0%;
 }
 .square::after {
 	position: absolute;
@@ -118,9 +104,14 @@
 	background-image: url(../img/tileHighlights.png);
 	background-repeat: no-repeat;
 	background-position: 0 0;
+	transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 0%;
 }
 .pit::before {
 	background-position-x: -128px;
+}
+.wall {
+	transform: translateZ(64px);
 }
 .wall::before {
 	background-position-x: -384px;
@@ -162,10 +153,6 @@
 	width: 64px;
 	height: 64px;
 }
-.board .piece {
-	top: 26px;
-	left: 58px;
-}
 .piece::before {
 	position: absolute;
 	bottom: 0px;
@@ -175,6 +162,18 @@
 	content: "";
 	background-repeat: no-repeat;
 	background-position: 0px 0px;
+}
+.board .piece {
+	top: 26px;
+	left: 58px;
+	transform: rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 100%;
+	transform-style: preserve-3d;
+	box-sizing: border-box;
+}
+.board .piece::before {
+	transform: translateZ(-110px);
+	box-sizing: border-box;
 }
 
 .selectable::before {
