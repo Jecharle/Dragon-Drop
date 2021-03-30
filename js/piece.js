@@ -257,6 +257,13 @@ class ControllablePiece extends TargetablePiece {
 		return this._skills;
 	}
 
+	get canMove() {
+		return !this.moved && !this.acted;
+	}
+	get canAct() {
+		return !this.acted;
+	}
+
 	startTurn() {
 		this.myTurn = true;
 		this.refresh();
@@ -314,8 +321,8 @@ class ControllablePiece extends TargetablePiece {
 	refresh() {
 		super.refresh();
 		this._refreshSkills();
-		this._setUnselectable(this.moved && this.acted && this.myTurn);
-		this._setSelectable(this.myTurn && !(this.moved && this.acted));
+		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
 	}
 	_refreshSkills() {
 		this._skills.forEach(skill => skill.refresh());
@@ -402,8 +409,7 @@ class SkillPiece extends Piece {
 	}
 
 	canUse() {
-		if (this.user.acted || this.cooldown > 0) return false;
-		else return true;
+		return this.user.canAct && this.cooldown <= 0;
 	}
 	use(target) {
 		if (!this.validTarget(target)) return false;

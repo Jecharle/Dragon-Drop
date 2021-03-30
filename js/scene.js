@@ -376,9 +376,9 @@ class BattleScene extends Scene {
 			if (this._target) {
 				this._board.showAoE(this._skill, this._target);
 			}
-		} else if (this._unit && !this._unit.moved) {
+		} else if (this._unit && this._unit.canMove) {
 			this._board.setMoveArea(this._unit);
-		} else if (this._unit && this._lastMove == this._unit) {
+		} else if (this._unit && this._lastMove == this._unit) { // TODO: Somehow disable free re-moving once you deselect?
 			this._board.setMoveArea(this._unit);
 		}
 	}
