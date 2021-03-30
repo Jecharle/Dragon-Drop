@@ -191,13 +191,12 @@
 	filter: grayscale(100%);
 }
 
-/*TODO: Should I bother keeping these? Large units are major pain to deal with*/
-.x2 {
+.unit.x2 {
 	width: 128px;
 	height: 128px;
 	right: -64px;
 }
-.x2::before {
+.unit.x2::before {
 	width: 128px;
 	height: 128px;
 }

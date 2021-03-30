@@ -436,7 +436,13 @@ class BattleScene extends Scene {
 				this._deselectSkill();
 				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
-				this._useSkill(this._skill, square);
+				if (square == this._target) {
+					this._useSkill(this._skill, square);
+				} else if (!square.invalid) {
+					this._selectTarget(square);
+					this._board.clearAoE();
+					this._board.showAoE(this._skill, this._target);
+				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				this._moveUnit(this._unit, square);
 			}
@@ -445,16 +451,16 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 
-	mouseEnter(position, dragId) {
-		if (position != this._target && this._skill && this._skill.idMatch(dragId)) {
-			// TODO: don't trigger for invalid squares somehow?
-			this._selectTarget(position);
+	/*TODO: Ignore these on a touch device?*/
+	mouseEnter(square, dragId) {
+		if (square != this._target && this._skill && this._skill.idMatch(dragId)) {
+			this._selectTarget(square);
 			this._board.clearAoE();
 			this._board.showAoE(this._skill, this._target);
 		}
 	}
-	mouseLeave(position, dragId) {
-		if (this._target == position && this._skill && this._skill.idMatch(dragId)) {
+	mouseLeave(square, dragId) {
+		if (this._target == square && this._skill && this._skill.idMatch(dragId)) {
 			this._deselectTarget();
 			this._board.clearAoE();
 		}
