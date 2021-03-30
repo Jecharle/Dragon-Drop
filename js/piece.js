@@ -183,7 +183,7 @@ class TargetablePiece extends Piece {
 
 		if (!props || !props.noAnimation) {
 			this.el.classList.add('damaged');
-			setTimeout(() => this.el.classList.remove('damaged'), 1000);
+			setTimeout(() => this.el.classList.remove('damaged'), 1200);
 		}
 
 		this._showPopup(power);
