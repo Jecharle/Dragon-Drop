@@ -230,7 +230,7 @@
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
 	top: -16px;
 }
- 
+
 .melee-unit::before {
 	background-image: url("../img/testUnit.png");
 }
@@ -241,7 +241,6 @@
 	background-image: url("../img/testUnit.png");
 }
 .rock::before {
-	border: hidden;
 	background-image: url("../img/testObject.png");
 }
 
@@ -294,7 +293,7 @@
 }
 
 .skill-description {
-	visibility: hidden;
+	display: none;
 	/* Pick better colors? */
 	background-color: white;
 	border: 1px solid black;
@@ -302,6 +301,7 @@
 	z-index: 3;
 	width: max-content;
 	height: max-content;
+	left: 0%;
 	bottom: 110%;
 	border-radius: 4px;
 	padding: 5px;
@@ -316,7 +316,7 @@
 	border-color: black transparent transparent transparent;
 }
 .skill:hover .skill-description {
-	visibility: visible;
+	display: block;
 }
 
 .lifebar {
