@@ -117,13 +117,13 @@
 	transform-origin: 50% 0%;
 }
 .pit::before {
-	background-position-x: -128px;
+	background-position-y: -128px;
 }
 .wall {
 	transform: translateZ(64px);
 }
 .wall::before {
-	background-position-x: -384px;
+	background-position-y: -384px;
 }
 
 .deploy-range, .move-range, .skill-range {
@@ -217,8 +217,8 @@
 	top: 0px;
 	background-image: url("../img/uiMarkers.png");
 	background-repeat: no-repeat;
-	background-position: -48px 0px;
-	animation: animate 750ms steps(3) alternate infinite;
+	background-position: -64px 0px;
+	animation: animate 1s steps(4) infinite;
 }
 .unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after, .damaged.unit::after {
 	top: -16px;
