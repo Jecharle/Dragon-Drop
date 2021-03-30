@@ -298,21 +298,21 @@ class BattleScene extends Scene {
 		this._skillList.setUser(null);
 		this._sameMove = false;
 	}
-	_moveUnit(piece, square) {
-		if (piece.move(square)) {
-			if (piece != this._lastMove) {
-				this._moveStack.push(piece);
+	_moveUnit(unit, square) {
+		if (unit.move(square)) {
+			if (unit != this._lastMove) {
+				this._moveStack.push(unit);
 				this._sameMove = true;
-			} else if (!piece.moved) {
+			} else if (!unit.homeSquare) {
 				this._moveStack.pop();
 				this._deselectUnit();
 			}
 		}
 	}
 	_undoMove() {
-		var piece = this._moveStack.pop();
-		if (piece) {
-			piece.undoMove();
+		var unit = this._moveStack.pop();
+		if (unit) {
+			unit.undoMove();
 		} else if (this._canRedeploy) {
 			this._deploy();
 		}
@@ -326,11 +326,11 @@ class BattleScene extends Scene {
 		else return null;
 	}
 
-	_selectSkill(piece) {
-		if (!piece.select()) return false;
-		if (this._skill != piece) this._deselectSkill();
+	_selectSkill(skill) {
+		if (!skill.select()) return false;
+		if (this._skill != skill) this._deselectSkill();
 
-		this._skill = piece;
+		this._skill = skill;
 		return true;
 	}
 	_deselectSkill() {
@@ -338,9 +338,10 @@ class BattleScene extends Scene {
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
-	_useSkill(piece, square) {
-		if (piece.use(square)) {
+	_useSkill(skill, square) {
+		if (skill.use(square)) {
 			this._deselectSkill();
+			this._sameMove = false;
 			this._clearMoves();
 			this._checkForEnd(); // TEMP?
 		}

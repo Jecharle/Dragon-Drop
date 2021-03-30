@@ -279,7 +279,7 @@ class Board extends Container {
 	setMoveArea(unit) {
 		if (!unit || !unit.moveRange) return;
 
-		var origin = unit.moved ? unit.homeSquare : unit.square;
+		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
 		this._paintMoveRange(origin, unit.moveRange, true, true);

@@ -258,7 +258,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get canMove() {
-		return !this.moved && !this.acted;
+		return !this.homeSquare && !this.acted;
 	}
 	get canAct() {
 		return !this.acted;
@@ -270,7 +270,6 @@ class ControllablePiece extends TargetablePiece {
 	}
 	endTurn() {
 		this.myTurn = false;
-		this.moved = false;
 		this.acted = false;
 		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
@@ -293,11 +292,9 @@ class ControllablePiece extends TargetablePiece {
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			if (!this.moved) {
-				this.moved = true;
+			if (this.homeSquare == null) {
 				this.homeSquare = oldSquare;
 			} else if (target == this.homeSquare) {
-				this.moved = false;
 				this.homeSquare = null;
 			}
 			this.face(target, this.homeSquare);
@@ -307,10 +304,9 @@ class ControllablePiece extends TargetablePiece {
 		return false;
 	}
 	undoMove() {
-		if (!this.moved || !this.homeSquare) return false;
+		if (this.homeSquare == null) return false;
 		
 		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
-			this.moved = false;
 			this.homeSquare = null;
 			this.refresh();
 			return true;
