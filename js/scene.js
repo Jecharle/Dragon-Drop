@@ -461,19 +461,21 @@ class BattleScene extends Scene {
 	}
 
 	keydown(key) {
-		if (key == "Escape") {
+		if (key == "Escape" || key == "Delete" || key == "Backspace") {
 			if (this._target && this._phase == BattleScene.DeployPhase) {
 				this._deselectTarget();
 			} else if (this._skill) {
 				this._deselectSkill();
 			} else if (this._unit) {
-				this._deselectUnit();
+				if (this._unit == this._lastMove) this._undoMove();
+				else this._deselectUnit();
+			} else {
+				this._undoMove();
 			}
-			// TODO: Open a menu?
 			this.refresh();
 		}
 
-		if (key == "Delete" || key == "Backspace" || key == "z" || key == "Z") {
+		if (key == "z" || key == "Z") {
 			this._undoMove();
 			this.refresh();
 		}
