@@ -94,6 +94,10 @@ class TargetablePiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 	}
 
+	get elClass() {
+		return 'unit';
+	}
+
 	get targetable() {
 		return true;
 	}
@@ -234,10 +238,6 @@ class ControllablePiece extends TargetablePiece {
 		this._setSkills();
 
 		this.endTurn(); // TEMP?
-	}
-
-	get elClass() {
-		return 'unit';
 	}
 
 	_setStats() {
