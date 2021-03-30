@@ -296,11 +296,13 @@ class BattleScene extends Scene {
 		if (this._unit) this._unit.deselect();
 		this._unit = null;
 		this._skillList.setUser(null);
+		this._sameMove = false;
 	}
 	_moveUnit(piece, square) {
 		if (piece.move(square)) {
 			if (piece != this._lastMove) {
 				this._moveStack.push(piece);
+				this._sameMove = true;
 			} else if (!piece.moved) {
 				this._moveStack.pop();
 				this._deselectUnit();
@@ -376,9 +378,7 @@ class BattleScene extends Scene {
 			if (this._target) {
 				this._board.showAoE(this._skill, this._target);
 			}
-		} else if (this._unit && this._unit.canMove) {
-			this._board.setMoveArea(this._unit);
-		} else if (this._unit && this._lastMove == this._unit) { // TODO: Somehow disable free re-moving once you deselect?
+		} else if (this._unit && this._unit.canMove || this._sameMove) {
 			this._board.setMoveArea(this._unit);
 		}
 	}
@@ -433,7 +433,7 @@ class BattleScene extends Scene {
 		} else { // TODO: once AI works, only run for player phase
 			if (!square.inRange) {
 				this._deselectSkill();
-				this._deselectUnit();
+				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
 				this._useSkill(this._skill, square);
 			} else if (this._unit && this._unit.idMatch(dragId)) {
