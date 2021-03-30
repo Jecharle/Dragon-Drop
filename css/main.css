@@ -216,8 +216,8 @@
 	top: 0px;
 	background-image: url("../img/uiMarkers.png");
 	background-repeat: no-repeat;
-	background-position: -64px 0px;
-	animation: animate 1s steps(4) infinite;
+	background-position-x: -64px;
+	animation: sprite-animation 1.2s steps(4) infinite;
 }
 .unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after {
 	top: -16px;
@@ -259,7 +259,7 @@
 	background-image: url("../img/testObject.png");
 }
 
-.damaged::before {
+.damaged {
 	animation: shake 150ms;
 }
 
@@ -371,14 +371,12 @@
 	animation: banner-display 800ms ease-out 2 alternate;
 }
 
-@keyframes animate {
+@keyframes sprite-animation {
 	from {
 		background-position-x: 0px;
 	}
-	to {
-		
-	}
 }
+
 @keyframes shake {
 	from {
 		margin-left: 0px;
