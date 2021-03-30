@@ -84,6 +84,7 @@ class TargetablePiece extends Piece {
 		this._team = null;
 		this._partyMember = partyMember;
 		this.square = null;
+		this.size = 1;
 
 		this._setStats();
 
@@ -101,11 +102,11 @@ class TargetablePiece extends Piece {
 		return this._size;
 	}
 	set size(value) {
-		if (this._size) {
+		if (this._size > 1) {
 			this.el.classList.remove("x"+this.size);
 		}
 		this._size = value;
-		if (this._size) {
+		if (this._size > 1) {
 			this.el.classList.add("x"+this.size);
 		}
 	}
@@ -178,7 +179,7 @@ class TargetablePiece extends Piece {
 
 		if (!props || !props.noAnimation) {
 			this.el.classList.add('damaged');
-			this.el.addEventListener('animationend', this._removeDamagedAnimation);
+			setTimeout(() => this.el.classList.remove('damaged'), 1000);
 		}
 
 		this._showPopup(power);
@@ -190,10 +191,6 @@ class TargetablePiece extends Piece {
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
-	}
-	_removeDamagedAnimation(ev) {
-		ev.target.classList.remove('damaged');
-		ev.target.removeEventListener('animationend', this._removeDamagedAnimation);
 	}
 	_showPopup(value) {
 		var popup = new PopupText(value);

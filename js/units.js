@@ -4,8 +4,7 @@
 class TestMeleeUnit extends ControllablePiece {
 	constructor(partyMember) {
 		super(partyMember);
-		this.style = 'ball';
-		this.size = 1;
+		this.style = 'melee-unit';
 	}
 
 	_setStats() {
@@ -24,8 +23,7 @@ class TestMeleeUnit extends ControllablePiece {
 class TestSupportUnit extends ControllablePiece {
 	constructor(partyMember) {
 		super(partyMember);
-		this.style = 'ball3';
-		this.size = 1;
+		this.style = 'support-unit';
 	}
 
 	_setStats() {
@@ -45,8 +43,7 @@ class TestSupportUnit extends ControllablePiece {
 class TestEnemyUnit extends ControllablePiece {
 	constructor(partyMember) {
 		super(partyMember);
-		this.style = 'ball2';
-		this.size = 1;
+		this.style = 'enemy-unit';
 	}
 
 	_setStats() {
@@ -68,7 +65,6 @@ class TestRockObject extends TargetablePiece {
 	constructor() {
 		super();
 		this.style = 'rock';
-		this.size = 1;
 	}
 
 	_setStats() {

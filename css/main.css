@@ -224,19 +224,20 @@
 	top: 0px;
 	background-image: url("../img/uiMarkers.png");
 	background-repeat: no-repeat;
-	background-position: 0px 0px;
+	background-position: -48px 0px;
+	animation: animate 750ms steps(3) alternate infinite;
 }
 .unit.selectable:hover::after, .skill-range .unit.selectable::after {
-	top: -12px;
+	top: -16px;
 }
-
-.ball::before {
+ 
+.melee-unit::before {
 	background-image: url("../img/testUnit.png");
 }
-.ball2::before {
+.support-unit::before {
 	background-image: url("../img/testUnit.png");
 }
-.ball3::before {
+.enemy-unit::before {
 	background-image: url("../img/testUnit.png");
 }
 .rock::before {
@@ -334,7 +335,7 @@
 	background-position: 0px -12px;
 	background-repeat: repeat-x;
 }
-.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar {
+.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
 	visibility: visible;
 }
 
@@ -346,7 +347,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	position: relative;
+	position: absolute;
 	z-index: 4;
 	animation: rise-up 1s ease-out;
 }
@@ -366,6 +367,14 @@
 	animation: banner-display 800ms ease-out 2 alternate;
 }
 
+@keyframes animate {
+	from {
+		background-position-x: 0px;
+	}
+	to {
+		
+	}
+}
 @keyframes shake {
 	from {
 		margin-left: 0px;
