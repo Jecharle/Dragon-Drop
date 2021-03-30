@@ -47,7 +47,7 @@ class BattleScene extends Scene {
 		if (mapData) this._addMapUnits(mapData.units);
 		this._addParty(partyUnits);
 
-		// TODO: Box these up somewhere as well?
+		// TODO: Box these assignments up as well?
 		this._maxTurns = mapData.maxTurns;
 		this._minTurns = mapData.minTurns;
 		this._defaultVictory = mapData.defaultVictory;

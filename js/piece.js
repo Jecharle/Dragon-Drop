@@ -258,10 +258,10 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get canMove() {
-		return !this.homeSquare && !this.acted;
+		return !this.homeSquare && !this.actionUsed;
 	}
 	get canAct() {
-		return !this.acted;
+		return !this.actionUsed;
 	}
 
 	startTurn() {
@@ -270,7 +270,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 	endTurn() {
 		this.myTurn = false;
-		this.acted = false;
+		this.actionUsed = false;
 		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
@@ -450,7 +450,7 @@ class SkillPiece extends Piece {
 	_endEffects(target, squares, units) { }
 
 	_payCost() {
-		this.user.acted = true;
+		this.user.actionUsed = true;
 		this.cooldown = this._cooldownCost;
 	}
 
