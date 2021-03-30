@@ -129,31 +129,31 @@
 	cursor: pointer;
 }
 .deploy-range::after {
-	background-position-x: -384px;
+	background-position-y: -192px;
 }
 .deploy-range:hover::after, .selected.deploy-range::after {
-	background-position-y: -64px;
-}
-.move-range::after {
 	background-position-x: -128px;
 }
-.move-range:hover::after {
+.move-range::after {
 	background-position-y: -64px;
+}
+.move-range:not(.invalid):hover::after {
+	background-position-x: -128px;
 }
 .move-origin::after {
-	background-position-x: -512px;
+	background-position-y: -256px;
 }
 .skill-range::after {
-	background-position-x: -256px;
+	background-position-y: -128px;
 }
 .skill-aoe::after {
-	background-position-y: -64px;
+	background-position-x: -128px;
 }
 .invalid {
 	cursor: unset;
 }
-.invalid::after, .invalid:hover::after {
-	background-position-y: -128px;
+.invalid::after {
+	opacity: 25%;
 }
 
 .piece {
@@ -227,8 +227,28 @@
 	background-position: -48px 0px;
 	animation: animate 750ms steps(3) alternate infinite;
 }
-.unit.selectable:hover::after, .skill-range .unit.selectable::after {
+.unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after, .damaged .unit::after {
 	top: -16px;
+}
+
+.lifebar {
+	visibility: hidden;
+	position: absolute;
+	z-index: 2;
+	height: var(--lifebar-unit-size);
+	top: 0px;
+	background-image: url(../img/lifebar.png);
+	background-position: 0px 0px;
+	background-repeat: repeat-x;
+}
+.lifebar>div {
+	height: var(--lifebar-unit-size);
+	background-image: url(../img/lifebar.png);
+	background-position: 0px -12px;
+	background-repeat: repeat-x;
+}
+.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
+	visibility: visible;
 }
 
 .melee-unit::before {
@@ -319,26 +339,6 @@
 	display: block;
 }
 
-.lifebar {
-	visibility: hidden;
-	position: absolute;
-	z-index: 2;
-	height: var(--lifebar-unit-size);
-	top: 0px;
-	background-image: url(../img/lifebar.png);
-	background-position: 0px 0px;
-	background-repeat: repeat-x;
-}
-.lifebar>div {
-	height: var(--lifebar-unit-size);
-	background-image: url(../img/lifebar.png);
-	background-position: 0px -12px;
-	background-repeat: repeat-x;
-}
-.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
-	visibility: visible;
-}
-
 .popup-text {
 	font-size: 24px;
 	font-weight: bold;
@@ -395,13 +395,13 @@
 }
 @keyframes rise-up {
 	from {
-		top: 0px;
+		bottom: 95%;
 	}
 	70% {
-		top: -32px;
+		bottom: 110%;
 	}
 	to {
-		top: -32px;
+		bottom: 110%;
 	}
 }
 @keyframes banner-display {

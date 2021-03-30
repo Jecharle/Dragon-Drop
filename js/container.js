@@ -306,13 +306,14 @@ class Board extends Container {
 	_paintMoveRange(square, movesLeft, isOrigin, valid) {
 		square.el.classList.add('move-range');
 		if (isOrigin) square.el.classList.add('move-origin');
+		square.inRange = true;
+		square.movesLeft = movesLeft;
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 		} else {
 			square.el.classList.add('invalid');
+			square.invalid = true;
 		}
-		square.inRange = true;
-		square.movesLeft = movesLeft;
 	}
 	setSkillArea(skill) {
 		if (!skill || !skill.user) return [];
@@ -333,6 +334,7 @@ class Board extends Container {
 			square.el.ondragover = this._allowDrop;
 		} else {
 			square.el.classList.add('invalid');
+			square.invalid = true;
 		}
 	}
 
@@ -347,6 +349,7 @@ class Board extends Container {
 		square.el.classList.remove('invalid');
 		square.el.ondragover = null;
 		square.inRange = false;
+		square.invalid = false;
 		square.movesLeft = null;
 	}
 
@@ -478,7 +481,7 @@ class Square extends Position {
 		if (ev.currentTarget) { // mouse-in counts pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.currentTarget.obj;
-			if (square && square.inRange) {
+			if (square && square.inRange && !square.invalid) {
 				if (Game.scene) Game.scene.mouseEnter(square, elId);
 			}
 		}
@@ -488,7 +491,7 @@ class Square extends Position {
 		if (ev.target) { // mouse-out does NOT count pieces
 			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.target.obj;
-			if (square && square.inRange) {
+			if (square && square.inRange && !square.invalid) {
 				if (Game.scene) Game.scene.mouseLeave(square, elId);
 			}
 		}
