@@ -59,9 +59,6 @@ class Board extends Container {
 		this.el.ondrop = this._drop;
 	}
 
-	get elType() {
-		return 'div';
-	}
 	get elClass() {
 		return 'board';
 	}
@@ -425,9 +422,6 @@ class Square extends Position {
 		this.el.ondragleave = this._mouseLeave;
 	}
 
-	get elType() {
-		return 'div';
-	}
 	get elClass() {
 		return 'square';
 	}

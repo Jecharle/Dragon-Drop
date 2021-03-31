@@ -36,7 +36,7 @@ class Party {
 		return this.members.some(member => member.alive);
 	}
 
-	static getPieces() {
+	static getUnits() {
 		var pieces = [];
 		this.members.forEach(member => {
 			if (member.alive && pieces.length < this.partySize){

@@ -10,6 +10,10 @@ class Scene extends ElObj {
 		this._dataIn = null;
 	}
 
+	get elClass() {
+		return 'scene';
+	}
+
 	get lastScene() {
 		this._lastScene;
 	}

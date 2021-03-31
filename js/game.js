@@ -38,13 +38,12 @@ class Game {
 
 		Game.el = document.createElement("div");
 		Game.el.classList.add("game-window");
-		Game.el.id = "gameDiv";
 		document.body.appendChild(Game.el);
 
 		// TEMP
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
-		Game.setScene(new BattleScene( new TestMap(), Party.getPieces() ));
+		Game.setScene(new BattleScene( new TestMap(), Party.getUnits() ));
 	}
 }
 Game.begin();
