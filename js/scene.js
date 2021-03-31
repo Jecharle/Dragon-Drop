@@ -420,7 +420,6 @@ class BattleScene extends Scene {
 				}
 			}
 		}
-		this._dragging = dragging;
 		this.refresh();
 	}
 	selectPosition(square, dragId) {
@@ -451,7 +450,6 @@ class BattleScene extends Scene {
 				this._moveUnit(this._unit, square);
 			}
 		}
-		this._dragging = false;
 		this.refresh();
 	}
 

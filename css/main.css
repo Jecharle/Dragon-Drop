@@ -7,6 +7,7 @@
 .game-window {
 	width: var(--game-w);
 	height: var(--game-h);
+	overflow: hidden;
 }
 
 .scene {
@@ -20,6 +21,9 @@
 }
 
 /*Universal styles*/
+.selectable {
+	cursor: pointer;
+}
 .unselectable::before {
 	filter: grayscale(100%);
 }
@@ -276,9 +280,6 @@
 	.left.unit::before {
 		transform: translateZ(-100px) scaleX(-1.0);
 	}
-	.selectable {
-		cursor: pointer;
-	}
 	.damaged {
 		animation: shake 150ms;
 	}
@@ -445,9 +446,8 @@
 }
 
 /*Layout debugging styles*/
-.scene {
+.game-window {
 	border: 1px solid black;
-	box-sizing: border-box;
 }
 
 /*.nav-bar, .skill-list {
