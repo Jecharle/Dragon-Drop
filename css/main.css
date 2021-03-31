@@ -262,13 +262,13 @@
 }
 
 .melee-unit::before {
-	background-image: url("../img/testUnit.png");
+	background-image: url("../img/testMeleeUnit.png");
 }
 .support-unit::before {
-	background-image: url("../img/testUnit.png");
+	background-image: url("../img/testSupportUnit.png");
 }
 .enemy-unit::before {
-	background-image: url("../img/testUnit.png");
+	background-image: url("../img/testEnemyUnit.png");
 }
 .rock::before {
 	background-image: url("../img/testObject.png");
