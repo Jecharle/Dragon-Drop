@@ -83,8 +83,8 @@ class TestBuildSkill extends SkillPiece {
 		return "Create a wall with 1 HP";
 	}
 
-	_range = 1;
-	_baseCooldown = 3;
+	_range = 1
+	_maxUses = 1
 
 	inRange(origin, target) {
 		return this._inSquare(origin, target, this.range)
@@ -118,10 +118,13 @@ class TestMoveSkill extends SkillPiece {
 		return "Move to a square adjacent to another unit";
 	}
 
-	_baseCooldown = 3;
+	_baseCooldown = 3
 
 	inRange(origin, target) {
-		return this._nearPiece(origin, target)
+		// TODO: near a unit other than the user
+		return target != origin
+			&& this._nearUnit(origin, target)
+			&& target.parent.canFit(this.user, target);
 	}
 
 	validTarget(target) {

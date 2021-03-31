@@ -275,6 +275,9 @@
 	height: 64px;
 	margin-left: 1px;
 	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 .skill::before {
 	content: "";
@@ -284,9 +287,11 @@
 	position: absolute;
 }
 
+.selectable.skill:hover, .skill.selected {
+	bottom: 4px;
+}
 .selectable.skill:hover::before, .skill.selected::before {
 	border: 2px solid deepskyblue;
-	bottom: 4px;
 }
 
 .attack-skill::before {
@@ -307,13 +312,11 @@
 }
 
 .cooldown-label {
-	font-size: 32px;
+	font-size: 24px;
 	font-weight: bold;
 	color: white;
 	text-align: center;
 	position: absolute;
-	top: 20%;
-	left: 35%;
 }
 
 .skill-description {

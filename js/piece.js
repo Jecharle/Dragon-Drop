@@ -344,6 +344,7 @@ class SkillPiece extends Piece {
 		super();
 		this.user = user;
 		this.cooldown = 0;
+		this.useCount = 0;
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -360,8 +361,15 @@ class SkillPiece extends Piece {
 
 	get fullDescription() {
 		var desc = `<strong>${this._name}</strong><br>${this._description}`;
-		if (this._cooldownCost > 0) {
-			desc += `<br><em>${this._cooldownCost} turn cooldown</em>`;
+		if (this.hasLimitedUses) {
+			desc += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
+		}
+		if (this.hasCooldown) {
+			if (this.cooldown > 0) {
+				desc += `<br><em>Ready in ${this.cooldownCost} turn${this.cooldown == 1 ? "" : "s"}</em>`;
+			} else {
+				desc += `<br><em>${this.cooldownCost} turn cooldown</em>`;
+			}
 		}
 		return desc;
 	}
@@ -395,8 +403,22 @@ class SkillPiece extends Piece {
 	}
 
 	_baseCooldown = 0
-	get _cooldownCost() {
+	get cooldownCost() {
 		return this._baseCooldown;
+	}
+	get hasCooldown() {
+		return this.cooldownCost > 0;
+	}
+
+	_maxUses = 0
+	get maxUses() {
+		return this._maxUses;
+	}
+	get hasLimitedUses() {
+		return this.maxUses > 0;
+	}
+	get usesLeft() {
+		return this.hasLimitedUses ? this.maxUses - this.useCount : 1;
 	}
 
 	_basePower = 1
@@ -405,7 +427,7 @@ class SkillPiece extends Piece {
 	}
 
 	canUse() {
-		return this.user.canAct && this.cooldown <= 0;
+		return this.user.canAct && this.cooldown <= 0 && this.usesLeft;
 	}
 	use(target) {
 		if (!this.validTarget(target)) return false;
@@ -426,7 +448,7 @@ class SkillPiece extends Piece {
 	}
 
 	validTarget(target) {
-		return true;
+		return !!target;
 	}
 	_affectedSquares(target) {
 		if (!target) return [];
@@ -451,7 +473,8 @@ class SkillPiece extends Piece {
 
 	_payCost() {
 		this.user.actionUsed = true;
-		this.cooldown = this._cooldownCost;
+		this.cooldown = this.cooldownCost;
+		this.useCount += 1;
 	}
 
 	endTurn() {
@@ -465,7 +488,14 @@ class SkillPiece extends Piece {
 		var usable = this.canUse();
 		this._setSelectable(usable);
 		this._setUnselectable(!usable);
-		this._cooldownLabel.value = this.cooldown || "";
+		// TEMP - two separate labels?
+		if (this.cooldown > 0) {
+			this._cooldownLabel.value = this.cooldown;
+		} else if (this.hasLimitedUses) {
+			this._cooldownLabel.value = "x"+this.usesLeft;
+		} else {
+			this._cooldownLabel.value = "";
+		}
 		this._tooltip.value = this.fullDescription;
 	}
 
@@ -531,7 +561,7 @@ class SkillPiece extends Piece {
 			if (square.piece) return false; // TODO: Use props to decide which pieces block
 		}
 	}
-	_nearPiece(_origin, target, props) {
+	_nearUnit(_origin, target, props) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
 			if (square.piece) return true; // TODO: Use props to decide which pieces count
