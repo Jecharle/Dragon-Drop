@@ -14,7 +14,10 @@ class TestAttackSkill extends SkillPiece {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	_range = 2
+	_setStats() {
+		super._setStats();
+		this._range = 2;
+	}
 
 	inRange(origin, target) {
 		return super.inRange(origin, target)
@@ -51,10 +54,13 @@ class TestHealSkill extends SkillPiece {
 		return `Restore ${this.power} HP`;
 	}
 
-	_basePower = 2;
-	_baseCooldown = 2;
-	_range = 1;
-	_minRange = 0;
+	_setStats() {
+		super._setStats();
+		this._basePower = 2;
+		this._baseCooldown = 2;
+		this._range = 1;
+		this._minRange = 0;
+	}
 
 	validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -83,8 +89,10 @@ class TestBuildSkill extends SkillPiece {
 		return "Create a wall with 1 HP";
 	}
 
-	_range = 1
-	_maxUses = 1
+	_setStats() {
+		super._setStats();
+		this._maxUses = 1;
+	}
 
 	inRange(origin, target) {
 		return this._inSquare(origin, target, this.range)
@@ -118,7 +126,10 @@ class TestMoveSkill extends SkillPiece {
 		return "Move to a square adjacent to another unit";
 	}
 
-	_baseCooldown = 3
+	_setStats() {
+		super._setStats();
+		this._baseCooldown = 3;
+	}
 
 	inRange(origin, target) {
 		// TODO: near a unit other than the user
@@ -154,9 +165,12 @@ class TestAreaSkill extends SkillPiece {
 		return `Deal ${this.power} damage to all targets in a small area`;
 	}
 
-	_range = 3
-	_minRange = 2
-	_area = 1
+	_setStats() {
+		super._setStats();
+		this._range = 3;
+		this._minRange = 2;
+		this._area = 1;
+	}
 
 	inArea(origin, target) {
 		return this._inCircle(origin, target, this.area);

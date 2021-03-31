@@ -88,7 +88,6 @@ class TargetablePiece extends Piece {
 
 		this._setStats();
 
-		// TODO: Make a proper "initialize" method for this?
 		this.hp = this.maxHp;
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
@@ -162,9 +161,6 @@ class TargetablePiece extends Piece {
 		return !this.dead();
 	}
 
-	// TODO: Call this from somewhere standardized
-		// But how to know which units to affect?
-		// Separate "affected unit list" system for skills? Might help for AoE standardizing too
 	dieIfDead() {
 		if (this.dead) {
 			this.setParent(null);
@@ -237,7 +233,7 @@ class ControllablePiece extends TargetablePiece {
 		super();
 		this._setSkills();
 
-		this.endTurn(); // TEMP?
+		this.initialize();
 	}
 
 	_setStats() {
@@ -264,6 +260,12 @@ class ControllablePiece extends TargetablePiece {
 		return !this.actionUsed;
 	}
 
+	initialize() {
+		this.myTurn = false;
+		this.actionUsed = false;
+		this.homeSquare = null;
+		this.refresh();
+	}
 	startTurn() {
 		this.myTurn = true;
 		this.refresh();
@@ -343,8 +345,9 @@ class SkillPiece extends Piece {
 	constructor(user) {
 		super();
 		this.user = user;
-		this.cooldown = 0;
-		this.useCount = 0;
+		this._setStats();
+		this.cooldown = Math.max(this.cooldownCost-1, 0);
+		this.usesLeft = this.maxUses;
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -353,6 +356,15 @@ class SkillPiece extends Piece {
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
+	}
+
+	_setStats() {
+		this._range = 1;
+		this._minRange = 1;
+		this._area = 0;
+		this._baseCooldown = 0;
+		this._maxUses = 0;
+		this._basePower = 1;
 	}
 
 	get elClass() {
@@ -366,7 +378,7 @@ class SkillPiece extends Piece {
 		}
 		if (this.hasCooldown) {
 			if (this.cooldown > 0) {
-				desc += `<br><em>Ready in ${this.cooldownCost} turn${this.cooldown == 1 ? "" : "s"}</em>`;
+				desc += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
 			} else {
 				desc += `<br><em>${this.cooldownCost} turn cooldown</em>`;
 			}
@@ -381,11 +393,9 @@ class SkillPiece extends Piece {
 		return "[Skill description]";
 	}
 
-	_range = 1
 	get range() {
 		return this._range;
 	}
-	_minRange = 1
 	get minRange() {
 		return this._minRange;
 	}
@@ -394,7 +404,6 @@ class SkillPiece extends Piece {
 			&& !this._inCircle(origin, target, this.minRange-1);
 	}
 
-	_area = 0;
 	get area() {
 		return this._area;
 	}
@@ -402,7 +411,6 @@ class SkillPiece extends Piece {
 		return this._inCircle(origin, target, this.area);
 	}
 
-	_baseCooldown = 0
 	get cooldownCost() {
 		return this._baseCooldown;
 	}
@@ -410,24 +418,19 @@ class SkillPiece extends Piece {
 		return this.cooldownCost > 0;
 	}
 
-	_maxUses = 0
 	get maxUses() {
 		return this._maxUses;
 	}
 	get hasLimitedUses() {
 		return this.maxUses > 0;
 	}
-	get usesLeft() {
-		return this.hasLimitedUses ? this.maxUses - this.useCount : 1;
-	}
 
-	_basePower = 1
 	get power() {
 		return this._basePower;
 	}
 
 	canUse() {
-		return this.user.canAct && this.cooldown <= 0 && this.usesLeft;
+		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
 	use(target) {
 		if (!this.validTarget(target)) return false;
@@ -473,8 +476,8 @@ class SkillPiece extends Piece {
 
 	_payCost() {
 		this.user.actionUsed = true;
-		this.cooldown = this.cooldownCost;
-		this.useCount += 1;
+		if (this.hasCooldown) this.cooldown = this.cooldownCost;
+		if (this.hasLimitedUses) this.usesLeft--;
 	}
 
 	endTurn() {

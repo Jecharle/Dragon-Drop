@@ -43,10 +43,11 @@
 }
 	.nav-bar button {
 		display: inline-block;
+		font-size: 18px;
 		color: white;
 		background-color: deepskyblue;
 		border: none;
-		padding: 8px;
+		padding: 12px;
 		flex: 0 0 15%;
 		cursor: pointer;
 	}
