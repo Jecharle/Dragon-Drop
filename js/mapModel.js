@@ -43,8 +43,6 @@ class MapModel {
 class TestMap extends MapModel { // TEMP
 	constructor() {
 		super();
-		
-		//this._maxTurns = 2;
 
 		this._deployment.push(
 			{x: 2, y: 5},

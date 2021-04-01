@@ -279,11 +279,12 @@ class Board extends Container {
 		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, unit.moveRange, true, true);
+		this._paintMoveRange(origin, unit.moveRange, [], true);
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
 			var adjacent = this.getAdjacent(edges[i]);
+			var path = [edges[i]].concat(edges[i].path);
 			
 			for (var n = 0; n < adjacent.length; n++) {
 				var movesLeft = edges[i].movesLeft - (adjacent[n].slowsMove ? 2 : 1);
@@ -296,18 +297,20 @@ class Board extends Container {
 				if (!this.canPass(unit, adjacent[n])) {
 					continue;
 				}
-				this._paintMoveRange(adjacent[n], movesLeft, false, this.canFit(unit, adjacent[n]));
+				this._paintMoveRange(adjacent[n], movesLeft, path, this.canFit(unit, adjacent[n]));
 				if (movesLeft > 0) {
 					edges.push(adjacent[n]);
 				}
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft, isOrigin, valid) {
+	_paintMoveRange(square, movesLeft, path, valid) {
 		square.el.classList.add('move-range');
-		if (isOrigin) square.el.classList.add('move-origin');
+		if (path.length == 0) square.el.classList.add('move-origin');
 		square.inRange = true;
 		square.movesLeft = movesLeft;
+		square.path = path;
+
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 		} else {
@@ -351,6 +354,7 @@ class Board extends Container {
 		square.inRange = false;
 		square.invalid = false;
 		square.movesLeft = null;
+		square.path = null;
 	}
 
 	getAoE(skill, origin) {

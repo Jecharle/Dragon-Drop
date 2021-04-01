@@ -298,7 +298,7 @@ class ControllablePiece extends TargetablePiece {
 			} else if (target == this.homeSquare) {
 				this.homeSquare = null;
 			}
-			this.face(target, this.homeSquare);
+			this.face(target, target.path[0]);
 			this.refresh();
 			return true;
 		}
