@@ -31,8 +31,7 @@ class Scene extends ElObj {
 
 	selectPiece(piece, dragging) { }
 	selectPosition(position, dragId) { }
-	mouseEnter(position, dragId) { }
-	mouseLeave(position, dragId) { }
+	mouseOver(position, dragId) { }
 
 	keydown(key) { }
 	keyup(key) { }
@@ -347,8 +346,13 @@ class BattleScene extends Scene {
 	}
 
 	_selectTarget(square) {
+		if (this._target) {
+			this._deselectTarget();
+		}
 		this._target = square;
-		this._target.el.classList.add('selected'); // TEMP
+		if (this._target) {
+			this._target.el.classList.add('selected'); // TEMP
+		}
 		return true;
 	}
 	_deselectTarget() {
@@ -449,17 +453,16 @@ class BattleScene extends Scene {
 	}
 
 	// TODO: Ignore these on a touch device?
-	mouseEnter(square, dragId) {
-		if (square != this._target && this._skill && this._skill.idMatch(dragId)) {
-			this._selectTarget(square);
-			this._board.clearAoE();
-			this._board.showAoE(this._skill, this._target);
-		}
-	}
-	mouseLeave(square, dragId) {
-		if (this._target == square && this._skill && this._skill.idMatch(dragId)) {
-			this._deselectTarget();
-			this._board.clearAoE();
+	mouseOver(square, dragId) {
+		if (this._skill && this._skill.idMatch(dragId)) {
+			if (square == null) {
+				this._deselectTarget();
+				this._board.clearAoE();
+			} else if (square != this._target) {
+				this._selectTarget(square);
+				this._board.clearAoE();
+				this._board.showAoE(this._skill, this._target);
+			}
 		}
 	}
 

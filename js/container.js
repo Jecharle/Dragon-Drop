@@ -415,10 +415,8 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this.el.onmouseenter = this._mouseEnter;
-		this.el.ondragenter = this._mouseEnter;
-		this.el.onmouseleave = this._mouseLeave;
-		this.el.ondragleave = this._mouseLeave;
+		this.el.onmouseenter = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {
@@ -478,23 +476,14 @@ class Square extends Position {
 		return (this.terrain&Square._SlowMove == Square._SlowMove);
 	}
 
-	_mouseEnter(ev) {
+	_mouseOver(ev) {
 		ev.stopPropagation();
-		if (ev.currentTarget) { // mouse-in counts pieces
-			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+		if (ev.currentTarget) { // pieces count
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.currentTarget.obj;
-			if (square && square.inRange && !square.invalid) {
-				if (Game.scene) Game.scene.mouseEnter(square, elId);
-			}
-		}
-	}
-	_mouseLeave(ev) {
-		ev.stopPropagation();
-		if (ev.target) { // mouse-out does NOT count pieces
-			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.target.obj;
-			if (square && square.inRange && !square.invalid) {
-				if (Game.scene) Game.scene.mouseLeave(square, elId);
+			if (square && Game.scene) { 
+				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
+				else Game.scene.mouseOver(null, dragElId);
 			}
 		}
 	}
