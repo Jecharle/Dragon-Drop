@@ -72,7 +72,6 @@
 	position: absolute;
 	bottom: 0px;
 	width: 50%;
-	height: 64px;
 }
 
 /*Phase change & end screens*/
@@ -127,7 +126,7 @@
 		position: absolute;
 		z-index: -1;
 		top: 0px;
-		left: -64px;
+		left: calc(-0.5*var(--square-sprite-w));
 		opacity: 50%;
 		width: var(--square-sprite-w);
 		height: var(--square-sprite-top-h);
@@ -141,26 +140,26 @@
 		.deploy-range, .move-range, .skill-range {
 			cursor: pointer;
 		}
-		.deploy-range::after {
-			background-position-y: -192px;
-		}
-		.deploy-range:hover::after, .selected.deploy-range::after {
-			background-position-x: -128px;
-		}
 		.move-range::after {
-			background-position-y: -64px;
+			background-position-y: calc(-1*var(--square-sprite-top-h));
 		}
 		.move-range:not(.invalid):hover::after {
-			background-position-x: -128px;
-		}
-		.move-origin::after {
-			background-position-y: -256px;
+			background-position-x: calc(-1*var(--square-sprite-w));
 		}
 		.skill-range::after {
-			background-position-y: -128px;
+			background-position-y: calc(-2*var(--square-sprite-top-h));
 		}
 		.skill-aoe::after {
-			background-position-x: -128px;
+			background-position-x: calc(-1*var(--square-sprite-w));
+		}
+		.deploy-range::after {
+			background-position-y: calc(-3*var(--square-sprite-top-h));
+		}
+		.deploy-range:hover::after, .selected.deploy-range::after {
+			background-position-x: calc(-1*var(--square-sprite-w));
+		}
+		.move-origin::after {
+			background-position-y: calc(-4*var(--square-sprite-top-h));
 		}
 		.invalid {
 			cursor: unset;
@@ -174,7 +173,7 @@
 		position: absolute;
 		z-index: -2;
 		top: 0px;
-		left: -64px;
+		left: calc(-0.5*var(--square-sprite-w));
 		width: var(--square-sprite-w);
 		height: var(--square-sprite-h);
 		content: "";
@@ -185,19 +184,20 @@
 		transform-origin: 50% 0%;
 	}
 		.pit::before {
-			background-position-y: -128px;
+			background-position-y: calc(-1*var(--square-sprite-h));
 		}
 		.wall {
 			transform: translateZ(var(--square-wall-z));
 		}
 		.wall::before {
-			background-position-y: -384px;
+			background-position-y: calc(-3*var(--square-sprite-h));
 		}
 
 /*Unit base*/
 :root {
 	--unit-sprite-w: 64px;	
 	--unit-sprite-h: 64px;
+	--unit-sprite-z: -100px;
 }
 .unit {
 	width: var(--unit-sprite-w);
@@ -205,7 +205,7 @@
 	box-sizing: border-box;
 	position: absolute;
 	z-index: 1;
-	right: -32px;
+	right: calc(-0.5*var(--unit-sprite-w));
 	bottom: 0px;
 	transform: rotateZ(-45deg) rotateX(-60deg);
 	transform-origin: 50% 100%;
@@ -220,18 +220,18 @@
 		box-sizing: border-box;
 		position: absolute;
 		bottom: 0px;
-		transform: translateZ(-100px);
+		transform: translateZ(var(--unit-sprite-z));
 		background-repeat: no-repeat;
 		background-position: 0px 0px;
 	}
 	.unit.x2 {
-		width: 128px;
-		height: 128px;
-		right: -64px;
+		width: calc(2*var(--unit-sprite-w));
+		height: calc(2*var(--unit-sprite-h));
+		right: calc(-1*var(--unit-sprite-w));;
 	}
 		.unit.x2::before {
-			width: 128px;
-			height: 128px;
+			width: calc(2*var(--unit-sprite-w));
+			height: calc(2*var(--unit-sprite-h));
 		}
 
 	/*Unit details*/
@@ -248,11 +248,11 @@
 		top: 0px;
 		background-image: url("../img/uiMarkers.png");
 		background-repeat: no-repeat;
-		background-position-x: -64px;
+		background-position-x: calc(-4*var(--action-mark-w));
 		animation: sprite-animation 1.2s steps(4) infinite;
 	}
 		.unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after {
-			top: -16px;
+			top: calc(-1*var(--action-mark-h));
 		}
 		.damaged.unit::after {
 			display: none;
@@ -270,7 +270,7 @@
 		.lifebar>div {
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
-			background-position: 0px -12px;
+			background-position: 0px calc(-1*var(--lifebar-h));
 			background-repeat: repeat-x;
 		}
 		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
@@ -285,7 +285,7 @@
 		animation: shake 150ms;
 	}
 	.unit.selectable:hover::before, .unit.selected::before {
-		background-position-y: -64px;
+		background-position-y: calc(-1*var(--unit-sprite-h));
 	}
 
 	/*Unit skins*/
@@ -303,9 +303,13 @@
 	}
 
 /*Skill base and info*/
+:root {
+	--skill-w: 64px;
+	--skill-h: 64px;
+}
 .skill {
-	width: 64px;
-	height: 64px;
+	width: var(--skill-w);
+	height: var(--skill-h);
 	margin-left: 1px;
 	position: relative;
 	display: flex;
