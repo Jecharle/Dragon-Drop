@@ -178,6 +178,12 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_nextTurn() {
+		if (this._phase != BattleScene.DeployPhase
+		&& this._activeTeam && this._activeTeam.hasActions
+		&& !confirm("End turn?")) {
+			return; // prompt to avoid ending turn without doing anything
+		}
+
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -253,7 +259,7 @@ class BattleScene extends Scene {
 
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "";
+			this._turnTitleEl.innerText = "Starting Position";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
 		} else if (this._maxTurns) {
@@ -263,7 +269,7 @@ class BattleScene extends Scene {
 		}
 
 		if (this._phase == BattleScene.DeployPhase) {
-			this._endTurnButtonEl.innerText = "Start Battle";
+			this._endTurnButtonEl.innerText = "Ready";
 			this._undoButtonEl.style.visibility = "hidden";
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
@@ -272,13 +278,13 @@ class BattleScene extends Scene {
 
 		if (this._lastMove != null) {
 			this._undoButtonEl.disabled = false;
-			this._undoButtonEl.innerText = "Undo";
+			this._undoButtonEl.innerText = "Undo Move";
 		} else if (this._canRedeploy) {
 			this._undoButtonEl.disabled = false;
-			this._undoButtonEl.innerText = "Switch";
+			this._undoButtonEl.innerText = "Reposition";
 		} else {
 			this._undoButtonEl.disabled = true;
-			this._undoButtonEl.innerText = "Undo";
+			this._undoButtonEl.innerText = "Undo Move";
 		}
 	}
 
@@ -292,6 +298,7 @@ class BattleScene extends Scene {
 		return true;
 	}
 	_deselectUnit() {
+		this._deselectTarget();
 		if (this._unit) this._unit.deselect();
 		this._unit = null;
 		this._skillList.setUser(null);
@@ -389,6 +396,8 @@ class BattleScene extends Scene {
 		}
 	}
 
+	// TODO: AI functions here!
+
 	selectPiece(piece, dragging) {
 		if (!piece) return;
 
@@ -448,13 +457,19 @@ class BattleScene extends Scene {
 					this._board.showAoE(this._skill, this._target);
 				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
-				this._moveUnit(this._unit, square);
+				if (square == this._target) {
+					this._moveUnit(this._unit, square);
+				} else {
+					this._selectTarget(square);
+					this._board.clearPath();
+					this._board.showPath(this._target);
+				}
 			}
 		}
 		this.refresh();
 	}
 
-	// TODO: Ignore these on a touch device?
+	// TODO: Ignore this on a touch device?
 	mouseOver(square, dragId) {
 		if (this._skill && this._skill.idMatch(dragId)) {
 			if (square == null) {
@@ -466,9 +481,14 @@ class BattleScene extends Scene {
 				this._board.showAoE(this._skill, this._target);
 			}
 		} else if (this._unit && this._unit.idMatch(dragId)) {
-			this._board.clearPath(); // TODO: Use this._target for this phase, too?
+			if (square == null) {
+				this._deselectTarget();
+				this._board.clearPath();
+			}
 			if (square) {
-				this._board.showPath(square);
+				this._selectTarget(square);
+				this._board.clearPath();
+				this._board.showPath(this._target);
 			}
 		}
 	}
@@ -479,9 +499,10 @@ class BattleScene extends Scene {
 				this._deselectTarget();
 			} else if (this._skill) {
 				this._deselectSkill();
+			} else if (this._unit == this._lastMove) { // undo move before deselecting
+				this._undoMove();
 			} else if (this._unit) {
-				if (this._unit == this._lastMove) this._undoMove();
-				else this._deselectUnit();
+				this._deselectUnit();
 			} else {
 				this._undoMove();
 			}
@@ -530,6 +551,10 @@ class Team {
 			if (member.alive) return count+1;
 			else return count;
 		}, 0);
+	}
+
+	get hasActions() {
+		return this.members.some(member => member.canAct);
 	}
 
 	add(piece) {

@@ -253,10 +253,10 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get canMove() {
-		return !this.homeSquare && !this.actionUsed;
+		return this.alive && !this.homeSquare && !this.actionUsed;
 	}
 	get canAct() {
-		return !this.actionUsed;
+		return this.alive && !this.actionUsed;
 	}
 
 	initialize() {
