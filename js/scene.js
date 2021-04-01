@@ -48,8 +48,8 @@ class BattleScene extends Scene {
 		this._board = new Board(mapData);
 		this._skillList = new SkillList();
 
-		if (mapData) this._addMapUnits(mapData.units);
 		this._addParty(partyUnits);
+		if (mapData) this._addMapUnits(mapData.units);
 
 		// TODO: Box these assignments up as well?
 		this._maxTurns = mapData.maxTurns;
@@ -131,6 +131,16 @@ class BattleScene extends Scene {
 		}
 	}
 
+	_addParty(partyUnits) {
+		if (!partyUnits) return;
+
+		partyUnits.forEach(piece => {
+			var index = this.playerTeam.size;
+			var square = this._board.deployArea[index];
+			if (square) this._board.movePiece(piece, square);
+			piece.setTeam(this.playerTeam);
+		});
+	}
 	_addMapUnits(unitData) {
 		if (!unitData) return;
 
@@ -148,17 +158,6 @@ class BattleScene extends Scene {
 			return true;
 		}
 		return false;
-	}
-
-	_addParty(partyUnits) {
-		if (!partyUnits) return;
-
-		partyUnits.forEach(piece => {
-			var index = this.playerTeam.size;
-			var square = this._board.deployArea[index];
-			if (square) this._board.movePiece(piece, square);
-			piece.setTeam(this.playerTeam);
-		});
 	}
 	_addReinforcements() {
 		// this removes the data for anything successfully added
