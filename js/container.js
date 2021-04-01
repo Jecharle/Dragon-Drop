@@ -115,13 +115,13 @@ class Board extends Container {
 	}
 
 	canFit(piece, centerSquare, size) {
-		size = size || piece.size;
+		size = size || piece.size || 1;
 		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain & Square.BlockMove) {
+			if (square.blocksMove) {
 				return false;
 			}
 			if (square.piece != null && square.piece != piece) {
@@ -131,17 +131,17 @@ class Board extends Container {
 		});
 	}
 	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
-	canPass(piece, centerSquare, size) {
-		size = size || piece.size;
+	canPass(piece, centerSquare, size, props) {
+		size = size || piece.size || 1;
 		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain & Square.BlockMove) {
-				return false; // TODO: Depends on movement settings?
+			if (square.blocksMove) { // TODO: Depends on movement settings?
+				return false;
 			}
-			if (square.piece != null && piece != null && !square.piece.isAlly(piece)) {
+			if (square.piece != null && !square.piece.isAlly(piece)) { // TODO: Depends on movement settings?
 				return false;
 			}
 			return true;
@@ -468,6 +468,15 @@ class Square extends Position {
 				break;
 		}
 	}
+	get blocksMove() {
+		return (this.terrain&Square._BlockMove == Square._BlockMove);
+	}
+	get blocksSight() {
+		return (this.terrain&Square._BlockSight == Square._BlockSight);
+	}
+	get slowsMove() {
+		return (this.terrain&Square._SlowMove == Square._SlowMove);
+	}
 
 	_mouseEnter(ev) {
 		ev.stopPropagation();
@@ -490,15 +499,15 @@ class Square extends Position {
 		}
 	}
 };
-Square.BlockMove = 1;
-Square.BlockSight = 2;
-Square.SlowMove = 4;
+Square._BlockMove = 1;
+Square._BlockSight = 2;
+Square._SlowMove = 4;
 
 Square.Flat = 0;
-Square.Pit = Square.BlockMove;
-Square.Bush = Square.BlockSight;
-Square.Wall = Square.BlockMove | Square.BlockSight;
-Square.Mud = Square.SlowMove;
+Square.Pit = Square._BlockMove;
+Square.Bush = Square._BlockSight;
+Square.Wall = Square._BlockMove | Square._BlockSight;
+Square.Mud = Square._SlowMove;
 
 /***************************************************
  Skill list

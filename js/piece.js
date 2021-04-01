@@ -551,14 +551,14 @@ class SkillPiece extends Piece {
 		var tx = target.x;
 		var ty = target.y;
 		while (true) {
-			// It's not a straight line, but close enough for how I'm using it
+			// It's not a straight line, but good enough for how I'm using it
 			if (x < tx) x++;
 			else if (x > tx) x--;
 			if (y < ty) y++;
 			else if (y > ty) y--;
 
 			var square = board.at(x, y);
-			if (square && (square.terrain & Square.BlockSight)) return false; // TODO: Use props to decide which terrain blocks?
+			if (square && square.blocksSight) return false; // TODO: Use props to decide which terrain blocks
 			if (x == tx && y == ty) return true;
 			if (square.piece) return false; // TODO: Use props to decide which pieces block
 		}
