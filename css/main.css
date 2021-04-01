@@ -108,9 +108,21 @@
 	--square-size: 90px;
 	--square-z: 32px;
 	--square-wall-z: 70px;
+
 	--square-sprite-w: 128px;
 	--square-sprite-h: 128px;
 	--square-sprite-top-h: 64px;
+
+	--unit-sprite-w: 64px;	
+	--unit-sprite-h: 64px;
+	--unit-sprite-z: -100px;
+
+	--lifebar-h: 12px;
+	--action-mark-h: 16px;
+	--action-mark-w: 16px;
+
+	--skill-w: 64px;
+	--skill-h: 64px;
 }
 .board {
 	display: flex;
@@ -186,10 +198,10 @@
 	.square::before {
 		position: absolute;
 		z-index: -2;
-		top: 0px;
-		left: calc(-0.5*var(--square-sprite-w));
 		width: var(--square-sprite-w);
 		height: var(--square-sprite-h);
+		top: 0px;
+		left: calc(-0.5*var(--square-sprite-w));
 		content: "";
 		background-image: url(../img/testTileset.png);
 		background-repeat: no-repeat;
@@ -208,11 +220,6 @@
 		}
 
 /*Unit base*/
-:root {
-	--unit-sprite-w: 64px;	
-	--unit-sprite-h: 64px;
-	--unit-sprite-z: -100px;
-}
 .unit {
 	width: var(--unit-sprite-w);
 	height: var(--unit-sprite-h);
@@ -249,11 +256,6 @@
 		}
 
 	/*Unit details*/
-	:root {
-		--lifebar-h: 12px;
-		--action-mark-h: 16px;
-		--action-mark-w: 16px;
-	}
 	.unit.selectable::after {
 		content: "";
 		position: absolute;
@@ -293,7 +295,7 @@
 
 	/*Unit states and motions*/
 	.left.unit::before {
-		transform: translateZ(-100px) scaleX(-1.0);
+		transform: translateZ(-100px) rotateY(180deg);
 	}
 	.damaged {
 		animation: shake 150ms;
@@ -317,10 +319,6 @@
 	}
 
 /*Skill base and info*/
-:root {
-	--skill-w: 64px;
-	--skill-h: 64px;
-}
 .skill {
 	width: var(--skill-w);
 	height: var(--skill-h);
