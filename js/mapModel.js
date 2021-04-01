@@ -55,9 +55,10 @@ class TestMap extends MapModel { // TEMP
 
 		this._terrain.push(
 			{type: Square.Wall, x: 1, y: 4},
-			{type: Square.Wall, x: 2, y: 4},
+			{type: Square.Mud, x: 2, y: 4},
 			{type: Square.Wall, x: 3, y: 4},
-			{type: Square.Pit, x: 4, y: 4}
+			{type: Square.Pit, x: 4, y: 4},
+			{type: Square.Grass, x: 5, y: 4}
 		);
 
 		this._units.push(

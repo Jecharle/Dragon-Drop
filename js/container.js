@@ -284,17 +284,20 @@ class Board extends Container {
 		
 		for (var i = 0; i < edges.length; i++) {
 			var adjacent = this.getAdjacent(edges[i]);
-			var movesLeft = edges[i].movesLeft-1;
 			
 			for (var n = 0; n < adjacent.length; n++) {
-				if (adjacent.inRange && adjacent.movesLeft > movesLeft) {
+				var movesLeft = edges[i].movesLeft - (adjacent[n].slowsMove ? 2 : 1);
+				if (movesLeft < 0) {
+					continue;
+				}
+				if (adjacent[n].inRange && adjacent[n].movesLeft > movesLeft) {
 					continue;
 				}
 				if (!this.canPass(unit, adjacent[n])) {
 					continue;
 				}
 				this._paintMoveRange(adjacent[n], movesLeft, false, this.canFit(unit, adjacent[n]));
-				if (movesLeft) {
+				if (movesLeft > 0) {
 					edges.push(adjacent[n]);
 				}
 			}
@@ -441,8 +444,8 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.remove('pit');
 				break;
-			case Square.Bush:
-				this.el.classList.remove('bush');
+			case Square.Grass:
+				this.el.classList.remove('grass');
 				break;
 			case Square.Mud:
 				this.el.classList.remove('mud');
@@ -458,8 +461,8 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.add('pit');
 				break;
-			case Square.Bush:
-				this.el.classList.add('bush');
+			case Square.Grass:
+				this.el.classList.add('grass');
 				break;
 			case Square.Mud:
 				this.el.classList.add('mud');
@@ -494,7 +497,7 @@ Square._SlowMove = 4;
 
 Square.Flat = 0;
 Square.Pit = Square._BlockMove;
-Square.Bush = Square._BlockSight;
+Square.Grass = Square._BlockSight;
 Square.Wall = Square._BlockMove | Square._BlockSight;
 Square.Mud = Square._SlowMove;
 

@@ -212,11 +212,20 @@
 		.pit::before {
 			background-position-y: calc(-1*var(--square-sprite-h));
 		}
+		.grass::before {
+			background-position-y: calc(-2*var(--square-sprite-h));
+		}
+		.grass .unit::before {
+			opacity: 50%; /*units in grass are hidden*/
+		}
 		.wall {
 			transform: translateZ(var(--square-wall-z));
 		}
 		.wall::before {
 			background-position-y: calc(-3*var(--square-sprite-h));
+		}
+		.mud::before {
+			background-position-y: calc(-4*var(--square-sprite-h));
 		}
 
 /*Unit base*/
