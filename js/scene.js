@@ -97,7 +97,7 @@ class BattleScene extends Scene {
 		var button = document.createElement("button");
 		button.type = "button";
 		button.onclick = () => {
-			this._endTurn();
+			this._nextTurn();
 		};
 		return button;
 	}
@@ -120,6 +120,8 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 	}
 	_setActiveTeam(team) {
+		if (team == this._activeTeam) return;
+
 		if (this._activeTeam) {
 			this._activeTeam.endTurn();
 		}
@@ -183,7 +185,7 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		this.refresh();
 	}
-	_endTurn() {
+	_nextTurn() {
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
@@ -191,41 +193,35 @@ class BattleScene extends Scene {
 			case BattleScene.DeployPhase:
 				this._phase = BattleScene.PlayerPhase;
 				this._canRedeploy = true;
+				this._showPhaseBanner("Battle Start");
 				break;
 
 			case BattleScene.PlayerPhase:
 				this._phase = BattleScene.EnemyPhase;
+				this._setActiveTeam(this.enemyTeam);
+				this._showPhaseBanner("Enemy Phase");
 				break;
 
 			case BattleScene.EnemyPhase:
 				this._addReinforcements(); // TODO: Put this at the end of the enemy AI action processing
-				this._phase = BattleScene.PlayerPhase;
 				this._turn++;
-				this._checkForEnd();
-				break;
-		}
-		this._startTurn();
-	}
-	_startTurn() {
-		switch (this._phase) {
-			case BattleScene.PlayerPhase:
-				this._setActiveTeam(this.playerTeam);
-				this._showPhaseBanner("Turn "+this._turn);
-				break;
-
-			case BattleScene.EnemyPhase:
-				this._setActiveTeam(this.enemyTeam);
-				this._showPhaseBanner("Enemy Phase");
+				if (!this._isBattleOver()) {
+					this._phase = BattleScene.PlayerPhase;
+					this._setActiveTeam(this.playerTeam);
+					this._showPhaseBanner("Turn "+this._turn);
+				}
 				break;
 		}
 		this.refresh();
 	}
 
-	_checkForEnd() {
+	_isBattleOver() {
 		if (this.playerTeam.size == 0) {
 			this._lose();
+			return true;
 		} else if (this.enemyTeam.size == 0 && this._turn >= this._minTurns) {
 			this._win();
+			return true;
 		}
 
 		if (this._maxTurns && this._turn > this._maxTurns) {
@@ -234,7 +230,9 @@ class BattleScene extends Scene {
 			} else {
 				this._lose();
 			}
+			return true;
 		}
+		return false;
 	}
 	_win() {
 		// TODO: Make a better victory screen
@@ -347,7 +345,7 @@ class BattleScene extends Scene {
 			this._deselectSkill();
 			this._sameMove = false;
 			this._clearMoves();
-			this._checkForEnd(); // TEMP?
+			this._isBattleOver(); // TEMP?
 		}
 	}
 
@@ -489,7 +487,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
-			this._endTurn();
+			this._nextTurn();
 		}
 
 		if (isFinite(key)) {
