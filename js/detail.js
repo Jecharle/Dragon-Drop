@@ -39,6 +39,19 @@ class PhaseBanner extends Detail {
 }
 
 /***************************************************
+ Battle end screen
+***************************************************/
+class EndScreen extends Detail {
+	constructor(startValue) {
+		super(startValue);
+	}
+
+	get elClass() {
+		return 'battle-end';
+	}
+}
+
+/***************************************************
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {

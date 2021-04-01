@@ -74,7 +74,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 
-		setTimeout(() => { alert("The battle is now over"); }, 1900); // TEMP
+		setTimeout(() => { alert("The battle is now over"); }, 3100); // TEMP
 	}
 
 	_createUndoButton() {
@@ -232,22 +232,30 @@ class BattleScene extends Scene {
 	}
 	_win() {
 		// TODO: Make a better victory screen
-		this._showPhaseBanner("Victory");
+		this._showEndScreen("Victory");
 		if (this.lastScene) this.lastScene.sendData({ victory: true });
+
+		//TODO: Wait for input before ending?
 
 		this.end(); // TEMP?
 	}
 	_lose() {
 		// TODO: Make a better defeat screen
-		this._showPhaseBanner("Defeat");
+		this._showEndScreen("Defeat");
 		if (this.lastScene) this.lastScene.sendData({ victory: false });
 		
+		//TODO: Wait for input before ending?
+
 		this.end(); // TEMP?
 	}
 
-	_showPhaseBanner(value) {
-		var banner = new PhaseBanner(value);
+	_showPhaseBanner(text) {
+		var banner = new PhaseBanner(text);
 		this.el.appendChild(banner.el);
+	}
+	_showEndScreen(text) {
+		var endScreen = new EndScreen(text);
+		this.el.appendChild(endScreen.el);
 	}
 
 	_refreshUi() {
