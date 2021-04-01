@@ -2,14 +2,13 @@
  Subtypes of ControllablePiece
 ***************************************************/
 class TestMeleeUnit extends ControllablePiece {
-	constructor() {
-		super();
-		this.style = 'ball';
-		this.size = 1;
+	constructor(partyMember) {
+		super(partyMember);
+		this.style = 'melee-unit';
 	}
 
 	_setStats() {
-		this._maxHp = 5;
+		this._maxHp = 4;
 		this._moveRange = 3;
 	}
 
@@ -22,14 +21,13 @@ class TestMeleeUnit extends ControllablePiece {
 };
 
 class TestSupportUnit extends ControllablePiece {
-	constructor() {
-		super();
-		this.style = 'ball3';
-		this.size = 1;
+	constructor(partyMember) {
+		super(partyMember);
+		this.style = 'support-unit';
 	}
 
 	_setStats() {
-		this._maxHp = 3;
+		this._maxHp = 2;
 		this._moveRange = 2;
 	}
 
@@ -43,14 +41,13 @@ class TestSupportUnit extends ControllablePiece {
 };
 
 class TestEnemyUnit extends ControllablePiece {
-	constructor() {
-		super();
-		this.style = 'ball2';
-		this.size = 1;
+	constructor(partyMember) {
+		super(partyMember);
+		this.style = 'enemy-unit';
 	}
 
 	_setStats() {
-		this._maxHp = 5;
+		this._maxHp = 4;
 		this._moveRange = 2;
 	}
 
@@ -68,10 +65,9 @@ class TestRockObject extends TargetablePiece {
 	constructor() {
 		super();
 		this.style = 'rock';
-		this.size = 1;
 	}
 
 	_setStats() {
-		this._maxHp = 1;
+		this._maxHp = 2;
 	}
 }

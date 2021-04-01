@@ -1,5 +1,5 @@
 /***************************************************
- Static Game object
+(Static) Handles global input and processes Scenes
 ***************************************************/
 class Game {
 	constructor() {
@@ -38,10 +38,12 @@ class Game {
 
 		Game.el = document.createElement("div");
 		Game.el.classList.add("game-window");
-		Game.el.id = "gameDiv";
 		document.body.appendChild(Game.el);
 
-		Game.setScene(new TestScene()); // TEMP
+		// TEMP
+		Party.add(new TestMeleePartyMember());
+		Party.add(new TestSupportPartyMember());
+		Game.setScene(new BattleScene( new TestMap(), Party.getUnits() ));
 	}
 }
 Game.begin();

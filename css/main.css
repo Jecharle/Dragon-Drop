@@ -1,273 +1,80 @@
-.game-window {
-	display: flex;
-	justify-content: center;
+/*Game core*/
+:root {
+	--game-w: 1024px;
+	--game-h: 768px;
 }
 
+.game-window {
+	width: var(--game-w);
+	height: var(--game-h);
+	overflow: hidden;
+}
+
+.scene {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+/*Universal styles*/
+.selectable {
+	cursor: pointer;
+}
+.unselectable::before {
+	filter: grayscale(100%);
+}
+
+/*Battle Scene*/
+
+/*Nav bar*/
 .nav-bar {
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: space-between;
 	align-items: center;
-	margin: 1px;
-}
-.nav-bar button {
-	display: inline-block;
-	color: white;
-	background-color: deepskyblue;
-	border: none;
-	padding: 8px;
-	flex: 0 0 25%;
-	cursor: pointer;
-}
-.nav-bar button:hover {
-	background-color: skyblue;
-}
-.nav-bar button:disabled {
-	color: lightgray;
-	background-color: gray;
-	cursor: default;
-}
-.nav-bar span {
-	flex: 0 1 100%;
-	font-size: 24px;
-}
-
-.board {
-	display: flex;
-	flex-flow: column nowrap;
-}
-.row {
-	flex: 0 0 auto;
-	display: flex;
-	flex-flow: row nowrap;
-}
-.square {
-	flex: 0 0 auto;
-	position: relative;
-	background-color: gray;
-	box-sizing: border-box;
-	border: 1px solid white;
-	width: 64px;
-	height: 64px;
-}
-.square::before {
 	position: absolute;
+	width: 100%;
 	top: 0px;
-	box-sizing: border-box;
-	width: 100%;
-	height: 100%;
-	opacity: 75%;
-	content: "";
+	left: 0px;
 }
-.wall {
-	background-color: darkslategray;
-}
-.pit {
-	background-color: transparent;
-}
+	.nav-bar button {
+		display: inline-block;
+		font-size: 18px;
+		color: white;
+		background-color: deepskyblue;
+		border: none;
+		padding: 12px;
+		flex: 0 0 15%;
+		cursor: pointer;
+	}
+	.nav-bar button:hover {
+		background-color: skyblue;
+	}
+	.nav-bar button:disabled {
+		color: lightgray;
+		background-color: gray;
+		cursor: default;
+	}
+	.nav-bar span {
+		flex: 0 1 100%;
+		font-size: 24px;
+	}
 
-.deploy-range, .move-range, .skill-range {
-	cursor: pointer;
-}
-.deploy-range::before {
-	background-color: seagreen;
-}
-.deploy-range:hover::before, .selected.deploy-range::before {
-	background-color: lightseagreen;
-}
-.move-range::before {
-	background-color: deepskyblue;
-}
-.move-range:hover::before {
-	background-color: skyblue;
-}
-.move-origin::before {
-	border: 8px solid skyblue;
-}
-.skill-range::before {
-	background-color: orange;
-}
-.skill-range:hover::before {
-	background-color: yellow;
-}
-.skill-aoe::before {
-	border: 8px solid yellow;
-}
-.skill-range-invalid::before {
-	background-color: darkgoldenrod;
-}
-
-.piece {
-	position: relative;
-	z-index: 1;
-	/*TODO: Is this the right place for this?*/
-	width: 100%;
-	height: 100%;
-}
-.piece::before {
-	position: absolute;
-	top: 0px;
-	height: 100%;
-	width: 100%;
-	content: "";
-}
-
-.selectable::before {
-	cursor: pointer;
-}
-.selectable:hover::before, .piece.selected::before {
-	border: 2px solid deepskyblue;
-	margin: -2px;
-}
-
-.unselectable::before {
-	filter: grayscale(100%);
-}
-
-.x2 {
-	width: 200%;
-	height: 200%;
-	top: 50%;
-}
-.x3 {
-	width: 300%;
-	height: 300%;
-	right: 100%;
-}
-
-.unit.selectable::after {
-	content: "";
-	position: absolute;
-	top: -16px;
-	left: 21px;
-	border-width: 10px;
-	border-style: solid;
-	border-color: white transparent transparent transparent;
-}
-.unit.selectable:hover::after, .skill-range .unit.selectable::after {
-	top: -25px;
-}
-
-.ball::before {
-	background-color: darkgreen;
-	border-radius: 50%;
-}
-.ball2::before {
-	background-color: red;
-	border-radius: 50%;
-}
-.ball3::before {
-	background-color: greenyellow;
-	border-radius: 50%;
-}
-.rock::before {
-	background-color: purple;
-	height: 90%;
-	width: 90%;
-	margin: 5%;
-}
-
-.damaged {
-	animation: shake 150ms;
-}
-
+/*Skill list*/
 .skill-list {
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: flex-start;
-	margin-top: 1px;
-}
-
-.skill {
-	width: 64px;
-	height: 64px;
-	margin-left: 1px;
-}
-
-.attack-skill::before {
-	background-color: red;
-	border-radius: 25%;
-}
-.heal-skill::before {
-	background-color: green;
-	border-radius: 25%;
-}
-.build-skill::before {
-	background-color: purple;
-	border-radius: 25%;
-}
-.move-skill::before {
-	background-color: cornflowerblue;
-	border-radius: 25%;
-}
-
-.cooldown-label {
-	font-size: 32px;
-	font-weight: bold;
-	color: white;
-	text-align: center;
 	position: absolute;
-	top: 20%;
-	left: 35%;
+	bottom: 0px;
+	width: 50%;
 }
 
-.skill-description {
-	visibility: hidden;
-	/* Pick better colors? */
-	background-color: white;
-	border: 1px solid black;
-	position: absolute;
-	z-index: 3;
-	width: max-content;
-	height: max-content;
-	bottom: 110%;
-	border-radius: 4px;
-	padding: 5px;
-}
-.skill-description::after {
-	content: "";
-	position: absolute;
-	top: 100%;
-	left: 25px;
-	border-width: 5px;
-	border-style: solid;
-	border-color: black transparent transparent transparent;
-}
-.skill:hover .skill-description {
-	visibility: visible;
-}
-
-.lifebar {
-	visibility: hidden;
-	position: absolute;
-	z-index: 2;
-	width: 100%;
-	height: 8px;
-	top: -12px;
-	outline: 1px solid black;
-	background-color: gray;
-}
-.inner-lifebar {
-	height: 100%;
-	background-color: red;
-}
-.piece:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar {
-	visibility: visible;
-}
-
-.popup-text {
-	font-size: 24px;
-	font-weight: bold;
-	color: white;
-	text-shadow: 2px 2px black;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: relative;
-	z-index: 4;
-	animation: float-up 1s ease-out;
-}
-
+/*Phase change & end screens*/
 .phase-banner {
 	font-size: 40px;
 	font-weight: bold;
@@ -277,12 +84,345 @@
 	width: 100%;
 	display: flex;
 	justify-content: center;
-	position: relative;
-	bottom: 50%;
+	position: absolute;
 	z-index: 5;
-	animation: banner-display 800ms ease-out 0s 2 alternate;
+	animation: banner-display 800ms ease-out 2 alternate;
+}
+.battle-end {
+	font-size: 64px;
+	font-weight: bold;
+	color: white;
+	background-color: #000000cc;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	z-index: 5;
+	animation: end-screen 2s linear;
 }
 
+/*Board structure*/
+:root {
+	--square-size: 90px;
+	--square-z: 32px;
+	--square-wall-z: 70px;
+
+	--square-sprite-w: 128px;
+	--square-sprite-h: 128px;
+	--square-sprite-top-h: 64px;
+
+	--unit-sprite-w: 64px;	
+	--unit-sprite-h: 64px;
+	--unit-sprite-z: -100px;
+
+	--lifebar-h: 12px;
+	--action-mark-h: 16px;
+	--action-mark-w: 16px;
+
+	--skill-w: 64px;
+	--skill-h: 64px;
+}
+.board {
+	display: flex;
+	flex-flow: column nowrap;
+	transform: rotateX(60deg) rotateZ(45deg);
+	transform-style: preserve-3d;
+	position: absolute;
+	z-index: 0;
+}
+	.row {
+		flex: 0 0 auto;
+		display: flex;
+		flex-flow: row nowrap;
+	}
+	.square {
+		flex: 0 0 auto;
+		position: relative;
+		box-sizing: border-box;
+		width: var(--square-size);
+		height: var(--square-size);
+		transform: translateZ(var(--square-z));
+		transform-style: preserve-3d;
+	}
+
+	/*Square highlighting*/
+	.square::after {
+		position: absolute;
+		z-index: -1;
+		top: 0px;
+		left: calc(-0.5*var(--square-sprite-w));
+		opacity: 50%;
+		width: var(--square-sprite-w);
+		height: var(--square-sprite-top-h);
+		content: "";
+		background-image: url(../img/tileHighlights.png);
+		background-repeat: no-repeat;
+		background-position: 0 0;
+		transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+		transform-origin: 50% 0%;
+	}
+		.deploy-range, .move-range, .skill-range {
+			cursor: pointer;
+		}
+		.move-range::after {
+			background-position-y: calc(-1*var(--square-sprite-top-h));
+		}
+		.move-range:not(.invalid):hover::after {
+			background-position-x: calc(-1*var(--square-sprite-w));
+		}
+		.skill-range::after {
+			background-position-y: calc(-2*var(--square-sprite-top-h));
+		}
+		.skill-aoe::after {
+			background-position-x: calc(-1*var(--square-sprite-w));
+		}
+		.deploy-range::after {
+			background-position-y: calc(-3*var(--square-sprite-top-h));
+		}
+		.deploy-range:hover::after, .selected.deploy-range::after {
+			background-position-x: calc(-1*var(--square-sprite-w));
+		}
+		.move-origin::after {
+			background-position-y: calc(-4*var(--square-sprite-top-h));
+		}
+		.invalid {
+			cursor: unset;
+		}
+		.invalid::after {
+			opacity: 25%;
+		}
+
+	/*Terrain types*/
+	.square::before {
+		position: absolute;
+		z-index: -2;
+		width: var(--square-sprite-w);
+		height: var(--square-sprite-h);
+		top: 0px;
+		left: calc(-0.5*var(--square-sprite-w));
+		content: "";
+		background-image: url(../img/testTileset.png);
+		background-repeat: no-repeat;
+		background-position: 0 0;
+		transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
+		transform-origin: 50% 0%;
+	}
+		.pit::before {
+			background-position-y: calc(-1*var(--square-sprite-h));
+		}
+		.grass::before {
+			background-position-y: calc(-2*var(--square-sprite-h));
+		}
+		.grass .unit::before {
+			opacity: 50%; /*units in grass are hidden*/
+		}
+		.wall {
+			transform: translateZ(var(--square-wall-z));
+		}
+		.wall::before {
+			background-position-y: calc(-3*var(--square-sprite-h));
+		}
+		.mud::before {
+			background-position-y: calc(-4*var(--square-sprite-h));
+		}
+
+/*Unit base*/
+.unit {
+	width: var(--unit-sprite-w);
+	height: var(--unit-sprite-h);
+	box-sizing: border-box;
+	position: absolute;
+	z-index: 1;
+	right: calc(-0.5*var(--unit-sprite-w));
+	bottom: 0px;
+	transform: rotateZ(-45deg) rotateX(-60deg);
+	transform-origin: 50% 100%;
+	transform-style: preserve-3d;
+	display: flex;
+	justify-content: center;
+}
+	.unit::before {
+		content: "";
+		width: var(--unit-sprite-w);
+		height: var(--unit-sprite-h);
+		box-sizing: border-box;
+		position: absolute;
+		bottom: 0px;
+		transform: translateZ(var(--unit-sprite-z));
+		background-repeat: no-repeat;
+		background-position: 0px 0px;
+	}
+	.unit.x2 {
+		width: calc(2*var(--unit-sprite-w));
+		height: calc(2*var(--unit-sprite-h));
+		right: calc(-1*var(--unit-sprite-w));;
+	}
+		.unit.x2::before {
+			width: calc(2*var(--unit-sprite-w));
+			height: calc(2*var(--unit-sprite-h));
+		}
+
+	/*Unit details*/
+	.unit.selectable::after {
+		content: "";
+		position: absolute;
+		width: var(--action-mark-w);
+		height: var(--action-mark-h);;
+		top: 0px;
+		background-image: url("../img/uiMarkers.png");
+		background-repeat: no-repeat;
+		background-position-x: calc(-4*var(--action-mark-w));
+		animation: sprite-animation 1.2s steps(4) infinite;
+	}
+		.unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after {
+			top: calc(-1*var(--action-mark-h));
+		}
+		.damaged.unit::after {
+			display: none;
+		}
+	.lifebar {
+		visibility: hidden;
+		position: absolute;
+		z-index: 2;
+		height: var(--lifebar-h);
+		top: 0px;
+		background-image: url(../img/lifebar.png);
+		background-position: 0px 0px;
+		background-repeat: repeat-x;
+	}
+		.lifebar>div {
+			height: var(--lifebar-h);
+			background-image: url(../img/lifebar.png);
+			background-position: 0px calc(-1*var(--lifebar-h));
+			background-repeat: repeat-x;
+		}
+		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
+			visibility: visible;
+		}
+
+	/*Unit states and motions*/
+	.left.unit::before {
+		transform: translateZ(-100px) rotateY(180deg);
+	}
+	.damaged {
+		animation: shake 150ms;
+	}
+	.unit.selectable:hover::before, .unit.selected::before {
+		background-position-y: calc(-1*var(--unit-sprite-h));
+	}
+
+	/*Unit skins*/
+	.melee-unit::before {
+		background-image: url("../img/testMeleeUnit.png");
+	}
+	.support-unit::before {
+		background-image: url("../img/testSupportUnit.png");
+	}
+	.enemy-unit::before {
+		background-image: url("../img/testEnemyUnit.png");
+	}
+	.rock::before {
+		background-image: url("../img/testObject.png");
+	}
+
+/*Skill base and info*/
+.skill {
+	width: var(--skill-w);
+	height: var(--skill-h);
+	margin-left: 1px;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+	.skill::before {
+		content: "";
+		width: 100%;
+		height: 100%;
+		box-sizing: border-box;
+		position: absolute;
+	}
+	.skill-description {
+		display: none;
+		background-color: white;
+		border: 1px solid black;
+		position: absolute;
+		z-index: 3;
+		width: max-content;
+		height: max-content;
+		left: 0%;
+		bottom: 110%;
+		border-radius: 4px;
+		padding: 5px;
+	}
+		.skill-description::after {
+			content: "";
+			position: absolute;
+			top: 100%;
+			left: 25px;
+			border-width: 5px;
+			border-style: solid;
+			border-color: black transparent transparent transparent;
+		}
+	.cooldown-label {
+		font-size: 24px;
+		font-weight: bold;
+		color: white;
+		text-align: center;
+		position: absolute;
+	}
+
+	/*Skill states*/
+	.selectable.skill:hover, .skill.selected {
+		bottom: 4px;
+	}
+	.selectable.skill:hover::before, .skill.selected::before {
+		border: 2px solid deepskyblue;
+	}
+	.skill:hover .skill-description {
+		display: block;
+	}
+
+	/*Skill icons*/
+	.attack-skill::before {
+		background-color: red;
+		border-radius: 25%;
+	}
+	.heal-skill::before {
+		background-color: green;
+		border-radius: 25%;
+	}
+	.build-skill::before {
+		background-color: purple;
+		border-radius: 25%;
+	}
+	.move-skill::before {
+		background-color: cornflowerblue;
+		border-radius: 25%;
+	}
+
+/*VFX, popups, etc.*/
+.popup-text {
+	font-size: 24px;
+	font-weight: bold;
+	color: white;
+	text-shadow: 2px 2px black;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	z-index: 4;
+	animation: rise-up 1s ease-out;
+}
+
+/*Holding area for keyframes*/
+@keyframes sprite-animation {
+	from {
+		background-position-x: 0px;
+	}
+}
 @keyframes shake {
 	from {
 		margin-left: 0px;
@@ -301,15 +441,15 @@
 		margin-right: 0px;
 	}
 }
-@keyframes float-up {
+@keyframes rise-up {
 	from {
-		top: 0px;
+		bottom: 95%;
 	}
-	70% {
-		top: -32px;
+	50% {
+		bottom: 120%;
 	}
 	to {
-		top: -32px;
+		bottom: 120%;
 	}
 }
 @keyframes banner-display {
@@ -330,3 +470,53 @@
 		color: black;
 	}
 }
+@keyframes end-screen {
+	from {
+		color: transparent;
+		background-color: transparent;
+	}
+	80% {
+		color: transparent;
+		font-size: 10em;
+	}
+	to {
+
+	}
+}
+
+/*Layout debugging styles*/
+.game-window {
+	border: 1px solid black;
+}
+
+/*.nav-bar, .skill-list {
+	border: 1px solid black;
+	box-sizing: border-box;
+}/**/
+
+/*3D debugging styles*/
+/*
+.board {
+	animation: rotate-3D 15s ease-in-out infinite;
+}
+.square {
+	border: 1px solid red;
+}
+.unit {
+	border: 1px solid black;
+}
+.unit::before {
+	border: 1px solid black;
+}
+@keyframes rotate-3D {
+	from {
+		transform: rotateX(60deg) rotateZ(45deg);
+	}
+	50% {
+		transform: rotateX(60deg) rotateZ(225deg);
+	}
+	to {
+		transform: rotateX(60deg) rotateZ(405deg);
+	}
+}
+/**/

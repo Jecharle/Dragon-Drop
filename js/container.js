@@ -36,7 +36,7 @@ class Position extends ElObj {
  Game board
 ***************************************************/
 class Board extends Container {
-	constructor() {
+	constructor(mapData) {
 		super();
 		this._squares = [];
 
@@ -50,16 +50,15 @@ class Board extends Container {
 			}
 			this.el.appendChild(row);
 		}
+		if (mapData) this._loadTerrain(mapData.terrain);
 
 		this.deployArea = [];
+		if (mapData) this._loadDeployArea(mapData.deployment);
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
 	}
 
-	get elType() {
-		return 'div';
-	}
 	get elClass() {
 		return 'board';
 	}
@@ -69,6 +68,19 @@ class Board extends Container {
 	}
 	get h() {
 		return 8;
+	}
+
+	_loadTerrain(terrainData) {
+		if (!terrainData) return;
+		terrainData.forEach(data => {
+			this.at(data.x, data.y).terrain = data.type;
+		});
+	}
+	_loadDeployArea(deployData) {
+		if (!deployData) return;
+		deployData.forEach(data => {
+			this.addDeploySquare(this.at(data.x, data.y));
+		});
 	}
 
 	addDeploySquare(square) {
@@ -85,34 +97,31 @@ class Board extends Container {
 		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
 		return this._squares[(y * this.w) + x];
 	}
-	getArea(origin, size, rule, ruleProps) {
+	getFootprint(origin, size) {
 		size = Math.max(size || 0, 1);
 	
-		var left = origin.x - Math.floor((size-1)/2);
-		var right = origin.x + Math.ceil((size-1)/2);
-		var top = origin.y - Math.floor((size-1)/2);
-		var bottom = origin.y + Math.ceil((size-1)/2);
+		var left = origin.x - (size-1);
+		var right = origin.x;
+		var top = origin.y - (size-1);
+		var bottom = origin.y;
 
 		var area = [];
 		for (var dx = left; dx <= right; dx++) {
 			for (var dy = top; dy <= bottom; dy++) {
-				var square = this.at(dx, dy);
-				if (!rule || rule(origin, square, ruleProps)) {
-					area.push(square);
-				}
+				area.push(this.at(dx, dy));
 			}
 		}
 		return area;
 	}
 
 	canFit(piece, centerSquare, size) {
-		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+		size = size || piece.size || 1;
+		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain & Square.BlockMove) {
+			if (square.blocksMove) {
 				return false;
 			}
 			if (square.piece != null && square.piece != piece) {
@@ -122,21 +131,36 @@ class Board extends Container {
 		});
 	}
 	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
-	canPass(piece, centerSquare, size) {
-		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+	canPass(piece, centerSquare, size, props) {
+		size = size || piece.size || 1;
+		var area = this.getFootprint(centerSquare, size);
 		return area.every(function(square) {
 			if (!square) {
 				return false;
 			}
-			if (square.terrain & Square.BlockMove) {
-				return false; // TODO: Depends on movement settings?
+			if (square.blocksMove) { // TODO: Depends on movement settings?
+				return false;
 			}
-			if (square.piece != null && piece != null && !square.piece.isAlly(piece)) {
+			if (square.piece != null && !square.piece.isAlly(piece)) { // TODO: Depends on movement settings?
 				return false;
 			}
 			return true;
 		});
+	}
+
+	getNearestFit(piece, centerSquare) {
+		if (this.canFit(piece, centerSquare)) return centerSquare;
+		var minDistance = null;
+		var nearestSquare = null;
+		this._squares.forEach(square => {
+			var distance = this.getDistance(centerSquare, square);
+			if (minDistance && distance >= minDistance) return;
+			if (this.canFit(piece, square)) {
+				nearestSquare = square;
+				minDistance = distance;
+			}
+		});
+		return nearestSquare;
 	}
 
 	movePiece(piece, targetSquare) {
@@ -170,7 +194,7 @@ class Board extends Container {
 		if (!centerSquare) return;
 
 		size = size || piece.size;
-		var area = this.getArea(centerSquare, size);
+		var area = this.getFootprint(centerSquare, size);
 		area.forEach(function(square) {
 			if (square) square.piece = piece;
 		});
@@ -204,6 +228,9 @@ class Board extends Container {
 		}
 		this.movePiece(piece, square);
 		return distMoved;
+	}
+	getDistance(origin, target) {
+		return Math.abs(target.x - origin.x) + Math.abs(target.y - origin.y);
 	}
 	getDirection(origin, target) {
 		var dx = target.x - origin.x;
@@ -246,39 +273,47 @@ class Board extends Container {
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
 	}
-	setMoveArea(piece) {
-		if (!piece || !piece.moveRange) return;
+	setMoveArea(unit) {
+		if (!unit || !unit.moveRange) return;
 
-		var origin = piece.moved ? piece.originSquare : piece.square;
+		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, piece.moveRange, true);
+		this._paintMoveRange(origin, unit.moveRange, true, true);
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
 			var adjacent = this.getAdjacent(edges[i]);
-			var movesLeft = edges[i].movesLeft-1;
 			
 			for (var n = 0; n < adjacent.length; n++) {
-				if (adjacent.inRange && adjacent.movesLeft > movesLeft) {
+				var movesLeft = edges[i].movesLeft - (adjacent[n].slowsMove ? 2 : 1);
+				if (movesLeft < 0) {
 					continue;
 				}
-				if (!this.canPass(piece, adjacent[n])) {
+				if (adjacent[n].inRange && adjacent[n].movesLeft > movesLeft) {
 					continue;
 				}
-				this._paintMoveRange(adjacent[n], movesLeft);
-				if (movesLeft) {
+				if (!this.canPass(unit, adjacent[n])) {
+					continue;
+				}
+				this._paintMoveRange(adjacent[n], movesLeft, false, this.canFit(unit, adjacent[n]));
+				if (movesLeft > 0) {
 					edges.push(adjacent[n]);
 				}
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft, isOrigin) {
+	_paintMoveRange(square, movesLeft, isOrigin, valid) {
 		square.el.classList.add('move-range');
 		if (isOrigin) square.el.classList.add('move-origin');
-		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
 		square.movesLeft = movesLeft;
+		if (valid) {
+			square.el.ondragover = this._allowDrop;
+		} else {
+			square.el.classList.add('invalid');
+			square.invalid = true;
+		}
 	}
 	setSkillArea(skill) {
 		if (!skill || !skill.user) return [];
@@ -293,13 +328,13 @@ class Board extends Container {
 		// TODO: More possible origins for larger units?
 	}
 	_paintSkillRange(square, valid) {
+		square.el.classList.add('skill-range');
+		square.inRange = true;
 		if (valid) {
-			square.el.classList.add('skill-range');
 			square.el.ondragover = this._allowDrop;
-			square.inRange = true;
 		} else {
-			square.el.classList.add('skill-range-invalid');
-			square.inRange = true;
+			square.el.classList.add('invalid');
+			square.invalid = true;
 		}
 	}
 
@@ -311,9 +346,10 @@ class Board extends Container {
 		square.el.classList.remove('move-range');
 		square.el.classList.remove('move-origin');
 		square.el.classList.remove('skill-range');
-		square.el.classList.remove('skill-range-invalid');
+		square.el.classList.remove('invalid');
 		square.el.ondragover = null;
 		square.inRange = false;
+		square.invalid = false;
 		square.movesLeft = null;
 	}
 
@@ -348,7 +384,6 @@ class Board extends Container {
 
 	_allowDrop(ev) {
 		ev.preventDefault();
-		// TODO: Reject if the data transfer is incorrect
 	}
 	_drop(ev) {
 		ev.preventDefault();
@@ -383,15 +418,10 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this.el.onmouseenter = this._mouseEnter;
-		this.el.ondragenter = this._mouseEnter;
-		this.el.onmouseleave = this._mouseLeave;
-		this.el.ondragleave = this._mouseLeave;
+		this.el.onmouseenter = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
 	}
 
-	get elType() {
-		return 'div';
-	}
 	get elClass() {
 		return 'square';
 	}
@@ -414,8 +444,8 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.remove('pit');
 				break;
-			case Square.Bush:
-				this.el.classList.remove('bush');
+			case Square.Grass:
+				this.el.classList.remove('grass');
 				break;
 			case Square.Mud:
 				this.el.classList.remove('mud');
@@ -431,45 +461,45 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.add('pit');
 				break;
-			case Square.Bush:
-				this.el.classList.add('bush');
+			case Square.Grass:
+				this.el.classList.add('grass');
 				break;
 			case Square.Mud:
 				this.el.classList.add('mud');
 				break;
 		}
 	}
-
-	_mouseEnter(ev) {
-		ev.stopPropagation();
-		if (ev.currentTarget) { // mouse-in counts pieces
-			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.currentTarget.obj;
-			if (square && square.inRange) {
-				if (Game.scene) Game.scene.mouseEnter(square, elId);
-			}
-		}
+	get blocksMove() {
+		return (this.terrain&Square._BlockMove) == Square._BlockMove;
 	}
-	_mouseLeave(ev) {
+	get blocksSight() {
+		return (this.terrain&Square._BlockSight) == Square._BlockSight;
+	}
+	get slowsMove() {
+		return (this.terrain&Square._SlowMove) == Square._SlowMove;
+	}
+
+	_mouseOver(ev) {
 		ev.stopPropagation();
-		if (ev.target) { // mouse-out does NOT count pieces
-			var elId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.target.obj;
-			if (square && square.inRange) {
-				if (Game.scene) Game.scene.mouseLeave(square, elId);
+		if (ev.currentTarget) { // pieces count
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.currentTarget.obj;
+			if (square && Game.scene) { 
+				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
+				else Game.scene.mouseOver(null, dragElId);
 			}
 		}
 	}
 };
-Square.BlockMove = 1;
-Square.BlockSight = 2;
-Square.SlowMove = 4;
+Square._BlockMove = 1;
+Square._BlockSight = 2;
+Square._SlowMove = 4;
 
 Square.Flat = 0;
-Square.Pit = Square.BlockMove;
-Square.Bush = Square.BlockSight;
-Square.Wall = Square.BlockMove | Square.BlockSight;
-Square.Mud = Square.SlowMove;
+Square.Pit = Square._BlockMove;
+Square.Grass = Square._BlockSight;
+Square.Wall = Square._BlockMove | Square._BlockSight;
+Square.Mud = Square._SlowMove;
 
 /***************************************************
  Skill list

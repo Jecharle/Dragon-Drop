@@ -11,7 +11,6 @@ class Piece extends ElObj {
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
 
-		// TODO: Safe to assume this is always viable?
 		this.el.onclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
@@ -79,17 +78,22 @@ class Piece extends ElObj {
  Targetable piece
 ***************************************************/
 class TargetablePiece extends Piece {
-	constructor() {
+	constructor(partyMember) {
 		super();
 		this._team = null;
+		this._partyMember = partyMember;
 		this.square = null;
+		this.size = 1;
 
 		this._setStats();
 
-		// TODO: Make a proper "initialize" method for this?
 		this.hp = this.maxHp;
-		this._lifebar = new Lifebar(this.hpRate);
+		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
+	}
+
+	get elClass() {
+		return 'unit';
 	}
 
 	get targetable() {
@@ -100,13 +104,13 @@ class TargetablePiece extends Piece {
 		return this._size;
 	}
 	set size(value) {
-		if (this._size) {
+		if (this._size > 1) {
 			this.el.classList.remove("x"+this.size);
 		}
-		if (value) {
-			this.el.classList.add("x"+this._size);
-		}
 		this._size = value;
+		if (this._size > 1) {
+			this.el.classList.add("x"+this.size);
+		}
 	}
 
 	_setStats() {
@@ -153,15 +157,20 @@ class TargetablePiece extends Piece {
 		return this.hp <= 0;
 	}
 	get alive() {
-		return !this.dead();
+		return !this.dead;
+	}
+
+	dieIfDead() {
+		if (this.dead) {
+			this.setParent(null);
+			this.setTeam(null);
+			if (this._partyMember) this._partyMember.alive = false;
+		}
 	}
 
 	refresh() {
-		if (this.dead) { // TEMP
-			this.setParent(null);
-			this.setTeam(null);
-		}
-		this._lifebar.value = this.hpRate;
+		this._lifebar.maxValue = this.maxHp;
+		this._lifebar.value = this.hp;
 	}
 
 	takeDamage(power, props) {
@@ -169,7 +178,7 @@ class TargetablePiece extends Piece {
 
 		if (!props || !props.noAnimation) {
 			this.el.classList.add('damaged');
-			this.el.addEventListener('animationend', this._removeDamagedAnimation);
+			setTimeout(() => this.el.classList.remove('damaged'), 1200);
 		}
 
 		this._showPopup(power);
@@ -181,10 +190,6 @@ class TargetablePiece extends Piece {
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
-	}
-	_removeDamagedAnimation(ev) {
-		ev.target.classList.remove('damaged');
-		ev.target.removeEventListener('animationend', this._removeDamagedAnimation);
 	}
 	_showPopup(value) {
 		var popup = new PopupText(value);
@@ -227,11 +232,7 @@ class ControllablePiece extends TargetablePiece {
 		super();
 		this._setSkills();
 
-		this.endTurn(); // TEMP?
-	}
-
-	get elClass() {
-		return 'unit';
+		this.initialize();
 	}
 
 	_setStats() {
@@ -251,42 +252,63 @@ class ControllablePiece extends TargetablePiece {
 		return this._skills;
 	}
 
+	get canMove() {
+		return !this.homeSquare && !this.actionUsed;
+	}
+	get canAct() {
+		return !this.actionUsed;
+	}
+
+	initialize() {
+		this.myTurn = false;
+		this.actionUsed = false;
+		this.homeSquare = null;
+		this.refresh();
+	}
 	startTurn() {
 		this.myTurn = true;
 		this.refresh();
 	}
 	endTurn() {
 		this.myTurn = false;
-		this.moved = false;
-		this.acted = false;
-		this.originSquare = null;
+		this.actionUsed = false;
+		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
 
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent) return;
+
+		var facing = (target.x - target.y) - (from.x - from.y);
+		if (facing < 0) {
+			this.el.classList.add('left');
+		} else if (facing > 0) {
+			this.el.classList.remove('left');
+		}
+	}
 	move(target) {
 		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			if (!this.moved) {
-				this.moved = true;
-				this.originSquare = oldSquare;
-			} else if (target == this.originSquare) {
-				this.moved = false;
-				this.originSquare = null;
+			if (this.homeSquare == null) {
+				this.homeSquare = oldSquare;
+			} else if (target == this.homeSquare) {
+				this.homeSquare = null;
 			}
+			this.face(target, this.homeSquare);
 			this.refresh();
 			return true;
 		}
 		return false;
 	}
 	undoMove() {
-		if (!this.moved || !this.originSquare) return false;
+		if (this.homeSquare == null) return false;
 		
-		if (this.originSquare.parent.movePiece(this, this.originSquare)) {
-			this.moved = false;
-			this.originSquare = null;
+		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
+			this.homeSquare = null;
 			this.refresh();
 			return true;
 		}
@@ -296,8 +318,8 @@ class ControllablePiece extends TargetablePiece {
 	refresh() {
 		super.refresh();
 		this._refreshSkills();
-		this._setUnselectable(this.moved && this.acted && this.myTurn);
-		this._setSelectable(this.myTurn && !(this.moved && this.acted));
+		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
 	}
 	_refreshSkills() {
 		this._skills.forEach(skill => skill.refresh());
@@ -322,7 +344,9 @@ class SkillPiece extends Piece {
 	constructor(user) {
 		super();
 		this.user = user;
-		this.cooldown = 0;
+		this._setStats();
+		this.cooldown = this.cooldownCost-1;
+		this.usesLeft = this.maxUses;
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -333,14 +357,30 @@ class SkillPiece extends Piece {
 		this.refresh();
 	}
 
+	_setStats() {
+		this._range = 1;
+		this._minRange = 1;
+		this._area = 0;
+		this._baseCooldown = 0;
+		this._maxUses = 0;
+		this._basePower = 1;
+	}
+
 	get elClass() {
 		return 'skill';
 	}
 
 	get fullDescription() {
 		var desc = `<strong>${this._name}</strong><br>${this._description}`;
-		if (this._cooldownCost > 0) {
-			desc += `<br><em>${this._cooldownCost} turn cooldown</em>`;
+		if (this.hasLimitedUses) {
+			desc += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
+		}
+		if (this.hasCooldown) {
+			if (this.cooldown > 0) {
+				desc += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
+			} else {
+				desc += `<br><em>${this.cooldownCost} turn cooldown</em>`;
+			}
 		}
 		return desc;
 	}
@@ -352,11 +392,9 @@ class SkillPiece extends Piece {
 		return "[Skill description]";
 	}
 
-	_range = 1
 	get range() {
 		return this._range;
 	}
-	_minRange = 1
 	get minRange() {
 		return this._minRange;
 	}
@@ -365,7 +403,6 @@ class SkillPiece extends Piece {
 			&& !this._inCircle(origin, target, this.minRange-1);
 	}
 
-	_area = 0;
 	get area() {
 		return this._area;
 	}
@@ -373,36 +410,73 @@ class SkillPiece extends Piece {
 		return this._inCircle(origin, target, this.area);
 	}
 
-	_baseCooldown = 0
-	get _cooldownCost() {
+	get cooldownCost() {
 		return this._baseCooldown;
 	}
+	get hasCooldown() {
+		return this.cooldownCost > 0;
+	}
 
-	_basePower = 1
+	get maxUses() {
+		return this._maxUses;
+	}
+	get hasLimitedUses() {
+		return this.maxUses > 0;
+	}
+
 	get power() {
 		return this._basePower;
 	}
 
 	canUse() {
-		if (this.user.acted || this.cooldown > 0) return false;
-		else return true;
+		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
 	use(target) {
 		if (!this.validTarget(target)) return false;
-
+		this.user.face(target);
+		
 		this._payCost();
-		this._effects(target);
 
+		var squares = this._affectedSquares(target);
+		var units = this._affectedUnits(squares);
+		this._startEffects(target, squares, units);
+		squares.forEach(square => this._squareEffects(square, target));
+		units.forEach(piece => this._unitEffects(piece, target));
+		this._endEffects(target, squares, units);
+
+		units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
 		return true;
 	}
+
 	validTarget(target) {
-		return true;
+		return !!target;
 	}
-	_effects(target) { }
+	_affectedSquares(target) {
+		if (!target) return [];
+		return target.parent.getAoE(this, target);
+	}
+	_affectedUnits(squares) {
+		// TODO: Include a "validTargetUnit" logic in here somehow as well...?
+		if (!squares) return [];
+		var units = [];
+		squares.forEach(square => {
+			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
+				units.push(square.piece);
+			}
+		});
+		return units;
+	}
+
+	_startEffects(target, squares, units) { }
+	_squareEffects(square, target) { }
+	_unitEffects(unit, target) { }
+	_endEffects(target, squares, units) { }
+
 	_payCost() {
-		this.user.acted = true;
-		this.cooldown = this._cooldownCost;
+		this.user.actionUsed = true;
+		if (this.hasCooldown) this.cooldown = this.cooldownCost;
+		if (this.hasLimitedUses) this.usesLeft--;
 	}
 
 	endTurn() {
@@ -416,7 +490,14 @@ class SkillPiece extends Piece {
 		var usable = this.canUse();
 		this._setSelectable(usable);
 		this._setUnselectable(!usable);
-		this._cooldownLabel.value = this.cooldown || "";
+		// TEMP - two separate labels?
+		if (this.cooldown > 0) {
+			this._cooldownLabel.value = this.cooldown;
+		} else if (this.hasLimitedUses) {
+			this._cooldownLabel.value = "x"+this.usesLeft;
+		} else {
+			this._cooldownLabel.value = "";
+		}
 		this._tooltip.value = this.fullDescription;
 	}
 
@@ -457,33 +538,6 @@ class SkillPiece extends Piece {
 		return (dx == dy);
 	}
 
-	// targeting directions
-
-	_ahead(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var forward = dx * direction[0] + dy * direction[1];
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (forward >= 0 && forward >= sideways);
-	}
-	_behind(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var backward = -dx * direction[0] - dy * direction[1];
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (backward >= 0 && backward >= sideways);
-	}
-	_beside(origin, target, direction) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-
-		var forward = Math.abs(dx * direction[0] + dy * direction[1]);
-		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-		return (sideways >= 0 && sideways >= forward);
-	}
-
 	// other targeting rules
 
 	_canSee(origin, target, props) {
@@ -497,23 +551,50 @@ class SkillPiece extends Piece {
 		var tx = target.x;
 		var ty = target.y;
 		while (true) {
-			// It's not a straight line, but close enough for how I'm using it
+			// It's not a straight line, but good enough for how I'm using it
 			if (x < tx) x++;
 			else if (x > tx) x--;
 			if (y < ty) y++;
 			else if (y > ty) y--;
 
 			var square = board.at(x, y);
-			if (square && (square.terrain & Square.BlockSight)) return false; // TODO: Use props to decide which terrain blocks?
+			if (square && square.blocksSight) return false; // TODO: Use props to decide which terrain blocks
 			if (x == tx && y == ty) return true;
 			if (square.piece) return false; // TODO: Use props to decide which pieces block
 		}
 	}
-	_nearPiece(_origin, target, props) {
+	_nearUnit(_origin, target, props) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
 			if (square.piece) return true; // TODO: Use props to decide which pieces count
 			else return false;
 		});
 	}
+
+		// targeting directions (for area effects)
+
+		_ahead(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var forward = dx * direction[0] + dy * direction[1];
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (forward >= 0 && forward >= sideways);
+		}
+		_behind(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var backward = -dx * direction[0] - dy * direction[1];
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (backward >= 0 && backward >= sideways);
+		}
+		_beside(origin, target, direction) {
+			var dx = target.x - origin.x;
+			var dy = target.y - origin.y;
+	
+			var forward = Math.abs(dx * direction[0] + dy * direction[1]);
+			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+			return (sideways >= 0 && sideways >= forward);
+		}
 };

@@ -14,7 +14,10 @@ class TestAttackSkill extends SkillPiece {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	_range = 2
+	_setStats() {
+		super._setStats();
+		this._range = 2;
+	}
 
 	inRange(origin, target) {
 		return super.inRange(origin, target)
@@ -29,10 +32,9 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_effects(target) {
-		var targetPiece = target.piece;
-		targetPiece.takeDamage(this.power);
-		targetPiece.push(this.user.square, 1);
+	_unitEffects(unit, _target) {
+		unit.takeDamage(this.power);
+		unit.push(this.user.square, 1);
 	}
 };
 
@@ -52,10 +54,13 @@ class TestHealSkill extends SkillPiece {
 		return `Restore ${this.power} HP`;
 	}
 
-	_basePower = 2;
-	_baseCooldown = 2;
-	_range = 1;
-	_minRange = 0;
+	_setStats() {
+		super._setStats();
+		this._basePower = 2;
+		this._baseCooldown = 2;
+		this._range = 1;
+		this._minRange = 0;
+	}
 
 	validTarget(target) {
 		if (target.piece && target.piece.targetable) {
@@ -63,8 +68,8 @@ class TestHealSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
-		target.piece.heal(2);
+	_unitEffects(unit, _target) {
+		unit.heal(this.power);
 	}
 };
 
@@ -84,8 +89,10 @@ class TestBuildSkill extends SkillPiece {
 		return "Create a wall with 1 HP";
 	}
 
-	_range = 1;
-	_baseCooldown = 3;
+	_setStats() {
+		super._setStats();
+		this._maxUses = 1;
+	}
 
 	inRange(origin, target) {
 		return this._inSquare(origin, target, this.range)
@@ -97,9 +104,9 @@ class TestBuildSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
+	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
-		return target.parent.movePiece(wall, target);
+		square.parent.movePiece(wall, square);
 	}
 };
 
@@ -119,10 +126,16 @@ class TestMoveSkill extends SkillPiece {
 		return "Move to a square adjacent to another unit";
 	}
 
-	_baseCooldown = 3;
+	_setStats() {
+		super._setStats();
+		this._baseCooldown = 3;
+	}
 
 	inRange(origin, target) {
-		return this._nearPiece(origin, target)
+		// TODO: near a unit other than the user
+		return target != origin
+			&& this._nearUnit(origin, target)
+			&& target.parent.canFit(this.user, target);
 	}
 
 	validTarget(target) {
@@ -131,8 +144,8 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_effects(target) {
-		return target.parent.movePiece(this.user, target);
+	_startEffects(target, _squares, _pieces) {
+		target.parent.movePiece(this.user, target);
 	}
 };
 
@@ -152,15 +165,15 @@ class TestAreaSkill extends SkillPiece {
 		return `Deal ${this.power} damage to all targets in a small area`;
 	}
 
-	_range = 3
-	_minRange = 2
-	_area = 1
+	_setStats() {
+		super._setStats();
+		this._range = 3;
+		this._minRange = 2;
+		this._area = 1;
+	}
 
 	inArea(origin, target) {
-		var direction = origin.parent.getDirection(this.user.square, origin);
-		return this._inSquare(origin, target, this.area)
-			&& this._inLine(origin, target)
-			&& this._beside(origin, target, direction);
+		return this._inCircle(origin, target, this.area);
 	}
 
 	inRange(origin, target) {
@@ -168,12 +181,8 @@ class TestAreaSkill extends SkillPiece {
 			&& this._inLine(origin, target);
 	}
 
-	_effects(target) {
-		// TODO: Standardize this for use with future AoE skills?
-		target.parent.getAoE(this, target).forEach(square => {
-			if (square && square.piece && square.piece.targetable) {
-				square.piece.takeDamage(this.power);
-			}
-		});
+	_unitEffects(unit, _target) {
+		unit.takeDamage(this.power);
+		unit.push(this.user.square, 1);
 	}
 };
