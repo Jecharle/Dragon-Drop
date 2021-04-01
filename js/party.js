@@ -40,7 +40,7 @@ class Party {
 		var pieces = [];
 		this.members.forEach(member => {
 			if (member.alive && pieces.length < this.partySize){
-				pieces.push(member.getPiece());
+				pieces.push(member.getUnit());
 			}
 		});
 		return pieces;
@@ -54,9 +54,9 @@ class PartyMember {
 
 	// TODO: Also provide the unit's skill list
 
-	getPiece() {
-		// TODO: Fill out the skill list here
-		return new TestMeleeUnit(this); // TEMP
+	getUnit() {
+		// TODO: also fill out the skill list?
+		return null;
 	}
 
 	set dead(value) {
@@ -68,13 +68,13 @@ class PartyMember {
 }
 
 class TestMeleePartyMember extends PartyMember {
-	getPiece() {
+	getUnit() {
 		return new TestMeleeUnit(this);
 	}
 }
 
 class TestSupportPartyMember extends PartyMember {
-	getPiece() {
+	getUnit() {
 		return new TestSupportUnit(this);
 	}
 }

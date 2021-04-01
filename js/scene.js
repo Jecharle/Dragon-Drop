@@ -69,9 +69,8 @@ class BattleScene extends Scene {
 
 	start() {
 		this._deploy();
-	}
-	// TEMP
-	end() {
+	}	
+	end() { // TEMP
 		this._phase = BattleScene.EndPhase;
 		this._setActiveTeam(null);
 		this.refresh();
@@ -134,8 +133,7 @@ class BattleScene extends Scene {
 	_addParty(partyUnits) {
 		if (!partyUnits) return;
 
-		partyUnits.forEach(piece => {
-			var index = this.playerTeam.size;
+		partyUnits.forEach((piece, index) => {
 			var square = this._board.deployArea[index];
 			if (square) this._board.movePiece(piece, square);
 			piece.setTeam(this.playerTeam);
@@ -450,7 +448,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 
-	/*TODO: Ignore these on a touch device?*/
+	// TODO: Ignore these on a touch device?
 	mouseEnter(square, dragId) {
 		if (square != this._target && this._skill && this._skill.idMatch(dragId)) {
 			this._selectTarget(square);

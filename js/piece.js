@@ -11,7 +11,6 @@ class Piece extends ElObj {
 		this.el.id = Piece.nextId();
 		this.el.classList.add('piece');
 
-		// TODO: Safe to assume this is always viable?
 		this.el.onclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
@@ -158,7 +157,7 @@ class TargetablePiece extends Piece {
 		return this.hp <= 0;
 	}
 	get alive() {
-		return !this.dead();
+		return !this.dead;
 	}
 
 	dieIfDead() {
@@ -346,7 +345,7 @@ class SkillPiece extends Piece {
 		super();
 		this.user = user;
 		this._setStats();
-		this.cooldown = Math.max(this.cooldownCost-1, 0);
+		this.cooldown = this.cooldownCost-1;
 		this.usesLeft = this.maxUses;
 
 		this._cooldownLabel = new CooldownLabel("");

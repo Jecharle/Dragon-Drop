@@ -381,7 +381,6 @@ class Board extends Container {
 
 	_allowDrop(ev) {
 		ev.preventDefault();
-		// TODO: Reject if the data transfer is incorrect
 	}
 	_drop(ev) {
 		ev.preventDefault();
