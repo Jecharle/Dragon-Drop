@@ -516,7 +516,10 @@ class Team {
 	}
 
 	get size() {
-		return this.members.length; // TODO: Exclude dead / unimportant members
+		return this.members.reduce((count, member) => {
+			if (member.alive) return count+1;
+			else return count;
+		}, 0);
 	}
 
 	add(piece) {
