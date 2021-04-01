@@ -467,13 +467,13 @@ class Square extends Position {
 		}
 	}
 	get blocksMove() {
-		return (this.terrain&Square._BlockMove == Square._BlockMove);
+		return (this.terrain&Square._BlockMove) == Square._BlockMove;
 	}
 	get blocksSight() {
-		return (this.terrain&Square._BlockSight == Square._BlockSight);
+		return (this.terrain&Square._BlockSight) == Square._BlockSight;
 	}
 	get slowsMove() {
-		return (this.terrain&Square._SlowMove == Square._SlowMove);
+		return (this.terrain&Square._SlowMove) == Square._SlowMove;
 	}
 
 	_mouseOver(ev) {

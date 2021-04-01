@@ -103,7 +103,7 @@
 	flex-flow: column nowrap;
 	transform: rotateX(60deg) rotateZ(45deg);
 	transform-style: preserve-3d;
-	position: relative;
+	position: absolute;
 	z-index: 0;
 }
 	.row {
