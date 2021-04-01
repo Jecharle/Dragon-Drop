@@ -169,7 +169,7 @@
 		.move-range::after {
 			background-position-y: calc(-1*var(--square-sprite-top-h));
 		}
-		.move-range:not(.invalid):hover::after {
+		.move-path::after {
 			background-position-x: calc(-1*var(--square-sprite-w));
 		}
 		.skill-range::after {

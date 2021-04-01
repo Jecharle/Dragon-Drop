@@ -375,6 +375,7 @@ class BattleScene extends Scene {
 
 	_refreshArea() {
 		this._board.clearAoE();
+		this._board.clearPath();
 		this._board.resetAreas();
 		if (this._phase == BattleScene.DeployPhase) {
 			this._board.setDeployArea();
@@ -463,6 +464,11 @@ class BattleScene extends Scene {
 				this._selectTarget(square);
 				this._board.clearAoE();
 				this._board.showAoE(this._skill, this._target);
+			}
+		} else if (this._unit && this._unit.idMatch(dragId)) {
+			this._board.clearPath(); // TODO: Use this._target for this phase, too?
+			if (square) {
+				this._board.showPath(square);
 			}
 		}
 	}

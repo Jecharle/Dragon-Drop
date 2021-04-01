@@ -357,6 +357,14 @@ class Board extends Container {
 		square.path = null;
 	}
 
+	showPath(target) {
+		target.el.classList.add('move-path');
+		target.path.forEach(square => square.el.classList.add('move-path'));
+	}
+	clearPath() {
+		this._squares.forEach(square => square.el.classList.remove('move-path'));
+	}
+
 	getAoE(skill, origin) {
 		if (!skill || !origin) return [];
 		return this._squares.filter(square => skill.inArea(origin, square));
