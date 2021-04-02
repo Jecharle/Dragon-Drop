@@ -109,8 +109,8 @@ class BattleScene extends Scene {
 	}
 
 	_initTeams() {
-		this.playerTeam = new Team(0);
-		this.enemyTeam = new Team(1);
+		this.playerTeam = new Team(0, false);
+		this.enemyTeam = new Team(1, true);
 		this._setActiveTeam(null);
 	}
 	_setActiveTeam(team) {
@@ -123,6 +123,10 @@ class BattleScene extends Scene {
 		if (this._activeTeam) {
 			this._activeTeam.startTurn();
 		}
+	}
+	get _aiPhase() {
+		if (!this._activeTeam) return false;
+		else return this._activeTeam.isAi;
 	}
 
 	_addParty(partyUnits) {
@@ -164,6 +168,7 @@ class BattleScene extends Scene {
 
 	refresh() {
 		this._refreshArea();
+		this._refreshTargetArea();
 		this._refreshUi();
 	}
 
@@ -201,7 +206,7 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.EnemyPhase:
-				this._addReinforcements(); // TODO: Put this at the end of the enemy AI action processing
+				this._addReinforcements();
 				this._turn++;
 				if (!this._isBattleOver()) {
 					this._phase = BattleScene.PlayerPhase;
@@ -211,6 +216,10 @@ class BattleScene extends Scene {
 				break;
 		}
 		this.refresh();
+	
+		if (this._aiPhase) {
+			setTimeout(() => this.aiTurnStart(), 1000);
+		}
 	}
 
 	_isBattleOver() {
@@ -381,22 +390,80 @@ class BattleScene extends Scene {
 	}
 
 	_refreshArea() {
-		this._board.clearAoE();
-		this._board.clearPath();
 		this._board.resetAreas();
 		if (this._phase == BattleScene.DeployPhase) {
 			this._board.setDeployArea();
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
-			if (this._target) {
-				this._board.showAoE(this._skill, this._target);
-			}
 		} else if (this._unit && this._unit.canMove || this._sameMove) {
 			this._board.setMoveArea(this._unit);
 		}
 	}
+	_refreshTargetArea() {
+		this._board.clearAoE();
+		this._board.clearPath();
+		if (this._target) {
+			if (this._skill) this._board.showAoE(this._skill, this._target);
+			else if (this._unit) this._board.showPath(this._target);
+		}
+	}
 
-	// TODO: AI functions here!
+	aiTurnStart() {
+		// get the units to move
+		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
+		// TODO: Also sort by ai priority values
+		this.aiSelectUnit();
+	}
+	aiSelectUnit() {
+		this._selectUnit(this._aiControlUnits.shift())
+		if (!this._unit) { // no units left, end the turn
+			this.aiTurnEnd();
+			return;
+		} else if (!this._unit.canMove) { // unit can't move, immediately go to the skill
+			this.aiSelectSkill();
+			return;
+		}
+		this.refresh();
+
+		this._selectTarget(this._board.aiBestSquare);
+		this._refreshTargetArea();
+
+		setTimeout(() => this.aiMoveUnit(), 500);
+	}
+	aiMoveUnit() {
+		if (this._target) {
+			this._moveUnit(this._unit, this._target);
+			this._deselectTarget();
+			this.refresh();
+		}
+		setTimeout(() => this.aiSelectSkill(), 500);
+	}
+	aiSelectSkill() {
+		this._selectSkill(this._unit.skills[0]); // TODO: Actually pick a skill
+		if (!this._skill) { // unit can't use a skill, skip to next one
+			this.aiSelectUnit();
+			return;
+		}
+
+		this.refresh();
+		this._selectTarget(this._board.aiBestSquare);
+		this._refreshTargetArea();
+
+		setTimeout(() => this.aiUseSkill(), 500);
+	}
+	aiUseSkill() {
+		if (this._target) {
+			this._useSkill(this._skill, this._target);
+		} else this._deselectSkill();
+		this._deselectUnit();
+		this.refresh();
+		setTimeout(() => this.aiSelectUnit(), 500);
+	}
+	aiTurnEnd() {
+		this._aiControlUnits = null;
+		this._nextTurn();
+	}
+
 
 	selectPiece(piece, dragging) {
 		if (!piece) return;
@@ -408,7 +475,7 @@ class BattleScene extends Scene {
 				}
 				this.selectPosition(piece.square);
 			}
-		} else { // TODO: once AI works, only run for player phase
+		} else if (!this._aiPhase) {
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
@@ -444,7 +511,7 @@ class BattleScene extends Scene {
 			} else {
 				this._selectTarget(square);
 			}
-		} else { // TODO: once AI works, only run for player phase
+		} else if (!this._aiPhase) {
 			if (!square.inRange) {
 				this._deselectSkill();
 				if (square.piece != this._unit) this._deselectUnit();
@@ -453,16 +520,14 @@ class BattleScene extends Scene {
 					this._useSkill(this._skill, square);
 				} else if (!square.invalid) {
 					this._selectTarget(square);
-					this._board.clearAoE();
-					this._board.showAoE(this._skill, this._target);
+					this._refreshTargetArea();
 				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
 					this._moveUnit(this._unit, square);
 				} else {
 					this._selectTarget(square);
-					this._board.clearPath();
-					this._board.showPath(this._target);
+					this._refreshTargetArea();
 				}
 			}
 		}
@@ -471,29 +536,29 @@ class BattleScene extends Scene {
 
 	// TODO: Ignore this on a touch device?
 	mouseOver(square, dragId) {
+		if (this._aiPhase) return; // TEMP?
+
 		if (this._skill && this._skill.idMatch(dragId)) {
 			if (square == null) {
 				this._deselectTarget();
-				this._board.clearAoE();
 			} else if (square != this._target) {
 				this._selectTarget(square);
-				this._board.clearAoE();
-				this._board.showAoE(this._skill, this._target);
 			}
+			this._refreshTargetArea();
 		} else if (this._unit && this._unit.idMatch(dragId)) {
 			if (square == null) {
 				this._deselectTarget();
-				this._board.clearPath();
 			}
 			if (square) {
 				this._selectTarget(square);
-				this._board.clearPath();
-				this._board.showPath(this._target);
 			}
+			this._refreshTargetArea();
 		}
 	}
 
 	keydown(key) {
+		if (this._aiPhase) return; // TEMP?
+
 		if (key == "Escape" || key == "Delete" || key == "Backspace") {
 			if (this._target && this._phase == BattleScene.DeployPhase) {
 				this._deselectTarget();
@@ -541,9 +606,14 @@ BattleScene.EndPhase = -1;
  Battle scene -> Team
 ***************************************************/
 class Team {
-	constructor(group) {
+	constructor(group, isAi) {
 		this.group = group;
 		this.members = [];
+		this._isAi = isAi || false;
+	}
+
+	get isAi() {
+		return this._isAi;
 	}
 
 	get size() {

@@ -279,7 +279,7 @@ class Board extends Container {
 		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, unit.moveRange, [], true);
+		this._paintMoveRange(origin, unit.moveRange, [], true, unit.aiMoveScore(origin));
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
@@ -287,24 +287,25 @@ class Board extends Container {
 			var path = [edges[i]].concat(edges[i].path);
 			
 			for (var n = 0; n < adjacent.length; n++) {
-				var movesLeft = edges[i].movesLeft - (adjacent[n].slowsMove ? 2 : 1);
+				var square = adjacent[n];
+				var movesLeft = edges[i].movesLeft - (square.slowsMove ? 2 : 1);
 				if (movesLeft < 0) {
 					continue;
 				}
-				if (adjacent[n].inRange && adjacent[n].movesLeft > movesLeft) {
+				if (square.inRange && square.movesLeft > movesLeft) {
 					continue;
 				}
-				if (!this.canPass(unit, adjacent[n])) {
+				if (!this.canPass(unit, square)) {
 					continue;
 				}
-				this._paintMoveRange(adjacent[n], movesLeft, path, this.canFit(unit, adjacent[n]));
+				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), unit.aiMoveScore(square));
 				if (movesLeft > 0) {
-					edges.push(adjacent[n]);
+					edges.push(square);
 				}
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft, path, valid) {
+	_paintMoveRange(square, movesLeft, path, valid, aiScore) {
 		square.el.classList.add('move-range');
 		if (path.length == 0) square.el.classList.add('move-origin');
 		square.inRange = true;
@@ -313,6 +314,7 @@ class Board extends Container {
 
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			square.aiScore = aiScore;
 		} else {
 			square.el.classList.add('invalid');
 			square.invalid = true;
@@ -326,15 +328,18 @@ class Board extends Container {
 
 		// for a map this small, it's easiest to check every square
 		this._squares.forEach(square => {
-			if (skill.inRange(origin, square)) this._paintSkillRange(square, skill.validTarget(square));
+			if (skill.inRange(origin, square)) {
+				this._paintSkillRange(square, skill.validTarget(square), skill.aiTargetScore(square));
+			}
 		});
 		// TODO: More possible origins for larger units?
 	}
-	_paintSkillRange(square, valid) {
+	_paintSkillRange(square, valid, aiScore) {
 		square.el.classList.add('skill-range');
 		square.inRange = true;
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			square.aiScore = aiScore;
 		} else {
 			square.el.classList.add('invalid');
 			square.invalid = true;
@@ -355,6 +360,7 @@ class Board extends Container {
 		square.invalid = false;
 		square.movesLeft = null;
 		square.path = null;
+		square.aiScore = null;
 	}
 
 	showPath(target) {
@@ -392,6 +398,14 @@ class Board extends Container {
 		if (down) adjacent.push(down);
 
 		return adjacent;
+	}
+
+	get aiBestSquare() {
+		return this._squares.reduce((best, square) => {
+			if (square.aiScore == null) return best;
+			else if (!best || square.aiScore > best.aiScore) return square;
+			else return best;
+		}, null);
 	}
 
 	_allowDrop(ev) {

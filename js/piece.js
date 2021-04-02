@@ -253,7 +253,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get canMove() {
-		return this.alive && !this.homeSquare && !this.actionUsed;
+		return this.alive && !this.homeSquare && !this.actionUsed && (this.moveRange > 0);
 	}
 	get canAct() {
 		return this.alive && !this.actionUsed;
@@ -334,6 +334,10 @@ class ControllablePiece extends TargetablePiece {
 	}
 	get type() {
 		return Piece.Unit;
+	}
+
+	aiMoveScore(square) {
+		return (square.x+square.y); // TEMP
 	}
 };
 
@@ -511,6 +515,10 @@ class SkillPiece extends Piece {
 	}
 	get type() {
 		return Piece.Skill;
+	}
+
+	aiTargetScore(square) {
+		return (square.piece && square.piece.targetable) ? 1 : 0; // TEMP
 	}
 
 	// targeting shapes
