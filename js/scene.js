@@ -268,7 +268,7 @@ class BattleScene extends Scene {
 
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Starting Position";
+			this._turnTitleEl.innerText = "Positioning";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
 		} else if (this._maxTurns) {
@@ -279,13 +279,21 @@ class BattleScene extends Scene {
 
 		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Ready";
+			this._endTurnButtonEl.disabled = false;
 			this._undoButtonEl.style.visibility = "hidden";
+		} else if (this._aiPhase) {
+			this._endTurnButtonEl.disabled = true;
+			this._undoButtonEl.style.visibility = "visible";
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
+			this._endTurnButtonEl.disabled = false;
 			this._undoButtonEl.style.visibility = "visible";
 		}
 
-		if (this._lastMove != null) {
+		if (this._aiPhase) {
+			this._undoButtonEl.disabled = true;
+			this._undoButtonEl.innerText = "Undo Move";
+		} else if (this._lastMove != null) {
 			this._undoButtonEl.disabled = false;
 			this._undoButtonEl.innerText = "Undo Move";
 		} else if (this._canRedeploy) {
