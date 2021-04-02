@@ -183,8 +183,8 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_nextTurn() {
-		if (this._phase == BattleScene.PlayerPhase
-		&& this.playerTeam.untouched
+		if (this._phase != BattleScene.DeployPhase && !this._aiPhase
+		&& this._activeTeam && this._activeTeam.untouched
 		&& !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
 		}
@@ -538,18 +538,11 @@ class BattleScene extends Scene {
 	mouseOver(square, dragId) {
 		if (this._aiPhase) return; // TEMP?
 
-		if (this._skill && this._skill.idMatch(dragId)) {
+		if ((this._skill && this._skill.idMatch(dragId))
+		|| (this._unit && this._unit.idMatch(dragId))) {
 			if (square == null) {
 				this._deselectTarget();
 			} else if (square != this._target) {
-				this._selectTarget(square);
-			}
-			this._refreshTargetArea();
-		} else if (this._unit && this._unit.idMatch(dragId)) {
-			if (square == null) {
-				this._deselectTarget();
-			}
-			if (square) {
 				this._selectTarget(square);
 			}
 			this._refreshTargetArea();
