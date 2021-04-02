@@ -444,7 +444,7 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this.el.onmouseenter = this._mouseOver;
+		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
 	}
 
