@@ -35,6 +35,7 @@ class SpriteElObj extends ElObj {
 		super();
 		this.spriteEl =  document.createElement('div');
 		this.spriteEl.classList.add('sprite');
+		this.spriteEl.obj = this;
 		this.el.appendChild(this.spriteEl);
 	}
 }
