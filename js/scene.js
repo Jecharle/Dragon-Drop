@@ -178,8 +178,8 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_nextTurn() {
-		if (this._phase != BattleScene.DeployPhase
-		&& this._activeTeam && this._activeTeam.hasActions
+		if (this._phase == BattleScene.PlayerPhase
+		&& this.playerTeam.untouched
 		&& !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
 		}
@@ -553,8 +553,8 @@ class Team {
 		}, 0);
 	}
 
-	get hasActions() {
-		return this.members.some(member => member.canAct);
+	get untouched() {
+		return this.members.every(member => member.dead || (member.canMove && member.canAct));
 	}
 
 	add(piece) {
