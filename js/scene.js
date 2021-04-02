@@ -502,8 +502,7 @@ class BattleScene extends Scene {
 	selectPosition(square, dragId) {
 		if (!square) return;
 
-		if (this._phase == BattleScene.DeployPhase)
-		{
+		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
 				this._deselectTarget();
 			} else if (this._target) {

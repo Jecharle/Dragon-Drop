@@ -470,11 +470,11 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.remove('pit');
 				break;
-			case Square.Grass:
-				this.el.classList.remove('grass');
+			case Square.Cover:
+				this.el.classList.remove('cover');
 				break;
-			case Square.Mud:
-				this.el.classList.remove('mud');
+			case Square.Rough:
+				this.el.classList.remove('rough');
 				break;
 		}
 
@@ -487,11 +487,11 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.add('pit');
 				break;
-			case Square.Grass:
-				this.el.classList.add('grass');
+			case Square.Cover:
+				this.el.classList.add('cover');
 				break;
-			case Square.Mud:
-				this.el.classList.add('mud');
+			case Square.Rough:
+				this.el.classList.add('rough');
 				break;
 		}
 	}
@@ -523,9 +523,9 @@ Square._SlowMove = 4;
 
 Square.Flat = 0;
 Square.Pit = Square._BlockMove;
-Square.Grass = Square._BlockSight;
+Square.Cover = Square._BlockSight;
 Square.Wall = Square._BlockMove | Square._BlockSight;
-Square.Mud = Square._SlowMove;
+Square.Rough = Square._SlowMove;
 
 /***************************************************
  Skill list
