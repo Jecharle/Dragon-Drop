@@ -57,7 +57,6 @@ class Board extends Container {
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
-		this.el.oncontextmenu = this._rclick;
 	}
 
 	get elClass() {
@@ -431,10 +430,6 @@ class Board extends Container {
 				if (Game.scene) Game.scene.selectPosition(square);
 			}
 		}
-	}
-	_rclick(ev) {
-		ev.preventDefault();
-		if (Game.scene) Game.scene.rightClick();
 	}
 };
 

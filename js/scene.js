@@ -8,6 +8,11 @@ class Scene extends ElObj {
 		super();
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
+
+		this.el.oncontextmenu = ev => {
+			ev.preventDefault();
+			this.rightClick();
+		};
 	}
 
 	get elClass() {
