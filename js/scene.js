@@ -288,13 +288,13 @@ class BattleScene extends Scene {
 		}
 	}
 
-	_selectUnit(piece) {
-		if (piece && !piece.select()) return false;
+	_selectUnit(unit) {
+		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();
-		if (this._unit != piece) this._deselectUnit();
+		if (this._unit != unit) this._deselectUnit();
 
-		this._unit = piece;
-		this._skillList.setUser(piece);
+		this._unit = unit;
+		this._skillList.setUser(unit);
 		return true;
 	}
 	_deselectUnit() {
