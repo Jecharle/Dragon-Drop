@@ -66,7 +66,7 @@ class Piece extends SpriteElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
-		ev.dataTransfer.setDragImage(piece.spriteEl, 48, 48); // TEMP coordinates
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP coordinates
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
