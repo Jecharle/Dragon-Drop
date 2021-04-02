@@ -162,7 +162,7 @@ class TestAreaSkill extends SkillPiece {
 		return "Area Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage to all targets in a small area`;
+		return `Deal ${this.power} damage to all targets around the center and push them away`;
 	}
 
 	_setStats() {
@@ -181,8 +181,8 @@ class TestAreaSkill extends SkillPiece {
 			&& this._inLine(origin, target);
 	}
 
-	_unitEffects(unit, _target) {
+	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1);
+		unit.push(target, 1);
 	}
 };
