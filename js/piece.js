@@ -343,6 +343,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get aiUnitScore() {
+		// TEMP
 		if (this.square) return (this.square.x + this.square.y);
 		else return 0;
 	}

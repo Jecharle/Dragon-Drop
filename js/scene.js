@@ -32,6 +32,7 @@ class Scene extends ElObj {
 	selectPiece(piece, dragging) { }
 	selectPosition(position, dragId) { }
 	mouseOver(position, dragId) { }
+	rightClick() { }
 
 	keydown(key) { }
 	keyup(key) { }
@@ -218,7 +219,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	
 		if (this._autoPhase) {
-			setTimeout(() => this.aiTurnStart(), 1000);
+			setTimeout(() => this._aiTurnStart(), 1000);
 		}
 	}
 
@@ -405,22 +406,36 @@ class BattleScene extends Scene {
 		}
 	}
 
-	aiTurnStart() {
+	_goBack() {
+		if (this._target && this._phase == BattleScene.DeployPhase) {
+			this._deselectTarget();
+		} else if (this._skill) {
+			this._deselectSkill();
+		} else if (this._unit == this._lastMove) { // undo move before deselecting
+			this._undoMove();
+		} else if (this._unit) {
+			this._deselectUnit();
+		} else {
+			this._undoMove();
+		}
+	}
+
+	_aiTurnStart() {
 		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
 		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-		this.aiSelectUnit();
+		this._aiSelectUnit();
 	}
-	aiSelectUnit() {
+	_aiSelectUnit() {
 		if (this._aiControlUnits.length == 0) {
-			this.aiTurnEnd();
+			this._aiTurnEnd();
 			return;
 		}
 
 		if (!this._selectUnit(this._aiControlUnits.pop())) {
-			this.aiSelectUnit(); // warning: technically recursive
+			this._aiSelectUnit(); // warning: technically recursive
 		}
 		if (!this._unit.canMove) {
-			this.aiSelectSkill();
+			this._aiSelectSkill();
 			return;
 		}
 		this.refresh();
@@ -428,18 +443,18 @@ class BattleScene extends Scene {
 		this._selectTarget(this._board.aiBestSquare);
 		this._refreshTargetArea();
 
-		setTimeout(() => this.aiMoveUnit(), 250);
+		setTimeout(() => this._aiMoveUnit(), 250);
 	}
-	aiMoveUnit() {
+	_aiMoveUnit() {
 		if (this._target) {
 			this._moveUnit(this._unit, this._target);
 			this.refresh();
 		}
-		setTimeout(() => this.aiSelectSkill(), 500);
+		setTimeout(() => this._aiSelectSkill(), 500);
 	}
-	aiSelectSkill() {
+	_aiSelectSkill() {
 		if (!this._selectSkill(this._unit.aiBestSkill)) {
-			this.aiSelectUnit();
+			this._aiSelectUnit();
 			return;
 		}
 		this.refresh();
@@ -447,9 +462,9 @@ class BattleScene extends Scene {
 		this._selectTarget(this._board.aiBestSquare);
 		this._refreshTargetArea();
 
-		setTimeout(() => this.aiUseSkill(), 500);
+		setTimeout(() => this._aiUseSkill(), 500);
 	}
-	aiUseSkill() {
+	_aiUseSkill() {
 		if (this._target) {
 			this._useSkill(this._skill, this._target);
 		} else {
@@ -459,9 +474,9 @@ class BattleScene extends Scene {
 		this._deselectUnit();
 		this.refresh();
 
-		setTimeout(() => this.aiSelectUnit(), 250);
+		setTimeout(() => this._aiSelectUnit(), 250);
 	}
-	aiTurnEnd() {
+	_aiTurnEnd() {
 		this._aiControlUnits = null;
 		this._nextTurn();
 	}
@@ -535,7 +550,6 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 
-	// TODO: Ignore this on a touch device?
 	mouseOver(square, dragId) {
 		if (this._autoPhase) return; // TEMP?
 
@@ -550,21 +564,18 @@ class BattleScene extends Scene {
 		}
 	}
 
+	rightClick() {
+		if (this._autoPhase) return; // TEMP?
+
+		this._goBack();
+		this.refresh();
+	}
+
 	keydown(key) {
 		if (this._autoPhase) return; // TEMP?
 
 		if (key == "Escape" || key == "Delete" || key == "Backspace") {
-			if (this._target && this._phase == BattleScene.DeployPhase) {
-				this._deselectTarget();
-			} else if (this._skill) {
-				this._deselectSkill();
-			} else if (this._unit == this._lastMove) { // undo move before deselecting
-				this._undoMove();
-			} else if (this._unit) {
-				this._deselectUnit();
-			} else {
-				this._undoMove();
-			}
+			this._goBack();
 			this.refresh();
 		}
 
