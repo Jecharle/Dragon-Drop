@@ -124,9 +124,9 @@ class BattleScene extends Scene {
 			this._activeTeam.startTurn();
 		}
 	}
-	get _aiPhase() {
+	get _autoPhase() {
 		if (!this._activeTeam) return false;
-		else return this._activeTeam.isAi;
+		else return this._activeTeam.isAuto;
 	}
 
 	_addParty(partyUnits) {
@@ -183,7 +183,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	_nextTurn() {
-		if (this._phase != BattleScene.DeployPhase && !this._aiPhase
+		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
 		&& this._activeTeam && this._activeTeam.untouched
 		&& !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
@@ -217,7 +217,7 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	
-		if (this._aiPhase) {
+		if (this._autoPhase) {
 			setTimeout(() => this.aiTurnStart(), 1000);
 		}
 	}
@@ -269,7 +269,7 @@ class BattleScene extends Scene {
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "Positioning";
-		} else if (this._aiPhase) {
+		} else if (this._autoPhase) {
 			this._turnTitleEl.innerText = "Enemy turn";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
@@ -284,14 +284,14 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.disabled = !!this._aiPhase;
+		this._endTurnButtonEl.disabled = !!this._autoPhase;
 
 		if (!this._lastMove && this._canRedeploy) {
 			this._undoButtonEl.innerText = "Reposition";
 		} else {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
-		this._undoButtonEl.disabled = !!(this._aiPhase || (!this._lastMove && !this._canRedeploy));
+		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
 	}
 
 	_selectUnit(unit) {
@@ -339,7 +339,7 @@ class BattleScene extends Scene {
 	}
 
 	_selectSkill(skill) {
-		if (!skill.select()) return false;
+		if (skill && !skill.select()) return false;
 		if (this._skill != skill) this._deselectSkill();
 
 		this._skill = skill;
@@ -406,17 +406,20 @@ class BattleScene extends Scene {
 	}
 
 	aiTurnStart() {
-		// get the units to move
 		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		// TODO: Also sort by ai priority values
+		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
 		this.aiSelectUnit();
 	}
 	aiSelectUnit() {
-		this._selectUnit(this._aiControlUnits.shift())
-		if (!this._unit) { // no units left, end the turn
+		if (this._aiControlUnits.length == 0) {
 			this.aiTurnEnd();
 			return;
-		} else if (!this._unit.canMove) { // unit can't move, immediately go to the skill
+		}
+
+		if (!this._selectUnit(this._aiControlUnits.pop())) {
+			this.aiSelectUnit(); // warning: technically recursive
+		}
+		if (!this._unit.canMove) {
 			this.aiSelectSkill();
 			return;
 		}
@@ -425,24 +428,22 @@ class BattleScene extends Scene {
 		this._selectTarget(this._board.aiBestSquare);
 		this._refreshTargetArea();
 
-		setTimeout(() => this.aiMoveUnit(), 500);
+		setTimeout(() => this.aiMoveUnit(), 250);
 	}
 	aiMoveUnit() {
 		if (this._target) {
 			this._moveUnit(this._unit, this._target);
-			this._deselectTarget();
 			this.refresh();
 		}
 		setTimeout(() => this.aiSelectSkill(), 500);
 	}
 	aiSelectSkill() {
-		this._selectSkill(this._unit.skills[0]); // TODO: Actually pick a skill
-		if (!this._skill) { // unit can't use a skill, skip to next one
+		if (!this._selectSkill(this._unit.aiBestSkill)) {
 			this.aiSelectUnit();
 			return;
 		}
-
 		this.refresh();
+
 		this._selectTarget(this._board.aiBestSquare);
 		this._refreshTargetArea();
 
@@ -451,10 +452,14 @@ class BattleScene extends Scene {
 	aiUseSkill() {
 		if (this._target) {
 			this._useSkill(this._skill, this._target);
-		} else this._deselectSkill();
+		} else {
+			this._deselectSkill();
+		}
+
 		this._deselectUnit();
 		this.refresh();
-		setTimeout(() => this.aiSelectUnit(), 500);
+
+		setTimeout(() => this.aiSelectUnit(), 250);
 	}
 	aiTurnEnd() {
 		this._aiControlUnits = null;
@@ -472,7 +477,7 @@ class BattleScene extends Scene {
 				}
 				this.selectPosition(piece.square);
 			}
-		} else if (!this._aiPhase) {
+		} else if (!this._autoPhase) {
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
@@ -507,7 +512,7 @@ class BattleScene extends Scene {
 			} else {
 				this._selectTarget(square);
 			}
-		} else if (!this._aiPhase) {
+		} else if (!this._autoPhase) {
 			if (!square.inRange) {
 				this._deselectSkill();
 				if (square.piece != this._unit) this._deselectUnit();
@@ -532,7 +537,7 @@ class BattleScene extends Scene {
 
 	// TODO: Ignore this on a touch device?
 	mouseOver(square, dragId) {
-		if (this._aiPhase) return; // TEMP?
+		if (this._autoPhase) return; // TEMP?
 
 		if ((this._skill && this._skill.idMatch(dragId))
 		|| (this._unit && this._unit.idMatch(dragId))) {
@@ -546,7 +551,7 @@ class BattleScene extends Scene {
 	}
 
 	keydown(key) {
-		if (this._aiPhase) return; // TEMP?
+		if (this._autoPhase) return; // TEMP?
 
 		if (key == "Escape" || key == "Delete" || key == "Backspace") {
 			if (this._target && this._phase == BattleScene.DeployPhase) {
@@ -595,14 +600,14 @@ BattleScene.EndPhase = -1;
  Battle scene -> Team
 ***************************************************/
 class Team {
-	constructor(group, isAi) {
+	constructor(group, isAuto) {
 		this.group = group;
 		this.members = [];
-		this._isAi = isAi || false;
+		this._auto = isAuto || false;
 	}
 
-	get isAi() {
-		return this._isAi;
+	get isAuto() {
+		return this._auto;
 	}
 
 	get size() {

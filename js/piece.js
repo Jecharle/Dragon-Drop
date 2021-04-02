@@ -338,7 +338,19 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	aiMoveScore(square) {
-		return (square.x+square.y); // TEMP
+		// TEMP
+		return (square.x+square.y);
+	}
+
+	get aiUnitScore() {
+		if (this.square) return (this.square.x + this.square.y);
+		else return 0;
+	}
+
+	get aiBestSkill() {
+		// TEMP
+		if (this._skills[0].canUse()) return this._skills[0];
+		else return null;
 	}
 };
 
