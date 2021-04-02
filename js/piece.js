@@ -3,7 +3,7 @@
 The root class for objects you can select, click,
 and drag around between containers
 ***************************************************/
-class Piece extends ElObj {
+class Piece extends SpriteElObj {
 	constructor() {
 		super();
 		this._parent = null;
@@ -66,6 +66,7 @@ class Piece extends ElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
+		ev.dataTransfer.setDragImage(piece.spriteEl, 48, 48); // TEMP coordinates
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {

@@ -21,7 +21,7 @@ class Container extends ElObj {
 The root class for squares, cells, and nodes other
 subdivisions or positions within a container
 ***************************************************/
-class Position extends ElObj {
+class Position extends SpriteElObj {
 	constructor(parent) {
 		super();
 		this._parent = parent;
@@ -414,7 +414,7 @@ class Board extends Container {
 	_drop(ev) {
 		ev.preventDefault();
 		var elId = ev.dataTransfer.getData("piece");
-		if (elId && ev.target) {
+		if (elId && ev.target && ev.target.obj) {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
