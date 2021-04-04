@@ -117,15 +117,13 @@ class Board extends Container {
 	canFit(unit, centerSquare) {
 		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) return false;
-			return unit.canStand(square);
+			return square && unit.canStand(square);
 		});
 	}
-	canPass(unit, centerSquare) {
+	canFitThrough(unit, centerSquare) {
 		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) return false;
-			return unit.canPass(square);
+			return square && unit.canPass(square);
 		});
 	}
 
@@ -276,7 +274,7 @@ class Board extends Container {
 				if (square.inRange && square.movesLeft > movesLeft) {
 					continue;
 				}
-				if (!this.canPass(unit, square)) {
+				if (!this.canFitThrough(unit, square)) {
 					continue;
 				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), unit.aiMoveScore(square));
