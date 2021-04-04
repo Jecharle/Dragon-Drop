@@ -258,7 +258,8 @@ class Board extends Container {
 		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, unit.moveRange, [], true, unit.aiMoveScore(origin));
+		this._paintMoveRange(origin, unit.moveRange, [], true);
+		this._paintAiScore(origin, unit.aiMoveScore(origin));
 		var edges = [origin];
 		
 		for (var i = 0; i < edges.length; i++) {
@@ -277,14 +278,15 @@ class Board extends Container {
 				if (!this.canFitThrough(unit, square)) {
 					continue;
 				}
-				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), unit.aiMoveScore(square));
+				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square));
+				if (!square.invalid) this._paintAiScore(square, unit.aiMoveScore(square));
 				if (movesLeft > 0) {
 					edges.push(square);
 				}
 			}
 		}
 	}
-	_paintMoveRange(square, movesLeft, path, valid, aiScore) {
+	_paintMoveRange(square, movesLeft, path, valid) {
 		square.el.classList.add('move-range');
 		if (path.length == 0) square.el.classList.add('move-origin');
 		square.inRange = true;
@@ -293,7 +295,6 @@ class Board extends Container {
 
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
-			square.aiScore = aiScore;
 		} else {
 			square.el.classList.add('invalid');
 			square.invalid = true;
@@ -309,6 +310,7 @@ class Board extends Container {
 		this._squares.forEach(square => {
 			if (skill.inRange(origin, square)) {
 				this._paintSkillRange(square, skill.validTarget(square), skill.aiTargetScore(square));
+				if (!square.invalid) this._paintAiScore(square, skill.aiTargetScore(square));
 			}
 		});
 		// TODO: More possible origins for larger units?
@@ -318,11 +320,14 @@ class Board extends Container {
 		square.inRange = true;
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
-			if (aiScore > 0) square.aiScore = aiScore;
 		} else {
 			square.el.classList.add('invalid');
 			square.invalid = true;
 		}
+	}
+
+	_paintAiScore(square, aiScore) {
+		if (aiScore >= 0) square.aiScore = aiScore;
 	}
 
 	resetAreas() {

@@ -14,11 +14,6 @@ class TestAttackSkill extends SkillPiece {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	_setStats() {
-		super._setStats();
-		this._range = 2;
-	}
-
 	inRange(origin, target) {
 		return super.inRange(origin, target)
 			&& this._inLine(origin, target)

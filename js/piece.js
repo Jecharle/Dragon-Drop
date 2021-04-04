@@ -131,12 +131,17 @@ class TargetablePiece extends Piece {
 		}
 	}
 	isAlly(piece) {
-		if (!this.team) return false;
+		if (!this.team || !piece) return false;
 		return this.team.isAlly(piece.team);
 	}
 	isEnemy(piece) {
-		if (!this.team) return false;
+		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
+	}
+
+	canStand(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || square.piece == this);
 	}
 
 	get hp() {
@@ -289,10 +294,6 @@ class ControllablePiece extends TargetablePiece {
 			this.el.classList.remove('left');
 		}
 	}
-	canStand(square) {
-		if (square.blocksMove) return false;
-		else return (square.piece == null || square.piece == this);
-	}
 	canPass(square) {
 		if (square.blocksMove) return false;
 		else return (square.piece == null || this.isAlly(square.piece));
@@ -352,7 +353,7 @@ class ControllablePiece extends TargetablePiece {
 
 	get aiUnitScore() {
 		// TEMP
-		if (this.square) return (this.square.x + this.square.y);
+		if (this.square) return this._nearestTargetScore(this.square, target => this.isEnemy(target.piece));
 		else return 0;
 	}
 
@@ -364,10 +365,15 @@ class ControllablePiece extends TargetablePiece {
 
 	// proximity nearest / most nearby squares matching a target function
 
+	_maxTargetScore() {
+		var board = this.parent;
+		return board.h + board.w;
+	}
+
 	_nearestTargetScore(origin, targetFunction) {
 		var board = origin.parent;
-		var maxDistance = board.h + board.w;
-		return maxDistance - board._squares.reduce((nearest, square) => {
+		var maxDistance = this._maxTargetScore();
+		var nearestTarget = board._squares.reduce((nearest, square) => {
 			if (targetFunction.call(this, square)) {
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				return Math.min(nearest, distance);
@@ -375,18 +381,21 @@ class ControllablePiece extends TargetablePiece {
 			
 			return nearest;
 		}, maxDistance);
+		return maxDistance - nearestTarget;
 	}
 
 	_mostTargetsScore(origin, targetFunction) {
 		var board = origin.parent;
-		return board._squares.reduce((totalScore, square) => {
+		var targetCount = 0;
+		var totalTargets = board._squares.reduce((totalScore, square) => {
 			if (targetFunction.call(this, square)){
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
+				targetCount += 1;
 				return totalScore - distance;
 			}
-			
 			return totalScore;
 		}, 0);
+		return _maxTargetScore - (totalTargets / targetCount);
 	}
 };
 
@@ -570,9 +579,9 @@ class SkillPiece extends Piece {
 	aiTargetScore(square) {
 		var area = this._affectedSquares(square);
 		return area.reduce((totalScore, square) => {
-			if (!square.piece) return totalScore;
-			else if (this.user.isEnemy(square.piece)) return totalScore + 1;
+			if (this.user.isEnemy(square.piece)) return totalScore + 1;
 			else if (this.user.isAlly(square.piece)) return totalScore - 1;
+			else return totalScore;
 		}, 0);
 	}
 
