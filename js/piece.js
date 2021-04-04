@@ -347,55 +347,53 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	aiMoveScore(square) {
-		// TEMP
-		return this._nearestTargetScore(square, target => target.piece && this.isEnemy(target.piece));
+		var nearestEnemyDistance = this._nearestTargetDistance(square, target => this.isEnemy(target.piece));
+		return this._maxDistance() - nearestEnemyDistance;
 	}
 
 	get aiUnitScore() {
 		// TEMP
-		if (this.square) return this._nearestTargetScore(this.square, target => this.isEnemy(target.piece));
+		if (this.square) return -this._nearestTargetDistance(this.square, target => this.isEnemy(target.piece));
 		else return 0;
 	}
 
 	get aiBestSkill() {
 		// TEMP
-		if (this._skills[0].canUse()) return this._skills[0];
-		else return null;
+		return this.skills.find(skill => skill.canUse());
 	}
 
 	// proximity nearest / most nearby squares matching a target function
 
-	_maxTargetScore() {
+	_maxDistance() {
 		var board = this.parent;
 		return board.h + board.w;
 	}
 
-	_nearestTargetScore(origin, targetFunction) {
+	_nearestTargetDistance(origin, targetFunction) {
 		var board = origin.parent;
-		var maxDistance = this._maxTargetScore();
-		var nearestTarget = board._squares.reduce((nearest, square) => {
+		var nearestDistance = board._squares.reduce((nearest, square) => {
 			if (targetFunction.call(this, square)) {
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				return Math.min(nearest, distance);
 			}
-			
 			return nearest;
-		}, maxDistance);
-		return maxDistance - nearestTarget;
+		}, this._maxDistance());
+		return nearestDistance;
 	}
 
-	_mostTargetsScore(origin, targetFunction) {
+	// TODO: Make this into something sensible?
+	_averageTargetDistance(origin, targetFunction) {
 		var board = origin.parent;
 		var targetCount = 0;
-		var totalTargets = board._squares.reduce((totalScore, square) => {
+		var totalDistance = board._squares.reduce((sum, square) => {
 			if (targetFunction.call(this, square)){
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				targetCount += 1;
-				return totalScore - distance;
+				return sum + distance;
 			}
-			return totalScore;
+			return sum;
 		}, 0);
-		return _maxTargetScore - (totalTargets / targetCount);
+		return targetCount > 0 ? (totalDistance / targetCount) : 0;
 	}
 };
 
