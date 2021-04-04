@@ -134,8 +134,8 @@ class TestMoveSkill extends SkillPiece {
 	inRange(origin, target) {
 		// TODO: near a unit other than the user
 		return target != origin
-			&& this._nearTarget(origin, target, function(square) { return square.piece && square.piece != this;})
-			&& target.parent.canFit(this.user, target);
+			&& target.parent.canFit(this.user, target)
+			&& this._nearTarget(origin, target, square => (square.piece && square.piece != this.user));
 	}
 
 	validTarget(target) {

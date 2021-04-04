@@ -427,7 +427,6 @@ class BattleScene extends Scene {
 
 	_aiTurnStart() {
 		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
 		this._aiSelectUnit();
 	}
 	_aiSelectUnit() {
@@ -436,6 +435,8 @@ class BattleScene extends Scene {
 			return;
 		}
 
+		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+	
 		if (!this._selectUnit(this._aiControlUnits.pop())) {
 			this._aiSelectUnit(); // warning: technically recursive
 		}

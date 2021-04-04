@@ -320,7 +320,7 @@ class Board extends Container {
 		square.inRange = true;
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
-			square.aiScore = aiScore;
+			if (aiScore > 0) square.aiScore = aiScore;
 		} else {
 			square.el.classList.add('invalid');
 			square.invalid = true;

@@ -368,8 +368,8 @@ class ControllablePiece extends TargetablePiece {
 		var board = origin.parent;
 		var maxDistance = board.h + board.w;
 		return maxDistance - board._squares.reduce((nearest, square) => {
-			if (!targetFunction.call(this, square)) {
-				var distance = Math.asb(square.x - origin.x) + Math.abs(square.y - origin.y);
+			if (targetFunction.call(this, square)) {
+				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				return Math.min(nearest, distance);
 			}
 			
@@ -381,7 +381,7 @@ class ControllablePiece extends TargetablePiece {
 		var board = origin.parent;
 		return board._squares.reduce((totalScore, square) => {
 			if (targetFunction.call(this, square)){
-				var distance = Math.asb(square.x - origin.x) + Math.abs(square.y - origin.y);
+				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				return totalScore - distance;
 			}
 			
