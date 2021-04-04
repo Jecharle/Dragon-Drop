@@ -99,7 +99,7 @@ class TestBuildSkill extends SkillPiece {
 			&& !this._inSquare(origin, target, this.minRange-1);
 	}
 	validTarget(target) {
-		if (target.parent.canFit(null, target, 1)) {
+		if (target.parent.canFit(this.user, target)) {
 			return true;
 		}
 		return false;
@@ -134,7 +134,7 @@ class TestMoveSkill extends SkillPiece {
 	inRange(origin, target) {
 		// TODO: near a unit other than the user
 		return target != origin
-			&& this._nearUnit(origin, target)
+			&& this._nearTarget(origin, target, function(square) { return square.piece && square.piece != this;})
 			&& target.parent.canFit(this.user, target);
 	}
 

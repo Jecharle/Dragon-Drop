@@ -289,6 +289,14 @@ class ControllablePiece extends TargetablePiece {
 			this.el.classList.remove('left');
 		}
 	}
+	canStop(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || square.piece == this);
+	}
+	canPass(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || this.isAlly(square.piece));
+	}
 	move(target) {
 		if (this.square == target) return false;
 
@@ -353,6 +361,33 @@ class ControllablePiece extends TargetablePiece {
 		if (this._skills[0].canUse()) return this._skills[0];
 		else return null;
 	}
+
+	// proximity nearest / most nearby squares matching a target function
+
+	_nearestTargetScore(origin, targetFunction) {
+		var board = origin.parent;
+		var maxDistance = board.h + board.w;
+		return maxDistance - board._squares.reduce((nearest, square) => {
+			if (!targetFunction.call(this, square)) {
+				var distance = Math.asb(square.x - origin.x) + Math.abs(square.y - origin.y);
+				return Math.min(nearest, distance);
+			}
+			
+			return nearest;
+		}, maxDistance);
+	}
+
+	_mostTargetsScore(origin, targetFunction) {
+		var board = origin.parent;
+		return board._squares.reduce((totalScore, square) => {
+			if (targetFunction.call(this, square)){
+				var distance = Math.asb(square.x - origin.x) + Math.abs(square.y - origin.y);
+				return totalScore - distance;
+			}
+			
+			return totalScore;
+		}, 0);
+	}
 };
 
 /***************************************************
@@ -363,7 +398,7 @@ class SkillPiece extends Piece {
 		super();
 		this.user = user;
 		this._setStats();
-		this.cooldown = this.cooldownCost-1;
+		this.cooldown = 0;
 		this.usesLeft = this.maxUses;
 
 		this._cooldownLabel = new CooldownLabel("");
@@ -472,11 +507,12 @@ class SkillPiece extends Piece {
 	}
 	_affectedSquares(target) {
 		if (!target) return [];
+
 		return target.parent.getAoE(this, target);
 	}
 	_affectedUnits(squares) {
-		// TODO: Include a "validTargetUnit" logic in here somehow as well...?
 		if (!squares) return [];
+
 		var units = [];
 		squares.forEach(square => {
 			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
@@ -561,17 +597,19 @@ class SkillPiece extends Piece {
 	}
 
 	// other targeting rules
+	_canSeeSquare(square) {
+		return (!square.blocksSight && !square.piece);
+	}
 
-	_canSee(origin, target, props) {
+	_canSee(origin, target) {
 		if (!origin || !target || origin.parent != target.parent) return false;
-		if (origin == target) return true;
 		
 		var board = origin.parent;
-
 		var x = origin.x;
 		var y = origin.y;
 		var tx = target.x;
 		var ty = target.y;
+
 		while (true) {
 			// It's not a straight line, but good enough for how I'm using it
 			if (x < tx) x++;
@@ -579,44 +617,42 @@ class SkillPiece extends Piece {
 			if (y < ty) y++;
 			else if (y > ty) y--;
 
-			var square = board.at(x, y);
-			if (square && square.blocksSight) return false; // TODO: Use props to decide which terrain blocks
 			if (x == tx && y == ty) return true;
-			if (square.piece) return false; // TODO: Use props to decide which pieces block
+			var square = board.at(x, y);
+			if (square && !this._canSeeSquare(square)) return false;
 		}
 	}
-	_nearUnit(_origin, target, props) {
+	_nearTarget(_origin, target, targetFunction) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
-			if (square.piece) return true; // TODO: Use props to decide which pieces count
-			else return false;
+			return (targetFunction && targetFunction.call(this.user, square));
 		});
 	}
 
-		// targeting directions (for area effects)
+	// targeting directions (for area effects)
 
-		_ahead(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var forward = dx * direction[0] + dy * direction[1];
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (forward >= 0 && forward >= sideways);
-		}
-		_behind(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var backward = -dx * direction[0] - dy * direction[1];
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (backward >= 0 && backward >= sideways);
-		}
-		_beside(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var forward = Math.abs(dx * direction[0] + dy * direction[1]);
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (sideways >= 0 && sideways >= forward);
-		}
+	_ahead(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = dx * direction[0] + dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (forward >= 0 && forward >= sideways);
+	}
+	_behind(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var backward = -dx * direction[0] - dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (backward >= 0 && backward >= sideways);
+	}
+	_beside(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = Math.abs(dx * direction[0] + dy * direction[1]);
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (sideways >= 0 && sideways >= forward);
+	}
 };

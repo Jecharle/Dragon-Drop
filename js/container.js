@@ -114,37 +114,18 @@ class Board extends Container {
 		return area;
 	}
 
-	canFit(piece, centerSquare, size) {
-		size = size || piece.size || 1;
-		var area = this.getFootprint(centerSquare, size);
+	canFit(unit, centerSquare) {
+		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) {
-				return false;
-			}
-			if (square.blocksMove) {
-				return false;
-			}
-			if (square.piece != null && square.piece != piece) {
-				return false;
-			}
-			return true;
+			if (!square) return false;
+			return unit.canStand(square);
 		});
 	}
-	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
-	canPass(piece, centerSquare, size, props) {
-		size = size || piece.size || 1;
-		var area = this.getFootprint(centerSquare, size);
+	canPass(unit, centerSquare) {
+		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) {
-				return false;
-			}
-			if (square.blocksMove) { // TODO: Depends on movement settings?
-				return false;
-			}
-			if (square.piece != null && !square.piece.isAlly(piece)) { // TODO: Depends on movement settings?
-				return false;
-			}
-			return true;
+			if (!square) return false;
+			return unit.canPass(square);
 		});
 	}
 
