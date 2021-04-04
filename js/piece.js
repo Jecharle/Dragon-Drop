@@ -347,7 +347,7 @@ class ControllablePiece extends TargetablePiece {
 
 	aiMoveScore(square) {
 		// TEMP
-		return (square.x+square.y);
+		return this._nearestTargetScore(square, target => target.piece && this.isEnemy(target.piece));
 	}
 
 	get aiUnitScore() {
@@ -568,7 +568,12 @@ class SkillPiece extends Piece {
 	}
 
 	aiTargetScore(square) {
-		return (square.piece && square.piece.targetable) ? 1 : 0; // TEMP
+		var area = this._affectedSquares(square);
+		return area.reduce((totalScore, square) => {
+			if (!square.piece) return totalScore;
+			else if (this.user.isEnemy(square.piece)) return totalScore + 1;
+			else if (this.user.isAlly(square.piece)) return totalScore - 1;
+		}, 0);
 	}
 
 	// targeting shapes
