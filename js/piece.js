@@ -289,7 +289,7 @@ class ControllablePiece extends TargetablePiece {
 			this.el.classList.remove('left');
 		}
 	}
-	canStop(square) {
+	canStand(square) {
 		if (square.blocksMove) return false;
 		else return (square.piece == null || square.piece == this);
 	}
