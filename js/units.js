@@ -47,7 +47,7 @@ class TestEnemyUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 4;
+		this._maxHp = 2;
 		this._moveRange = 2;
 	}
 
