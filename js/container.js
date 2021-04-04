@@ -384,7 +384,7 @@ class Board extends Container {
 	get aiBestSquare() {
 		return this._squares.reduce((best, square) => {
 			if (square.aiScore == null) return best;
-			else if (!best || square.aiScore > best.aiScore) return square;
+			else if (!best || square.aiScore >= best.aiScore) return square;
 			else return best;
 		}, null);
 	}
