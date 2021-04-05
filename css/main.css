@@ -289,13 +289,28 @@
 		background-position: 0px 0px;
 		background-repeat: repeat-x;
 	}
-		.lifebar>div {
+		.lifebar>.inner {
+			position: absolute;
+			z-index: 1;
+			left: 0px;
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
 			background-position: 0px calc(-1*var(--lifebar-h));
 			background-repeat: repeat-x;
 		}
-		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar {
+		.lifebar>.change {
+			position: absolute;
+			z-index: 2;
+			height: var(--lifebar-h);
+			background-image: url(../img/lifebar.png);
+			background-position: 0px calc(-2*var(--lifebar-h));
+			background-repeat: repeat-x;
+			visibility: hidden;
+		}
+		.damaged .lifebar>.change, .healed .lifebar>.change {
+			visibility: visible;
+		}
+		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar, .healed .lifebar {
 			visibility: visible;
 		}
 

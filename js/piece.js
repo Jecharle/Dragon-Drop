@@ -179,20 +179,22 @@ class TargetablePiece extends Piece {
 		this._lifebar.value = this.hp;
 	}
 
-	takeDamage(power, props) {
+	takeDamage(power, _props) {
 		this.hp -= power;
 
-		if (!props || !props.noAnimation) {
-			this.el.classList.add('damaged');
-			setTimeout(() => this.el.classList.remove('damaged'), 1200);
-		}
+		this.el.classList.add('damaged');
+		setTimeout(() => this.el.classList.remove('damaged'), 1200);
 
 		this._showPopup(power);
 		this.refresh();
 		return power;
 	}
-	heal(power, props) {
+	heal(power, _props) {
 		this.hp += power;
+
+		this.el.classList.add('healed');
+		setTimeout(() => this.el.classList.remove('healed'), 1200);
+
 		this._showPopup("+"+power);
 		this.refresh();
 		return power;
