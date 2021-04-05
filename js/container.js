@@ -262,17 +262,15 @@ class Board extends Container {
 		this._paintAiScore(origin, unit.aiMoveScore(origin));
 		var edges = [origin];
 		
-		for (var i = 0; i < edges.length; i++) {
-			var adjacent = this.getAdjacent(edges[i]);
-			var path = [edges[i]].concat(edges[i].path);
+		while (edges.length > 0) {
+			var newEdge = edges.pop();
+			var adjacent = this.getAdjacent(newEdge);
+			var path = [newEdge].concat(newEdge.path);
 			
 			for (var n = 0; n < adjacent.length; n++) {
 				var square = adjacent[n];
-				var movesLeft = edges[i].movesLeft - (square.slowsMove ? 2 : 1);
-				if (movesLeft < 0) {
-					continue;
-				}
-				if (square.movesLeft != null && square.movesLeft > movesLeft) {
+				var movesLeft = newEdge.movesLeft - (square.slowsMove ? 2 : 1);
+				if (square.movesLeft != null) {
 					continue;
 				}
 				if (!this.canFitThrough(unit, square)) {
@@ -282,6 +280,7 @@ class Board extends Container {
 				if (!square.invalid) this._paintAiScore(square, unit.aiMoveScore(square));
 				edges.push(square);
 			}
+			edges.sort((a, b) => a.movesLeft - b.movesLeft);
 		}
 	}
 	_paintMoveRange(square, movesLeft, path, valid) {

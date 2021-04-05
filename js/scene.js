@@ -366,6 +366,8 @@ class BattleScene extends Scene {
 	}
 
 	_selectTarget(square) {
+		if (square && (!square.inRange || square.invalid)) return false;
+
 		if (this._target) {
 			this._deselectTarget();
 		}
@@ -446,7 +448,11 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 
-		this._selectTarget(this._board.aiBestSquare);
+		var destination = this._board.aiBestSquare;
+		if (!this._selectTarget(destination)) {
+			var waypoint = destination.path.find(square => square.inRange && !square.invalid);
+			this._selectTarget(waypoint);
+		}
 		this._refreshTargetArea();
 
 		setTimeout(() => this._aiMoveUnit(), 250);

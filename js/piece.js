@@ -349,6 +349,7 @@ class ControllablePiece extends TargetablePiece {
 	aiMoveScore(square) {
 		var score = this._maxDistance();
 		score -= this._nearestTargetDistance(square, target => this.isEnemy(target.piece));
+		score += square.movesLeft*0.1;
 		return score;
 	}
 
