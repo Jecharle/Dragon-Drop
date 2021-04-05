@@ -182,20 +182,20 @@ class TargetablePiece extends Piece {
 	takeDamage(power, _props) {
 		this.hp -= power;
 
-		this.el.classList.add('damaged');
-		setTimeout(() => this.el.classList.remove('damaged'), 1200);
+		if (power > 0) {
+			this._addTimedClass('damaged', 1200);
+		}
 
-		this._showPopup(power);
 		this.refresh();
 		return power;
 	}
 	heal(power, _props) {
 		this.hp += power;
 
-		this.el.classList.add('healed');
-		setTimeout(() => this.el.classList.remove('healed'), 1200);
+		if (power > 0) {
+			this._addTimedClass('healed', 1200);
+		}
 
-		this._showPopup("+"+power);
 		this.refresh();
 		return power;
 	}
@@ -203,6 +203,11 @@ class TargetablePiece extends Piece {
 		var popup = new PopupText(value);
 		this.el.appendChild(popup.el);
 	}
+	_addTimedClass(className, duration) {
+		this.el.classList.add(className);
+		setTimeout(() => this.el.classList.remove(className), duration);
+	}
+
 
 	push(origin, dist, props) {
 		if (!this.parent) return 0;
@@ -241,6 +246,7 @@ class ControllablePiece extends TargetablePiece {
 		this._setSkills();
 
 		this.initialize();
+		this._moveStyle = "path";
 	}
 
 	_setStats() {
@@ -271,6 +277,7 @@ class ControllablePiece extends TargetablePiece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this._facing = 1;
 		this.refresh();
 	}
 	startTurn() {
@@ -292,21 +299,100 @@ class ControllablePiece extends TargetablePiece {
 		var facing = (target.x - target.y) - (from.x - from.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
+			this._facing = -1;
 		} else if (facing > 0) {
 			this.el.classList.remove('left');
+			this._facing = 1;
 		}
 	}
+	_animateMove(target, type) {
+		var moveTime = 0;
+		switch (type) {
+			case "jump":
+				moveTime = this._animateJump(target)
+				break;
+
+			case "teleport":
+				moveTime = this._animateTeleport(target);
+				break;
+
+			default:
+			case "path":
+				moveTime = this._animatePath(target);
+				break;
+		}
+		this._addTimedClass('moving', moveTime);
+	}
+	_animatePath(target) {
+		var keyframes = [{}];
+		var prevFacing = this._facing;
+		this.face(target, target.path[0]);
+		target.path.forEach(square => {
+			var dx = 64*(square.x - target.x - square.y + target.y);
+			var dy = 32*(square.x - target.x + square.y - target.y);
+			var dz = dy;
+
+			keyframes.push({
+				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})`
+			});
+		});
+		keyframes.reverse();
+		this.spriteEl.animate(keyframes, {duration: 80*keyframes.length, easing: "ease-out"});		
+		return 80*keyframes.length;
+	}
+	_animateJump(target) {
+		var origin = target.path[target.path.length-1];
+		var prevFacing = this._facing;
+		this.face(target, origin);
+
+		var dx = 64*(origin.x - target.x - origin.y + target.y);
+		var dy = 32*(origin.x - target.x + origin.y - target.y);
+		var dz = dy;
+
+		var keyframes = [
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
+			{ }
+		];
+		this.spriteEl.animate(keyframes, {duration: 400, easing: "linear"});
+
+		var jumpframes = [
+			{ },
+			{ bottom: "128px" }
+		];
+		this.spriteEl.animate(jumpframes, {duration: 200, iterations: 2, direction: "alternate", easing: "ease-out"});
+		return 400;
+	}
+	_animateTeleport(target) {
+		var origin = target.path[target.path.length-1];
+		var prevFacing = this._facing;
+		this.face(target, origin);
+
+		var dx = 64*(origin.x - target.x - origin.y + target.y);
+		var dy = 32*(origin.x - target.x + origin.y - target.y);
+		var dz = dy;
+
+		var keyframes = [
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(0)` },
+			{ transform: `scaleX(0)` },
+			{ transform: `scaleX(${this._facing})`}
+		]
+		this.spriteEl.animate(keyframes, {duration: 300, easing: "ease-out"});
+		return 300;
+	}
+
 	canPass(square) {
 		if (square.blocksMove) return false;
 		else return (square.piece == null || this.isAlly(square.piece));
 	}
+
 	move(target) {
 		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
 			this.homeSquare = oldSquare;
-			this.face(target, target.path[0]);
+			this._animateMove(target, this._moveStyle);
 			this.refresh();
 			return true;
 		}

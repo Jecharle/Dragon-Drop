@@ -24,6 +24,7 @@ class TestSupportUnit extends ControllablePiece {
 	constructor(partyMember) {
 		super(partyMember);
 		this.style = 'support-unit';
+		this._moveStyle = 'teleport';
 	}
 
 	_setStats() {

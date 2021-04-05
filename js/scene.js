@@ -451,8 +451,9 @@ class BattleScene extends Scene {
 		if (this._target) {
 			this._moveUnit(this._unit, this._target);
 			this.refresh();
+			setTimeout(() => this._aiSelectSkill(), 350);
 		}
-		setTimeout(() => this._aiSelectSkill(), 500);
+		else this._aiSelectSkill();
 	}
 	_aiSelectSkill() {
 		if (!this._selectSkill(this._unit.aiBestSkill)) {
@@ -468,6 +469,7 @@ class BattleScene extends Scene {
 	}
 	_aiUseSkill() {
 		if (this._target) {
+			// TODO: Get a skill wait time to animate?
 			this._useSkill(this._skill, this._target);
 		} else {
 			this._deselectSkill();
