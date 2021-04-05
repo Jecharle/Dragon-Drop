@@ -255,7 +255,7 @@ class Board extends Container {
 	setMoveArea(unit) {
 		if (!unit || !unit.moveRange) return;
 
-		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
+		var origin = unit.square;
 		if (!origin || origin.parent != this) return;
 
 		this._paintMoveRange(origin, unit.moveRange, [], true);
@@ -348,6 +348,7 @@ class Board extends Container {
 	}
 
 	showPath(target) {
+		if (!target) return;
 		target.el.classList.add('move-path');
 		target.path.forEach(square => square.el.classList.add('move-path'));
 	}
@@ -360,6 +361,7 @@ class Board extends Container {
 		return this._squares.filter(square => skill.inArea(origin, square));
 	}
 	showAoE(skill, origin) {
+		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
 	}
 	clearAoE() {

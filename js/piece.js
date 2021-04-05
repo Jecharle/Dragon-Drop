@@ -303,11 +303,7 @@ class ControllablePiece extends TargetablePiece {
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			if (this.homeSquare == null) {
-				this.homeSquare = oldSquare;
-			} else if (target == this.homeSquare) {
-				this.homeSquare = null;
-			}
+			this.homeSquare = oldSquare;
 			this.face(target, target.path[0]);
 			this.refresh();
 			return true;

@@ -66,5 +66,8 @@ class TestMap extends MapModel { // TEMP
 			{turn: 1, type: TestEnemyUnit, x: 4, y: 3, enemy: true},
 			{turn: 2, type: TestEnemyUnit, x: 5, y: 3, enemy: true}
 		);
+
+		// must wait until last reinforcements have appeared
+		this._minTurns = 3;
 	}
 }
