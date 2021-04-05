@@ -272,7 +272,7 @@ class Board extends Container {
 				if (movesLeft < 0) {
 					continue;
 				}
-				if (square.inRange && square.movesLeft > movesLeft) {
+				if (square.movesLeft != null && square.movesLeft > movesLeft) {
 					continue;
 				}
 				if (!this.canFitThrough(unit, square)) {
@@ -280,18 +280,19 @@ class Board extends Container {
 				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square));
 				if (!square.invalid) this._paintAiScore(square, unit.aiMoveScore(square));
-				if (movesLeft > 0) {
-					edges.push(square);
-				}
+				edges.push(square);
 			}
 		}
 	}
 	_paintMoveRange(square, movesLeft, path, valid) {
-		square.el.classList.add('move-range');
-		if (path.length == 0) square.el.classList.add('move-origin');
-		square.inRange = true;
 		square.movesLeft = movesLeft;
 		square.path = path;
+
+		if (movesLeft < 0) return;
+
+		square.inRange = true;
+		square.el.classList.add('move-range');
+		if (path.length == 0) square.el.classList.add('move-origin');
 
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
@@ -316,8 +317,8 @@ class Board extends Container {
 		// TODO: More possible origins for larger units?
 	}
 	_paintSkillRange(square, valid, aiScore) {
-		square.el.classList.add('skill-range');
 		square.inRange = true;
+		square.el.classList.add('skill-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 		} else {

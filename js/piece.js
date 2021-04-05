@@ -347,8 +347,9 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	aiMoveScore(square) {
-		var nearestEnemyDistance = this._nearestTargetDistance(square, target => this.isEnemy(target.piece));
-		return this._maxDistance() - nearestEnemyDistance;
+		var score = this._maxDistance();
+		score -= this._nearestTargetDistance(square, target => this.isEnemy(target.piece));
+		return score;
 	}
 
 	get aiUnitScore() {
@@ -362,7 +363,7 @@ class ControllablePiece extends TargetablePiece {
 		return this.skills.find(skill => skill.canUse());
 	}
 
-	// proximity nearest / most nearby squares matching a target function
+	// distance to nearby squares / units of interest
 
 	_maxDistance() {
 		var board = this.parent;
@@ -381,7 +382,6 @@ class ControllablePiece extends TargetablePiece {
 		return nearestDistance;
 	}
 
-	// TODO: Make this into something sensible?
 	_averageTargetDistance(origin, targetFunction) {
 		var board = origin.parent;
 		var targetCount = 0;
