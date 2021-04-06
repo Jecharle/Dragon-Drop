@@ -377,8 +377,8 @@ class ControllablePiece extends TargetablePiece {
 			{ transform: `scaleX(0)` },
 			{ transform: `scaleX(${this._facing})`}
 		]
-		this.spriteEl.animate(keyframes, {duration: 300, easing: "ease-out"});
-		return 300;
+		this.spriteEl.animate(keyframes, {duration: 400, easing: "ease-out"});
+		return 400;
 	}
 
 	canPass(square) {

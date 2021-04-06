@@ -158,17 +158,16 @@ class BattleScene extends Scene {
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			return true;
+			return newPiece;
 		}
-		return false;
+		return null;
 	}
 	_addReinforcements() {
-		// this removes the data for anything successfully added
-		this._reinforcementData = this._reinforcementData.filter(data => {
-			if (data.turn <= this._turn) {
-				return !this._addMapUnit(data);
+		this._reinforcementData.forEach(data => {
+			if (data.turn == this._turn) {
+				var newPiece = this._addMapUnit(data);
+				newPiece._addTimedClass('spawn', 500);
 			}
-			return true;
 		});
 	}
 

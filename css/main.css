@@ -325,6 +325,9 @@
 	.damaged {
 		animation: shake 150ms;
 	}
+	.spawn .sprite {
+		animation: drop-in 0.2s ease-in;
+	}
 	/*.unit.moving>.sprite {
 		TODO: walking animation!
 	}*/
@@ -473,6 +476,12 @@
 @keyframes fade-out {
 	to {
 		opacity: 0%;
+	}
+}
+@keyframes drop-in {
+	from {
+		opacity: 0%;
+		bottom: 100%;
 	}
 }
 @keyframes banner-display {
