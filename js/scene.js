@@ -437,23 +437,20 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 
-		var destination = this._board.aiBestSquare;
-		if (!this._selectTarget(destination)) {
-			var waypoint = destination.path.find(square => square.inRange && !square.invalid);
-			this._selectTarget(waypoint);
-		}
+		this._selectTarget(this._board.aiBestMoveSquare(this._unit));
 		this._refreshTargetArea();
-
-		setTimeout(() => this._aiMoveUnit(), 250);
+		if (this._target && this._target != this._unit.square) {
+			setTimeout(() => this._aiMoveUnit(), 250);
+		} else {
+			this._aiSelectSkill();
+		}
 	}
 	_aiMoveUnit() {
-		if (this._target) {
-			this._moveUnit(this._unit, this._target);
-			this.refresh();
-			setTimeout(() => this._aiSelectSkill(), 350);
-		}
-		else this._aiSelectSkill();
+		this._moveUnit(this._unit, this._target);
+		this.refresh();
+		setTimeout(() => this._aiSelectSkill(), 350);
 	}
+
 	_aiSelectSkill() {
 		if (!this._selectSkill(this._unit.aiBestSkill)) {
 			this._aiSelectUnit();
@@ -461,24 +458,23 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 
-		this._selectTarget(this._board.aiBestSquare);
+		this._selectTarget(this._board.aiBestSkillSquare(this._skill))
 		this._refreshTargetArea();
-
-		setTimeout(() => this._aiUseSkill(), 500);
-	}
-	_aiUseSkill() {
 		if (this._target) {
-			// TODO: Get a skill wait time to animate?
-			this._useSkill(this._skill, this._target);
+			setTimeout(() => this._aiUseSkill(), 500);
 		} else {
 			this._deselectSkill();
+			this._aiSelectUnit();
 		}
-
+	}
+	_aiUseSkill() {
+		this._useSkill(this._skill, this._target);
 		this._deselectUnit();
 		this.refresh();
 
 		setTimeout(() => this._aiSelectUnit(), 250);
 	}
+	
 	_aiTurnEnd() {
 		this._aiControlUnits = null;
 		this._nextTurn();

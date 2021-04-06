@@ -259,7 +259,6 @@ class Board extends Container {
 		if (!origin || origin.parent != this) return;
 
 		this._paintMoveRange(origin, unit.moveRange, [], true);
-		this._paintAiScore(origin, unit.aiMoveScore(origin));
 		var edges = [origin];
 		
 		while (edges.length > 0) {
@@ -277,7 +276,6 @@ class Board extends Container {
 					continue;
 				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square));
-				if (!square.invalid) this._paintAiScore(square, unit.aiMoveScore(square));
 				edges.push(square);
 			}
 			edges.sort((a, b) => a.movesLeft - b.movesLeft);
@@ -296,8 +294,8 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 		} else {
-			square.el.classList.add('invalid');
 			square.invalid = true;
+			square.el.classList.add('invalid');
 		}
 	}
 	setSkillArea(skill) {
@@ -310,24 +308,20 @@ class Board extends Container {
 		this._squares.forEach(square => {
 			if (skill.inRange(origin, square)) {
 				this._paintSkillRange(square, skill.validTarget(square), skill.aiTargetScore(square));
-				if (!square.invalid) this._paintAiScore(square, skill.aiTargetScore(square));
+				//if (!square.invalid) this._paintAiScore(square, skill.aiTargetScore(square));
 			}
 		});
 		// TODO: More possible origins for larger units?
 	}
-	_paintSkillRange(square, valid, aiScore) {
+	_paintSkillRange(square, valid) {
 		square.inRange = true;
 		square.el.classList.add('skill-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 		} else {
-			square.el.classList.add('invalid');
 			square.invalid = true;
+			square.el.classList.add('invalid');
 		}
-	}
-
-	_paintAiScore(square, aiScore) {
-		if (aiScore >= 0) square.aiScore = aiScore;
 	}
 
 	resetAreas() {
@@ -344,7 +338,6 @@ class Board extends Container {
 		square.invalid = false;
 		square.movesLeft = null;
 		square.path = null;
-		square.aiScore = null;
 	}
 
 	showPath(target) {
@@ -386,12 +379,39 @@ class Board extends Container {
 		return adjacent;
 	}
 
-	get aiBestSquare() {
-		return this._squares.reduce((best, square) => {
-			if (square.aiScore == null) return best;
-			else if (!best || square.aiScore >= best.aiScore) return square;
-			else return best;
+	aiBestMoveSquare(unit) {
+		var best = this._squares.reduce((best, square) => {
+			if (square.invalid || !square.path) return best;
+
+			var score = unit.aiMoveScore(square);
+			if (!best || score > best[1] || (score == best[1] && square.movesLeft > best[0].movesLeft)) {
+				best = [square, score];
+			}
+			return best;
 		}, null);
+	
+		if (!best) return null;
+		var bestSquare = best[0];
+		if (bestSquare.invalid || !bestSquare.inRange) {
+			return bestSquare.path.find(square => square.inRange && !square.invalid);
+		}
+		return bestSquare;
+	}
+
+	aiBestSkillSquare(skill) {
+		var best = this._squares.reduce((best, square) => {
+			if (square.invalid || !square.inRange) return best;
+
+			var score = skill.aiTargetScore(square);
+			if (score >= (best ? best[1] : 0)) {
+				best = [square, score];
+			}
+			return best;
+		}, null);
+		
+		if (!best) return null;
+		var bestSquare = best[0];
+		return bestSquare;
 	}
 
 	_allowDrop(ev) {
