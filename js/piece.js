@@ -305,29 +305,29 @@ class ControllablePiece extends TargetablePiece {
 			this._facing = 1;
 		}
 	}
-	_animateMove(target, type) {
+	_animateMove(target, path, type) {
 		var moveTime = 0;
 		switch (type) {
 			case "jump":
-				moveTime = this._animateJump(target)
+				moveTime = this._animateJump(target, path)
 				break;
 
 			case "teleport":
-				moveTime = this._animateTeleport(target);
+				moveTime = this._animateTeleport(target, path);
 				break;
 
 			default:
 			case "path":
-				moveTime = this._animatePath(target);
+				moveTime = this._animatePath(target, path);
 				break;
 		}
 		this._addTimedClass('moving', moveTime);
 	}
-	_animatePath(target) {
+	_animatePath(target, path) {
 		var keyframes = [{}];
 		var prevFacing = this._facing;
-		this.face(target, target.path[0]);
-		target.path.forEach(square => {
+		this.face(target, path[0]);
+		path.forEach(square => {
 			var dx = 64*(square.x - target.x - square.y + target.y);
 			var dy = 32*(square.x - target.x + square.y - target.y);
 			var dz = dy;
@@ -337,11 +337,11 @@ class ControllablePiece extends TargetablePiece {
 			});
 		});
 		keyframes.reverse();
-		this.spriteEl.animate(keyframes, {duration: 80*keyframes.length, easing: "ease-out"});		
-		return 80*keyframes.length;
+		this.spriteEl.animate(keyframes, {duration: 85*keyframes.length, easing: "ease-out"});		
+		return 85*keyframes.length;
 	}
-	_animateJump(target) {
-		var origin = target.path[target.path.length-1];
+	_animateJump(target, path) {
+		var origin = path[path.length-1];
 		var prevFacing = this._facing;
 		this.face(target, origin);
 
@@ -362,8 +362,8 @@ class ControllablePiece extends TargetablePiece {
 		this.spriteEl.animate(jumpframes, {duration: 200, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return 400;
 	}
-	_animateTeleport(target) {
-		var origin = target.path[target.path.length-1];
+	_animateTeleport(target, path) {
+		var origin = path[path.length-1];
 		var prevFacing = this._facing;
 		this.face(target, origin);
 
@@ -392,7 +392,7 @@ class ControllablePiece extends TargetablePiece {
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
 			this.homeSquare = oldSquare;
-			this._animateMove(target, this._moveStyle);
+			this._animateMove(target, target.path, this._moveStyle);
 			this.refresh();
 			return true;
 		}
