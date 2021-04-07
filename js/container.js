@@ -307,8 +307,7 @@ class Board extends Container {
 		// for a map this small, it's easiest to check every square
 		this._squares.forEach(square => {
 			if (skill.inRange(origin, square)) {
-				this._paintSkillRange(square, skill.validTarget(square), skill.aiTargetScore(square));
-				//if (!square.invalid) this._paintAiScore(square, skill.aiTargetScore(square));
+				this._paintSkillRange(square, skill.validTarget(square));
 			}
 		});
 		// TODO: More possible origins for larger units?
