@@ -30,6 +30,7 @@ class TestAttackSkill extends SkillPiece {
 	_unitEffects(unit, _target) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1);
+		return 200;
 	}
 };
 
@@ -65,6 +66,7 @@ class TestHealSkill extends SkillPiece {
 	}
 	_unitEffects(unit, _target) {
 		unit.heal(this.power);
+		return 200;
 	}
 };
 
@@ -103,6 +105,7 @@ class TestBuildSkill extends SkillPiece {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
 		wall._addTimedClass('spawn', 500);
+		return 500;
 	}
 };
 
@@ -141,7 +144,10 @@ class TestMoveSkill extends SkillPiece {
 		return false;
 	}
 	_startEffects(target, _squares, _pieces) {
+		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
+		this.user.animateMove(target, [startSquare], "teleport");
+		return 400;
 	}
 };
 
@@ -180,5 +186,6 @@ class TestAreaSkill extends SkillPiece {
 	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(target, 1);
+		return 200;
 	}
 };

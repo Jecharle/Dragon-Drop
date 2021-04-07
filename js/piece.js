@@ -305,7 +305,7 @@ class ControllablePiece extends TargetablePiece {
 			this._facing = 1;
 		}
 	}
-	_animateMove(target, path, type) {
+	animateMove(target, path, type) {
 		var moveTime = 0;
 		switch (type) {
 			case "jump":
@@ -337,8 +337,9 @@ class ControllablePiece extends TargetablePiece {
 			});
 		});
 		keyframes.reverse();
-		this.spriteEl.animate(keyframes, {duration: 85*keyframes.length, easing: "ease-out"});		
-		return 85*keyframes.length;
+		var time = 100*keyframes.length
+		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});		
+		return time;
 	}
 	_animateJump(target, path) {
 		var origin = path[path.length-1];
@@ -348,19 +349,20 @@ class ControllablePiece extends TargetablePiece {
 		var dx = 64*(origin.x - target.x - origin.y + target.y);
 		var dy = 32*(origin.x - target.x + origin.y - target.y);
 		var dz = dy;
+		var time = 400;
 
 		var keyframes = [
 			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
 			{ }
 		];
-		this.spriteEl.animate(keyframes, {duration: 400, easing: "linear"});
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
 
 		var jumpframes = [
 			{ },
 			{ bottom: "128px" }
 		];
-		this.spriteEl.animate(jumpframes, {duration: 200, iterations: 2, direction: "alternate", easing: "ease-out"});
-		return 400;
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		return time;
 	}
 	_animateTeleport(target, path) {
 		var origin = path[path.length-1];
@@ -370,6 +372,7 @@ class ControllablePiece extends TargetablePiece {
 		var dx = 64*(origin.x - target.x - origin.y + target.y);
 		var dy = 32*(origin.x - target.x + origin.y - target.y);
 		var dz = dy;
+		var time = 400;
 
 		var keyframes = [
 			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
@@ -377,8 +380,8 @@ class ControllablePiece extends TargetablePiece {
 			{ transform: `scaleX(0)` },
 			{ transform: `scaleX(${this._facing})`}
 		]
-		this.spriteEl.animate(keyframes, {duration: 400, easing: "ease-out"});
-		return 400;
+		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
+		return time;
 	}
 
 	canPass(square) {
@@ -392,7 +395,7 @@ class ControllablePiece extends TargetablePiece {
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
 			this.homeSquare = oldSquare;
-			this._animateMove(target, target.path, this._moveStyle);
+			this.animateMove(target, target.path, this._moveStyle);
 			this.refresh();
 			return true;
 		}
@@ -575,19 +578,49 @@ class SkillPiece extends Piece {
 	use(target) {
 		if (!this.validTarget(target)) return false;
 		this.user.face(target);
+
+		this._target = target;
+		this._squares = this._affectedSquares(this._target);
+		this._units = this._affectedUnits(this._squares);
 		
-		this._payCost();
+		var waitTime = this._startEffects(this._target, this._squares, this._units);
+		setTimeout(() => this._squareEffectIterator(this._squares.values()), waitTime);
 
-		var squares = this._affectedSquares(target);
-		var units = this._affectedUnits(squares);
-		this._startEffects(target, squares, units);
-		squares.forEach(square => this._squareEffects(square, target));
-		units.forEach(piece => this._unitEffects(piece, target));
-		this._endEffects(target, squares, units);
-
-		units.forEach(piece => piece.dieIfDead());
-		this.user.refresh();
 		return true;
+	}
+	_squareEffectIterator(squareIterator) {
+		var next = squareIterator.next();
+		var waitTime = 0;
+		if (next.value) {
+			waitTime = this._squareEffects(next.value, this._target);
+		}
+		if (next.done) {
+			this._unitEffectIterator(this._units.values());
+		} else {
+			setTimeout(() => this._squareEffectIterator(squareIterator), waitTime);
+		}
+	}
+	_unitEffectIterator(unitIterator) {
+		var next = unitIterator.next();
+		var waitTime = 0;
+		if (next.value) {
+			waitTime = this._unitEffects(next.value, this._target);
+		}
+		if (next.done) {
+			this._finishUse();
+		} else {
+			setTimeout(() => this._unitEffectIterator(unitIterator, this._target), waitTime);
+		}
+	}
+	_finishUse() {
+		this._endEffects(this._target, this._squares, this._units);
+		this._payCost();
+		this._units.forEach(piece => piece.dieIfDead());
+		this.user.refresh();
+		
+		this._target = null;
+		this._units = null;
+		this._squares = null;
 	}
 
 	validTarget(target) {
@@ -610,10 +643,10 @@ class SkillPiece extends Piece {
 		return units;
 	}
 
-	_startEffects(target, squares, units) { }
-	_squareEffects(square, target) { }
-	_unitEffects(unit, target) { }
-	_endEffects(target, squares, units) { }
+	_startEffects(target, squares, units) { return 0; }
+	_squareEffects(square, target) { return 0; }
+	_unitEffects(unit, target) { return 0; }
+	_endEffects(target, squares, units) { return 0; }
 
 	_payCost() {
 		this.user.actionUsed = true;
