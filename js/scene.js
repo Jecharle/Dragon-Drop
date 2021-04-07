@@ -223,7 +223,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	
 		if (this._autoPhase) {
-			setTimeout(() => this._aiTurnStart(), 1000);
+			setTimeout(() => this._aiTurnStart(), 1600);
 		}
 	}
 
@@ -422,7 +422,7 @@ class BattleScene extends Scene {
 	}
 	_aiSelectUnit() {
 		if (this._aiControlUnits.length == 0) {
-			this._aiTurnEnd();
+			setTimeout(() => this._aiTurnEnd(), 400);
 			return;
 		}
 
@@ -464,6 +464,7 @@ class BattleScene extends Scene {
 			setTimeout(() => this._aiUseSkill(), 500);
 		} else {
 			this._deselectSkill();
+			this.refresh();
 			this._aiSelectUnit();
 		}
 	}

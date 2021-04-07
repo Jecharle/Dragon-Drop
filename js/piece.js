@@ -388,12 +388,28 @@ class ControllablePiece extends TargetablePiece {
 
 		var keyframes = [
 			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(0)` },
-			{ transform: `scaleX(0)` },
-			{ transform: `scaleX(${this._facing})`}
-		]
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(0) scaleY(1.5)` },
+			{ transform: `translate3d(0, 0, 0) scaleX(0) scaleY(1.5)` },
+			{ }
+		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
 		return time;
+	}
+
+	animateBump(target) {
+		var origin = this.square;
+		var dx = 32*(target.x - origin.x - target.y + origin.y);
+		var dy = 16*(target.x - origin.x + target.y - origin.y);
+		var dz = dy;
+		var time = 200;
+
+		var keyframes = [
+			{ },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
+			{ }
+		];
+		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
+		// TODO: Attacking style, or leave that elsewhere?
 	}
 
 	canPass(square) {
@@ -656,7 +672,11 @@ class SkillPiece extends Piece {
 		return units;
 	}
 
-	_startEffects(target, squares, units) { return 0; }
+	_startEffects(target, squares, units) {
+		this.user.animateBump(target);
+		return 100;
+	}
+
 	_squareEffects(square, target) { return 0; }
 	_unitEffects(unit, target) { return 0; }
 	_endEffects(target, squares, units) { return 0; }

@@ -27,7 +27,7 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_unitEffects(unit, _target) {
+	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1);
 		return 200;
@@ -101,6 +101,9 @@ class TestBuildSkill extends SkillPiece {
 		}
 		return false;
 	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
 	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
@@ -143,7 +146,7 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(target, _squares, _pieces) {
+	_startEffects(target, _squares, _units) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
 		this.user.animateMove([startSquare], "teleport");
