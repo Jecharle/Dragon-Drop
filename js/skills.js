@@ -146,7 +146,7 @@ class TestMoveSkill extends SkillPiece {
 	_startEffects(target, _squares, _pieces) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
-		this.user.animateMove(target, [startSquare], "teleport");
+		this.user.animateMove([startSquare], "teleport");
 		return 400;
 	}
 };
