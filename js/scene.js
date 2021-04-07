@@ -345,9 +345,14 @@ class BattleScene extends Scene {
 	}
 	_swapDeploySquares(piece, target) {
 		if (target.piece) {
+			var previousSquare = piece.square;
 			this._board.swapPieces(piece, target.piece);
+			piece.animateMove([previousSquare]);
+			previousSquare.piece.animateMove([piece.square]);
 		} else {
+			var previousSquare = piece.square;
 			this._board.movePiece(piece, target);
+			piece.animateMove([previousSquare]);
 		}
 		this._deselectUnit();
 	}
