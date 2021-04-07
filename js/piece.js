@@ -213,17 +213,26 @@ class TargetablePiece extends Piece {
 		if (!this.parent) return 0;
 		var previousSquare = this.square;
 		var distanceMoved = this.parent.shiftPiece(this, origin, distance);
-		if (props?.animate != "none") {
-			this.animateMove([previousSquare], props?.animate);
+		if (props?.animation) {
+			this.animateMove([previousSquare], props.animation);
 		}
 		return distanceMoved;
 	}
 	pull(origin, distance, props) {
 		return this.push(origin, -distance, props);
 	}
-	swap(piece) {
+	swap(piece, props) {
 		if (!this.parent) return false;
-		return this.parent.swapPieces(this, piece);
+		if (this.parent.swapPieces(this, piece)) {
+			if (props?.animation) {
+				this.animateMove([piece.square], props.animation);
+			}
+			if (props?.animation2) {
+				piece.animateMove([this.square], props.animation2);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	// status effects
@@ -330,8 +339,6 @@ class ControllablePiece extends TargetablePiece {
 	}
 	_animatePath(path) {
 		var target = this.square;
-		var prevFacing = this._facing;
-		this.face(target, path[0]);
 
 		var keyframes = [{}];
 		path.forEach(square => {
@@ -340,7 +347,7 @@ class ControllablePiece extends TargetablePiece {
 			var dz = dy;
 
 			keyframes.push({
-				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})`
+				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})`
 			});
 		});
 		keyframes.reverse();
@@ -351,8 +358,6 @@ class ControllablePiece extends TargetablePiece {
 	_animateJump(path) {
 		var target = this.square;
 		var origin = path[path.length-1];
-		var prevFacing = this._facing;
-		this.face(target, origin);
 
 		var dx = 64*(origin.x - target.x - origin.y + target.y);
 		var dy = 32*(origin.x - target.x + origin.y - target.y);
@@ -360,7 +365,7 @@ class ControllablePiece extends TargetablePiece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
@@ -375,8 +380,6 @@ class ControllablePiece extends TargetablePiece {
 	_animateTeleport(path) {
 		var target = this.square;
 		var origin = path[path.length-1];
-		var prevFacing = this._facing;
-		this.face(target, origin);
 
 		var dx = 64*(origin.x - target.x - origin.y + target.y);
 		var dy = 32*(origin.x - target.x + origin.y - target.y);
@@ -384,7 +387,7 @@ class ControllablePiece extends TargetablePiece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${prevFacing})` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
 			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(0)` },
 			{ transform: `scaleX(0)` },
 			{ transform: `scaleX(${this._facing})`}
@@ -405,6 +408,7 @@ class ControllablePiece extends TargetablePiece {
 		if (target.parent.movePiece(this, target)) {
 			this.homeSquare = oldSquare;
 			this.animateMove(target.path, this._moveStyle);
+			this.face(target, target.path[0]);
 			this.refresh();
 			return true;
 		}
