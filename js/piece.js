@@ -464,7 +464,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	aiMoveScore(square) {
-		return -this._nearestTargetDistance(square, target => this.isEnemy(target.piece));
+		return square.parent.getAdjacent(square).some(adjacent => this.isEnemy(adjacent.piece)) ? 1 : 0;
 	}
 
 	get aiUnitScore() {
@@ -485,8 +485,7 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	_nearestTargetDistance(origin, targetFunction) {
-		var board = origin.parent;
-		var nearestDistance = board._squares.reduce((nearest, square) => {
+		var nearestDistance = origin.parent.allSquares.reduce((nearest, square) => {
 			if (targetFunction.call(this, square)) {
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				return Math.min(nearest, distance);
@@ -497,9 +496,8 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	_averageTargetDistance(origin, targetFunction) {
-		var board = origin.parent;
 		var targetCount = 0;
-		var totalDistance = board._squares.reduce((sum, square) => {
+		var totalDistance = origin.parent.allSquares.reduce((sum, square) => {
 			if (targetFunction.call(this, square)){
 				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
 				targetCount += 1;

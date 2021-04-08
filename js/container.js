@@ -38,14 +38,14 @@ class Position extends SpriteElObj {
 class Board extends Container {
 	constructor(mapData) {
 		super();
-		this._squares = [];
+		this.allSquares = [];
 
 		for (var y = 0; y < this.h; y++) {
 			var row = document.createElement('div');
 			row.classList.add('row');
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
-				this._squares[(y * this.w) + x] = square;
+				this.allSquares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
 			}
 			this.el.appendChild(row);
@@ -54,6 +54,8 @@ class Board extends Container {
 
 		this.deployArea = [];
 		if (mapData) this._loadDeployArea(mapData.deployment);
+
+		this.squaresInRange = [];
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -94,8 +96,8 @@ class Board extends Container {
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
-		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
-		return this._squares[(y * this.w) + x];
+		if (!this.allSquares || !this.allSquares[(y * this.w) + x]) return null;
+		return this.allSquares[(y * this.w) + x];
 	}
 	getFootprint(origin, size) {
 		size = Math.max(size || 0, 1);
@@ -131,7 +133,7 @@ class Board extends Container {
 		if (this.canFit(piece, centerSquare)) return centerSquare;
 		var minDistance = null;
 		var nearestSquare = null;
-		this._squares.forEach(square => {
+		this.allSquares.forEach(square => {
 			var distance = this.getDistance(centerSquare, square);
 			if (minDistance && distance >= minDistance) return;
 			if (this.canFit(piece, square)) {
@@ -251,6 +253,7 @@ class Board extends Container {
 		square.el.classList.add('deploy-range');
 		square.el.ondragover = this._allowDrop;
 		square.inRange = true;
+		this.squaresInRange.push(square);
 	}
 	setMoveArea(unit) {
 		if (!unit || !unit.moveRange) return;
@@ -293,6 +296,7 @@ class Board extends Container {
 
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
 		} else {
 			square.invalid = true;
 			square.el.classList.add('invalid');
@@ -305,7 +309,7 @@ class Board extends Container {
 		var origin = user.square;
 
 		// for a map this small, it's easiest to check every square
-		this._squares.forEach(square => {
+		this.allSquares.forEach(square => {
 			if (skill.inRange(origin, square)) {
 				this._paintSkillRange(square, skill.validTarget(square));
 			}
@@ -317,6 +321,7 @@ class Board extends Container {
 		square.el.classList.add('skill-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
 		} else {
 			square.invalid = true;
 			square.el.classList.add('invalid');
@@ -324,7 +329,8 @@ class Board extends Container {
 	}
 
 	resetAreas() {
-		this._squares.forEach(square => this._clearPaint(square));
+		this.allSquares.forEach(square => this._clearPaint(square));
+		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
 		square.el.classList.remove('deploy-range');
@@ -345,19 +351,19 @@ class Board extends Container {
 		target.path.forEach(square => square.el.classList.add('move-path'));
 	}
 	clearPath() {
-		this._squares.forEach(square => square.el.classList.remove('move-path'));
+		this.allSquares.forEach(square => square.el.classList.remove('move-path'));
 	}
 
 	getAoE(skill, origin) {
 		if (!skill || !origin) return [];
-		return this._squares.filter(square => skill.inArea(origin, square));
+		return this.allSquares.filter(square => skill.inArea(origin, square));
 	}
 	showAoE(skill, origin) {
 		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
 	}
 	clearAoE() {
-		this._squares.forEach(square => square.el.classList.remove('skill-aoe'));
+		this.allSquares.forEach(square => square.el.classList.remove('skill-aoe'));
 	}
 
 	getAdjacent(square) {
@@ -379,7 +385,7 @@ class Board extends Container {
 	}
 
 	aiBestMoveSquare(unit) {
-		var best = this._squares.reduce((best, square) => {
+		var best = this.allSquares.reduce((best, square) => {
 			if (square.invalid || !square.path) return best;
 
 			var score = unit.aiMoveScore(square);
@@ -398,7 +404,7 @@ class Board extends Container {
 	}
 
 	aiBestSkillSquare(skill) {
-		var best = this._squares.reduce((best, square) => {
+		var best = this.allSquares.reduce((best, square) => {
 			if (square.invalid || !square.inRange) return best;
 
 			var score = skill.aiTargetScore(square);
