@@ -722,8 +722,8 @@ class SkillPiece extends Piece {
 		return Piece.Skill;
 	}
 
-	aiTargetScore(square) {
-		var area = this._affectedSquares(square);
+	aiTargetScore(target) {
+		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
 			if (this.user.isEnemy(square.piece)) return totalScore + 1;
 			else if (this.user.isAlly(square.piece)) return totalScore - 1;
