@@ -184,6 +184,7 @@ class TargetablePiece extends Piece {
 
 		if (power > 0) {
 			this._addTimedClass('damaged', 1200);
+			this._addTimedClass('hp-change', 1200);
 		}
 
 		this.refresh();
@@ -193,7 +194,7 @@ class TargetablePiece extends Piece {
 		this.hp += power;
 
 		if (power > 0) {
-			this._addTimedClass('healed', 1200);
+			this._addTimedClass('hp-change', 1200);
 		}
 
 		this.refresh();

@@ -279,7 +279,7 @@
 		.unit:hover::after, .skill-range .unit::after, .skill-aoe .unit::after {
 			top: calc(-1*var(--action-mark-h));
 		}
-		.damaged.unit::after, .healed.unit::after {
+		.hp-change.unit::after {
 			display: none;
 		}
 	.lifebar {
@@ -310,11 +310,11 @@
 			background-repeat: repeat-x;
 			visibility: hidden;
 		}
-		.damaged .lifebar>.change, .healed .lifebar>.change {
-			animation: fade-out 1s 0.2s both;
+		.hp-change .lifebar>.change {
+			animation: fade-out 0.8s 0.2s both;
 			visibility: visible;
 		}
-		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .damaged .lifebar, .healed .lifebar {
+		.unit:hover .lifebar, .skill-range .lifebar, .skill-aoe .lifebar, .hp-change .lifebar {
 			visibility: visible;
 		}
 
