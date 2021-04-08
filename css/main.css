@@ -320,7 +320,7 @@
 
 	/*Unit states and motions*/
 	.left.unit>.sprite {
-		transform: translateZ(-100px) scaleX(-1);
+		transform: translateZ(-100px) rotateY(180deg);
 	}
 	.damaged {
 		animation: shake 150ms;

@@ -291,7 +291,7 @@ class ControllablePiece extends TargetablePiece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._facing = 1;
+		this._facing = 0;
 		this.refresh();
 	}
 	startTurn() {
@@ -313,10 +313,10 @@ class ControllablePiece extends TargetablePiece {
 		var facing = (target.x - target.y) - (from.x - from.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
-			this._facing = -1;
+			this._facing = 180;
 		} else if (facing > 0) {
 			this.el.classList.remove('left');
-			this._facing = 1;
+			this._facing = 0;
 		}
 	}
 	animateMove(path, type) {
@@ -347,7 +347,7 @@ class ControllablePiece extends TargetablePiece {
 			var dz = dy;
 
 			keyframes.push({
-				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})`
+				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)`
 			});
 		});
 		keyframes.reverse();
@@ -365,7 +365,7 @@ class ControllablePiece extends TargetablePiece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
@@ -387,9 +387,9 @@ class ControllablePiece extends TargetablePiece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(0) scaleY(1.5)` },
-			{ transform: `translate3d(0, 0, 0) scaleX(0) scaleY(1.5)` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(90deg) scaleY(1.5)` },
+			{ transform: `translate3d(0, 0, 0) rotateY(90deg) scaleY(1.5)` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
@@ -405,7 +405,7 @@ class ControllablePiece extends TargetablePiece {
 
 		var keyframes = [
 			{ },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) scaleX(${this._facing})` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
