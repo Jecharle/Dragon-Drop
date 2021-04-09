@@ -354,7 +354,7 @@ class ControllablePiece extends TargetablePiece {
 		});
 		keyframes.reverse();
 		var time = 100*keyframes.length
-		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});		
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});		
 		return time;
 	}
 	_animateJump(path) {
@@ -394,14 +394,13 @@ class ControllablePiece extends TargetablePiece {
 			{ transform: `translate3d(0, 0, 0) rotateY(90deg) scaleY(1.5)` },
 			{ }
 		];
-		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
 		return time;
 	}
 
-	animateBump(target) {
-		var origin = this.square;
-		var dx = 32*(target.x - origin.x - target.y + origin.y);
-		var dy = 16*(target.x - origin.x + target.y - origin.y);
+	animateBump(target, origin) {
+		var dx = 32*(target.x - this.square.x - target.y + this.square.y);
+		var dy = 16*(target.x - this.square.x + target.y - this.square.y);
 		var dz = dy;
 		var time = 200;
 
@@ -410,9 +409,14 @@ class ControllablePiece extends TargetablePiece {
 			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
 			{ }
 		];
+		if (origin) {
+			dx = 32*(origin.x - this.square.x - origin.y + this.square.y);
+			dy = 16*(origin.x - this.square.x + origin.y - this.square.y);
+			dz = dy;
+			keyframes[0] = { transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` };
+		}
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
-		// TODO: Attacking style, or leave that elsewhere?
-		// TODO: Allow run-up?
+		// TODO: Add attacking style, or leave that elsewhere?
 	}
 
 	canPass(square) {
