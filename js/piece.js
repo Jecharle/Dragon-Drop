@@ -412,6 +412,7 @@ class ControllablePiece extends TargetablePiece {
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
 		// TODO: Attacking style, or leave that elsewhere?
+		// TODO: Allow run-up?
 	}
 
 	canPass(square) {
@@ -465,18 +466,22 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get aiUnitScore() {
-		if (this.square) return -this._nearestTargetDistance(this.square, target => this.isEnemy(target.piece));
+		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
 		else return 0;
 	}
+
+	// TEMP
 	_aiChooseSkill() {
-		return this.skills.find(skill => skill.canUse()); 		// TEMP
+		return this.skills.find(skill => skill.canUse());
 	}
 
-	// assumes the unit has been selected
+	// assumes the unit has been selected, and move range is visible
 	aiMakePlans() {
 		this.aiSkill = this._aiChooseSkill();
 
-		var bestPlan = this.parent.allSquares.reduce((best, square) => {
+		// TODO: Choose skill as part of the planning, by comparing all valid skills for the position
+
+		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
 			// in range trumps out of range
@@ -512,17 +517,17 @@ class ControllablePiece extends TargetablePiece {
 		}
 	}
 
-	// distance to nearby squares / units of interest
+	// distance to nearby units of interest
 
 	_maxDistance() {
 		var board = this.parent;
 		return board.h + board.w;
 	}
 
-	_nearestTargetDistance(origin, targetFunction) {
-		var nearestDistance = origin.parent.allSquares.reduce((nearest, square) => {
-			if (targetFunction.call(this, square)) {
-				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
+	_nearestPieceDistance(origin, targetFunction) {
+		var nearestDistance = origin.parent.pieces.reduce((nearest, piece) => {
+			if (targetFunction.call(this, piece)) {
+				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
 				return Math.min(nearest, distance);
 			}
 			return nearest;
@@ -530,11 +535,11 @@ class ControllablePiece extends TargetablePiece {
 		return nearestDistance;
 	}
 
-	_averageTargetDistance(origin, targetFunction) {
+	_averagePieceDistance(origin, targetFunction) {
 		var targetCount = 0;
-		var totalDistance = origin.parent.allSquares.reduce((sum, square) => {
-			if (targetFunction.call(this, square)){
-				var distance = Math.abs(square.x - origin.x) + Math.abs(square.y - origin.y);
+		var totalDistance = origin.parent.pieces.reduce((sum, piece) => {
+			if (targetFunction.call(this, piece)){
+				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
 				targetCount += 1;
 				return sum + distance;
 			}
@@ -755,20 +760,28 @@ class SkillPiece extends Piece {
 		return Piece.Skill;
 	}
 
-	aiTargetScore(target) {
+	_aiBaseTargetScore(target) {
+		return 0;
+	}
+	_aiAreaTargetScore(square) {
+		if (this.user.isEnemy(square.piece)) return 1;
+		else if (this.user.isAlly(square.piece)) return -0.9;
+		else if (square.piece) return 0.1;
+		else return 0;
+	}
+
+	_aiTargetScore(target) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
-			if (this.user.isEnemy(square.piece)) return totalScore + 1;
-			else if (this.user.isAlly(square.piece)) return totalScore - 1;
-			else return totalScore;
-		}, 0);
+			return totalScore + this._aiAreaTargetScore(square);
+		}, this._aiBaseTargetScore(target));
 	}
 
 	aiBestTarget(origin) {
-		var best = origin.parent.allSquares.reduce((best, target) => {
+		var best = origin.parent.squares.reduce((best, target) => {
 			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
 
-			var score = this.aiTargetScore(target);
+			var score = this._aiTargetScore(target);
 			if (score >= best.score){
 				 return {
 					target: target,
@@ -782,11 +795,6 @@ class SkillPiece extends Piece {
 			score: 0
 		});
 		return best;
-	}
-
-	aiMoveScore(square) {
-		var bestTargetHere = this.aiBestTarget(square);
-		return bestTargetHere.score;
 	}
 
 	// targeting shapes

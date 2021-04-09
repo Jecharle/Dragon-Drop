@@ -52,14 +52,14 @@ class Position extends SpriteElObj {
 class Board extends Container {
 	constructor(mapData) {
 		super();
-		this.allSquares = [];
+		this.squares = [];
 
 		for (var y = 0; y < this.h; y++) {
 			var row = document.createElement('div');
 			row.classList.add('row');
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
-				this.allSquares[(y * this.w) + x] = square;
+				this.squares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
 			}
 			this.el.appendChild(row);
@@ -110,8 +110,8 @@ class Board extends Container {
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
-		if (!this.allSquares || !this.allSquares[(y * this.w) + x]) return null;
-		return this.allSquares[(y * this.w) + x];
+		if (!this.squares || !this.squares[(y * this.w) + x]) return null;
+		return this.squares[(y * this.w) + x];
 	}
 	getFootprint(origin, size) {
 		size = Math.max(size || 0, 1);
@@ -147,7 +147,7 @@ class Board extends Container {
 		if (this.canFit(piece, centerSquare)) return centerSquare;
 		var minDistance = null;
 		var nearestSquare = null;
-		this.allSquares.forEach(square => {
+		this.squares.forEach(square => {
 			var distance = this.getDistance(centerSquare, square);
 			if (minDistance && distance >= minDistance) return;
 			if (this.canFit(piece, square)) {
@@ -323,7 +323,7 @@ class Board extends Container {
 		var origin = user.square;
 
 		// for a map this small, it's easiest to check every square
-		this.allSquares.forEach(square => {
+		this.squares.forEach(square => {
 			if (skill.inRange(origin, square)) {
 				this._paintSkillRange(square, skill.validTarget(square));
 			}
@@ -343,7 +343,7 @@ class Board extends Container {
 	}
 
 	resetAreas() {
-		this.allSquares.forEach(square => this._clearPaint(square));
+		this.squares.forEach(square => this._clearPaint(square));
 		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
@@ -365,19 +365,19 @@ class Board extends Container {
 		target.path.forEach(square => square.el.classList.add('move-path'));
 	}
 	clearPath() {
-		this.allSquares.forEach(square => square.el.classList.remove('move-path'));
+		this.squares.forEach(square => square.el.classList.remove('move-path'));
 	}
 
 	getAoE(skill, origin) {
 		if (!skill || !origin) return [];
-		return this.allSquares.filter(square => skill.inArea(origin, square));
+		return this.squares.filter(square => skill.inArea(origin, square));
 	}
 	showAoE(skill, origin) {
 		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
 	}
 	clearAoE() {
-		this.allSquares.forEach(square => square.el.classList.remove('skill-aoe'));
+		this.squares.forEach(square => square.el.classList.remove('skill-aoe'));
 	}
 
 	getAdjacent(square) {
@@ -524,7 +524,6 @@ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
-		this._skills = [];
 		this.el.classList.add('skill-list');
 	}
 
@@ -533,28 +532,22 @@ class SkillList extends Container {
 		this._user = user;
 		if (!user) return false;
 
-		/*var userSkills = user.skills;
-		for (var i = 0; i < userSkills.length; i++) {
-			this._addSkill(userSkills[i]);
-		}*/
 		user.skills.forEach(skill => this._addSkill(skill));
 		return true;
 	}
 
 	get skills() {
-		return this._skills;
+		return this.pieces;
 	}
 
 	_addSkill(piece) {
 		if (piece) {
 			piece.setParent(this);
-			this.skills.push(piece);
 			this.el.appendChild(piece.el);
 		}
 	}
 
 	_clearSkills() {
-		this.skills.forEach(skill => this.removePiece(skill));
-		this._skills = [];
+		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
 	}
 }

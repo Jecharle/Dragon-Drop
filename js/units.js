@@ -54,6 +54,7 @@ class TestEnemyUnit extends ControllablePiece {
 
 	_setSkills() {
 		this._skills = [
+			//new TestAreaSkill(this),
 			new TestAttackSkill(this),
 		]
 	}

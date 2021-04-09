@@ -191,4 +191,8 @@ class TestAreaSkill extends SkillPiece {
 		unit.push(target, 1);
 		return 200;
 	}
+
+	_aiBaseTargetScore(target) {
+		return -1; // need to catch at least two targets to be worth using
+	}
 };
