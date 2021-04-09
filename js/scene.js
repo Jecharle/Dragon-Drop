@@ -396,7 +396,7 @@ class BattleScene extends Scene {
 			this._board.setDeployArea();
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
-		} else if (this._unit && this._unit.canMove) {
+		} else if (this._unit) {
 			this._board.setMoveArea(this._unit);
 		}
 	}

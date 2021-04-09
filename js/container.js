@@ -270,7 +270,7 @@ class Board extends Container {
 		this.squaresInRange.push(square);
 	}
 	setMoveArea(unit) {
-		if (!unit || !unit.moveRange) return;
+		if (!unit) return;
 
 		var origin = unit.square;
 		if (!origin || origin.parent != this) return;
@@ -278,6 +278,8 @@ class Board extends Container {
 		this._paintMoveRange(origin, unit.moveRange, [], true);
 		var edges = [origin];
 		
+		if (!unit.canMove || !unit.moveRange) return;
+
 		while (edges.length > 0) {
 			var newEdge = edges.pop();
 			var adjacent = this.getAdjacent(newEdge);
