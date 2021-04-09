@@ -470,49 +470,56 @@ class ControllablePiece extends TargetablePiece {
 		else return 0;
 	}
 
-	// TEMP
-	_aiChooseSkill() {
-		return this.skills.find(skill => skill.canUse());
+	_aiGetBestSkill(square) {
+		return this.skills.reduce((best, skill) => {
+			if (!skill.canUse()) return best;
+
+			var newSkill = skill.aiGetBestTarget(square);
+			newSkill.skill = skill;
+			if (newSkill.target && newSkill.score > best.score) return newSkill;
+			
+			return best;
+		},
+		{
+			skill: null, target: null, score: 0
+		});
 	}
 
 	// assumes the unit has been selected, and move range is visible
-	aiMakePlans() {
-		this.aiSkill = this._aiChooseSkill();
-
-		// TODO: Choose skill as part of the planning, by comparing all valid skills for the position
+	aiCalculate() {
 
 		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
-			// in range trumps out of range
+			// in range trumps out of range (already in-range)
 			if (best.move?.inRange && !square.inRange) return best;
 			
-			var newPlan = this.aiSkill.aiBestTarget(square);
+			var newPlan = this._aiGetBestSkill(square);
 			newPlan.move = square;
-			if (!newPlan.target || newPlan.score < 0) return best;
+			if (!newPlan.target || newPlan.score <= 0) return best;
 
-			// a valid target trumps an invalid one
-			if (!best.move)  return newPlan;
 			// in range trumps out of range
-			if (newPlan.move.inRange && !best.move.inRange) return newPlan;
+			if (newPlan.move.inRange && !best.move?.inRange) return newPlan;
 			// better score wins
 			if (newPlan.score > best.score) return newPlan;
-			// fewer moves wins
+			// equal score, fewer moves wins
 			if (newPlan.score == best.score && newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
 			
 			return best;
 		},
 		{
-			move: null, target: null, score: 0
+			move: null, skill: null, target: null, score: 0
 		});
 
 		this.aiMoveTarget = bestPlan.move;
 
 		if (!this.aiMoveTarget.invalid && this.aiMoveTarget.inRange) {
+			this.aiSkill = bestPlan.skill;
 			this.aiSkillTarget = bestPlan.target;	
 		} else  {
 			// can't reach the target this turn
 			this.aiMoveTarget = this.aiMoveTarget.path.find(square => square.inRange && !square.invalid);
+			this.aiSkill = null;
 			this.aiSkillTarget = null;
 		}
 	}
@@ -769,7 +776,6 @@ class SkillPiece extends Piece {
 		else if (square.piece) return 0.1;
 		else return 0;
 	}
-
 	_aiTargetScore(target) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
@@ -777,7 +783,7 @@ class SkillPiece extends Piece {
 		}, this._aiBaseTargetScore(target));
 	}
 
-	aiBestTarget(origin) {
+	aiGetBestTarget(origin) {
 		var best = origin.parent.squares.reduce((best, target) => {
 			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
 

@@ -436,7 +436,7 @@ class BattleScene extends Scene {
 			this._aiSelectUnit(); // warning: technically recursive
 		}
 		this.refresh();
-		this._unit.aiMakePlans();
+		this._unit.aiCalculate();
 
 		if (!this._unit.canMove) {
 			this._aiSelectSkill();

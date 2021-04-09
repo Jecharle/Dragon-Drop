@@ -8,7 +8,7 @@ class TestMeleeUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 3;
 	}
 
@@ -28,7 +28,7 @@ class TestSupportUnit extends ControllablePiece {
 	}
 
 	_setStats() {
-		this._maxHp = 2;
+		this._maxHp = 4;
 		this._moveRange = 2;
 	}
 
@@ -54,8 +54,8 @@ class TestEnemyUnit extends ControllablePiece {
 
 	_setSkills() {
 		this._skills = [
-			//new TestAreaSkill(this),
 			new TestAttackSkill(this),
+			new TestAreaSkill(this),
 		]
 	}
 };
