@@ -432,17 +432,18 @@ class BattleScene extends Scene {
 		}
 
 		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-	
 		if (!this._selectUnit(this._aiControlUnits.pop())) {
 			this._aiSelectUnit(); // warning: technically recursive
 		}
+		this.refresh();
+		this._unit.aiMakePlans();
+
 		if (!this._unit.canMove) {
 			this._aiSelectSkill();
 			return;
 		}
-		this.refresh();
 
-		this._selectTarget(this._board.aiBestMoveSquare(this._unit));
+		this._selectTarget(this._unit.aiMoveTarget);
 		this._refreshTargetArea();
 		if (this._target && this._target != this._unit.square) {
 			setTimeout(() => this._aiMoveUnit(), 250);
@@ -457,13 +458,13 @@ class BattleScene extends Scene {
 	}
 
 	_aiSelectSkill() {
-		if (!this._selectSkill(this._unit.aiBestSkill)) {
+		if (!this._selectSkill(this._unit.aiSkill)) {
 			this._aiSelectUnit();
 			return;
 		}
 		this.refresh();
 
-		this._selectTarget(this._board.aiBestSkillSquare(this._skill))
+		this._selectTarget(this._unit.aiSkillTarget)
 		this._refreshTargetArea();
 		if (this._target) {
 			setTimeout(() => this._aiUseSkill(), 500);

@@ -463,18 +463,52 @@ class ControllablePiece extends TargetablePiece {
 		return Piece.Unit;
 	}
 
-	aiMoveScore(square) {
-		return square.parent.getAdjacent(square).some(adjacent => this.isEnemy(adjacent.piece)) ? 1 : 0;
-	}
-
 	get aiUnitScore() {
 		if (this.square) return -this._nearestTargetDistance(this.square, target => this.isEnemy(target.piece));
 		else return 0;
 	}
+	_aiChooseSkill() {
+		return this.skills.find(skill => skill.canUse()); 		// TEMP
+	}
 
-	get aiBestSkill() {
-		// TEMP
-		return this.skills.find(skill => skill.canUse());
+	// assumes the unit has been selected
+	aiMakePlans() {
+		this.aiSkill = this._aiChooseSkill();
+
+		var bestPlan = this.parent.allSquares.reduce((best, square) => {
+			// square must be reachable
+			if (square.invalid || !square.path) return best;
+			// in range trumps out of range
+			if (best.move?.inRange && !square.inRange) return best;
+			
+			var newPlan = this.aiSkill.aiBestTarget(square);
+			newPlan.move = square;
+			if (!newPlan.target || newPlan.score < 0) return best;
+
+			// a valid target trumps an invalid one
+			if (!best.move)  return newPlan;
+			// in range trumps out of range
+			if (newPlan.move.inRange && !best.move.inRange) return newPlan;
+			// better score wins
+			if (newPlan.score > best.score) return newPlan;
+			// fewer moves wins
+			if (newPlan.score == best.score && newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
+			
+			return best;
+		},
+		{
+			move: null, target: null, score: 0
+		});
+
+		this.aiMoveTarget = bestPlan.move;
+
+		if (!this.aiMoveTarget.invalid && this.aiMoveTarget.inRange) {
+			this.aiSkillTarget = bestPlan.target;	
+		} else  {
+			// can't reach the target this turn
+			this.aiMoveTarget = this.aiMoveTarget.path.find(square => square.inRange && !square.invalid);
+			this.aiSkillTarget = null;
+		}
 	}
 
 	// distance to nearby squares / units of interest
@@ -727,6 +761,31 @@ class SkillPiece extends Piece {
 			else if (this.user.isAlly(square.piece)) return totalScore - 1;
 			else return totalScore;
 		}, 0);
+	}
+
+	aiBestTarget(origin) {
+		var best = origin.parent.allSquares.reduce((best, target) => {
+			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
+
+			var score = this.aiTargetScore(target);
+			if (score >= best.score){
+				 return {
+					target: target,
+					score: score
+				};
+			}
+			return best;
+		},
+		{
+			target: null,
+			score: 0
+		});
+		return best;
+	}
+
+	aiMoveScore(square) {
+		var bestTargetHere = this.aiBestTarget(square);
+		return bestTargetHere.score;
 	}
 
 	// targeting shapes

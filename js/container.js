@@ -384,41 +384,6 @@ class Board extends Container {
 		return adjacent;
 	}
 
-	aiBestMoveSquare(unit) {
-		var best = this.allSquares.reduce((best, square) => {
-			if (square.invalid || !square.path) return best;
-
-			var score = unit.aiMoveScore(square);
-			if (!best || score > best[1] || (score == best[1] && square.movesLeft > best[0].movesLeft)) {
-				best = [square, score];
-			}
-			return best;
-		}, null);
-	
-		if (!best) return null;
-		var bestSquare = best[0];
-		if (bestSquare.invalid || !bestSquare.inRange) {
-			return bestSquare.path.find(square => square.inRange && !square.invalid);
-		}
-		return bestSquare;
-	}
-
-	aiBestSkillSquare(skill) {
-		var best = this.allSquares.reduce((best, square) => {
-			if (square.invalid || !square.inRange) return best;
-
-			var score = skill.aiTargetScore(square);
-			if (score >= (best ? best[1] : 0)) {
-				best = [square, score];
-			}
-			return best;
-		}, null);
-		
-		if (!best) return null;
-		var bestSquare = best[0];
-		return bestSquare;
-	}
-
 	_allowDrop(ev) {
 		ev.preventDefault();
 	}
