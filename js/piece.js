@@ -30,6 +30,7 @@ class Piece extends SpriteElObj {
 			this.parent.removePiece(this);
 		}
 		this._parent = container;
+		if (container) container.addPiece(this);
 	}
 	get parent() {
 		return this._parent;

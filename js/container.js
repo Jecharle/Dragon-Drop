@@ -6,12 +6,26 @@ that contain pieces and track their positions
 class Container extends ElObj {
 	constructor() {
 		super();
+		this.pieces = [];
 	}
 
+	addPiece(piece) {
+		if (!piece) return false;
+		if (piece.parent && piece.parent != this) return false;
+		
+		if (!this.pieces.includes(piece)) this.pieces.push(piece);
+		
+		return true;
+	}
 	removePiece(piece) {
 		if (!piece || piece.parent != this) return false;
+
 		var parentEl = piece.el.parentElement;
 		if (parentEl) parentEl.removeChild(piece.el);
+
+		var pieceIndex = this.pieces.indexOf(piece);
+		if (pieceIndex >= 0) this.pieces.splice(pieceIndex, 1);
+
 		return true;
 	}
 };
@@ -541,9 +555,6 @@ class SkillList extends Container {
 
 	_clearSkills() {
 		this.skills.forEach(skill => this.removePiece(skill));
-		/*for (var i = 0; i < this.skills.length; i++) {
-			this.removePiece(this.skills[i]);
-		}*/
 		this._skills = [];
 	}
 }
