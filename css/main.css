@@ -86,7 +86,7 @@
 	justify-content: center;
 	position: absolute;
 	z-index: 5;
-	animation: banner-display 800ms ease-out 2 alternate;
+	animation: banner-display 600ms ease-out 2 alternate;
 }
 .battle-end {
 	font-size: 64px;
@@ -486,11 +486,11 @@
 		height: 0px;
 		color: transparent;
 	}
-	40% {
+	50% {
 		height: 48px;
 		color: transparent;
 	}
-	80% {
+	75% {
 		height: 48px;
 		color: black;
 	}
