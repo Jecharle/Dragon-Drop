@@ -654,8 +654,8 @@ class SkillPiece extends Piece {
 	canUse() {
 		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
-	use(target) {
-		if (!this.validTarget(target)) return false;
+	use(target, callback) {
+		if (!this.validTarget(target)) callback(false);
 		this.user.face(target);
 
 		this._target = target;
@@ -663,35 +663,33 @@ class SkillPiece extends Piece {
 		this._units = this._affectedUnits(this._squares);
 		
 		var waitTime = this._startEffects(this._target, this._squares, this._units);
-		setTimeout(() => this._squareEffectIterator(this._squares.values()), waitTime);
-
-		return true;
+		setTimeout(() => this._squareEffectIterator(this._squares.values(), callback), waitTime);
 	}
-	_squareEffectIterator(squareIterator) {
+	_squareEffectIterator(squareIterator, callback) {
 		var next = squareIterator.next();
 		var waitTime = 0;
 		if (next.value) {
 			waitTime = this._squareEffects(next.value, this._target);
 		}
 		if (next.done) {
-			this._unitEffectIterator(this._units.values());
+			this._unitEffectIterator(this._units.values(), callback);
 		} else {
-			setTimeout(() => this._squareEffectIterator(squareIterator), waitTime);
+			setTimeout(() => this._squareEffectIterator(squareIterator, callback), waitTime);
 		}
 	}
-	_unitEffectIterator(unitIterator) {
+	_unitEffectIterator(unitIterator, callback) {
 		var next = unitIterator.next();
 		var waitTime = 0;
 		if (next.value) {
 			waitTime = this._unitEffects(next.value, this._target);
 		}
 		if (next.done) {
-			this._finishUse();
+			this._finishUse(callback);
 		} else {
-			setTimeout(() => this._unitEffectIterator(unitIterator, this._target), waitTime);
+			setTimeout(() => this._unitEffectIterator(unitIterator, callback), waitTime);
 		}
 	}
-	_finishUse() {
+	_finishUse(callback) {
 		this._endEffects(this._target, this._squares, this._units);
 		this._payCost();
 		this._units.forEach(piece => piece.dieIfDead());
@@ -700,6 +698,7 @@ class SkillPiece extends Piece {
 		this._target = null;
 		this._units = null;
 		this._squares = null;
+		if (callback) callback(true);
 	}
 
 	validTarget(target) {

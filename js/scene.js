@@ -369,12 +369,16 @@ class BattleScene extends Scene {
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
-	_useSkill(skill, square) {
-		if (skill.use(square)) {
-			this._deselectSkill();
-			this._clearMoves();
-			this._isBattleOver(); // TEMP?
-		}
+	_useSkill(skill, square, callback) {
+		// TODO: Make this run on promises, not callbacks
+		skill.use(square, success => {
+			if (success) {
+				this._deselectSkill();
+				this._clearMoves();
+				this._isBattleOver();
+			}
+			if (callback) callback();
+		});
 	}
 
 	_selectTarget(square) {
@@ -449,7 +453,7 @@ class BattleScene extends Scene {
 	_aiMoveUnit() {
 		this._moveUnit(this._unit, this._target);
 		this.refresh();
-		setTimeout(() => this._aiSelectSkill(), 350);
+		this._aiSelectSkill();
 	}
 
 	_aiSelectSkill() {
@@ -470,11 +474,12 @@ class BattleScene extends Scene {
 		}
 	}
 	_aiUseSkill() {
-		this._useSkill(this._skill, this._target);
-		this._deselectUnit();
-		this.refresh();
+		this._useSkill(this._skill, this._target, () => {
+			this._deselectUnit();
+			this.refresh();
 
-		setTimeout(() => this._aiSelectUnit(), 250);
+			this._aiSelectUnit();
+		});
 	}
 	
 	_aiTurnEnd() {
@@ -535,7 +540,7 @@ class BattleScene extends Scene {
 				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
 				if (square == this._target) {
-					this._useSkill(this._skill, square);
+					this._useSkill(this._skill, square, () => this.refresh());
 				} else if (!square.invalid) {
 					this._selectTarget(square);
 					this._refreshTargetArea();
