@@ -260,14 +260,19 @@ class Board extends Container {
 		}
 	}
 
-	setDeployArea() {
-		this.deployArea.forEach(square => this._paintDeployRange(square));
+	setDeployArea(hasUnit) {
+		this.deployArea.forEach(square => this._paintDeployRange(square, hasUnit));
 	}
-	_paintDeployRange(square) {
-		square.el.classList.add('deploy-range');
-		square.el.ondragover = this._allowDrop;
+	_paintDeployRange(square, valid) {
 		square.inRange = true;
-		this.squaresInRange.push(square);
+		square.el.classList.add('deploy-range');
+		if (valid) {
+			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
+		} else {
+			square.invalid = true;
+			square.el.classList.add('invalid');
+		}
 	}
 	setMoveArea(unit) {
 		if (!unit) return;
@@ -349,11 +354,7 @@ class Board extends Container {
 		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
-		square.el.classList.remove('deploy-range');
-		square.el.classList.remove('move-range');
-		square.el.classList.remove('move-start');
-		square.el.classList.remove('skill-range');
-		square.el.classList.remove('invalid');
+		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'invalid');
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.invalid = false;
@@ -402,6 +403,16 @@ class Board extends Container {
 	}
 	clearAoE() {
 		this.squares.forEach(square => square.el.classList.remove('skill-aoe'));
+	}
+
+	showDeploySwap(unit, target) {
+		if (!unit || !unit.square) return;
+		unit.square.el.classList.add('deploy-swap');
+		if (!target) return;
+		target.el.classList.add('deploy-swap');
+	}
+	clearDeploySwap() {
+		this.squares.forEach(square => square.el.classList.remove('deploy-swap'));
 	}
 
 	getAdjacent(square) {

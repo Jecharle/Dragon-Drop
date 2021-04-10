@@ -312,6 +312,8 @@ class BattleScene extends Scene {
 	_selectDeployUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._unit != unit) this._deselectUnit();
+		
+		if (unit) this._selectTarget(unit.square);
 
 		this._unit = unit;
 		return true;
@@ -400,7 +402,7 @@ class BattleScene extends Scene {
 	_refreshArea() {
 		this._board.resetAreas();
 		if (this._phase == BattleScene.DeployPhase) {
-			this._board.setDeployArea();
+			this._board.setDeployArea(this._unit != null);
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
@@ -410,9 +412,12 @@ class BattleScene extends Scene {
 	_refreshTargetArea() {
 		this._board.clearAoE();
 		this._board.clearPath();
+		this._board.clearDeploySwap();
 		if (this._target && this._phase != BattleScene.DeployPhase) {
 			if (this._skill) this._board.showAoE(this._skill, this._target);
 			else if (this._unit) this._board.showPath(this._target);
+		} else if (this._phase == BattleScene.DeployPhase) {
+			this._board.showDeploySwap(this._unit, this._target);
 		}
 	}
 
@@ -535,7 +540,12 @@ class BattleScene extends Scene {
 			if (!square.inRange) {
 				this._deselectUnit();
 			} else if (this._unit) {
-				this._swapDeploySquares(this._unit, square);
+				if (square == this._target) {
+					this._swapDeploySquares(this._unit, square);
+				} else {
+					this._selectTarget(square);
+					this._refreshTargetArea();
+				}
 			}
 		} else {
 			if (!square.inRange) {
