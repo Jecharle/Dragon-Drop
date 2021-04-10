@@ -8,6 +8,7 @@ class Scene extends ElObj {
 		super();
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
+		this.busy = false;
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -371,12 +372,14 @@ class BattleScene extends Scene {
 	}
 	_useSkill(skill, square, callback) {
 		// TODO: Make this run on promises, not callbacks
+		this.busy = true;
 		skill.use(square, success => {
 			if (success) {
 				this._deselectSkill();
 				this._clearMoves();
 				this._isBattleOver();
 			}
+			this.busy = false;
 			if (callback) callback();
 		});
 	}
@@ -489,7 +492,7 @@ class BattleScene extends Scene {
 
 
 	selectPiece(piece, dragging) {
-		if (!piece || this._autoPhase) return;
+		if (!piece || this._autoPhase || this.busy) return;
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
@@ -526,7 +529,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	selectPosition(square, dragId) {
-		if (!square || this._autoPhase) return;
+		if (!square || this._autoPhase || this.busy) return;
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
@@ -558,7 +561,7 @@ class BattleScene extends Scene {
 	}
 
 	mouseOver(square, dragId) {
-		if (this._autoPhase) return; // TEMP?
+		if (this._autoPhase || this.busy) return; // TEMP?
 
 		if ((this._skill && this._skill.idMatch(dragId))
 		|| (this._unit && this._unit.idMatch(dragId))) {
@@ -572,14 +575,14 @@ class BattleScene extends Scene {
 	}
 
 	rightClick() {
-		if (this._autoPhase) return; // TEMP?
+		if (this._autoPhase || this.busy) return; // TEMP?
 
 		this._goBack();
 		this.refresh();
 	}
 
 	keydown(key) {
-		if (this._autoPhase) return; // TEMP?
+		if (this._autoPhase || this.busy) return; // TEMP?
 
 		if (key == "Escape" || key == "Delete" || key == "Backspace") {
 			this._goBack();
