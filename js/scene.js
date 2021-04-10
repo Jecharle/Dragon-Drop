@@ -438,11 +438,6 @@ class BattleScene extends Scene {
 		this.refresh();
 		this._unit.aiCalculate();
 
-		if (!this._unit.canMove) {
-			this._aiSelectSkill();
-			return;
-		}
-
 		this._selectTarget(this._unit.aiMoveTarget);
 		this._refreshTargetArea();
 		if (this._target && this._target != this._unit.square) {
