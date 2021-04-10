@@ -371,7 +371,7 @@ class BattleScene extends Scene {
 		this._skill = null;
 	}
 	_useSkill(skill, square, callback) {
-		// TODO: Make this run on promises, not callbacks
+		// TODO: Make this run on promises, not callbacks?
 		this.busy = true;
 		skill.use(square, success => {
 			if (success) {

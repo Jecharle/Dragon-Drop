@@ -308,7 +308,7 @@ class Board extends Container {
 
 		square.inRange = true;
 		square.el.classList.add('move-range');
-		if (path.length == 0) square.el.classList.add('move-origin');
+		if (path.length == 0) square.el.classList.add('move-start');
 
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
@@ -351,7 +351,7 @@ class Board extends Container {
 	_clearPaint(square) {
 		square.el.classList.remove('deploy-range');
 		square.el.classList.remove('move-range');
-		square.el.classList.remove('move-origin');
+		square.el.classList.remove('move-start');
 		square.el.classList.remove('skill-range');
 		square.el.classList.remove('invalid');
 		square.el.ondragover = null;
@@ -362,12 +362,34 @@ class Board extends Container {
 	}
 
 	showPath(target) {
-		if (!target) return;
-		target.el.classList.add('move-path');
-		target.path.forEach(square => square.el.classList.add('move-path'));
+		if (!target?.path?.length) return;
+
+		target.el.classList.add('move-path', 'move-end');
+
+		var previous = target;
+		target.path.forEach(square => {
+			square.el.classList.add('move-path');
+			if (previous.x < square.x) {
+				square.el.classList.add('left');
+				previous.el.classList.add('right');
+			}
+			if (previous.y < square.y) {
+				square.el.classList.add('up');
+				previous.el.classList.add('down');
+			}
+			if (previous.x > square.x) {
+				square.el.classList.add('right');
+				previous.el.classList.add('left');
+			}
+			if (previous.y > square.y) {
+				square.el.classList.add('down');
+				previous.el.classList.add('up');
+			}
+			previous = square;
+		});
 	}
 	clearPath() {
-		this.squares.forEach(square => square.el.classList.remove('move-path'));
+		this.squares.forEach(square => square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down'));
 	}
 
 	getAoE(skill, origin) {
