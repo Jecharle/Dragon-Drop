@@ -81,13 +81,13 @@ class Lifebar extends Detail {
 		if (value >= 0 && this.maxValue > 0 && this._subEl) {
 			var delta = this._value - value;
 			this._value = value;
-			this._subEl.style.width = String(value*6+2)+"px";
+			this._subEl.style.width = Lifebar.width(value);
 			
 			if (delta) {
-				var leftEdge = Math.min(value, value+delta);
-				this._deltaEl.style.width = String(Math.abs(delta)*6+2)+"px";
-				this._deltaEl.style.backgroundPositionX = String(-leftEdge*6)+"px";
-				this._deltaEl.style.left = String(leftEdge*6)+"px";
+				var leftEdge = Lifebar.width(Math.min(value, value+delta));
+				this._deltaEl.style.width = Lifebar.width(Math.abs(delta), true);
+				this._deltaEl.style.backgroundPositionX = "-"+leftEdge;
+				this._deltaEl.style.left = leftEdge;
 			}
 		}
 	}
@@ -98,8 +98,14 @@ class Lifebar extends Detail {
 	set maxValue(value) {
 		if (value > 0) {
 			this._maxValue = value;
-			this.el.style.width = String(value*6+2)+"px";
+			this.el.style.width = Lifebar.width(value);
 		}
+	}
+
+	static width(value, noPadding) {
+		var width = value*6;
+		if (width > 0 && !noPadding) width += 2;
+		return width+"px";
 	}
 }
 
