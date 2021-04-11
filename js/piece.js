@@ -274,6 +274,13 @@ class ControllablePiece extends TargetablePiece {
 		this._skills = [];
 	}
 
+	get _name() {
+		return "[Unit name]";
+	}
+	get _description() {
+		return "[Unit description]";
+	}
+
 	get moveRange() {
 		return this._moveRange;
 	}

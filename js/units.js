@@ -7,6 +7,13 @@ class TestMeleeUnit extends ControllablePiece {
 		this.style = 'melee-unit';
 	}
 
+	get _name() {
+		return "Melee Fighter";
+	}
+	get _description() {
+		return "Specialize in close-range combat";
+	}
+
 	_setStats() {
 		this._maxHp = 6;
 		this._moveRange = 3;
@@ -25,6 +32,13 @@ class TestSupportUnit extends ControllablePiece {
 		super(partyMember);
 		this.style = 'support-unit';
 		this._moveStyle = 'teleport';
+	}
+
+	get _name() {
+		return "Support Unit";
+	}
+	get _description() {
+		return "Low health, but a variety of long-range abilities";
 	}
 
 	_setStats() {
@@ -47,6 +61,13 @@ class TestEnemyUnit extends ControllablePiece {
 		this.style = 'enemy-unit';
 	}
 
+	get _name() {
+		return "Monster";
+	}
+	get _description() {
+		return "Specialize in close-range combat";
+	}
+
 	_setStats() {
 		this._maxHp = 2;
 		this._moveRange = 2;
@@ -63,13 +84,21 @@ class TestEnemyUnit extends ControllablePiece {
 /***************************************************
  Subtypes of TargetablePiece
 ***************************************************/
-class TestRockObject extends TargetablePiece {
+class TestRockObject extends ControllablePiece {
 	constructor() {
 		super();
 		this.style = 'rock';
 	}
 
+	get _name() {
+		return "Barrier";
+	}
+	get _description() {
+		return "An obstacle used to control the terrain";
+	}
+
 	_setStats() {
 		this._maxHp = 2;
+		this._moveRange = 0;
 	}
 }
