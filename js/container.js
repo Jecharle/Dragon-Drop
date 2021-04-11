@@ -269,6 +269,7 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
+			square.el.classList.add('selectable');
 		} else {
 			square.invalid = true;
 			square.el.classList.add('invalid');
@@ -318,6 +319,7 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
+			square.el.classList.add('selectable');
 		} else {
 			square.invalid = true;
 			square.el.classList.add('invalid');
@@ -343,6 +345,7 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
+			square.el.classList.add('selectable');
 		} else {
 			square.invalid = true;
 			square.el.classList.add('invalid');
@@ -354,7 +357,7 @@ class Board extends Container {
 		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
-		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'invalid');
+		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'invalid', 'selectable');
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.invalid = false;
