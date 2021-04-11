@@ -6,12 +6,26 @@ that contain pieces and track their positions
 class Container extends ElObj {
 	constructor() {
 		super();
+		this.pieces = [];
 	}
 
+	addPiece(piece) {
+		if (!piece) return false;
+		if (piece.parent && piece.parent != this) return false;
+		
+		if (!this.pieces.includes(piece)) this.pieces.push(piece);
+		
+		return true;
+	}
 	removePiece(piece) {
 		if (!piece || piece.parent != this) return false;
+
 		var parentEl = piece.el.parentElement;
 		if (parentEl) parentEl.removeChild(piece.el);
+
+		var pieceIndex = this.pieces.indexOf(piece);
+		if (pieceIndex >= 0) this.pieces.splice(pieceIndex, 1);
+
 		return true;
 	}
 };
@@ -21,7 +35,7 @@ class Container extends ElObj {
 The root class for squares, cells, and nodes other
 subdivisions or positions within a container
 ***************************************************/
-class Position extends ElObj {
+class Position extends SpriteElObj {
 	constructor(parent) {
 		super();
 		this._parent = parent;
@@ -38,14 +52,14 @@ class Position extends ElObj {
 class Board extends Container {
 	constructor(mapData) {
 		super();
-		this._squares = [];
+		this.squares = [];
 
 		for (var y = 0; y < this.h; y++) {
 			var row = document.createElement('div');
 			row.classList.add('row');
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
-				this._squares[(y * this.w) + x] = square;
+				this.squares[(y * this.w) + x] = square;
 				row.appendChild(square.el);
 			}
 			this.el.appendChild(row);
@@ -54,6 +68,8 @@ class Board extends Container {
 
 		this.deployArea = [];
 		if (mapData) this._loadDeployArea(mapData.deployment);
+
+		this.squaresInRange = [];
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -94,8 +110,8 @@ class Board extends Container {
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
-		if (!this._squares || !this._squares[(y * this.w) + x]) return null;
-		return this._squares[(y * this.w) + x];
+		if (!this.squares || !this.squares[(y * this.w) + x]) return null;
+		return this.squares[(y * this.w) + x];
 	}
 	getFootprint(origin, size) {
 		size = Math.max(size || 0, 1);
@@ -114,37 +130,16 @@ class Board extends Container {
 		return area;
 	}
 
-	canFit(piece, centerSquare, size) {
-		size = size || piece.size || 1;
-		var area = this.getFootprint(centerSquare, size);
+	canFit(unit, centerSquare) {
+		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) {
-				return false;
-			}
-			if (square.blocksMove) {
-				return false;
-			}
-			if (square.piece != null && square.piece != piece) {
-				return false;
-			}
-			return true;
+			return square && unit.canStand(square);
 		});
 	}
-	// TODO: Too much repeated code- recombine with canFit into one method with variable settings?
-	canPass(piece, centerSquare, size, props) {
-		size = size || piece.size || 1;
-		var area = this.getFootprint(centerSquare, size);
+	canFitThrough(unit, centerSquare) {
+		var area = this.getFootprint(centerSquare, unit.size);
 		return area.every(function(square) {
-			if (!square) {
-				return false;
-			}
-			if (square.blocksMove) { // TODO: Depends on movement settings?
-				return false;
-			}
-			if (square.piece != null && !square.piece.isAlly(piece)) { // TODO: Depends on movement settings?
-				return false;
-			}
-			return true;
+			return square && unit.canPass(square);
 		});
 	}
 
@@ -152,7 +147,7 @@ class Board extends Container {
 		if (this.canFit(piece, centerSquare)) return centerSquare;
 		var minDistance = null;
 		var nearestSquare = null;
-		this._squares.forEach(square => {
+		this.squares.forEach(square => {
 			var distance = this.getDistance(centerSquare, square);
 			if (minDistance && distance >= minDistance) return;
 			if (this.canFit(piece, square)) {
@@ -265,54 +260,67 @@ class Board extends Container {
 		}
 	}
 
-	setDeployArea() {
-		this.deployArea.forEach(square => this._paintDeployRange(square));
+	setDeployArea(hasUnit) {
+		this.deployArea.forEach(square => this._paintDeployRange(square, hasUnit));
 	}
-	_paintDeployRange(square) {
+	_paintDeployRange(square, valid) {
+		square.inRange = true;
 		square.el.classList.add('deploy-range');
-		square.el.ondragover = this._allowDrop;
-		square.inRange = true;
-	}
-	setMoveArea(unit) {
-		if (!unit || !unit.moveRange) return;
-
-		var origin = unit.homeSquare ? unit.homeSquare : unit.square;
-		if (!origin || origin.parent != this) return;
-
-		this._paintMoveRange(origin, unit.moveRange, true, true);
-		var edges = [origin];
-		
-		for (var i = 0; i < edges.length; i++) {
-			var adjacent = this.getAdjacent(edges[i]);
-			
-			for (var n = 0; n < adjacent.length; n++) {
-				var movesLeft = edges[i].movesLeft - (adjacent[n].slowsMove ? 2 : 1);
-				if (movesLeft < 0) {
-					continue;
-				}
-				if (adjacent[n].inRange && adjacent[n].movesLeft > movesLeft) {
-					continue;
-				}
-				if (!this.canPass(unit, adjacent[n])) {
-					continue;
-				}
-				this._paintMoveRange(adjacent[n], movesLeft, false, this.canFit(unit, adjacent[n]));
-				if (movesLeft > 0) {
-					edges.push(adjacent[n]);
-				}
-			}
-		}
-	}
-	_paintMoveRange(square, movesLeft, isOrigin, valid) {
-		square.el.classList.add('move-range');
-		if (isOrigin) square.el.classList.add('move-origin');
-		square.inRange = true;
-		square.movesLeft = movesLeft;
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
 		} else {
-			square.el.classList.add('invalid');
 			square.invalid = true;
+			square.el.classList.add('invalid');
+		}
+	}
+	setMoveArea(unit) {
+		if (!unit) return;
+
+		var origin = unit.square;
+		if (!origin || origin.parent != this) return;
+
+		this._paintMoveRange(origin, unit.moveRange, [], true);
+		var edges = [origin];
+		
+		if (!unit.canMove || !unit.moveRange) return;
+
+		while (edges.length > 0) {
+			var newEdge = edges.pop();
+			var adjacent = this.getAdjacent(newEdge);
+			var path = [newEdge].concat(newEdge.path);
+			
+			for (var n = 0; n < adjacent.length; n++) {
+				var square = adjacent[n];
+				var movesLeft = newEdge.movesLeft - (square.slowsMove ? 2 : 1);
+				if (square.movesLeft != null) {
+					continue;
+				}
+				if (!this.canFitThrough(unit, square)) {
+					continue;
+				}
+				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square));
+				edges.push(square);
+			}
+			edges.sort((a, b) => a.movesLeft - b.movesLeft);
+		}
+	}
+	_paintMoveRange(square, movesLeft, path, valid) {
+		square.movesLeft = movesLeft;
+		square.path = path;
+
+		if (movesLeft < 0) return;
+
+		square.inRange = true;
+		square.el.classList.add('move-range');
+		if (path.length == 0) square.el.classList.add('move-start');
+
+		if (valid) {
+			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
+		} else {
+			square.invalid = true;
+			square.el.classList.add('invalid');
 		}
 	}
 	setSkillArea(skill) {
@@ -322,46 +330,84 @@ class Board extends Container {
 		var origin = user.square;
 
 		// for a map this small, it's easiest to check every square
-		this._squares.forEach(square => {
-			if (skill.inRange(origin, square)) this._paintSkillRange(square, skill.validTarget(square));
+		this.squares.forEach(square => {
+			if (skill.inRange(origin, square)) {
+				this._paintSkillRange(square, skill.validTarget(square));
+			}
 		});
-		// TODO: More possible origins for larger units?
+		// TODO: Use every square in the footprint as an origin
 	}
 	_paintSkillRange(square, valid) {
-		square.el.classList.add('skill-range');
 		square.inRange = true;
+		square.el.classList.add('skill-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			this.squaresInRange.push(square);
 		} else {
-			square.el.classList.add('invalid');
 			square.invalid = true;
+			square.el.classList.add('invalid');
 		}
 	}
 
 	resetAreas() {
-		this._squares.forEach(square => this._clearPaint(square));
+		this.squares.forEach(square => this._clearPaint(square));
+		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
-		square.el.classList.remove('deploy-range');
-		square.el.classList.remove('move-range');
-		square.el.classList.remove('move-origin');
-		square.el.classList.remove('skill-range');
-		square.el.classList.remove('invalid');
+		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'invalid');
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.invalid = false;
 		square.movesLeft = null;
+		square.path = null;
+	}
+
+	showPath(target) {
+		if (!target?.path?.length) return;
+
+		target.el.classList.add('move-path', 'move-end');
+
+		var previous = target;
+		target.path.forEach(square => {
+			square.el.classList.add('move-path');
+			if (previous.x < square.x) {
+				square.el.classList.add('left');
+				previous.el.classList.add('right');
+			}
+			if (previous.y < square.y) {
+				square.el.classList.add('up');
+				previous.el.classList.add('down');
+			}
+			if (previous.x > square.x) {
+				square.el.classList.add('right');
+				previous.el.classList.add('left');
+			}
+			if (previous.y > square.y) {
+				square.el.classList.add('down');
+				previous.el.classList.add('up');
+			}
+			previous = square;
+		});
 	}
 
 	getAoE(skill, origin) {
 		if (!skill || !origin) return [];
-		return this._squares.filter(square => skill.inArea(origin, square));
+		return this.squares.filter(square => skill.inArea(origin, square));
 	}
 	showAoE(skill, origin) {
+		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
 	}
-	clearAoE() {
-		this._squares.forEach(square => square.el.classList.remove('skill-aoe'));
+
+	showDeploySwap(unit, target) {
+		if (!unit || !unit.square) return;
+		unit.square.el.classList.add('deploy-swap');
+		if (target) target.el.classList.add('deploy-swap');
+	}
+
+	clearTargeting() {
+		this.squares.forEach(square =>
+			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'skill-aoe', 'deploy-swap'));
 	}
 
 	getAdjacent(square) {
@@ -388,7 +434,7 @@ class Board extends Container {
 	_drop(ev) {
 		ev.preventDefault();
 		var elId = ev.dataTransfer.getData("piece");
-		if (elId && ev.target) {
+		if (elId && ev.target && ev.target.obj) {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
@@ -418,7 +464,7 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this.el.onmouseenter = this._mouseOver;
+		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
 	}
 
@@ -444,11 +490,11 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.remove('pit');
 				break;
-			case Square.Grass:
-				this.el.classList.remove('grass');
+			case Square.Cover:
+				this.el.classList.remove('cover');
 				break;
-			case Square.Mud:
-				this.el.classList.remove('mud');
+			case Square.Rough:
+				this.el.classList.remove('rough');
 				break;
 		}
 
@@ -461,11 +507,11 @@ class Square extends Position {
 			case Square.Pit:
 				this.el.classList.add('pit');
 				break;
-			case Square.Grass:
-				this.el.classList.add('grass');
+			case Square.Cover:
+				this.el.classList.add('cover');
 				break;
-			case Square.Mud:
-				this.el.classList.add('mud');
+			case Square.Rough:
+				this.el.classList.add('rough');
 				break;
 		}
 	}
@@ -497,9 +543,9 @@ Square._SlowMove = 4;
 
 Square.Flat = 0;
 Square.Pit = Square._BlockMove;
-Square.Grass = Square._BlockSight;
+Square.Cover = Square._BlockSight;
 Square.Wall = Square._BlockMove | Square._BlockSight;
-Square.Mud = Square._SlowMove;
+Square.Rough = Square._SlowMove;
 
 /***************************************************
  Skill list
@@ -508,7 +554,6 @@ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
-		this._skills = [];
 		this.el.classList.add('skill-list');
 	}
 
@@ -517,31 +562,22 @@ class SkillList extends Container {
 		this._user = user;
 		if (!user) return false;
 
-		/*var userSkills = user.skills;
-		for (var i = 0; i < userSkills.length; i++) {
-			this._addSkill(userSkills[i]);
-		}*/
 		user.skills.forEach(skill => this._addSkill(skill));
 		return true;
 	}
 
 	get skills() {
-		return this._skills;
+		return this.pieces;
 	}
 
 	_addSkill(piece) {
 		if (piece) {
 			piece.setParent(this);
-			this.skills.push(piece);
 			this.el.appendChild(piece.el);
 		}
 	}
 
 	_clearSkills() {
-		this.skills.forEach(skill => this.removePiece(skill));
-		/*for (var i = 0; i < this.skills.length; i++) {
-			this.removePiece(this.skills[i]);
-		}*/
-		this._skills = [];
+		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
 	}
 }

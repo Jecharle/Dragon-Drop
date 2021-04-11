@@ -3,7 +3,7 @@
 The root class for objects you can select, click,
 and drag around between containers
 ***************************************************/
-class Piece extends ElObj {
+class Piece extends SpriteElObj {
 	constructor() {
 		super();
 		this._parent = null;
@@ -30,6 +30,7 @@ class Piece extends ElObj {
 			this.parent.removePiece(this);
 		}
 		this._parent = container;
+		if (container) container.addPiece(this);
 	}
 	get parent() {
 		return this._parent;
@@ -66,6 +67,7 @@ class Piece extends ElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP coordinates
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
@@ -130,12 +132,17 @@ class TargetablePiece extends Piece {
 		}
 	}
 	isAlly(piece) {
-		if (!this.team) return false;
+		if (!this.team || !piece) return false;
 		return this.team.isAlly(piece.team);
 	}
 	isEnemy(piece) {
-		if (!this.team) return false;
+		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
+	}
+
+	canStand(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || square.piece == this);
 	}
 
 	get hp() {
@@ -173,21 +180,24 @@ class TargetablePiece extends Piece {
 		this._lifebar.value = this.hp;
 	}
 
-	takeDamage(power, props) {
+	takeDamage(power, _props) {
 		this.hp -= power;
 
-		if (!props || !props.noAnimation) {
-			this.el.classList.add('damaged');
-			setTimeout(() => this.el.classList.remove('damaged'), 1200);
+		if (power > 0) {
+			this._addTimedClass('damaged', 1200);
+			this._addTimedClass('hp-change', 1200);
 		}
 
-		this._showPopup(power);
 		this.refresh();
 		return power;
 	}
-	heal(power, props) {
+	heal(power, _props) {
 		this.hp += power;
-		this._showPopup("+"+power);
+
+		if (power > 0) {
+			this._addTimedClass('hp-change', 1200);
+		}
+
 		this.refresh();
 		return power;
 	}
@@ -195,17 +205,36 @@ class TargetablePiece extends Piece {
 		var popup = new PopupText(value);
 		this.el.appendChild(popup.el);
 	}
+	_addTimedClass(className, duration) {
+		this.el.classList.add(className);
+		setTimeout(() => this.el.classList.remove(className), duration);
+	}
 
-	push(origin, dist, props) {
+
+	push(origin, distance, props) {
 		if (!this.parent) return 0;
-		return this.parent.shiftPiece(this, origin, dist);
+		var previousSquare = this.square;
+		var distanceMoved = this.parent.shiftPiece(this, origin, distance);
+		if (props?.animation) {
+			this.animateMove([previousSquare], props.animation);
+		}
+		return distanceMoved;
 	}
-	pull(origin, dist, props) {
-		return this.push(origin, -dist, props);
+	pull(origin, distance, props) {
+		return this.push(origin, -distance, props);
 	}
-	swap(piece) {
+	swap(piece, props) {
 		if (!this.parent) return false;
-		return this.parent.swapPieces(this, piece);
+		if (this.parent.swapPieces(this, piece)) {
+			if (props?.animation) {
+				this.animateMove([piece.square], props.animation);
+			}
+			if (props?.animation2) {
+				piece.animateMove([this.square], props.animation2);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	// status effects
@@ -233,6 +262,7 @@ class ControllablePiece extends TargetablePiece {
 		this._setSkills();
 
 		this.initialize();
+		this._moveStyle = "path";
 	}
 
 	_setStats() {
@@ -253,16 +283,17 @@ class ControllablePiece extends TargetablePiece {
 	}
 
 	get canMove() {
-		return !this.homeSquare && !this.actionUsed;
+		return this.alive && !this.homeSquare && !this.actionUsed && (this.moveRange > 0);
 	}
 	get canAct() {
-		return !this.actionUsed;
+		return this.alive && !this.actionUsed;
 	}
 
 	initialize() {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this._facing = 0;
 		this.refresh();
 	}
 	startTurn() {
@@ -284,21 +315,123 @@ class ControllablePiece extends TargetablePiece {
 		var facing = (target.x - target.y) - (from.x - from.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
+			this._facing = 180;
 		} else if (facing > 0) {
 			this.el.classList.remove('left');
+			this._facing = 0;
 		}
 	}
+	animateMove(path, type) {
+		var moveTime = 0;
+		switch (type) {
+			case "jump":
+				moveTime = this._animateJump(path)
+				break;
+
+			case "teleport":
+				moveTime = this._animateTeleport(path);
+				break;
+
+			default:
+			case "path":
+				moveTime = this._animatePath(path);
+				break;
+		}
+		this._addTimedClass('moving', moveTime);
+	}
+	_animatePath(path) {
+		var target = this.square;
+
+		var keyframes = [{}];
+		path.forEach(square => {
+			var dx = 64*(square.x - target.x - square.y + target.y);
+			var dy = 32*(square.x - target.x + square.y - target.y);
+			var dz = dy;
+
+			keyframes.push({
+				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)`
+			});
+		});
+		keyframes.reverse();
+		var time = 100*keyframes.length
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});		
+		return time;
+	}
+	_animateJump(path) {
+		var target = this.square;
+		var origin = path[path.length-1];
+
+		var dx = 64*(origin.x - target.x - origin.y + target.y);
+		var dy = 32*(origin.x - target.x + origin.y - target.y);
+		var dz = dy;
+		var time = 400;
+
+		var keyframes = [
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ }
+		];
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
+
+		var jumpframes = [
+			{ },
+			{ bottom: "128px" }
+		];
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		return time;
+	}
+	_animateTeleport(path) {
+		var target = this.square;
+		var origin = path[path.length-1];
+
+		var dx = 64*(origin.x - target.x - origin.y + target.y);
+		var dy = 32*(origin.x - target.x + origin.y - target.y);
+		var dz = dy;
+		var time = 400;
+
+		var keyframes = [
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(90deg) scaleY(1.5)` },
+			{ transform: `translate3d(0, 0, 0) rotateY(90deg) scaleY(1.5)` },
+			{ }
+		];
+		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
+		return time;
+	}
+
+	animateBump(target, origin) {
+		var dx = 32*(target.x - this.square.x - target.y + this.square.y);
+		var dy = 16*(target.x - this.square.x + target.y - this.square.y);
+		var dz = dy;
+		var time = 200;
+
+		var keyframes = [
+			{ },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ }
+		];
+		if (origin) {
+			dx = 32*(origin.x - this.square.x - origin.y + this.square.y);
+			dy = 16*(origin.x - this.square.x + origin.y - this.square.y);
+			dz = dy;
+			keyframes[0] = { transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` };
+		}
+		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
+		// TODO: Add attacking style, or leave that elsewhere?
+	}
+
+	canPass(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || this.isAlly(square.piece));
+	}
+
 	move(target) {
 		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			if (this.homeSquare == null) {
-				this.homeSquare = oldSquare;
-			} else if (target == this.homeSquare) {
-				this.homeSquare = null;
-			}
-			this.face(target, this.homeSquare);
+			this.homeSquare = oldSquare;
+			this.animateMove(target.path, this._moveStyle);
+			this.face(target, target.path[0]);
 			this.refresh();
 			return true;
 		}
@@ -335,6 +468,96 @@ class ControllablePiece extends TargetablePiece {
 	get type() {
 		return Piece.Unit;
 	}
+
+	get aiUnitScore() {
+		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
+		else return 0;
+	}
+
+	_aiGetBestSkill(square) {
+		return this.skills.reduce((best, skill) => {
+			if (!skill.canUse()) return best;
+
+			var newSkill = skill.aiGetBestTarget(square);
+			newSkill.skill = skill;
+			if (newSkill.target && newSkill.score > best.score) return newSkill;
+			
+			return best;
+		},
+		{
+			skill: null, target: null, score: 0
+		});
+	}
+
+	// assumes the unit has been selected, and move range is visible
+	aiCalculate() {
+
+		var bestPlan = this.parent.squares.reduce((best, square) => {
+			// square must be reachable
+			if (square.invalid || !square.path) return best;
+			// in range trumps out of range (already in-range)
+			if (best.move?.inRange && !square.inRange) return best;
+			
+			var newPlan = this._aiGetBestSkill(square);
+			newPlan.move = square;
+			if (!newPlan.target || newPlan.score <= 0) return best;
+
+			// in range trumps out of range
+			if (newPlan.move.inRange && !best.move?.inRange) return newPlan;
+			// better score wins
+			if (newPlan.score > best.score) return newPlan;
+			// equal score, fewer moves wins
+			if (newPlan.score == best.score && newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
+			
+			return best;
+		},
+		{
+			move: null, skill: null, target: null, score: 0
+		});
+
+		this.aiMoveTarget = bestPlan.move;
+
+		if (!this.aiMoveTarget.invalid && this.aiMoveTarget.inRange) {
+			this.aiSkill = bestPlan.skill;
+			this.aiSkillTarget = bestPlan.target;	
+		} else  {
+			// can't reach the target this turn
+			this.aiMoveTarget = this.aiMoveTarget.path.find(square => square.inRange && !square.invalid);
+			this.aiSkill = null;
+			this.aiSkillTarget = null;
+		}
+	}
+
+	// distance to nearby units of interest
+
+	_maxDistance() {
+		var board = this.parent;
+		return board.h + board.w;
+	}
+
+	_nearestPieceDistance(origin, targetFunction) {
+		var nearestDistance = origin.parent.pieces.reduce((nearest, piece) => {
+			if (targetFunction.call(this, piece)) {
+				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				return Math.min(nearest, distance);
+			}
+			return nearest;
+		}, this._maxDistance());
+		return nearestDistance;
+	}
+
+	_averagePieceDistance(origin, targetFunction) {
+		var targetCount = 0;
+		var totalDistance = origin.parent.pieces.reduce((sum, piece) => {
+			if (targetFunction.call(this, piece)){
+				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				targetCount += 1;
+				return sum + distance;
+			}
+			return sum;
+		}, 0);
+		return targetCount > 0 ? (totalDistance / targetCount) : 0;
+	}
 };
 
 /***************************************************
@@ -345,7 +568,7 @@ class SkillPiece extends Piece {
 		super();
 		this.user = user;
 		this._setStats();
-		this.cooldown = this.cooldownCost-1;
+		this.cooldown = 0;
 		this.usesLeft = this.maxUses;
 
 		this._cooldownLabel = new CooldownLabel("");
@@ -431,22 +654,51 @@ class SkillPiece extends Piece {
 	canUse() {
 		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
-	use(target) {
-		if (!this.validTarget(target)) return false;
+	use(target, callback) {
+		if (!this.validTarget(target)) callback(false);
 		this.user.face(target);
+
+		this._target = target;
+		this._squares = this._affectedSquares(this._target);
+		this._units = this._affectedUnits(this._squares);
 		
+		var waitTime = this._startEffects(this._target, this._squares, this._units);
+		setTimeout(() => this._squareEffectIterator(this._squares.values(), callback), waitTime);
+	}
+	_squareEffectIterator(squareIterator, callback) {
+		var next = squareIterator.next();
+		var waitTime = 0;
+		if (next.value) {
+			waitTime = this._squareEffects(next.value, this._target);
+		}
+		if (next.done) {
+			this._unitEffectIterator(this._units.values(), callback);
+		} else {
+			setTimeout(() => this._squareEffectIterator(squareIterator, callback), waitTime);
+		}
+	}
+	_unitEffectIterator(unitIterator, callback) {
+		var next = unitIterator.next();
+		var waitTime = 0;
+		if (next.value) {
+			waitTime = this._unitEffects(next.value, this._target);
+		}
+		if (next.done) {
+			this._finishUse(callback);
+		} else {
+			setTimeout(() => this._unitEffectIterator(unitIterator, callback), waitTime);
+		}
+	}
+	_finishUse(callback) {
+		this._endEffects(this._target, this._squares, this._units);
 		this._payCost();
-
-		var squares = this._affectedSquares(target);
-		var units = this._affectedUnits(squares);
-		this._startEffects(target, squares, units);
-		squares.forEach(square => this._squareEffects(square, target));
-		units.forEach(piece => this._unitEffects(piece, target));
-		this._endEffects(target, squares, units);
-
-		units.forEach(piece => piece.dieIfDead());
+		this._units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
-		return true;
+		
+		this._target = null;
+		this._units = null;
+		this._squares = null;
+		if (callback) callback(true);
 	}
 
 	validTarget(target) {
@@ -454,11 +706,12 @@ class SkillPiece extends Piece {
 	}
 	_affectedSquares(target) {
 		if (!target) return [];
+
 		return target.parent.getAoE(this, target);
 	}
 	_affectedUnits(squares) {
-		// TODO: Include a "validTargetUnit" logic in here somehow as well...?
 		if (!squares) return [];
+
 		var units = [];
 		squares.forEach(square => {
 			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
@@ -468,10 +721,14 @@ class SkillPiece extends Piece {
 		return units;
 	}
 
-	_startEffects(target, squares, units) { }
-	_squareEffects(square, target) { }
-	_unitEffects(unit, target) { }
-	_endEffects(target, squares, units) { }
+	_startEffects(target, squares, units) {
+		this.user.animateBump(target);
+		return 100;
+	}
+
+	_squareEffects(square, target) { return 0; }
+	_unitEffects(unit, target) { return 0; }
+	_endEffects(target, squares, units) { return 0; }
 
 	_payCost() {
 		this.user.actionUsed = true;
@@ -513,6 +770,42 @@ class SkillPiece extends Piece {
 		return Piece.Skill;
 	}
 
+	_aiBaseTargetScore(target) {
+		return 0;
+	}
+	_aiAreaTargetScore(square) {
+		if (this.user.isEnemy(square.piece)) return 1;
+		else if (this.user.isAlly(square.piece)) return -0.9;
+		else if (square.piece) return 0.1;
+		else return 0;
+	}
+	_aiTargetScore(target) {
+		var area = this._affectedSquares(target);
+		return area.reduce((totalScore, square) => {
+			return totalScore + this._aiAreaTargetScore(square);
+		}, this._aiBaseTargetScore(target));
+	}
+
+	aiGetBestTarget(origin) {
+		var best = origin.parent.squares.reduce((best, target) => {
+			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
+
+			var score = this._aiTargetScore(target);
+			if (score >= best.score){
+				 return {
+					target: target,
+					score: score
+				};
+			}
+			return best;
+		},
+		{
+			target: null,
+			score: 0
+		});
+		return best;
+	}
+
 	// targeting shapes
 
 	_inCircle(origin, target, size) {
@@ -539,17 +832,19 @@ class SkillPiece extends Piece {
 	}
 
 	// other targeting rules
+	_canSeeSquare(square) {
+		return (!square.blocksSight && !square.piece);
+	}
 
-	_canSee(origin, target, props) {
+	_canSee(origin, target) {
 		if (!origin || !target || origin.parent != target.parent) return false;
-		if (origin == target) return true;
 		
 		var board = origin.parent;
-
 		var x = origin.x;
 		var y = origin.y;
 		var tx = target.x;
 		var ty = target.y;
+
 		while (true) {
 			// It's not a straight line, but good enough for how I'm using it
 			if (x < tx) x++;
@@ -557,44 +852,42 @@ class SkillPiece extends Piece {
 			if (y < ty) y++;
 			else if (y > ty) y--;
 
-			var square = board.at(x, y);
-			if (square && square.blocksSight) return false; // TODO: Use props to decide which terrain blocks
 			if (x == tx && y == ty) return true;
-			if (square.piece) return false; // TODO: Use props to decide which pieces block
+			var square = board.at(x, y);
+			if (square && !this._canSeeSquare(square)) return false;
 		}
 	}
-	_nearUnit(_origin, target, props) {
+	_nearTarget(_origin, target, targetFunction) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
-			if (square.piece) return true; // TODO: Use props to decide which pieces count
-			else return false;
+			return (targetFunction && targetFunction.call(this.user, square));
 		});
 	}
 
-		// targeting directions (for area effects)
+	// targeting directions (for area effects)
 
-		_ahead(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var forward = dx * direction[0] + dy * direction[1];
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (forward >= 0 && forward >= sideways);
-		}
-		_behind(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var backward = -dx * direction[0] - dy * direction[1];
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (backward >= 0 && backward >= sideways);
-		}
-		_beside(origin, target, direction) {
-			var dx = target.x - origin.x;
-			var dy = target.y - origin.y;
-	
-			var forward = Math.abs(dx * direction[0] + dy * direction[1]);
-			var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
-			return (sideways >= 0 && sideways >= forward);
-		}
+	_ahead(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = dx * direction[0] + dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (forward >= 0 && forward >= sideways);
+	}
+	_behind(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var backward = -dx * direction[0] - dy * direction[1];
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (backward >= 0 && backward >= sideways);
+	}
+	_beside(origin, target, direction) {
+		var dx = target.x - origin.x;
+		var dy = target.y - origin.y;
+
+		var forward = Math.abs(dx * direction[0] + dy * direction[1]);
+		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
+		return (sideways >= 0 && sideways >= forward);
+	}
 };

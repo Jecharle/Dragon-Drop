@@ -14,11 +14,6 @@ class TestAttackSkill extends SkillPiece {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	_setStats() {
-		super._setStats();
-		this._range = 2;
-	}
-
 	inRange(origin, target) {
 		return super.inRange(origin, target)
 			&& this._inLine(origin, target)
@@ -32,9 +27,10 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_unitEffects(unit, _target) {
+	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1);
+		return 200;
 	}
 };
 
@@ -70,6 +66,7 @@ class TestHealSkill extends SkillPiece {
 	}
 	_unitEffects(unit, _target) {
 		unit.heal(this.power);
+		return 200;
 	}
 };
 
@@ -99,14 +96,19 @@ class TestBuildSkill extends SkillPiece {
 			&& !this._inSquare(origin, target, this.minRange-1);
 	}
 	validTarget(target) {
-		if (target.parent.canFit(null, target, 1)) {
+		if (target.parent.canFit(this.user, target)) {
 			return true;
 		}
 		return false;
 	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
 	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
+		wall._addTimedClass('spawn', 500);
+		return 500;
 	}
 };
 
@@ -134,8 +136,8 @@ class TestMoveSkill extends SkillPiece {
 	inRange(origin, target) {
 		// TODO: near a unit other than the user
 		return target != origin
-			&& this._nearUnit(origin, target)
-			&& target.parent.canFit(this.user, target);
+			&& target.parent.canFit(this.user, target)
+			&& this._nearTarget(origin, target, square => (square.piece && square.piece != this.user));
 	}
 
 	validTarget(target) {
@@ -144,8 +146,11 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(target, _squares, _pieces) {
+	_startEffects(target, _squares, _units) {
+		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
+		this.user.animateMove([startSquare], "teleport");
+		return 400;
 	}
 };
 
@@ -162,7 +167,7 @@ class TestAreaSkill extends SkillPiece {
 		return "Area Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage to all targets in a small area`;
+		return `Deal ${this.power} damage to all targets around the center and push them away`;
 	}
 
 	_setStats() {
@@ -181,8 +186,13 @@ class TestAreaSkill extends SkillPiece {
 			&& this._inLine(origin, target);
 	}
 
-	_unitEffects(unit, _target) {
+	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1);
+		unit.push(target, 1);
+		return 200;
+	}
+
+	_aiBaseTargetScore(target) {
+		return -0.5; // AoE are lower priority unless they hit multiple targets
 	}
 };

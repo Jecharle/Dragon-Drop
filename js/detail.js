@@ -59,7 +59,13 @@ class Lifebar extends Detail {
 		super();
 
 		this._subEl = document.createElement(this.elType);
+		this._subEl.classList.add('inner');
 		this.el.appendChild(this._subEl);
+
+		this._deltaEl = document.createElement(this.elType);
+		this._deltaEl.classList.add('change');
+		this.el.appendChild(this._deltaEl);
+
 		this.maxValue = startMaxValue;
 		this.value = startValue;
 	}
@@ -73,8 +79,16 @@ class Lifebar extends Detail {
 
 	set value(value) {
 		if (value >= 0 && this.maxValue > 0 && this._subEl) {
+			var delta = this._value - value;
 			this._value = value;
 			this._subEl.style.width = String(value*6+2)+"px";
+			
+			if (delta) {
+				var leftEdge = Math.min(value, value+delta);
+				this._deltaEl.style.width = String(Math.abs(delta)*6+2)+"px";
+				this._deltaEl.style.backgroundPositionX = String(-leftEdge*6)+"px";
+				this._deltaEl.style.left = String(leftEdge*6)+"px";
+			}
 		}
 	}
 

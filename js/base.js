@@ -4,10 +4,9 @@ The root class for objects linked to DOM elements
 ***************************************************/
 class ElObj {
 	constructor() {
-		var el = document.createElement(this.elType);
-		if (this.elClass) el.classList.add(this.elClass);
-		this.el = el;
-		el.obj = this;
+		this.el = document.createElement(this.elType);
+		if (this.elClass) this.el.classList.add(this.elClass);
+		this.el.obj = this;
 	}
 
 	get elType() {
@@ -28,5 +27,15 @@ class ElObj {
 			this.el.classList.add(value);
 		}
 		this._style = value;
+	}
+}
+
+class SpriteElObj extends ElObj {
+	constructor() {
+		super();
+		this.spriteEl =  document.createElement('div');
+		this.spriteEl.classList.add('sprite');
+		this.spriteEl.obj = this;
+		this.el.appendChild(this.spriteEl);
 	}
 }

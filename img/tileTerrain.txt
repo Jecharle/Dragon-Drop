@@ -1,0 +1,8 @@
+Terrain types are arranged vertically, with frames for animated tiles arranged horizontally.
+
+Terrain types in order:
+0 Flat
+1 Pit
+2 Cover
+3 Wall
+4 Rough
