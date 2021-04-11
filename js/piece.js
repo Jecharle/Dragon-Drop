@@ -77,21 +77,25 @@ class Piece extends SpriteElObj {
 };
 
 /***************************************************
- Targetable piece
+ Unit piece
 ***************************************************/
-class TargetablePiece extends Piece {
+class UnitPiece extends Piece {
 	constructor(partyMember) {
 		super();
 		this._team = null;
 		this._partyMember = partyMember;
 		this.square = null;
 		this.size = 1;
+		this._moveStyle = "path";
 
 		this._setStats();
+		this._setSkills();
 
 		this.hp = this.maxHp;
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
+
+		this.initialize();
 	}
 
 	get elClass() {
@@ -117,6 +121,7 @@ class TargetablePiece extends Piece {
 
 	_setStats() {
 		this._maxHp = 1;
+		this._moveRange = 2;
 	}
 
 	get team() {
@@ -178,6 +183,10 @@ class TargetablePiece extends Piece {
 	refresh() {
 		this._lifebar.maxValue = this.maxHp;
 		this._lifebar.value = this.hp;
+
+		this._refreshSkills();
+		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
 	}
 
 	takeDamage(power, _props) {
@@ -251,24 +260,6 @@ class TargetablePiece extends Piece {
 	statusList() {
 
 	}*/
-};
-
-/***************************************************
- Controllable piece
-***************************************************/
-class ControllablePiece extends TargetablePiece {
-	constructor() {
-		super();
-		this._setSkills();
-
-		this.initialize();
-		this._moveStyle = "path";
-	}
-
-	_setStats() {
-		super._setStats();
-		this._moveRange = 2;
-	}
 
 	_setSkills() {
 		this._skills = [];
@@ -455,12 +446,6 @@ class ControllablePiece extends TargetablePiece {
 		return false;
 	}
 
-	refresh() {
-		super.refresh();
-		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
-	}
 	_refreshSkills() {
 		this._skills.forEach(skill => skill.refresh());
 	}

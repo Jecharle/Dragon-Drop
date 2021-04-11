@@ -1,7 +1,7 @@
 /***************************************************
  Subtypes of ControllablePiece
 ***************************************************/
-class TestMeleeUnit extends ControllablePiece {
+class TestMeleeUnit extends UnitPiece {
 	constructor(partyMember) {
 		super(partyMember);
 		this.style = 'melee-unit';
@@ -27,7 +27,7 @@ class TestMeleeUnit extends ControllablePiece {
 	}
 };
 
-class TestSupportUnit extends ControllablePiece {
+class TestSupportUnit extends UnitPiece {
 	constructor(partyMember) {
 		super(partyMember);
 		this.style = 'support-unit';
@@ -55,7 +55,7 @@ class TestSupportUnit extends ControllablePiece {
 	}
 };
 
-class TestEnemyUnit extends ControllablePiece {
+class TestEnemyUnit extends UnitPiece {
 	constructor(partyMember) {
 		super(partyMember);
 		this.style = 'enemy-unit';
@@ -84,7 +84,7 @@ class TestEnemyUnit extends ControllablePiece {
 /***************************************************
  Subtypes of TargetablePiece
 ***************************************************/
-class TestRockObject extends ControllablePiece {
+class TestRockObject extends UnitPiece {
 	constructor() {
 		super();
 		this.style = 'rock';
