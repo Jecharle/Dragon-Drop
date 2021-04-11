@@ -399,18 +399,18 @@ class Board extends Container {
 	}
 	showAoE(skill, origin) {
 		if (!skill || !origin) return;
-		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
+		this.getAoE(skill, origin).forEach(square => square.el.classList.add('selected'));
 	}
 
 	showDeploySwap(unit, target) {
 		if (!unit || !unit.square) return;
-		unit.square.el.classList.add('deploy-swap');
-		if (target) target.el.classList.add('deploy-swap');
+		unit.square.el.classList.add('selected');
+		if (target) target.el.classList.add('selected');
 	}
 
 	clearTargeting() {
 		this.squares.forEach(square =>
-			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'skill-aoe', 'deploy-swap'));
+			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'selected'));
 	}
 
 	getAdjacent(square) {
