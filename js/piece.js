@@ -720,14 +720,24 @@ class SkillPiece extends Piece {
 		return units;
 	}
 
-	_startEffects(target, squares, units) {
+	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
+
+		if (target.x < this.user.square.x || target.y > this.user.square.y) this._showEffect(target, "test-attack-effect", "left");
+		else this._showEffect(target, "test-attack-effect");
+		
 		return 100;
 	}
 
-	_squareEffects(square, target) { return 0; }
-	_unitEffects(unit, target) { return 0; }
-	_endEffects(target, squares, units) { return 0; }
+	_squareEffects(_square, _target) { return 0; }
+	_unitEffects(_unit, _target) { return 0; }
+	_endEffects(_target, _squares, _units) { return 0; }
+
+	_showEffect(square, ...styles) {
+		if (!square) return;
+		var vfx = new SpriteEffect(1000, "unit", ...styles);
+		square.el.appendChild(vfx.el);
+	}
 
 	_payCost() {
 		this.user.actionUsed = true;

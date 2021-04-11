@@ -64,7 +64,11 @@ class TestHealSkill extends SkillPiece {
 		}
 		return false;
 	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
 	_unitEffects(unit, _target) {
+		this._showEffect(unit.square, "test-heal-effect");
 		unit.heal(this.power);
 		return 200;
 	}

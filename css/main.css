@@ -388,6 +388,19 @@
 		background-image: url("../img/testObject.png");
 	}
 
+	/*Sprite Effects*/
+	.test-attack-effect>.sprite {
+		background-image: url("../img/testAttack.png");
+		background-position-x: calc(-6*var(--unit-sprite-w));
+		animation: sprite-animation 0.2s steps(6) both;
+	}
+	.test-heal-effect>.sprite {
+		background-image: url("../img/testHeal.png");
+		background-position-x: calc(-5*var(--unit-sprite-w));
+		animation: sprite-animation 0.3s steps(5) both;
+	}
+	
+
 /*Skill base and info*/
 .skill {
 	width: var(--skill-w);
