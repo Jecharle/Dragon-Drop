@@ -174,6 +174,7 @@ class UnitPiece extends Piece {
 
 	dieIfDead() {
 		if (this.dead) {
+			this._showDeathAnimation();
 			this.setParent(null);
 			this.setTeam(null);
 			if (this._partyMember) this._partyMember.alive = false;
@@ -193,8 +194,7 @@ class UnitPiece extends Piece {
 		this.hp -= power;
 
 		if (power > 0) {
-			this._addTimedClass('damaged', 1200);
-			this._addTimedClass('hp-change', 1200);
+			this._addTimedClass(1200, 'damaged', 'hp-change');
 		}
 
 		this.refresh();
@@ -204,7 +204,7 @@ class UnitPiece extends Piece {
 		this.hp += power;
 
 		if (power > 0) {
-			this._addTimedClass('hp-change', 1200);
+			this._addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
@@ -214,9 +214,15 @@ class UnitPiece extends Piece {
 		var popup = new PopupText(value);
 		this.el.appendChild(popup.el);
 	}
-	_addTimedClass(className, duration) {
-		this.el.classList.add(className);
-		setTimeout(() => this.el.classList.remove(className), duration);
+	_addTimedClass(duration, ...classList) {
+		this.el.classList.add(...classList);
+		setTimeout(() => this.el.classList.remove(...classList), duration);
+	}
+	_showDeathAnimation() {
+		if (!this.square) return;
+		var spriteEffect = new SpriteEffect(2000, "unit", this.style, "dead");
+		if (this._facing > 0) spriteEffect.el.classList.add("left");
+		this.square.el.appendChild(spriteEffect.el);
 	}
 
 
@@ -335,7 +341,7 @@ class UnitPiece extends Piece {
 				moveTime = this._animatePath(path);
 				break;
 		}
-		this._addTimedClass('moving', moveTime);
+		this._addTimedClass(moveTime, 'moving');
 	}
 	_animatePath(path) {
 		var target = this.square;

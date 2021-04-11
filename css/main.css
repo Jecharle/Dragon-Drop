@@ -383,8 +383,8 @@
 	.spawn .sprite {
 		animation: drop-in 0.2s ease-in;
 	}
-	.unit.selectable:hover>.sprite, .unit.selected>.sprite {
-		background-position-y: calc(-1*var(--unit-sprite-h));
+	.dead .sprite {
+		animation: darken-and-fade 1s 0.2s both;
 	}
 
 	/*Unit skins*/
@@ -527,6 +527,15 @@
 }
 @keyframes fade-out {
 	to {
+		opacity: 0%;
+	}
+}
+@keyframes darken-and-fade {
+	50% {
+		filter: brightness(0%);
+	}
+	to {
+		filter: brightness(0%);
 		opacity: 0%;
 	}
 }

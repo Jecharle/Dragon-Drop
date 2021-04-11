@@ -82,7 +82,7 @@ class Lifebar extends Detail {
 			var delta = this._value - value;
 			this._value = value;
 			this._subEl.style.width = Lifebar.width(value);
-			
+
 			if (delta) {
 				var leftEdge = Lifebar.width(Math.min(value, value+delta));
 				this._deltaEl.style.width = Lifebar.width(Math.abs(delta), true);
@@ -143,5 +143,22 @@ class SkillDescription extends Detail {
 	}
 	get elClass() {
 		return 'skill-description';
+	}
+}
+
+/***************************************************
+ Animated sprite effect
+***************************************************/
+class SpriteEffect extends SpriteElObj {
+	constructor(duration, ...classList) {
+		super();
+		this.el.classList.add(...classList)
+		setTimeout(() => {
+			this.el.parentElement.removeChild(this.el);
+		}, duration);
+	}
+
+	get elClass() {
+		return 'vfx-sprite';
 	}
 }
