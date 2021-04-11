@@ -403,8 +403,9 @@ class UnitPiece extends Piece {
 	}
 
 	animateBump(target, origin) {
-		var dx = 32*(target.x - this.square.x - target.y + this.square.y);
-		var dy = 16*(target.x - this.square.x + target.y - this.square.y);
+		var direction = this.parent.getDirection(this.square, target);
+		var dx = 32*(direction[0] - direction[1]);
+		var dy = 16*(direction[0] + direction[1]);
 		var dz = dy;
 		var time = 200;
 
