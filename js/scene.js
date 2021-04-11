@@ -410,9 +410,7 @@ class BattleScene extends Scene {
 		}
 	}
 	_refreshTargetArea() {
-		this._board.clearAoE();
-		this._board.clearPath();
-		this._board.clearDeploySwap();
+		this._board.clearTargeting();
 		if (this._target && this._phase != BattleScene.DeployPhase) {
 			if (this._skill) this._board.showAoE(this._skill, this._target);
 			else if (this._unit) this._board.showPath(this._target);

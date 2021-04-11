@@ -335,7 +335,7 @@ class Board extends Container {
 				this._paintSkillRange(square, skill.validTarget(square));
 			}
 		});
-		// TODO: More possible origins for larger units?
+		// TODO: Use every square in the footprint as an origin
 	}
 	_paintSkillRange(square, valid) {
 		square.inRange = true;
@@ -389,9 +389,6 @@ class Board extends Container {
 			previous = square;
 		});
 	}
-	clearPath() {
-		this.squares.forEach(square => square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down'));
-	}
 
 	getAoE(skill, origin) {
 		if (!skill || !origin) return [];
@@ -401,18 +398,16 @@ class Board extends Container {
 		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => square.el.classList.add('skill-aoe'));
 	}
-	clearAoE() {
-		this.squares.forEach(square => square.el.classList.remove('skill-aoe'));
-	}
 
 	showDeploySwap(unit, target) {
 		if (!unit || !unit.square) return;
 		unit.square.el.classList.add('deploy-swap');
-		if (!target) return;
-		target.el.classList.add('deploy-swap');
+		if (target) target.el.classList.add('deploy-swap');
 	}
-	clearDeploySwap() {
-		this.squares.forEach(square => square.el.classList.remove('deploy-swap'));
+
+	clearTargeting() {
+		this.squares.forEach(square =>
+			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'skill-aoe', 'deploy-swap'));
 	}
 
 	getAdjacent(square) {
