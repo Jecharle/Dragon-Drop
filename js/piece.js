@@ -723,8 +723,7 @@ class SkillPiece extends Piece {
 		return units;
 	}
 	_targetOrder(squareA, squareB) {
-		var board = this._target.parent;
-		return board.distance(this._target, squareA) - board.distance(this._target, squareB);
+		return this._target.distance(squareA) - this._target.distance(squareB);
 	}
 
 	_startEffects(target, _squares, _units) {
