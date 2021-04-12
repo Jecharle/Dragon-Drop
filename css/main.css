@@ -329,9 +329,9 @@
 		}
 		.selectable.unit:hover>.sprite {
 			filter: drop-shadow(2px 0px yellow) 
-			drop-shadow(0px 2px yellow)
-			drop-shadow(-2px 0px yellow)
-			drop-shadow(0px -2px yellow);
+				drop-shadow(0px 2px yellow)
+				drop-shadow(-2px 0px yellow)
+				drop-shadow(0px -2px yellow);
 		}
 	.lifebar {
 		visibility: hidden;

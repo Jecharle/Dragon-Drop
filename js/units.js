@@ -1,5 +1,5 @@
 /***************************************************
- Subtypes of ControllablePiece
+ Subtypes of UnitPiece
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {
 	constructor(partyMember) {
@@ -82,9 +82,18 @@ class TestEnemyUnit extends UnitPiece {
 };
 
 /***************************************************
- Subtypes of TargetablePiece
+ "Unit" subtypes that don't move or have actions
 ***************************************************/
-class TestRockObject extends UnitPiece {
+class ObjectPiece extends UnitPiece {
+	get canMove() { return false; }
+	get canAct() { return false; }
+	get myTurn() { return false; }
+	get moveRange() { return 0; }
+	select() { return false; }
+	_setSelectable() { }
+}
+
+class TestRockObject extends ObjectPiece {
 	constructor() {
 		super();
 		this.style = 'rock';
@@ -101,8 +110,4 @@ class TestRockObject extends UnitPiece {
 		this._maxHp = 2;
 		this._moveRange = 0;
 	}
-
-	// obstacles cannot be selected?
-	_setSelectable() { }
-	select() { return false; }
 }

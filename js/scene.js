@@ -500,13 +500,13 @@ class BattleScene extends Scene {
 	selectPiece(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
-		if (piece.type == Piece.Unit && !piece.myTurn) {
+		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
 			if (this._unit != piece) {
 				this._selectUnit(piece, true);
 			} else {
 				this._deselectUnit();
 			}
-			// TODO: Deselect when you mouse away...?
+			// TODO: Deselect when the mouse leaves...?
 		}
 
 		if (this._phase == BattleScene.DeployPhase) {
