@@ -328,10 +328,7 @@
 			display: none;
 		}
 		.selectable.unit:hover>.sprite {
-			filter: drop-shadow(2px 0px yellow) 
-				drop-shadow(0px 2px yellow)
-				drop-shadow(-2px 0px yellow)
-				drop-shadow(0px -2px yellow);
+			filter: contrast(60%) brightness(125%);
 		}
 	.lifebar {
 		visibility: hidden;
