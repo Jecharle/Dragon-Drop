@@ -69,7 +69,7 @@ class Piece extends SpriteElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.target.id);
 		var piece = ev.target.obj;
-		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP coordinates
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
 	_drop(ev) {
@@ -405,7 +405,7 @@ class UnitPiece extends Piece {
 	}
 
 	animateBump(target, origin) {
-		var direction = this.parent.getDirection(this.square, target);
+		var direction = this.square.direction(target);
 		var dx = 32*(direction[0] - direction[1]);
 		var dy = 16*(direction[0] + direction[1]);
 		var dz = dy;
@@ -539,7 +539,7 @@ class UnitPiece extends Piece {
 	_nearestPieceDistance(origin, targetFunction) {
 		var nearestDistance = origin.parent.pieces.reduce((nearest, piece) => {
 			if (targetFunction.call(this, piece)) {
-				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				var distance = origin.distance(piece.square);
 				return Math.min(nearest, distance);
 			}
 			return nearest;
@@ -551,7 +551,7 @@ class UnitPiece extends Piece {
 		var targetCount = 0;
 		var totalDistance = origin.parent.pieces.reduce((sum, piece) => {
 			if (targetFunction.call(this, piece)){
-				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				var distance = origin.distance(piece.square);
 				targetCount += 1;
 				return sum + distance;
 			}
@@ -661,6 +661,7 @@ class SkillPiece extends Piece {
 
 		this._target = target;
 		this._squares = this._affectedSquares(this._target);
+		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
 		this._units = this._affectedUnits(this._squares);
 		
 		var waitTime = this._startEffects(this._target, this._squares, this._units);
@@ -720,6 +721,10 @@ class SkillPiece extends Piece {
 			}
 		});
 		return units;
+	}
+	_targetOrder(squareA, squareB) {
+		var board = this._target.parent;
+		return board.distance(this._target, squareA) - board.distance(this._target, squareB);
 	}
 
 	_startEffects(target, _squares, _units) {

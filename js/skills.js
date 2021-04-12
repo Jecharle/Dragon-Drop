@@ -21,7 +21,7 @@ class TestAttackSkill extends SkillPiece {
 	}
 
 	validTarget(target) {
-		if (target.piece && target.piece.targetable) {
+		if (target.piece?.targetable) {
 			return true;
 		}
 		return false;
@@ -31,6 +31,22 @@ class TestAttackSkill extends SkillPiece {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1);
 		return 200;
+	}
+};
+
+/***************************************************
+ Test ranged attack skill
+***************************************************/
+class TestRangedSkill extends TestAttackSkill {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	_setStats() {
+		super._setStats();
+		this._range = 7;
+		this._minRange = 2;
 	}
 };
 
@@ -126,15 +142,15 @@ class TestMoveSkill extends SkillPiece {
 	}
 
 	get _name() {
-		return "Teleport";
+		return "Regroup";
 	}
 	get _description() {
-		return "Move to a square adjacent to another unit";
+		return "Jump to a square adjacent to another unit";
 	}
 
 	_setStats() {
 		super._setStats();
-		this._baseCooldown = 3;
+		this._baseCooldown = 2;
 	}
 
 	inRange(origin, target) {
@@ -153,7 +169,7 @@ class TestMoveSkill extends SkillPiece {
 	_startEffects(target, _squares, _units) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
-		this.user.animateMove([startSquare], "teleport");
+		this.user.animateMove([startSquare], "jump");
 		return 400;
 	}
 };
@@ -171,7 +187,7 @@ class TestAreaSkill extends SkillPiece {
 		return "Area Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage to all targets around the center and push them away`;
+		return `Deal ${this.power} damage everyone around the target position and push them back`;
 	}
 
 	_setStats() {
@@ -197,6 +213,62 @@ class TestAreaSkill extends SkillPiece {
 	}
 
 	_aiBaseTargetScore(target) {
-		return -this.power*0.5; // AoE are lower priority unless they hit multiple targets
+		return -0.5; // AoE are lower priority unless they hit multiple targets
 	}
+};
+
+/***************************************************
+ Test charge skill
+***************************************************/
+class TestRushSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	get _name() {
+		return "Charge Attack";
+	}
+	get _description() {
+		return `Charge the enemy and deal ${this.power} damage, pushing it back`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._range = 3;
+		this._minRange = 2;
+		this._baseCooldown = 3;
+	}
+
+	validTarget(target) {
+		if (target.piece?.targetable) {
+			return true;
+		}
+		return false;
+	}
+
+	inRange(origin, target) {
+		return super.inRange(origin, target)
+			&& this._inLine(origin, target)
+			&& this._canSee(origin, target);
+	}
+
+	_startEffects(target) {
+		this.user.animateBump(target, this.user.square);
+		this.user.pull(target, 2);
+
+		if (target.x < this.user.square.x || target.y > this.user.square.y) this._showEffect(target, "test-attack-effect", "left");
+		else this._showEffect(target, "test-attack-effect");
+
+		return 100;
+	}
+	_unitEffects(unit) {
+		unit.takeDamage(this.power);
+		unit.push(this.user.square, 1);
+		return 200;
+	}
+
+	/*_aiBaseTargetScore(target) {
+		return -this.power*0.5; // TODO: Use if the enemy is otherwise out of range
+	}*/
 };

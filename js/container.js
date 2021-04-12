@@ -148,7 +148,7 @@ class Board extends Container {
 		var minDistance = null;
 		var nearestSquare = null;
 		this.squares.forEach(square => {
-			var distance = this.getDistance(centerSquare, square);
+			var distance = centerSquare.distance(square);
 			if (minDistance && distance >= minDistance) return;
 			if (this.canFit(piece, square)) {
 				nearestSquare = square;
@@ -196,7 +196,7 @@ class Board extends Container {
 	}
 
 	shiftPiece(piece, origin, dist, props) {
-		var direction = this.getDirection(origin, piece.square);
+		var direction = origin.direction(piece.square);
 		return this.shiftPieceDirection(piece, direction, dist, props);
 	}
 	shiftPieceDirection(piece, direction, dist, props) {
@@ -223,23 +223,6 @@ class Board extends Container {
 		}
 		this.movePiece(piece, square);
 		return distMoved;
-	}
-	getDistance(origin, target) {
-		return Math.abs(target.x - origin.x) + Math.abs(target.y - origin.y);
-	}
-	getDirection(origin, target) {
-		var dx = target.x - origin.x;
-		var dy = target.y - origin.y;
-		
-		if (dx == 0 && dy == 0) {
-			return [0, 0];
-		} else if (Math.abs(dx) > Math.abs(dy)) {
-			if (dx > 0) return [1, 0];
-			else return [-1, 0];
-		} else {
-			if (dy > 0) return [0, 1];
-			else return [0, -1];
-		}
 	}
 
 	swapPieces(pieceA, pieceB) {
@@ -482,6 +465,28 @@ class Square extends Position {
 	}
 	get y() {
 		return this._y;
+	}
+
+	distance(square) {
+		if (!square || this.parent != square.parent) return null;
+		return Math.abs(this.x - square.x) + Math.abs(this.y - square.y);
+	}
+
+	direction(square) {
+		if (!square || this.parent != square.parent) return null;
+
+		var dx = square.x - this.x;
+		var dy = square.y - this.y;
+		
+		if (dx == 0 && dy == 0) {
+			return [0, 0];
+		} else if (Math.abs(dx) > Math.abs(dy)) {
+			if (dx > 0) return [1, 0];
+			else return [-1, 0];
+		} else {
+			if (dy > 0) return [0, 1];
+			else return [0, -1];
+		}
 	}
 
 	get terrain() {
