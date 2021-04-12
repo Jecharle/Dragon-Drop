@@ -167,7 +167,7 @@ class BattleScene extends Scene {
 		this._reinforcementData.forEach(data => {
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
-				newPiece._addTimedClass('spawn', 500);
+				newPiece._addTimedClass(500, 'spawn');
 			}
 		});
 	}
@@ -307,6 +307,14 @@ class BattleScene extends Scene {
 
 		this._unit = unit;
 		this._skillList.setUser(unit);
+		return true;
+	}
+	_selectPreviewUnit(unit) {
+		if (unit && !unit.select()) return false;
+		if (this._skill) this._deselectSkill();
+		if (this._unit != unit) this._deselectUnit();
+
+		this._unit = unit;
 		return true;
 	}
 	_selectDeployUnit(unit) {
@@ -526,6 +534,12 @@ class BattleScene extends Scene {
 					this._deselectUnit();
 				} else if (this._skill) {
 					this._deselectSkill();
+				}
+			} else if (piece.type == Piece.Unit) {
+				if (this._unit != piece) {
+					this._selectPreviewUnit(piece);
+				} else if (!dragging) {
+					this._deselectUnit();
 				}
 			}
 		}

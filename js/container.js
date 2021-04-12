@@ -277,11 +277,12 @@ class Board extends Container {
 	}
 	setMoveArea(unit) {
 		if (!unit) return;
+		var preview = !unit.myTurn;
 
 		var origin = unit.square;
 		if (!origin || origin.parent != this) return;
 
-		this._paintMoveRange(origin, unit.moveRange, [], true);
+		this._paintMoveRange(origin, unit.moveRange, [], true, preview);
 		var edges = [origin];
 		
 		if (!unit.canMove || !unit.moveRange) return;
@@ -293,20 +294,20 @@ class Board extends Container {
 			
 			for (var n = 0; n < adjacent.length; n++) {
 				var square = adjacent[n];
-				var movesLeft = newEdge.movesLeft - (square.slowsMove ? 2 : 1);
+				var movesLeft = newEdge.movesLeft - (square.slowsMove ? 2 : 1); // TODO: Varies by unit?
 				if (square.movesLeft != null) {
 					continue;
 				}
 				if (!this.canFitThrough(unit, square)) {
 					continue;
 				}
-				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square));
+				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), preview);
 				edges.push(square);
 			}
 			edges.sort((a, b) => a.movesLeft - b.movesLeft);
 		}
 	}
-	_paintMoveRange(square, movesLeft, path, valid) {
+	_paintMoveRange(square, movesLeft, path, valid, preview) {
 		square.movesLeft = movesLeft;
 		square.path = path;
 
@@ -315,8 +316,9 @@ class Board extends Container {
 		square.inRange = true;
 		square.el.classList.add('move-range');
 		if (path.length == 0) square.el.classList.add('move-start');
+		if (preview) square.el.classList.add('enemy-preview');
 
-		if (valid) {
+		if (valid && !preview) {
 			square.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
@@ -357,7 +359,7 @@ class Board extends Container {
 		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
-		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'invalid', 'selectable');
+		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'enemy-preview', 'invalid', 'selectable');
 		square.el.ondragover = null;
 		square.inRange = false;
 		square.invalid = false;
