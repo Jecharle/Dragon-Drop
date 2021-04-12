@@ -111,7 +111,7 @@ class TestBuildSkill extends SkillPiece {
 	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
-		wall._addTimedClass('spawn', 500);
+		wall._addTimedClass(500, 'spawn');
 		return 500;
 	}
 };

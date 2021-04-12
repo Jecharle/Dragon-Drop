@@ -47,8 +47,10 @@ class Piece extends SpriteElObj {
 		this.el.setAttribute("draggable", Boolean(selectable));
 		if (selectable) {
 			this.el.classList.add('selectable');
+			this.el.classList.remove('viewable');
 		} else {
 			this.el.classList.remove('selectable');
+			this.el.classList.add('viewable');
 		}
 	}
 	_setUnselectable(unselectable) {

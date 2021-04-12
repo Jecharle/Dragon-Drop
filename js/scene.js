@@ -402,7 +402,10 @@ class BattleScene extends Scene {
 	_refreshArea() {
 		this._board.resetAreas();
 		if (this._phase == BattleScene.DeployPhase) {
-			this._board.setDeployArea(this._unit != null);
+			if (this._unit && !this._unit.myTurn) {
+				this._board.setMoveArea(this._unit);
+			}
+			this._board.setDeployArea(this._unit && this._unit.myTurn);
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
@@ -497,9 +500,18 @@ class BattleScene extends Scene {
 	selectPiece(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
+		if (piece.type == Piece.Unit && !piece.myTurn) {
+			if (this._unit != piece) {
+				this._selectUnit(piece, true);
+			} else {
+				this._deselectUnit();
+			}
+			// TODO: Deselect when you mouse away...?
+		}
+
 		if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
-				if (!this._unit || dragging) {
+				if (!this._unit || !this._unit.myTurn || dragging) {
 					this._selectDeployUnit(piece);
 				} else if (this._unit == piece) {
 					this._deselectUnit();
@@ -507,7 +519,7 @@ class BattleScene extends Scene {
 					this.selectPosition(piece.square);
 				}
 			}
-		} else {
+		} else { // non-deploy phase
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
@@ -527,12 +539,6 @@ class BattleScene extends Scene {
 				} else if (this._skill) {
 					this._deselectSkill();
 				}
-			} else if (piece.type == Piece.Unit) {
-				if (this._unit != piece) {
-					this._selectUnit(piece, true);
-				} else if (!dragging) {
-					this._deselectUnit();
-				}
 			}
 		}
 		this.refresh();
@@ -551,7 +557,7 @@ class BattleScene extends Scene {
 					this._refreshTargetArea();
 				}
 			}
-		} else {
+		} else { // non-deploy phase
 			if (!square.inRange) {
 				this._deselectSkill();
 				if (square.piece != this._unit) this._deselectUnit();

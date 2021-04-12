@@ -101,4 +101,8 @@ class TestRockObject extends UnitPiece {
 		this._maxHp = 2;
 		this._moveRange = 0;
 	}
+
+	// obstacles cannot be selected?
+	_setSelectable() { }
+	select() { return false; }
 }

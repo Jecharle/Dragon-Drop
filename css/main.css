@@ -21,7 +21,7 @@
 }
 
 /*Common styles*/
-.selectable {
+.selectable, .viewable {
 	cursor: pointer;
 }
 .unselectable>.sprite {
