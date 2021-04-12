@@ -197,6 +197,6 @@ class TestAreaSkill extends SkillPiece {
 	}
 
 	_aiBaseTargetScore(target) {
-		return -0.5; // AoE are lower priority unless they hit multiple targets
+		return -this.power*0.5; // AoE are lower priority unless they hit multiple targets
 	}
 };

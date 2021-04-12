@@ -783,9 +783,9 @@ class SkillPiece extends Piece {
 		return 0;
 	}
 	_aiAreaTargetScore(square) {
-		if (this.user.isEnemy(square.piece)) return 1;
-		else if (this.user.isAlly(square.piece)) return -0.9;
-		else if (square.piece) return 0.1;
+		if (this.user.isEnemy(square.piece)) return this.power;
+		else if (this.user.isAlly(square.piece)) return -this.power*0.9;
+		else if (square.piece) return this.power*0.1;
 		else return 0;
 	}
 	_aiTargetScore(target) {
