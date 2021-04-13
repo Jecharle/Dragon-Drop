@@ -66,8 +66,6 @@ class BattleScene extends Scene {
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
-		this._unitInfo = this._createUnitInfo();
-
 		this._buildDOM();
 	}
 
@@ -105,11 +103,6 @@ class BattleScene extends Scene {
 		return button;
 	}
 
-	// TEMP
-	_createUnitInfo() {
-		return new UnitInfo();
-	}
-
 	_buildDOM() {
 		var navBar =  document.createElement("div");
 		navBar.classList.add("nav-bar");
@@ -120,7 +113,6 @@ class BattleScene extends Scene {
 
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
-		this.el.appendChild(this._unitInfo.el);
 	}
 
 	_initTeams() {
@@ -184,7 +176,6 @@ class BattleScene extends Scene {
 		this._refreshArea();
 		this._refreshTargetArea();
 		this._refreshUi();
-		this._refreshUnitInfo();
 	}
 
 	_deploy() {
@@ -307,10 +298,6 @@ class BattleScene extends Scene {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
 		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
-	}
-
-	_refreshUnitInfo() {
-		this._unitInfo.unit = this._unit;
 	}
 
 	_selectUnit(unit, preview) {
@@ -701,49 +688,5 @@ class Team {
 	isEnemy(otherTeam) {
 		if (!otherTeam) return false;
 		return otherTeam.group != this.group;
-	}
-}
-
-class UnitInfo extends SpriteElObj {
-	constructor() {
-		super();
-
-		this._lifebar = new Lifebar(0, 0);
-		this.el.appendChild(this._lifebar.el);
-
-		this._nameSpan = document.createElement("span");
-		this._nameSpan.classList.add('name');
-		this.el.appendChild(this._nameSpan);
-
-		this._tooltip = new SkillDescription("");
-		this.el.appendChild(this._tooltip.el);
-
-		this.unit = null;
-	}
-
-	get elClass() {
-		return 'unit-info';
-	}
-
-	get unit() {
-		return this._unit;
-	}
-
-	set unit(unit) {
-		if (unit) {
-			this._unit = unit;
-			this.style = unit.style;
-			this._lifebar.maxValue = unit.maxHp;
-			this._lifebar.value = unit.hp;
-			this._nameSpan.innerText = unit.name;
-			this._tooltip.value = unit.description;
-		} else {
-			this.style = null;
-			this._unit = null;
-			this._lifebar.maxValue = 0;
-			this._lifebar.value = 0;
-			this._nameSpan.innerText = "";
-			this._tooltip.value = "";
-		}
 	}
 }

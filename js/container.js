@@ -565,11 +565,15 @@ class SkillList extends Container {
 		super();
 		this._user = null;
 		this.el.classList.add('skill-list');
+
+		this._userInfo = new UnitInfo();
+		this.el.appendChild(this._userInfo.el);
 	}
 
 	setUser(user) {
 		this._clearSkills();
 		this._user = user;
+		this._userInfo.unit = user;
 		if (!user) return false;
 
 		user.skills.forEach(skill => this._addSkill(skill));
@@ -589,5 +593,56 @@ class SkillList extends Container {
 
 	_clearSkills() {
 		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
+	}
+}
+
+/***************************************************
+ Skill list -> Unit info
+***************************************************/
+class UnitInfo extends ElObj {
+	constructor() {
+		super();
+
+		this._portrait = document.createElement("div");
+		this._portrait.classList.add('face'); // TODO: Replace with 'face' and add portraits
+		this.el.appendChild(this._portrait);
+
+		this._lifebar = new Lifebar(0, 0);
+		this.el.appendChild(this._lifebar.el);
+
+		this._nameSpan = document.createElement("span");
+		this._nameSpan.classList.add('name');
+		this.el.appendChild(this._nameSpan);
+
+		this._tooltip = new SkillDescription("");
+		this.el.appendChild(this._tooltip.el);
+
+		this.unit = null;
+	}
+
+	get elClass() {
+		return 'unit-info';
+	}
+
+	get unit() {
+		return this._unit;
+	}
+
+	set unit(unit) {
+		if (unit) {
+			this._unit = unit;
+			this.style = unit.style;
+			this._lifebar.maxValue = unit.maxHp;
+			this._lifebar.value = unit.hp;
+			this._nameSpan.innerText = unit.name;
+			this._tooltip.value = unit.description;
+		} else {
+			this.style = null;
+			this._unit = null;
+			this._lifebar.maxValue = 0;
+			this._lifebar.value = 0;
+			this._nameSpan.innerText = "";
+			this._tooltip.value = "";
+		}
 	}
 }
