@@ -231,7 +231,7 @@ class UnitPiece extends Piece {
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
 		var previousSquare = this.square;
-		var distanceMoved = this.parent.shiftPiece(this, origin, distance);
+		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
 		}

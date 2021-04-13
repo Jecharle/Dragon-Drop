@@ -164,12 +164,15 @@ class BattleScene extends Scene {
 		return null;
 	}
 	_addReinforcements() {
+		var anySpawns = false;
 		this._reinforcementData.forEach(data => {
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
 				newPiece._addTimedClass(500, 'spawn');
+				anySpawns = true;
 			}
 		});
+		return anySpawns;
 	}
 
 	refresh() {
@@ -212,7 +215,6 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.EnemyPhase:
-				this._addReinforcements();
 				this._turn++;
 				if (!this._isBattleOver()) {
 					this._phase = BattleScene.PlayerPhase;
@@ -493,7 +495,12 @@ class BattleScene extends Scene {
 	
 	_aiTurnEnd() {
 		this._aiControlUnits = null;
-		this._nextTurn();
+		if (this._phase == BattleScene.EnemyPhase && this._addReinforcements()) {
+			setTimeout(() => this._nextTurn(), 750);
+		}
+		else {
+			this._nextTurn();
+		}
 	}
 
 

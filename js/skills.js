@@ -321,7 +321,7 @@ class TestPositionSkill extends SkillPiece {
 	_unitEffects(unit, target) {
 		var startSquare = unit.square;
 		target.parent.movePiece(unit, target);
-		unit.animateMove([startSquare], "jump"); // TODO: Setting to bypass obstacles
+		unit.animateMove([startSquare], "jump");
 		return 400;
 	}
 };
