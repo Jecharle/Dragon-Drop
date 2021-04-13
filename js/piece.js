@@ -623,15 +623,15 @@ class SkillPiece extends Piece {
 		return this._minRange;
 	}
 	inRange(origin, target) {
-		return this._inCircle(origin, target, this.range)
-			&& !this._inCircle(origin, target, this.minRange-1);
+		var distance = origin.distance(target);
+		return distance <= this.range && distance >= this.minRange;
 	}
 
 	get area() {
 		return this._area;
 	}
 	inArea(origin, target) {
-		return this._inCircle(origin, target, this.area);
+		return origin.distance(target) <= this.area;
 	}
 
 	get cooldownCost() {
@@ -824,12 +824,6 @@ class SkillPiece extends Piece {
 
 	// targeting shapes
 
-	_inCircle(origin, target, size) {
-		if (!origin || !target) return false;
-		var dx = Math.abs(origin.x - target.x);
-		var dy = Math.abs(origin.y - target.y);
-		return (dx + dy <= size);
-	}
 	_inSquare(origin, target, size) {
 		if (!origin || !target) return false;
 		var dx = Math.abs(origin.x - target.x);

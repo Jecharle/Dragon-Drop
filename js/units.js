@@ -23,7 +23,7 @@ class TestMeleeUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestRushSkill(this),
-			new TestMoveSkill(this),
+			new TestPositionSkill(this),
 		]
 	}
 };
@@ -49,7 +49,7 @@ class TestSupportUnit extends UnitPiece {
 
 	_setSkills() {
 		this._skills = [
-			new TestRangedSkill(this),
+			new TestAreaSkill(this),
 			new TestHealSkill(this),
 			new TestBuildSkill(this),
 		]

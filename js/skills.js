@@ -197,10 +197,6 @@ class TestAreaSkill extends SkillPiece {
 		this._area = 1;
 	}
 
-	inArea(origin, target) {
-		return this._inCircle(origin, target, this.area);
-	}
-
 	inRange(origin, target) {
 		return super.inRange(origin, target)
 			&& this._inLine(origin, target);
@@ -271,4 +267,61 @@ class TestRushSkill extends SkillPiece {
 	/*_aiBaseTargetScore(target) {
 		return -this.power*0.5; // TODO: Use if the enemy is otherwise out of range
 	}*/
+};
+
+/***************************************************
+ Test positioning skill
+***************************************************/
+class TestPositionSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'move-skill';
+	}
+
+	get _name() {
+		return "Throw";
+	}
+	get _description() {
+		return "Throw the unit in front of you to the target square";
+	}
+
+	_setStats() {
+		super._setStats();
+		this._range = 4;
+		this._minRange = 3;
+		this._baseCooldown = 2;
+	}
+
+	inRange(origin, target) {
+		// TODO: near a unit other than the user
+		return super.inRange(origin, target)
+			&& this._inLine(origin, target);
+	}
+
+	inArea(origin, target) {
+		var userSquare = this.user.square;
+		return target == origin
+		|| (userSquare.distance(target) == 1
+		&& this._ahead(userSquare, target, userSquare.direction(origin)));
+	}
+
+	validTarget(target) {
+		if (!target.parent.canFit(this.user, target)) {
+			return false;
+		}
+		var userSquare = this.user.square;
+		var direction = userSquare.direction(target);
+		var board = target.parent;
+		var throwSquare = board.at(userSquare.x+direction[0], userSquare.y+direction[1]);
+		if (throwSquare?.piece?.targetable) {
+			return true;
+		}
+		return false;
+	}
+	_unitEffects(unit, target) {
+		var startSquare = unit.square;
+		target.parent.movePiece(unit, target);
+		unit.animateMove([startSquare], "jump"); // TODO: Setting to bypass obstacles
+		return 400;
+	}
 };
