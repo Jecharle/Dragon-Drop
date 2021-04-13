@@ -91,7 +91,7 @@
 			position: absolute;
 			bottom: 0px;
 			background-repeat: no-repeat;
-			background-position: 0px 0px;
+			background-position: bottom left;
 		}
 		.unit-info .lifebar {
 			visibility: visible;
@@ -156,7 +156,7 @@
 	--unit-sprite-z: -110px;
 
 	--face-w: 96px;	
-	--face-h: 96px;
+	--face-h: 64px;
 
 	--lifebar-h: 12px;
 	--action-mark-h: 16px;

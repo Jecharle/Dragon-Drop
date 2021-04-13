@@ -565,6 +565,7 @@ class SkillList extends Container {
 		super();
 		this._user = null;
 		this.el.classList.add('skill-list');
+		this.el.style.visibility = "hidden";
 
 		this._userInfo = new UnitInfo();
 		this.el.appendChild(this._userInfo.el);
@@ -574,9 +575,13 @@ class SkillList extends Container {
 		this._clearSkills();
 		this._user = user;
 		this._userInfo.unit = user;
-		if (!user) return false;
+		if (!user) {
+			this.el.style.visibility = "hidden";
+			return false;
+		}
 
 		user.skills.forEach(skill => this._addSkill(skill));
+		this.el.style.visibility = "visible";
 		return true;
 	}
 
