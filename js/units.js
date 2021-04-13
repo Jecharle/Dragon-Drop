@@ -7,10 +7,10 @@ class TestMeleeUnit extends UnitPiece {
 		this.style = 'melee-unit';
 	}
 
-	get _name() {
+	get name() {
 		return "Melee Fighter";
 	}
-	get _description() {
+	get description() {
 		return "Specialize in close-range combat";
 	}
 
@@ -35,10 +35,10 @@ class TestSupportUnit extends UnitPiece {
 		this._moveStyle = 'teleport';
 	}
 
-	get _name() {
+	get name() {
 		return "Support Unit";
 	}
-	get _description() {
+	get description() {
 		return "Low health, but a variety of long-range abilities";
 	}
 
@@ -62,10 +62,10 @@ class TestEnemyUnit extends UnitPiece {
 		this.style = 'enemy-unit';
 	}
 
-	get _name() {
+	get name() {
 		return "Monster";
 	}
-	get _description() {
+	get description() {
 		return "Specialize in close-range combat";
 	}
 
@@ -88,7 +88,6 @@ class TestEnemyUnit extends UnitPiece {
 class ObjectPiece extends UnitPiece {
 	get canMove() { return false; }
 	get canAct() { return false; }
-	get myTurn() { return false; }
 	get moveRange() { return 0; }
 	select() { return false; }
 	_setSelectable() { }
@@ -100,10 +99,10 @@ class TestRockObject extends ObjectPiece {
 		this.style = 'rock';
 	}
 
-	get _name() {
+	get name() {
 		return "Barrier";
 	}
-	get _description() {
+	get description() {
 		return "An obstacle used to control the terrain";
 	}
 

@@ -78,7 +78,7 @@ class Lifebar extends Detail {
 	}
 
 	set value(value) {
-		if (value >= 0 && this.maxValue > 0 && this._subEl) {
+		if (value >= 0 && this.maxValue >= 0 && this._subEl) {
 			var delta = this._value - value;
 			this._value = value;
 			this._subEl.style.width = Lifebar.width(value);
@@ -96,7 +96,7 @@ class Lifebar extends Detail {
 		return this._maxValue;
 	}
 	set maxValue(value) {
-		if (value > 0) {
+		if (value >= 0) {
 			this._maxValue = value;
 			this.el.style.width = Lifebar.width(value);
 		}

@@ -273,10 +273,10 @@ class UnitPiece extends Piece {
 		this._skills = [];
 	}
 
-	get _name() {
+	get name() {
 		return "[Unit name]";
 	}
-	get _description() {
+	get description() {
 		return "[Unit description]";
 	}
 

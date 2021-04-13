@@ -74,6 +74,40 @@
 	width: 50%;
 }
 
+/*Selected unit info*/
+.unit-info {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	height: var(--unit-sprite-h);
+	width: 25%;
+	display: flex;
+	justify-content: flex-start;
+}
+	.unit-info .sprite {
+		width: var(--unit-sprite-w);
+		height: var(--unit-sprite-h);
+		box-sizing: border-box;
+		position: absolute;
+		bottom: 0px;
+		background-repeat: no-repeat;
+		background-position: 0px 0px;
+	}
+	.unit-info .lifebar {
+		visibility: visible;
+	}
+	.unit-info .name {
+		position: absolute;
+		z-index: 2;
+		height: max-content;
+		bottom: 0px;
+		font-size: 16px;
+		font-weight: bold;
+	}
+	.unit-info:hover .skill-description {
+		display: block;
+	}
+
 /*Phase change & end screens*/
 .phase-banner {
 	font-size: 40px;
