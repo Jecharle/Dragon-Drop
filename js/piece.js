@@ -276,8 +276,13 @@ class UnitPiece extends Piece {
 	get name() {
 		return "[Unit name]";
 	}
-	get description() {
+	get _description() {
 		return "[Unit description]";
+	}
+
+	get fullDescription() {
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		return description;
 	}
 
 	get moveRange() {
@@ -595,18 +600,18 @@ class SkillPiece extends Piece {
 	}
 
 	get fullDescription() {
-		var desc = `<strong>${this._name}</strong><br>${this._description}`;
+		var description = `<strong>${this._name}</strong><br>${this._description}`;
 		if (this.hasLimitedUses) {
-			desc += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
+			description += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
 		}
 		if (this.hasCooldown) {
 			if (this.cooldown > 0) {
-				desc += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
+				description += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
 			} else {
-				desc += `<br><em>${this.cooldownCost} turn cooldown</em>`;
+				description += `<br><em>${this.cooldownCost} turn cooldown</em>`;
 			}
 		}
-		return desc;
+		return description;
 	}
 
 	get _name() {

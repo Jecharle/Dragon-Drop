@@ -10,7 +10,7 @@ class TestMeleeUnit extends UnitPiece {
 	get name() {
 		return "Melee Fighter";
 	}
-	get description() {
+	get _description() {
 		return "Specialize in close-range combat";
 	}
 
@@ -38,7 +38,7 @@ class TestSupportUnit extends UnitPiece {
 	get name() {
 		return "Support Unit";
 	}
-	get description() {
+	get _description() {
 		return "Low health, but a variety of long-range abilities";
 	}
 
@@ -65,7 +65,7 @@ class TestEnemyUnit extends UnitPiece {
 	get name() {
 		return "Monster";
 	}
-	get description() {
+	get _description() {
 		return "Specialize in close-range combat";
 	}
 
@@ -102,12 +102,11 @@ class TestRockObject extends ObjectPiece {
 	get name() {
 		return "Barrier";
 	}
-	get description() {
+	get _description() {
 		return "An obstacle used to control the terrain";
 	}
 
 	_setStats() {
 		this._maxHp = 2;
-		this._moveRange = 0;
 	}
 }

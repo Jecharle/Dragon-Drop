@@ -640,7 +640,7 @@ class UnitInfo extends ElObj {
 			this._lifebar.maxValue = unit.maxHp;
 			this._lifebar.value = unit.hp;
 			this._nameSpan.innerText = unit.name;
-			this._tooltip.value = unit.description;
+			this._tooltip.value = unit.fullDescription;
 		} else {
 			this.style = null;
 			this._unit = null;

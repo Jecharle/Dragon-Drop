@@ -252,6 +252,7 @@ class BattleScene extends Scene {
 	_win() {
 		if (this.lastScene) this.lastScene.sendData({ victory: true });
 		this._phase = BattleScene.EndPhase;
+		this._deselectUnit();
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Victory!");
@@ -259,6 +260,7 @@ class BattleScene extends Scene {
 	_lose() {
 		if (this.lastScene) this.lastScene.sendData({ victory: false });
 		this._phase = BattleScene.EndPhase;
+		this._deselectUnit();
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Defeat");
