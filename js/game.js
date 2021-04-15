@@ -43,6 +43,7 @@ class Game {
 		// TEMP
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
+		Party.add(new TestPositionPartyMember());
 		Game.setScene(new BattleScene( new TestMap(), Party.getUnits() ));
 	}
 }

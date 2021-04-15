@@ -78,3 +78,9 @@ class TestSupportPartyMember extends PartyMember {
 		return new TestSupportUnit(this);
 	}
 }
+
+class TestPositionPartyMember extends PartyMember {
+	getUnit() {
+		return new TestPositionUnit(this);
+	}
+}

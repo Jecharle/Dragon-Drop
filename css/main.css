@@ -405,6 +405,13 @@
 		background-image: url("../img/testSupportUnitFace.png");
 	}
 
+	.position-unit>.sprite {
+		background-image: url("../img/testPositionUnit.png");
+	}
+	.position-unit>.face {
+		background-image: url("../img/testMeleeUnitFace.png");
+	}
+
 	.enemy-unit>.sprite {
 		background-image: url("../img/testEnemyUnit.png");
 	}
