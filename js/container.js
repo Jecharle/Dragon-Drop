@@ -55,14 +55,14 @@ class Board extends Container {
 		this.squares = [];
 
 		for (var y = 0; y < this.h; y++) {
-			var row = document.createElement('div');
-			row.classList.add('row');
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
+				var isoX = 64*(x-y); // TODO: Sync these numbers with the css?
+				var isoY = 32*(x+y)-8*32;
+				square.el.style.transform = `translate(${isoX}px, ${isoY}px)`;
 				this.squares[(y * this.w) + x] = square;
-				row.appendChild(square.el);
+				this.el.appendChild(square.el);
 			}
-			this.el.appendChild(row);
 		}
 		if (mapData) this._loadTerrain(mapData.terrain);
 

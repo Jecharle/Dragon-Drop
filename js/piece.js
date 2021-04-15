@@ -223,7 +223,7 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var spriteEffect = new SpriteEffect(2000, "unit", this.style, "dead");
-		if (this._facing > 0) spriteEffect.el.classList.add("left");
+		if (this._facing < 0) spriteEffect.el.classList.add("left");
 		this.square.el.appendChild(spriteEffect.el);
 	}
 
@@ -304,7 +304,7 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._facing = 0;
+		this._facing = 1;
 		this.refresh();
 	}
 	startTurn() {
@@ -326,10 +326,10 @@ class UnitPiece extends Piece {
 		var facing = (target.x - target.y) - (from.x - from.y);
 		if (facing < 0) {
 			this.el.classList.add('left');
-			this._facing = 180;
+			this._facing = -1;
 		} else if (facing > 0) {
 			this.el.classList.remove('left');
-			this._facing = 0;
+			this._facing = 1;
 		}
 	}
 	animateMove(path, type) {
@@ -360,7 +360,7 @@ class UnitPiece extends Piece {
 			var dz = dy;
 
 			keyframes.push({
-				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)`
+				transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})`
 			});
 		});
 		keyframes.reverse();
@@ -378,7 +378,7 @@ class UnitPiece extends Piece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
@@ -400,9 +400,9 @@ class UnitPiece extends Piece {
 		var time = 400;
 
 		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(90deg) scaleY(1.5)` },
-			{ transform: `translate3d(0, 0, 0) rotateY(90deg) scaleY(1.5)` },
+			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
+			{ transform: `translate(${dx}px, ${dy}px) scaleX(0) scaleY(1.5)` },
+			{ transform: `translate(0, 0) scaleX(0) scaleY(1.5)` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
@@ -418,14 +418,14 @@ class UnitPiece extends Piece {
 
 		var keyframes = [
 			{ },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
+			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
 			{ }
 		];
 		if (origin) {
 			dx = 32*(origin.x - this.square.x - origin.y + this.square.y);
 			dy = 16*(origin.x - this.square.x + origin.y - this.square.y);
 			dz = dy;
-			keyframes[0] = { transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` };
+			keyframes[0] = { transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` };
 		}
 		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
 		// TODO: Add attacking style, or leave that elsewhere?

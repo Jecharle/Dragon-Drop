@@ -142,17 +142,14 @@
 
 /*Board structure*/
 :root {
-	--square-size: 90px;
-	--square-z: 64px;
-	--square-wall-z: 102px;
+	--square-size: 128px;
 
-	--square-sprite-w: 128px;
-	--square-sprite-h: 128px;
-	--square-sprite-top-h: 64px;
+	--square-w: 128px;
+	--square-h: 128px;
+	--square-top-h: 64px;
 
-	--unit-sprite-w: 64px;	
-	--unit-sprite-h: 64px;
-	--unit-sprite-z: -110px;
+	--unit-w: 64px;	
+	--unit-h: 64px;
 
 	--face-w: 96px;	
 	--face-h: 80px;
@@ -166,57 +163,59 @@
 }
 .board {
 	display: flex;
-	flex-flow: column nowrap;
-	transform: rotateX(60deg) rotateZ(45deg);
+	justify-content: center;
+	align-items: center;
 	transform-style: preserve-3d;
 	position: relative;
-	top: 32px;
 	z-index: 0;
 }
-	.row {
-		flex: 0 0 auto;
-		display: flex;
-		flex-flow: row nowrap;
-	}
 	.square {
-		flex: 0 0 auto;
-		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: absolute;
+		z-index: 0;
 		box-sizing: border-box;
-		width: var(--square-size);
-		height: var(--square-size);
-		transform: translateZ(var(--square-z));
-		transform-style: preserve-3d;
+		width: var(--square-w);
+		height: var(--square-top-h);
+		pointer-events: none;
+	}
+	.square::after {
+		/*the mouse box for the square, also the place you'd put highlights*/
+		content: "";
+		width: inherit;
+		height: inherit;
+		position: absolute;
+		z-index: 0.5;
+		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+		pointer-events: auto;
 	}
 
 	/*Terrain types*/
 	.square>.sprite {
 		position: absolute;
 		z-index: -2;
-		width: var(--square-sprite-w);
-		height: var(--square-sprite-h);
+		width: var(--square-w);
+		height: var(--square-h);
 		top: 0px;
-		left: calc(-0.5*var(--square-sprite-w));
 		
 		background-image: url(../img/testTileset.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
-		transform: translateZ(-1px) rotateZ(-45deg) rotateX(-60deg);
 		transform-origin: 50% 0%;
 	}
 		.pit>.sprite {
-			background-position-y: calc(-1*var(--square-sprite-h));
+			background-position-y: calc(-1*var(--square-h));
 		}
 		.cover>.sprite {
-			background-position-y: calc(-2*var(--square-sprite-h));
-		}
-		.wall {
-			transform: translateZ(var(--square-wall-z));
+			background-position-y: calc(-2*var(--square-h));
 		}
 		.wall>.sprite {
-			background-position-y: calc(-3*var(--square-sprite-h));
+			background-position-y: calc(-3*var(--square-h));
+			top: -32px;
 		}
 		.rough>.sprite {
-			background-position-y: calc(-4*var(--square-sprite-h));
+			background-position-y: calc(-4*var(--square-h));
 		}
 
 	/*Square highlighting*/
@@ -227,27 +226,27 @@
 		top: 0px;
 		left: 0px;
 		opacity: 65%;
-		width: var(--square-sprite-w);
-		height: var(--square-sprite-top-h);
+		width: var(--square-w);
+		height: var(--square-top-h);
 		background-image: url(../img/tileHighlights.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
 		.move-range>.sprite::after {
-			background-position-y: calc(-1*var(--square-sprite-top-h));
+			background-position-y: calc(-1*var(--square-top-h));
 		}
 		.skill-range>.sprite::after {
-			background-position-y: calc(-2*var(--square-sprite-top-h));
+			background-position-y: calc(-2*var(--square-top-h));
 		}
 		.deploy-range>.sprite::after {
-			background-position-y: calc(-3*var(--square-sprite-top-h));
+			background-position-y: calc(-3*var(--square-top-h));
 		}
 		.enemy-preview.move-range>.sprite::after {
-			background-position-y: calc(-4*var(--square-sprite-top-h));
+			background-position-y: calc(-4*var(--square-top-h));
 		}
 
 		.square.selected>.sprite::after {
-			background-position-x: calc(-1*var(--square-sprite-w));
+			background-position-x: calc(-1*var(--square-w));
 		}
 
 		.invalid>.sprite::after {
@@ -257,11 +256,11 @@
 	.square.move-path>.sprite::before {
 		content: "";
 		position: absolute;
-		z-index: 0;
+		z-index: -0.5;
 		top: 0px;
 		left: 0px;
-		width: var(--square-sprite-w);
-		height: var(--square-sprite-top-h);
+		width: var(--square-w);
+		height: var(--square-top-h);
 		background-image: url(../img/path.png);
 		background-repeat: no-repeat;
 	}
@@ -270,87 +269,74 @@
 			background-position: 0 0;
 		}
 		.up>.sprite::before {
-			background-position: 0 calc(-1*var(--square-sprite-top-h));
+			background-position: 0 calc(-1*var(--square-top-h));
 		}
 		.right>.sprite::before {
-			background-position: 0 calc(-2*var(--square-sprite-top-h));
+			background-position: 0 calc(-2*var(--square-top-h));
 		}
 		.down>.sprite::before {
-			background-position: 0 calc(-3*var(--square-sprite-top-h));
+			background-position: 0 calc(-3*var(--square-top-h));
 		}
 		/*straight*/
 		.left.right>.sprite::before {
-			background-position: calc(-1*var(--square-sprite-w)) 0;
+			background-position: calc(-1*var(--square-w)) 0;
 		}
 		.up.down>.sprite::before {
-			background-position: calc(-1*var(--square-sprite-w)) calc(-1*var(--square-sprite-top-h));
+			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-top-h));
 		}
 		/*corners*/
 		.left.up>.sprite::before {
-			background-position: calc(-2*var(--square-sprite-w)) 0;
+			background-position: calc(-2*var(--square-w)) 0;
 		}
 		.up.right>.sprite::before {
-			background-position: calc(-2*var(--square-sprite-w)) calc(-1*var(--square-sprite-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-top-h));
 		}
 		.right.down>.sprite::before {
-			background-position: calc(-2*var(--square-sprite-w)) calc(-2*var(--square-sprite-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-top-h));
 		}
 		.down.left>.sprite::before {
-			background-position: calc(-2*var(--square-sprite-w)) calc(-3*var(--square-sprite-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-top-h));
 		}
 		/*arrows*/
 		.left.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-sprite-w)) 0;
+			background-position: calc(-3*var(--square-w)) 0;
 		}
 		.up.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-sprite-w)) calc(-1*var(--square-sprite-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-top-h));
 		}
 		.right.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-sprite-w)) calc(-2*var(--square-sprite-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-top-h));
 		}
 		.down.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-sprite-w)) calc(-3*var(--square-sprite-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-top-h));
 		}
 
 /*Unit base*/
 .unit {
-	width: var(--unit-sprite-w);
-	height: var(--unit-sprite-h);
+	width: var(--unit-w);
+	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
 	z-index: 1;
-	right: calc(-0.5*var(--unit-sprite-w));
-	bottom: 0px;
-	transform: rotateZ(-45deg) rotateX(-60deg);
-	transform-origin: 50% 100%;
-	transform-style: preserve-3d;
+	top: 0px;
 	display: flex;
 	justify-content: center;
+	pointer-events: auto;
 }
 	.unit>.sprite {
-		width: var(--unit-sprite-w);
-		height: var(--unit-sprite-h);
+		width: var(--unit-w);
+		height: var(--unit-h);
 		box-sizing: border-box;
 		position: absolute;
+		z-index: inherit;
 		bottom: 0px;
-		transform: translateZ(var(--unit-sprite-z));
 		background-repeat: no-repeat;
 		background-position: 0px 0px;
 		transition: transform 0.2s;
 	}
-	.unit.x2 {
-		width: calc(2*var(--unit-sprite-w));
-		height: calc(2*var(--unit-sprite-h));
-		right: calc(-1*var(--unit-sprite-w));;
-	}
-		.unit.x2>.sprite {
-			width: calc(2*var(--unit-sprite-w));
-			height: calc(2*var(--unit-sprite-h));
-		}
 
 	/*Unit details*/
 	.lifebar {
-		visibility: hidden;
 		position: absolute;
 		z-index: 2;
 		height: var(--lifebar-h);
@@ -358,6 +344,7 @@
 		background-image: url(../img/lifebar.png);
 		background-position: 0px 0px;
 		background-repeat: repeat-x;
+		visibility: hidden;
 	}
 		.lifebar>.inner {
 			position: absolute;
@@ -386,8 +373,12 @@
 		}
 
 	/*Unit states and motions*/
+	.unit.x2 {
+		--unit-w: 128px;
+		--unit-h: 128px;
+	}
 	.left.unit>.sprite {
-		transform: translateZ(-100px) rotateY(180deg);
+		transform: scaleX(-1);
 	}
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
 		filter: drop-shadow(2px 0px yellow)
@@ -431,17 +422,15 @@
 		background-image: url("../img/testObject.png");
 	}
 
-	/*TODO: Add portraits for the >.face style?*/
-
 	/*Sprite Effects*/
 	.test-attack-effect>.sprite {
 		background-image: url("../img/testAttack.png");
-		background-position-x: calc(-6*var(--unit-sprite-w));
+		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) both;
 	}
 	.test-heal-effect>.sprite {
 		background-image: url("../img/testHeal.png");
-		background-position-x: calc(-5*var(--unit-sprite-w));
+		background-position-x: calc(-5*var(--unit-w));
 		animation: sprite-animation 0.3s steps(5) both;
 	}
 	
