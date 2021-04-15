@@ -150,12 +150,15 @@ class SkillDescription extends Detail {
  Animated sprite effect
 ***************************************************/
 class SpriteEffect extends SpriteElObj {
-	constructor(duration, ...classList) {
+	constructor(square, duration, ...classList) {
 		super();
 		this.el.classList.add(...classList)
 		setTimeout(() => {
 			this.el.parentElement.removeChild(this.el);
 		}, duration);
+		this.square = square;
+		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY-32}px)`;
+		this.el.style.zIndex = square.screenZ;
 	}
 
 	get elClass() {

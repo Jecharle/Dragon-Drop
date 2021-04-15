@@ -222,9 +222,9 @@ class UnitPiece extends Piece {
 	}
 	_showDeathAnimation() {
 		if (!this.square) return;
-		var spriteEffect = new SpriteEffect(2000, "unit", this.style, "dead");
-		if (this._facing < 0) spriteEffect.el.classList.add("left");
-		this.square.el.appendChild(spriteEffect.el);
+		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
+		if (this._facing < 0) vfx.spriteEl.classList.add("left");
+		this.square.parent.el.appendChild(vfx.el);
 	}
 
 
@@ -351,37 +351,28 @@ class UnitPiece extends Piece {
 		this._addTimedClass(moveTime, 'moving');
 	}
 	_animatePath(path) {
-		var target = this.square;
-
 		var keyframes = [{}];
 		path.forEach(square => {
-			var dx = 64*(square.x - target.x - square.y + target.y);
-			var dy = 32*(square.x - target.x + square.y - target.y);
-			var dz = dy;
-
-			keyframes.push({
-				transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})`
+			keyframes.unshift({
+				transform: `translate(${square.screenX}px, ${square.screenY-32}px)`,
+				zIndex: square.screenZ
 			});
 		});
-		keyframes.reverse();
 		var time = 100*keyframes.length
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});		
+		this.el.animate(keyframes, {duration: time, easing: "linear"});		
 		return time;
 	}
 	_animateJump(path) {
-		var target = this.square;
 		var origin = path[path.length-1];
-
-		var dx = 64*(origin.x - target.x - origin.y + target.y);
-		var dy = 32*(origin.x - target.x + origin.y - target.y);
-		var dz = dy;
-		var time = 400;
-
 		var keyframes = [
-			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				zIndex: origin.screenZ
+			},
 			{ }
 		];
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
+		var time = 400;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
 
 		var jumpframes = [
 			{ },
@@ -391,18 +382,25 @@ class UnitPiece extends Piece {
 		return time;
 	}
 	_animateTeleport(path) {
-		var target = this.square;
 		var origin = path[path.length-1];
 
-		var dx = 64*(origin.x - target.x - origin.y + target.y);
-		var dy = 32*(origin.x - target.x + origin.y - target.y);
-		var dz = dy;
 		var time = 400;
-
 		var keyframes = [
-			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
-			{ transform: `translate(${dx}px, ${dy}px) scaleX(0) scaleY(1.5)` },
-			{ transform: `translate(0, 0) scaleX(0) scaleY(1.5)` },
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				zIndex: origin.screenZ
+			},
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				zIndex: origin.screenZ
+			}
+		];
+		this.el.animate(keyframes, {duration: time/2, easing: "linear"});
+
+		keyframes = [
+			{ transform: `scaleX(${this._facing})`},
+			{ transform: `scaleX(0) scaleY(1.5)` },
+			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ }
 		];
 		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
@@ -410,6 +408,7 @@ class UnitPiece extends Piece {
 	}
 
 	animateBump(target, origin) {
+		// TODO: Update this one to use square screen coordinates too I guess
 		var direction = this.square.direction(target);
 		var dx = 32*(direction[0] - direction[1]);
 		var dy = 16*(direction[0] + direction[1]);
@@ -747,8 +746,8 @@ class SkillPiece extends Piece {
 
 	_showEffect(square, ...styles) {
 		if (!square) return;
-		var vfx = new SpriteEffect(1000, "unit", ...styles);
-		square.el.appendChild(vfx.el);
+		var vfx = new SpriteEffect(square, 1000, "unit", ...styles);
+		square.parent.el.appendChild(vfx.el);
 	}
 
 	_payCost() {

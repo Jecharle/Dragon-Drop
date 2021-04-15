@@ -145,8 +145,8 @@
 	--square-size: 128px;
 
 	--square-w: 128px;
-	--square-h: 128px;
-	--square-top-h: 64px;
+	--square-h: 64px;
+	--square-total-h: 128px;
 
 	--unit-w: 64px;	
 	--unit-h: 64px;
@@ -155,8 +155,6 @@
 	--face-h: 80px;
 
 	--lifebar-h: 12px;
-	--action-mark-h: 16px;
-	--action-mark-w: 16px;
 
 	--skill-w: 64px;
 	--skill-h: 64px;
@@ -165,7 +163,6 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	transform-style: preserve-3d;
 	position: relative;
 	z-index: 0;
 }
@@ -174,14 +171,12 @@
 		justify-content: center;
 		align-items: center;
 		position: absolute;
-		z-index: 0;
 		box-sizing: border-box;
 		width: var(--square-w);
-		height: var(--square-top-h);
+		height: var(--square-h);
 		pointer-events: none;
 	}
 	.square::after {
-		/*the mouse box for the square, also the place you'd put highlights*/
 		content: "";
 		width: inherit;
 		height: inherit;
@@ -196,26 +191,25 @@
 		position: absolute;
 		z-index: -2;
 		width: var(--square-w);
-		height: var(--square-h);
+		height: var(--square-total-h);
 		top: 0px;
 		
 		background-image: url(../img/testTileset.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
-		transform-origin: 50% 0%;
 	}
 		.pit>.sprite {
-			background-position-y: calc(-1*var(--square-h));
+			background-position-y: calc(-1*var(--square-total-h));
 		}
 		.cover>.sprite {
-			background-position-y: calc(-2*var(--square-h));
+			background-position-y: calc(-2*var(--square-total-h));
 		}
 		.wall>.sprite {
-			background-position-y: calc(-3*var(--square-h));
+			background-position-y: calc(-3*var(--square-total-h));
 			top: -32px;
 		}
 		.rough>.sprite {
-			background-position-y: calc(-4*var(--square-h));
+			background-position-y: calc(-4*var(--square-total-h));
 		}
 
 	/*Square highlighting*/
@@ -227,22 +221,22 @@
 		left: 0px;
 		opacity: 65%;
 		width: var(--square-w);
-		height: var(--square-top-h);
+		height: var(--square-h);
 		background-image: url(../img/tileHighlights.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
 		.move-range>.sprite::after {
-			background-position-y: calc(-1*var(--square-top-h));
+			background-position-y: calc(-1*var(--square-h));
 		}
 		.skill-range>.sprite::after {
-			background-position-y: calc(-2*var(--square-top-h));
+			background-position-y: calc(-2*var(--square-h));
 		}
 		.deploy-range>.sprite::after {
-			background-position-y: calc(-3*var(--square-top-h));
+			background-position-y: calc(-3*var(--square-h));
 		}
 		.enemy-preview.move-range>.sprite::after {
-			background-position-y: calc(-4*var(--square-top-h));
+			background-position-y: calc(-4*var(--square-h));
 		}
 
 		.square.selected>.sprite::after {
@@ -260,7 +254,7 @@
 		top: 0px;
 		left: 0px;
 		width: var(--square-w);
-		height: var(--square-top-h);
+		height: var(--square-h);
 		background-image: url(../img/path.png);
 		background-repeat: no-repeat;
 	}
@@ -269,46 +263,46 @@
 			background-position: 0 0;
 		}
 		.up>.sprite::before {
-			background-position: 0 calc(-1*var(--square-top-h));
+			background-position: 0 calc(-1*var(--square-h));
 		}
 		.right>.sprite::before {
-			background-position: 0 calc(-2*var(--square-top-h));
+			background-position: 0 calc(-2*var(--square-h));
 		}
 		.down>.sprite::before {
-			background-position: 0 calc(-3*var(--square-top-h));
+			background-position: 0 calc(-3*var(--square-h));
 		}
 		/*straight*/
 		.left.right>.sprite::before {
 			background-position: calc(-1*var(--square-w)) 0;
 		}
 		.up.down>.sprite::before {
-			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-top-h));
+			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-h));
 		}
 		/*corners*/
 		.left.up>.sprite::before {
 			background-position: calc(-2*var(--square-w)) 0;
 		}
 		.up.right>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-h));
 		}
 		.right.down>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-h));
 		}
 		.down.left>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-top-h));
+			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-h));
 		}
 		/*arrows*/
 		.left.move-end>.sprite::before {
 			background-position: calc(-3*var(--square-w)) 0;
 		}
 		.up.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-h));
 		}
 		.right.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-h));
 		}
 		.down.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-top-h));
+			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-h));
 		}
 
 /*Unit base*/
@@ -620,30 +614,3 @@
 	border: 1px solid black;
 	box-sizing: border-box;
 }/**/
-
-/*3D debugging styles*/
-/*
-.board {
-	animation: rotate-3D 15s ease-in-out infinite;
-}
-.square {
-	border: 1px solid red;
-}
-.unit {
-	border: 1px solid black;
-}
-.unit>.sprite {
-	border: 1px solid black;
-}
-@keyframes rotate-3D {
-	from {
-		transform: rotateX(60deg) rotateZ(45deg);
-	}
-	50% {
-		transform: rotateX(60deg) rotateZ(225deg);
-	}
-	to {
-		transform: rotateX(60deg) rotateZ(405deg);
-	}
-}
-/**/

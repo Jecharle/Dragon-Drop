@@ -57,9 +57,9 @@ class Board extends Container {
 		for (var y = 0; y < this.h; y++) {
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
-				var isoX = 64*(x-y); // TODO: Sync these numbers with the css?
-				var isoY = 32*(x+y)-8*32;
-				square.el.style.transform = `translate(${isoX}px, ${isoY}px)`;
+				
+				square.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
+				square.el.style.zIndex = `${square.screenZ}`;
 				this.squares[(y * this.w) + x] = square;
 				this.el.appendChild(square.el);
 			}
@@ -158,22 +158,24 @@ class Board extends Container {
 		return nearestSquare;
 	}
 
-	movePiece(piece, targetSquare) {
-		if (!piece || !targetSquare) return false;
+	movePiece(piece, square) {
+		if (!piece || !square) return false;
 
-		if (!this.canFit(piece, targetSquare)) {
+		if (!this.canFit(piece, square)) {
 			return false;
 		}
 
 		if (piece.parent != this) {
 			piece.setParent(this);
+			this.el.appendChild(piece.el);
 		} else {
 			this._fillPiece(null, piece.square, piece.size);
 		}
 
-		targetSquare.el.appendChild(piece.el);
-		piece.square = targetSquare;
-		this._fillPiece(piece, targetSquare);
+		piece.el.style.transform = `translate(${square.screenX}px, ${square.screenY-32}px)`;
+		piece.el.style.zIndex = square.screenZ;
+		piece.square = square;
+		this._fillPiece(piece, square);
 
 		return true;
 	}
@@ -465,6 +467,16 @@ class Square extends Position {
 	}
 	get y() {
 		return this._y;
+	}
+
+	get screenX() {
+		return 64*(this.x - this.y);
+	}
+	get screenY() {
+		return 32*(this.x + this.y) - 8*32;
+	}
+	get screenZ() {
+		return (this.x + this.y);
 	}
 
 	distance(square) {
