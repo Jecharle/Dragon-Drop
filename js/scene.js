@@ -116,8 +116,8 @@ class BattleScene extends Scene {
 	}
 
 	_initTeams() {
-		this.playerTeam = new Team(0, false);
-		this.enemyTeam = new Team(1, true);
+		this.playerTeam = new Team(0, "ally");
+		this.enemyTeam = new Team(1, "enemy", true);
 		this._setActiveTeam(null);
 	}
 	_setActiveTeam(team) {
@@ -650,10 +650,11 @@ BattleScene.EndPhase = -1;
  Battle scene -> Team
 ***************************************************/
 class Team {
-	constructor(group, isAuto) {
+	constructor(group, style, isAuto) {
 		this.group = group;
-		this.members = [];
+		this.style = style;
 		this._auto = isAuto || false;
+		this.members = [];
 	}
 
 	get isAuto() {
@@ -674,12 +675,14 @@ class Team {
 	add(piece) {
 		if (!this.members.includes(piece)) {
 			this.members.push(piece);
+			if (this.style) piece.el.classList.add(this.style);
 		}
 	}
 	remove(piece) {
 		var index = this.members.indexOf(piece);
 		if (index > -1) {
 			this.members.splice(index, 1);
+			if (this.style) piece.el.classList.remove(this.style);
 		}
 	}
 

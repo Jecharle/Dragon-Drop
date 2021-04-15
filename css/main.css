@@ -349,26 +349,6 @@
 		}
 
 	/*Unit details*/
-	.unit.selectable::after {
-		content: "";
-		position: absolute;
-		width: var(--action-mark-w);
-		height: var(--action-mark-h);;
-		top: 0px;
-		background-image: url("../img/uiMarkers.png");
-		background-repeat: no-repeat;
-		background-position-x: calc(-4*var(--action-mark-w));
-		animation: sprite-animation 1.2s steps(4) infinite;
-	}
-		.unit:hover::after, .skill-range .unit::after, .selected .unit::after {
-			top: calc(-1*var(--action-mark-h));
-		}
-		.hp-change.unit::after {
-			display: none;
-		}
-		.selectable.unit:hover>.sprite {
-			filter: contrast(60%) brightness(125%);
-		}
 	.lifebar {
 		visibility: hidden;
 		position: absolute;
@@ -408,6 +388,12 @@
 	/*Unit states and motions*/
 	.left.unit>.sprite {
 		transform: translateZ(-100px) rotateY(180deg);
+	}
+	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
+		filter: drop-shadow(2px 0px yellow)
+		drop-shadow(-2px 0px yellow)
+		drop-shadow(0px 2px yellow)
+		drop-shadow(0px -2px yellow);
 	}
 	.damaged {
 		animation: shake 150ms;
