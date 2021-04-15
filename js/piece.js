@@ -607,7 +607,7 @@ class SkillPiece extends Piece {
 		this._area = 0;
 		this._baseCooldown = 0;
 		this._maxUses = 0;
-		this._basePower = 1;
+		this._basePower = 2;
 	}
 
 	get elClass() {
@@ -615,7 +615,7 @@ class SkillPiece extends Piece {
 	}
 
 	get fullDescription() {
-		var description = `<strong>${this._name}</strong><br>${this._description}`;
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
 		if (this.hasLimitedUses) {
 			description += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
 		}
@@ -629,7 +629,7 @@ class SkillPiece extends Piece {
 		return description;
 	}
 
-	get _name() {
+	get name() {
 		return "[Skill name]";
 	}
 	get _description() {
@@ -673,7 +673,8 @@ class SkillPiece extends Piece {
 	}
 
 	canUse() {
-		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
+		return this.user.myTurn && this.user.canAct
+		&& this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
 	use(target, callback) {
 		if (!this.validTarget(target)) callback(false);

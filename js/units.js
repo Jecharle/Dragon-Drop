@@ -23,7 +23,6 @@ class TestMeleeUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestRushSkill(this),
-			new TestPositionSkill(this),
 		]
 	}
 };
@@ -49,9 +48,36 @@ class TestSupportUnit extends UnitPiece {
 
 	_setSkills() {
 		this._skills = [
-			new TestAreaSkill(this),
+			new TestRangedSkill(this),
 			new TestHealSkill(this),
 			new TestBuildSkill(this),
+		]
+	}
+};
+
+class TestPositionUnit extends UnitPiece {
+	constructor(partyMember) {
+		super(partyMember);
+		this.style = 'position-unit';
+		this._moveStyle = 'jump';
+	}
+
+	get name() {
+		return "Positioning Unit";
+	}
+	get _description() {
+		return "Low damage, but specialized in positioning enemies";
+	}
+
+	_setStats() {
+		this._maxHp = 4;
+		this._moveRange = 4;
+	}
+
+	_setSkills() {
+		this._skills = [
+			new TestAreaSkill(this),
+			new TestPositionSkill(this),
 		]
 	}
 };
@@ -70,7 +96,7 @@ class TestEnemyUnit extends UnitPiece {
 	}
 
 	_setStats() {
-		this._maxHp = 2;
+		this._maxHp = 4;
 		this._moveRange = 2;
 	}
 

@@ -304,20 +304,10 @@ class BattleScene extends Scene {
 		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
 	}
 
-	_selectUnit(unit, preview) {
+	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();
 		if (this._unit != unit) this._deselectUnit();
-
-		this._unit = unit;
-		if (!preview) this._skillList.setUser(unit);
-		return true;
-	}
-	_selectDeployUnit(unit) {
-		if (unit && !unit.select()) return false;
-		if (this._unit != unit) this._deselectUnit();
-		
-		if (unit) this._selectTarget(unit.square);
 
 		this._unit = unit;
 		this._skillList.setUser(unit);
@@ -507,7 +497,7 @@ class BattleScene extends Scene {
 
 		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
 			if (this._unit != piece) {
-				this._selectUnit(piece, true);
+				this._selectUnit(piece);
 			} else {
 				this._deselectUnit();
 			}
@@ -517,7 +507,8 @@ class BattleScene extends Scene {
 		if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (!this._unit || !this._unit.myTurn || dragging) {
-					this._selectDeployUnit(piece);
+					this._selectUnit(piece);
+					this._selectTarget(piece.square);
 				} else if (this._unit == piece) {
 					this._deselectUnit();
 				} else if (piece.square) {

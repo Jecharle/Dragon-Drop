@@ -7,7 +7,7 @@ class TestAttackSkill extends SkillPiece {
 		this.style = 'attack-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Attack";
 	}
 	get _description() {
@@ -59,7 +59,7 @@ class TestHealSkill extends SkillPiece {
 		this.style = 'heal-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Heal";
 	}
 	get _description() {
@@ -68,7 +68,7 @@ class TestHealSkill extends SkillPiece {
 
 	_setStats() {
 		super._setStats();
-		this._basePower = 2;
+		this._basePower = 3;
 		this._baseCooldown = 2;
 		this._range = 1;
 		this._minRange = 0;
@@ -99,7 +99,7 @@ class TestBuildSkill extends SkillPiece {
 		this.style = 'build-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Build";
 	}
 	get _description() {
@@ -141,7 +141,7 @@ class TestMoveSkill extends SkillPiece {
 		this.style = 'move-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Regroup";
 	}
 	get _description() {
@@ -183,11 +183,11 @@ class TestAreaSkill extends SkillPiece {
 		this.style = 'attack-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Area Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage everyone around the target position and push them back`;
+		return `Deal ${this.power} damage in a small area and push targets away from the center`;
 	}
 
 	_setStats() {
@@ -195,6 +195,7 @@ class TestAreaSkill extends SkillPiece {
 		this._range = 3;
 		this._minRange = 2;
 		this._area = 1;
+		this._basePower = 1;
 	}
 
 	inRange(origin, target) {
@@ -222,18 +223,23 @@ class TestRushSkill extends SkillPiece {
 		this.style = 'attack-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Charge Attack";
 	}
 	get _description() {
-		return `Charge the enemy and deal ${this.power} damage, pushing it back`;
+		return `Charge two spaces forward and deal ${this.power} damage to the target, pushing it back`;
 	}
 
 	_setStats() {
 		super._setStats();
+		this._basePower = 2;
 		this._range = 3;
-		this._minRange = 2;
+		this._minRange = 3;
 		this._baseCooldown = 3;
+	}
+
+	_canSeeSquare(square) {
+		return this.user.canStand(square);
 	}
 
 	validTarget(target) {
@@ -278,7 +284,7 @@ class TestPositionSkill extends SkillPiece {
 		this.style = 'move-skill';
 	}
 
-	get _name() {
+	get name() {
 		return "Throw";
 	}
 	get _description() {
