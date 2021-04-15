@@ -370,7 +370,7 @@ class UnitPiece extends Piece {
 		var keyframes = [{}];
 		path.forEach(square => {
 			keyframes.unshift({
-				transform: `translate(${square.screenX}px, ${square.screenY-32}px)`,
+				transform: `translate(${square.screenX}px, ${square.screenY}px)`,
 				zIndex: square.screenZ
 			});
 		});
@@ -382,7 +382,7 @@ class UnitPiece extends Piece {
 		var origin = path[path.length-1];
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
 				zIndex: origin.screenZ
 			},
 			{ }
@@ -403,11 +403,11 @@ class UnitPiece extends Piece {
 		var time = 400;
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
 				zIndex: origin.screenZ
 			},
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY-32}px)`,
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
 				zIndex: origin.screenZ
 			}
 		];

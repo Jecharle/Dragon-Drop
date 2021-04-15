@@ -123,6 +123,7 @@
 	position: absolute;
 	z-index: 5;
 	animation: banner-display 600ms linear 2 alternate;
+	pointer-events: none;
 }
 .battle-end {
 	font-size: 64px;
@@ -162,8 +163,8 @@
 .board {
 	display: flex;
 	justify-content: center;
-	align-items: center;
-	position: relative;
+	position: absolute;
+	top: 96px;
 	z-index: 0;
 }
 	.square {
@@ -379,7 +380,7 @@
 		drop-shadow(0px 2px yellow)
 		drop-shadow(0px -2px yellow);
 	}
-	.damaged {
+	.damaged .sprite {
 		animation: shake 150ms;
 	}
 	.spawn .sprite {

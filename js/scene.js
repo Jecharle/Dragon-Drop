@@ -278,7 +278,7 @@ class BattleScene extends Scene {
 
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Positioning";
+			this._turnTitleEl.innerText = "Reposition";
 		} else if (this._autoPhase) {
 			this._turnTitleEl.innerText = "Enemy turn";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {

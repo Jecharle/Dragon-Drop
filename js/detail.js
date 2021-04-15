@@ -157,7 +157,7 @@ class SpriteEffect extends SpriteElObj {
 			this.el.parentElement.removeChild(this.el);
 		}, duration);
 		this.square = square;
-		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY-32}px)`;
+		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
 		this.el.style.zIndex = square.screenZ;
 	}
 
@@ -165,3 +165,5 @@ class SpriteEffect extends SpriteElObj {
 		return 'vfx-sprite';
 	}
 }
+
+// TODO: Sprites can have animated movements- straight and 'jump', at first, others later

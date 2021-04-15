@@ -171,7 +171,7 @@ class Board extends Container {
 			this._fillPiece(null, piece.square, piece.size);
 		}
 		if (!this.el.contains(piece.el)) this.el.appendChild(piece.el);
-		piece.el.style.transform = `translate(${square.screenX}px, ${square.screenY-32}px)`;
+		piece.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
 		piece.el.style.zIndex = square.screenZ;
 		piece.square = square;
 		this._fillPiece(piece, square);
@@ -487,7 +487,7 @@ class Square extends Position {
 		return 64*(this.x - this.y);
 	}
 	get screenY() {
-		return 32*(this.x + this.y) - 8*32;
+		return 32*(this.x + this.y);
 	}
 	get screenZ() {
 		return (this.x + this.y);
