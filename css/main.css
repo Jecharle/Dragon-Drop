@@ -315,7 +315,6 @@
 	top: 0px;
 	display: flex;
 	justify-content: center;
-	pointer-events: auto;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
@@ -362,7 +361,7 @@
 			animation: fade-out 0.8s 0.2s both;
 			visibility: visible;
 		}
-		.unit:hover .lifebar, .skill-range .lifebar, .selected .unit .lifebar, .hp-change .lifebar {
+		.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
 			visibility: visible;
 		}
 

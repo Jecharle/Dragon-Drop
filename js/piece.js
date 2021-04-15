@@ -98,6 +98,22 @@ class UnitPiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 
 		this.initialize();
+
+		this.el.onmousemove = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
+	}
+
+	// TODO: Better place for this?
+	_mouseOver(ev) {
+		ev.stopPropagation();
+		if (ev.currentTarget) {
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.currentTarget.obj.square;
+			if (square && Game.scene) { 
+				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
+				else Game.scene.mouseOver(null, dragElId);
+			}
+		}
 	}
 
 	get elClass() {

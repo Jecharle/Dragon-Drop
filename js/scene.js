@@ -352,14 +352,9 @@ class BattleScene extends Scene {
 	}
 	_swapDeploySquares(piece, target) {
 		if (target.piece) {
-			var previousSquare = piece.square;
 			this._board.swapPieces(piece, target.piece);
-			piece.animateMove([previousSquare]);
-			previousSquare.piece.animateMove([piece.square]);
 		} else {
-			var previousSquare = piece.square;
 			this._board.movePiece(piece, target);
-			piece.animateMove([previousSquare]);
 		}
 		this._deselectUnit();
 	}
@@ -558,7 +553,7 @@ class BattleScene extends Scene {
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
 				this._deselectUnit();
-			} else if (this._unit) {
+			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
 					this._swapDeploySquares(this._unit, square);
 				} else {

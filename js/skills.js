@@ -27,7 +27,7 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_unitEffects(unit, target) {
+	_unitEffects(unit, _target) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1);
 		return 200;

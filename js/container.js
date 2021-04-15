@@ -167,11 +167,10 @@ class Board extends Container {
 
 		if (piece.parent != this) {
 			piece.setParent(this);
-			this.el.appendChild(piece.el);
 		} else {
 			this._fillPiece(null, piece.square, piece.size);
 		}
-
+		if (!this.el.contains(piece.el)) this.el.appendChild(piece.el);
 		piece.el.style.transform = `translate(${square.screenX}px, ${square.screenY-32}px)`;
 		piece.el.style.zIndex = square.screenZ;
 		piece.square = square;
@@ -253,6 +252,7 @@ class Board extends Container {
 		square.el.classList.add('deploy-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -305,6 +305,7 @@ class Board extends Container {
 
 		if (valid && !preview) {
 			square.el.ondragover = this._allowDrop;
+			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -331,6 +332,10 @@ class Board extends Container {
 		square.el.classList.add('skill-range');
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
+			if (square.piece) {
+				square.piece.el.ondragover = this._allowDrop;
+				square.piece.el.classList.add('in-range');
+			}
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -346,6 +351,10 @@ class Board extends Container {
 	_clearPaint(square) {
 		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'enemy-preview', 'invalid', 'selectable');
 		square.el.ondragover = null;
+		if (square.piece) {
+			square.piece.el.ondragover = null;
+			square.piece.el.classList.remove('in-range');
+		}
 		square.inRange = false;
 		square.invalid = false;
 		square.movesLeft = null;
@@ -386,7 +395,10 @@ class Board extends Container {
 	}
 	showAoE(skill, origin) {
 		if (!skill || !origin) return;
-		this.getAoE(skill, origin).forEach(square => square.el.classList.add('selected'));
+		this.getAoE(skill, origin).forEach(square => {
+			square.el.classList.add('selected');
+			if (square.piece) square.piece.el.classList.add('in-area');
+		});
 	}
 
 	showDeploySwap(unit, target) {
@@ -396,8 +408,10 @@ class Board extends Container {
 	}
 
 	clearTargeting() {
-		this.squares.forEach(square =>
-			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'selected'));
+		this.squares.forEach(square => {
+			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'selected');
+			if (square.piece) square.piece.el.classList.remove('in-area');
+		});
 	}
 
 	getAdjacent(square) {
@@ -424,7 +438,7 @@ class Board extends Container {
 	_drop(ev) {
 		ev.preventDefault();
 		var elId = ev.dataTransfer.getData("piece");
-		if (elId && ev.target && ev.target.obj) {
+		if (elId && ev.target?.obj) {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
@@ -549,7 +563,7 @@ class Square extends Position {
 
 	_mouseOver(ev) {
 		ev.stopPropagation();
-		if (ev.currentTarget) { // pieces count
+		if (ev.currentTarget) {
 			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
 			var square = ev.currentTarget.obj;
 			if (square && Game.scene) { 
