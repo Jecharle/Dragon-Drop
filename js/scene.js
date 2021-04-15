@@ -320,6 +320,7 @@ class BattleScene extends Scene {
 		if (unit) this._selectTarget(unit.square);
 
 		this._unit = unit;
+		this._skillList.setUser(unit);
 		return true;
 	}
 	_deselectUnit() {
