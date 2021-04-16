@@ -2,11 +2,7 @@
  Subtypes of UnitPiece
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {
-	constructor(partyMember) {
-		super(partyMember);
-		this.style = 'melee-unit';
-	}
-
+	
 	get name() {
 		return "Melee Fighter";
 	}
@@ -15,6 +11,7 @@ class TestMeleeUnit extends UnitPiece {
 	}
 
 	_setStats() {
+		this.style = 'melee-unit';
 		this._maxHp = 6;
 		this._moveRange = 3;
 	}
@@ -28,12 +25,7 @@ class TestMeleeUnit extends UnitPiece {
 };
 
 class TestSupportUnit extends UnitPiece {
-	constructor(partyMember) {
-		super(partyMember);
-		this.style = 'support-unit';
-		this._moveStyle = 'teleport';
-	}
-
+	
 	get name() {
 		return "Support Unit";
 	}
@@ -42,6 +34,8 @@ class TestSupportUnit extends UnitPiece {
 	}
 
 	_setStats() {
+		this.style = 'support-unit';
+		this._moveStyle = 'teleport';
 		this._maxHp = 4;
 		this._moveRange = 2;
 	}
@@ -56,20 +50,17 @@ class TestSupportUnit extends UnitPiece {
 };
 
 class TestPositionUnit extends UnitPiece {
-	constructor(partyMember) {
-		super(partyMember);
-		this.style = 'position-unit';
-		this._moveStyle = 'jump';
-	}
 
 	get name() {
 		return "Positioning Unit";
 	}
 	get _description() {
-		return "Low damage, but specialized in positioning enemies";
+		return "Low damage, but specialized in repositioning allies and enemies";
 	}
 
 	_setStats() {
+		this.style = 'position-unit';
+		this._moveStyle = 'jump';
 		this._maxHp = 4;
 		this._moveRange = 4;
 	}
@@ -83,11 +74,7 @@ class TestPositionUnit extends UnitPiece {
 };
 
 class TestEnemyUnit extends UnitPiece {
-	constructor(partyMember) {
-		super(partyMember);
-		this.style = 'enemy-unit';
-	}
-
+	
 	get name() {
 		return "Monster";
 	}
@@ -96,6 +83,7 @@ class TestEnemyUnit extends UnitPiece {
 	}
 
 	_setStats() {
+		this.style = 'enemy-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
 	}
@@ -120,19 +108,16 @@ class ObjectPiece extends UnitPiece {
 }
 
 class TestRockObject extends ObjectPiece {
-	constructor() {
-		super();
-		this.style = 'rock';
-	}
 
 	get name() {
 		return "Barrier";
 	}
 	get _description() {
-		return "An obstacle used to control the terrain";
+		return "An obstacle used to control the battlefield";
 	}
 
 	_setStats() {
+		this.style = 'rock';
 		this._maxHp = 2;
 	}
 }
