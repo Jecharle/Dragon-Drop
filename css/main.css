@@ -30,39 +30,40 @@
 
 /*Battle Scene*/
 
-/*Nav bar*/
-.nav-bar {
-	display: flex;
-	flex-flow: row nowrap;
-	justify-content: space-between;
-	align-items: center;
+/*Navigation elements*/
+.nav-button {
+	display: inline-block;
+	font-size: 18px;
+	color: white;
+	background-color: deepskyblue;
+	border: none;
+	padding: 12px;
+	width: 15%;
+	cursor: pointer;
 	position: absolute;
-	width: 100%;
-	top: 0px;
-	left: 0px;
 }
-	.nav-bar button {
-		display: inline-block;
-		font-size: 18px;
-		color: white;
-		background-color: deepskyblue;
-		border: none;
-		padding: 12px;
-		flex: 0 0 15%;
-		cursor: pointer;
-	}
-	.nav-bar button:hover {
+	.nav-button:hover {
 		background-color: skyblue;
 	}
-	.nav-bar button:disabled {
+	.nav-button:disabled {
 		color: lightgray;
 		background-color: gray;
 		cursor: default;
 	}
-	.nav-bar span {
-		flex: 0 1 100%;
-		font-size: 24px;
+	.undo-button {
+		bottom: 12px;
+		left: 12px;
 	}
+	.end-turn-button {
+		bottom: 12px;
+		right: 12px;
+	}
+.turn-title {
+	font-size: 24px;
+	position: absolute;
+	top: 32px;
+	left: 32px;
+}
 
 /*Skill list*/
 .skill-list {

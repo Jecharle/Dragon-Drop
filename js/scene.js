@@ -80,8 +80,15 @@ class BattleScene extends Scene {
 		alert("The battle is now over"); // TEMP
 	}
 
+	_createTurnTitle() {
+		var turnTitle = document.createElement("span");
+		turnTitle.classList.add('turn-title');
+		turnTitle.style.textAlign = "center";
+		return turnTitle;
+	}
 	_createUndoButton() {
 		var button = document.createElement("button");
+		button.classList.add('nav-button', 'undo-button');
 		button.type = "button";
 		button.onclick = () => {
 			this._undoMove();
@@ -89,13 +96,9 @@ class BattleScene extends Scene {
 		};
 		return button;
 	}
-	_createTurnTitle() {
-		var turnTitle = document.createElement("span");
-		turnTitle.style.textAlign = "center";
-		return turnTitle;
-	}
 	_createEndTurnButton() {
 		var button = document.createElement("button");
+		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
 			this._nextTurn();
@@ -104,12 +107,9 @@ class BattleScene extends Scene {
 	}
 
 	_buildDOM() {
-		var navBar =  document.createElement("div");
-		navBar.classList.add("nav-bar");
-		navBar.appendChild(this._undoButtonEl);
-		navBar.appendChild(this._turnTitleEl);
-		navBar.appendChild(this._endTurnButtonEl);
-		this.el.appendChild(navBar);
+		this.el.appendChild(this._undoButtonEl);
+		this.el.appendChild(this._turnTitleEl);
+		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
