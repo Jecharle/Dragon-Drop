@@ -409,14 +409,14 @@
 		background-image: url("../img/testPositionUnit.png");
 	}
 	.position-unit>.face {
-		background-image: url("../img/testMeleeUnitFace.png");
+		background-image: url("../img/testPositionUnitFace.png");
 	}
 
 	.enemy-unit>.sprite {
 		background-image: url("../img/testEnemyUnit.png");
 	}
 	.enemy-unit>.face {
-		background-image: url("../img/testMeleeUnitFace.png");
+		background-image: url("../img/testEnemyUnitFace.png");
 	}
 
 	.rock>.sprite {
