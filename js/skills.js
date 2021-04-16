@@ -251,7 +251,7 @@ class TestRushSkill extends SkillPiece {
 
 	_setStats() {
 		super._setStats();
-		this._basePower = 2;
+		this._basePower = 3;
 		this._range = 3;
 		this._minRange = 3;
 		this._baseCooldown = 3;

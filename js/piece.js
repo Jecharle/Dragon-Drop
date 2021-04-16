@@ -440,26 +440,27 @@ class UnitPiece extends Piece {
 	}
 
 	animateBump(target, origin) {
-		// TODO: Update this one to use square screen coordinates too I guess
 		var direction = this.square.direction(target);
-		var dx = 32*(direction[0] - direction[1]);
-		var dy = 16*(direction[0] + direction[1]);
-		var dz = dy;
+		var dx = 32*(direction[0] - direction[1]) + this.square.screenX;
+		var dy = 16*(direction[0] + direction[1]) + this.square.screenY;
+		var dz = 16*(direction[0] + direction[1]) + this.square.screenZ;
 		var time = 200;
 
 		var keyframes = [
 			{ },
-			{ transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` },
+			{
+				transform: `translate(${dx}px, ${dy}px)`,
+				zIndex: dz
+			},
 			{ }
 		];
 		if (origin) {
-			dx = 32*(origin.x - this.square.x - origin.y + this.square.y);
-			dy = 16*(origin.x - this.square.x + origin.y - this.square.y);
-			dz = dy;
-			keyframes[0] = { transform: `translate(${dx}px, ${dy}px) scaleX(${this._facing})` };
+			keyframes[0] = { 
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			};
 		}
-		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
-		// TODO: Add attacking style, or leave that elsewhere?
+		this.el.animate(keyframes, {duration: time, easing: "ease-out"});
 	}
 
 	canPass(square) {

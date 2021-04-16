@@ -309,8 +309,8 @@ class BattleScene extends Scene {
 		}
 		this._endTurnButtonEl.disabled = !!this._autoPhase;
 
-		if (!this._lastMove && this._canRedeploy) {
-			this._undoButtonEl.innerText = "Reposition";
+		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
+			this._undoButtonEl.innerText = "Back";
 		} else {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
