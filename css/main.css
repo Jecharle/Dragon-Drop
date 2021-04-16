@@ -51,23 +51,23 @@
 		cursor: default;
 	}
 	.undo-button {
-		bottom: 12px;
-		left: 48px;
+		top: 12px;
+		left: 12%;
 	}
 	.end-turn-button {
 		bottom: 12px;
-		right: 48px;
+		right: 12px;
 	}
 	.menu-button {
 		top: 12px;
-		right: 12px;
-		width: unset;
+		left: 12px;
+		width: 10%;
 	}
 .turn-title {
 	font-size: 24px;
 	position: absolute;
-	top: 32px;
-	left: 32px;
+	top: 24px;
+	right: 32px;
 }
 
 /*Skill list*/
@@ -78,6 +78,7 @@
 	align-items: flex-end;
 	position: absolute;
 	bottom: 0px;
+	left: 12px;
 	width: 40%;
 }
 	/*Selected unit info*/
@@ -339,7 +340,7 @@
 		position: absolute;
 		z-index: 2;
 		height: var(--lifebar-h);
-		top: 0px;
+		top: -2px;
 		background-image: url(../img/lifebar.png);
 		background-position: 0px 0px;
 		background-repeat: repeat-x;

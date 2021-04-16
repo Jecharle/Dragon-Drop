@@ -201,7 +201,7 @@ class SpriteEffect extends SpriteElObj {
 
 		var jumpframes = [
 			{ },
-			{ top: "128px" }
+			{ top: "-128px" }
 		];
 		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 	}

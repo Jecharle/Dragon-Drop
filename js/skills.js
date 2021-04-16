@@ -43,6 +43,10 @@ class TestRangedSkill extends TestAttackSkill {
 		this.style = 'attack-skill';
 	}
 
+	get name() {
+		return "Ranged Attack";
+	}
+
 	_setStats() {
 		super._setStats();
 		this._range = 7;

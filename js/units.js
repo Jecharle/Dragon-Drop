@@ -28,10 +28,10 @@ class TestMeleeUnit extends UnitPiece {
 class TestSupportUnit extends UnitPiece {
 	
 	get name() {
-		return "Support Unit";
+		return "Supporter";
 	}
 	get _description() {
-		return "Low health, but a variety of long-range abilities";
+		return "Low health, but can attack at range and use support skills";
 	}
 
 	_setStats() {
@@ -53,16 +53,16 @@ class TestSupportUnit extends UnitPiece {
 class TestPositionUnit extends UnitPiece {
 
 	get name() {
-		return "Positioning Unit";
+		return "Repositioner";
 	}
 	get _description() {
-		return "Low damage, but specialized in repositioning allies and enemies";
+		return "Low damage, but specialized in moving allies and enemies";
 	}
 
 	_setStats() {
 		this.style = 'position-unit';
 		this._maxHp = 4;
-		this._moveRange = 4;
+		this._moveRange = 3;
 	}
 
 	_setSkills() {

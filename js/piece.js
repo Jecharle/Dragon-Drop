@@ -390,7 +390,7 @@ class UnitPiece extends Piece {
 		turnframes.unshift({
 			transform: `scaleX(${this._facing})`
 		});
-		var time = 150*keyframes.length;
+		var time = 100*keyframes.length;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});	
 		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
 		return time;
