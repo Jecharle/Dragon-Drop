@@ -434,6 +434,16 @@
 		background-position-x: calc(-5*var(--unit-w));
 		animation: sprite-animation 0.3s steps(5) both;
 	}
+	.test-shot-effect>.sprite {
+		background-image: url("../img/testBullet.png");
+		background-position-x: calc(-6*var(--unit-w));
+		animation: sprite-animation 0.2s steps(6) 0.2s both;
+	}
+	.test-arc-effect>.sprite {
+		background-image: url("../img/testBullet.png");
+		background-position-x: calc(-6*var(--unit-w));
+		animation: sprite-animation 0.2s steps(6) 0.4s both;
+	}
 	
 
 /*Skill base and info*/
