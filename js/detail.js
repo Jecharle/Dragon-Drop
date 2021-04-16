@@ -182,7 +182,7 @@ class SpriteEffect extends SpriteElObj {
 	_animateStraight(origin) {
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			},
 			{}];
@@ -192,7 +192,7 @@ class SpriteEffect extends SpriteElObj {
 	_animateArc(origin) {
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			},
 			{}];
@@ -201,14 +201,14 @@ class SpriteEffect extends SpriteElObj {
 
 		var jumpframes = [
 			{ },
-			{ bottom: "128px" }
+			{ top: "128px" }
 		];
-		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 	}
 	_animateReturn(origin) {
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			},
 			{}];

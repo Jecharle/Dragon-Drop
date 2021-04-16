@@ -20,6 +20,7 @@ class TestMeleeUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestRushSkill(this),
+			new TestMoveSkill(this)
 		]
 	}
 };
@@ -60,7 +61,6 @@ class TestPositionUnit extends UnitPiece {
 
 	_setStats() {
 		this.style = 'position-unit';
-		this._moveStyle = 'jump';
 		this._maxHp = 4;
 		this._moveRange = 4;
 	}

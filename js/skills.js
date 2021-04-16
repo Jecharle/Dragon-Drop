@@ -151,7 +151,7 @@ class TestMoveSkill extends SkillPiece {
 		return "Regroup";
 	}
 	get _description() {
-		return "Jump to a square adjacent to another unit";
+		return "Jump to a square adjacent to an ally";
 	}
 
 	_setStats() {
@@ -160,10 +160,9 @@ class TestMoveSkill extends SkillPiece {
 	}
 
 	inRange(origin, target) {
-		// TODO: near a unit other than the user
 		return target != origin
 			&& target.parent.canFit(this.user, target)
-			&& this._nearTarget(origin, target, square => (square.piece && square.piece != this.user));
+			&& this._nearTarget(origin, target, square => (this.user.isAlly(square.piece) && square.piece != this.user));
 	}
 
 	validTarget(target) {
@@ -218,10 +217,14 @@ class TestAreaSkill extends SkillPiece {
 	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(target, 1);
+		return 0;
+	}
+
+	_endEffects(_target, _squares, _units) {
 		return 200;
 	}
 
-	_aiBaseTargetScore(target) {
+	_aiBaseTargetScore(_target) {
 		return -0.5; // AoE are lower priority unless they hit multiple targets
 	}
 };

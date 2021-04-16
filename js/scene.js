@@ -62,6 +62,7 @@ class BattleScene extends Scene {
 		this._minTurns = mapData.minTurns;
 		this._defaultVictory = mapData.defaultVictory;
 
+		this._menuButtonEl = this._createMenuButton();
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
@@ -86,6 +87,16 @@ class BattleScene extends Scene {
 		turnTitle.style.textAlign = "center";
 		return turnTitle;
 	}
+	_createMenuButton() {
+		var button = document.createElement("button");
+		button.classList.add('nav-button', 'menu-button');
+		button.type = "button";
+		/*button.onclick = () => {
+			this._undoMove();
+			this.refresh();
+		};*/
+		return button;
+	}
 	_createUndoButton() {
 		var button = document.createElement("button");
 		button.classList.add('nav-button', 'undo-button');
@@ -107,8 +118,9 @@ class BattleScene extends Scene {
 	}
 
 	_buildDOM() {
-		this.el.appendChild(this._undoButtonEl);
 		this.el.appendChild(this._turnTitleEl);
+		this.el.appendChild(this._menuButtonEl);
+		this.el.appendChild(this._undoButtonEl);
 		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
@@ -279,8 +291,6 @@ class BattleScene extends Scene {
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
 			this._turnTitleEl.innerText = "Reposition";
-		} else if (this._autoPhase) {
-			this._turnTitleEl.innerText = "Enemy turn";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
 		} else if (this._maxTurns) {
@@ -288,6 +298,9 @@ class BattleScene extends Scene {
 		} else {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
 		}
+
+		this._menuButtonEl.innerText = "Menu";
+		this._menuButtonEl.disabled = true;
 
 		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Ready";

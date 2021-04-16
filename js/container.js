@@ -58,8 +58,8 @@ class Board extends Container {
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
 				
-				square.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
-				square.el.style.zIndex = `${square.screenZ}`;
+				square.el.style.transform = square.screenPosition;
+				square.el.style.zIndex = square.screenZ-31;
 				this.squares[(y * this.w) + x] = square;
 				this.el.appendChild(square.el);
 			}
@@ -171,7 +171,7 @@ class Board extends Container {
 			this._fillPiece(null, piece.square, piece.size);
 		}
 		if (!this.el.contains(piece.el)) this.el.appendChild(piece.el);
-		piece.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
+		piece.el.style.transform = square.screenPosition;
 		piece.el.style.zIndex = square.screenZ;
 		piece.square = square;
 		this._fillPiece(piece, square);
@@ -490,7 +490,10 @@ class Square extends Position {
 		return 32*(this.x + this.y);
 	}
 	get screenZ() {
-		return (this.x + this.y);
+		return this.screenY;
+	}
+	get screenPosition() {
+		return `translate(${this.screenX}px, ${this.screenY}px)`;
 	}
 
 	distance(square) {
@@ -665,7 +668,7 @@ class UnitInfo extends ElObj {
 			this.style = unit.style;
 			this._lifebar.maxValue = unit.maxHp;
 			this._lifebar.value = unit.hp;
-			this._nameSpan.innerText = unit.name;
+			this._nameSpan.innerText = unit.characterName;
 			this._tooltip.value = unit.fullDescription;
 		} else {
 			this.style = null;

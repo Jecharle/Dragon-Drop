@@ -52,11 +52,16 @@
 	}
 	.undo-button {
 		bottom: 12px;
-		left: 12px;
+		left: 48px;
 	}
 	.end-turn-button {
 		bottom: 12px;
+		right: 48px;
+	}
+	.menu-button {
+		top: 12px;
 		right: 12px;
+		width: unset;
 	}
 .turn-title {
 	font-size: 24px;
@@ -73,7 +78,7 @@
 	align-items: flex-end;
 	position: absolute;
 	bottom: 0px;
-	width: 50%;
+	width: 40%;
 }
 	/*Selected unit info*/
 	.unit-info {
@@ -183,7 +188,7 @@
 		width: inherit;
 		height: inherit;
 		position: absolute;
-		z-index: 0.5;
+		z-index: 1;
 		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 		pointer-events: auto;
 	}
@@ -313,7 +318,6 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	z-index: 1;
 	top: 0px;
 	display: flex;
 	justify-content: center;
@@ -323,7 +327,7 @@
 		height: var(--unit-h);
 		box-sizing: border-box;
 		position: absolute;
-		z-index: inherit;
+		z-index: 0;
 		bottom: 0px;
 		background-repeat: no-repeat;
 		background-position: 0px 0px;
@@ -343,7 +347,7 @@
 	}
 		.lifebar>.inner {
 			position: absolute;
-			z-index: 1;
+			z-index: 0;
 			left: 0px;
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
@@ -352,7 +356,7 @@
 		}
 		.lifebar>.change {
 			position: absolute;
-			z-index: 2;
+			z-index: 1;
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
 			background-position: 0px calc(-2*var(--lifebar-h));

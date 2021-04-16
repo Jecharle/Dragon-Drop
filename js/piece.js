@@ -63,12 +63,12 @@ class Piece extends SpriteElObj {
 
 	_click(ev) {
 		ev.stopPropagation();
-		var piece = ev.target.obj;
+		var piece = ev.currentTarget.obj;
 		if (Game.scene) Game.scene.selectPiece(piece);
 	}
 	_drag(ev) {
-		ev.dataTransfer.setData("piece", ev.target.id);
-		var piece = ev.target.obj;
+		ev.dataTransfer.setData("piece", ev.currentTarget.id);
+		var piece = ev.currentTarget.obj;
 		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
 		if (Game.scene) Game.scene.selectPiece(piece, true);
 	}
@@ -292,6 +292,9 @@ class UnitPiece extends Piece {
 	get name() {
 		return "[Unit name]";
 	}
+	get characterName() {
+		return this._partyMember?.name || this.name;
+	}
 	get _description() {
 		return "[Unit description]";
 	}
@@ -368,21 +371,35 @@ class UnitPiece extends Piece {
 	}
 	_animatePath(path) {
 		var keyframes = [{}];
+		var turnframes = [{}];
+		var lastSquare = null, facing = this._facing;
 		path.forEach(square => {
 			keyframes.unshift({
-				transform: `translate(${square.screenX}px, ${square.screenY}px)`,
+				transform: square.screenPosition,
 				zIndex: square.screenZ
 			});
+			if (lastSquare) {
+				if (square.screenX > lastSquare.screenX) facing = -1;
+				else if (square.screenX < lastSquare.screenX) facing = 1;
+				turnframes.unshift({
+					transform: `scaleX(${facing})`
+				});
+			}
+			lastSquare = square;
 		});
-		var time = 100*keyframes.length;
-		this.el.animate(keyframes, {duration: time, easing: "linear"});		
+		turnframes.unshift({
+			transform: `scaleX(${this._facing})`
+		});
+		var time = 150*keyframes.length;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});	
+		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
 		return time;
 	}
 	_animateJump(path) {
 		var origin = path[path.length-1];
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			},
 			{ }
@@ -392,9 +409,9 @@ class UnitPiece extends Piece {
 
 		var jumpframes = [
 			{ },
-			{ bottom: "128px" }
+			{ top: "-128px" }
 		];
-		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return time;
 	}
 	_animateTeleport(path) {
@@ -403,23 +420,22 @@ class UnitPiece extends Piece {
 		var time = 400;
 		var keyframes = [
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			},
 			{
-				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				transform: origin.screenPosition,
 				zIndex: origin.screenZ
 			}
 		];
-		this.el.animate(keyframes, {duration: time/2, easing: "linear"});
+		this.el.animate(keyframes, time/2);
 
-		keyframes = [
+		var twistframes = [
 			{ transform: `scaleX(${this._facing})`},
-			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ }
 		];
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
+		this.spriteEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
 		return time;
 	}
 
