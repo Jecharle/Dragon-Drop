@@ -271,7 +271,7 @@ class UnitPiece extends Piece {
 	}
 
 	// status effects
-	// TODO: status effects are stored in a dictionary, and occasionally looped through
+	// TODO: status effects are stored in a dictionary, and occasionally looped through?
 	/*hasStatus(name) {
 		return false;
 	}
@@ -374,7 +374,7 @@ class UnitPiece extends Piece {
 				zIndex: square.screenZ
 			});
 		});
-		var time = 100*keyframes.length
+		var time = 100*keyframes.length;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});		
 		return time;
 	}
@@ -765,6 +765,7 @@ class SkillPiece extends Piece {
 		if (!square) return;
 		var vfx = new SpriteEffect(square, 1000, "unit", ...styles);
 		square.parent.el.appendChild(vfx.el);
+		return vfx;
 	}
 
 	_payCost() {

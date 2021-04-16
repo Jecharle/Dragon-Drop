@@ -48,6 +48,20 @@ class TestRangedSkill extends TestAttackSkill {
 		this._range = 7;
 		this._minRange = 2;
 	}
+
+	_startEffects(target, _squares, _units) {
+		this.user.animateBump(target);
+
+		// TODO: Make an easier way to inherit facing?
+		if (target.x < this.user.square.x || target.y > this.user.square.y) {
+			this._showEffect(target, "test-attack-effect", "left").animateMove(this.user.square);
+		}
+		else {
+			this._showEffect(target, "test-attack-effect").animateMove(this.user.square);
+		}
+		
+		return 200;
+	}
 };
 
 /***************************************************

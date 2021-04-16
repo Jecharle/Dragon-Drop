@@ -164,6 +164,55 @@ class SpriteEffect extends SpriteElObj {
 	get elClass() {
 		return 'vfx-sprite';
 	}
-}
 
-// TODO: Sprites can have animated movements- straight and 'jump', at first, others later
+	animateMove(origin, style) {
+		switch (style) {
+			case "arc":
+				this._animateArc(origin);
+				break;
+			case "return":
+				this._animateReturn(origin);
+				break;
+			default:
+			case "straight":
+				this._animateStraight(origin);
+				break;
+		}
+	}
+	_animateStraight(origin) {
+		var keyframes = [
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 200;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+	}
+	_animateArc(origin) {
+		var keyframes = [
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 400;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+
+		var jumpframes = [
+			{ },
+			{ bottom: "128px" }
+		];
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+	}
+	_animateReturn(origin) {
+		var keyframes = [
+			{
+				transform: `translate(${origin.screenX}px, ${origin.screenY}px)`,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 200;
+		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});
+	}
+}
