@@ -483,14 +483,24 @@ class Square extends Position {
 		return this._y;
 	}
 
+	static screenX(x, y) {
+		return 64*(x - y);
+	}
+	static screenY(x, y) {
+		return 32*(x + y);
+	}
+	static screenZ(x, y) {
+		return Square.screenY(x, y);
+	}
+
 	get screenX() {
-		return 64*(this.x - this.y);
+		return Square.screenX(this.x, this.y);
 	}
 	get screenY() {
-		return 32*(this.x + this.y);
+		return Square.screenY(this.x, this.y);
 	}
 	get screenZ() {
-		return this.screenY;
+		return Square.screenZ(this.x, this.y);;
 	}
 	get screenPosition() {
 		return `translate(${this.screenX}px, ${this.screenY}px)`;

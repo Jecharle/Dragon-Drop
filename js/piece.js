@@ -394,7 +394,7 @@ class UnitPiece extends Piece {
 		turnframes.unshift({
 			transform: `scaleX(${this._facing})`
 		});
-		var time = 160*keyframes.length;
+		var time = 200*(keyframes.length-1);
 		this.el.animate(keyframes, {duration: time, easing: "linear"});	
 		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
 		return time;
@@ -445,9 +445,9 @@ class UnitPiece extends Piece {
 
 	animateBump(target, origin) {
 		var direction = this.square.direction(target);
-		var dx = 32*(direction[0] - direction[1]) + this.square.screenX;
-		var dy = 16*(direction[0] + direction[1]) + this.square.screenY;
-		var dz = 16*(direction[0] + direction[1]) + this.square.screenZ;
+		var dx = this.square.screenX + Square.screenX(...direction) / 2;
+		var dy = this.square.screenY + Square.screenY(...direction) / 2;
+		var dz = this.square.screenZ + Square.screenZ(...direction) / 2;
 		var time = 200;
 
 		var keyframes = [
