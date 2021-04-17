@@ -212,7 +212,8 @@ class UnitPiece extends Piece {
 		this.hp -= power;
 
 		if (power > 0) {
-			this._addTimedClass(1200, 'damaged', 'hp-change');
+			this._addTimedClass(450, 'damaged');
+			this._addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
@@ -384,13 +385,16 @@ class UnitPiece extends Piece {
 				turnframes.unshift({
 					transform: `scaleX(${facing})`
 				});
+				turnframes.unshift({
+					transform: `scaleX(${facing})`
+				});
 			}
 			lastSquare = square;
 		});
 		turnframes.unshift({
 			transform: `scaleX(${this._facing})`
 		});
-		var time = 100*keyframes.length;
+		var time = 160*keyframes.length;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});	
 		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
 		return time;

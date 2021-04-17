@@ -78,7 +78,7 @@ class TestHealSkill extends SkillPiece {
 
 	_setStats() {
 		super._setStats();
-		this._basePower = 3;
+		this._basePower = 4;
 		this._baseCooldown = 2;
 		this._range = 1;
 		this._minRange = 0;

@@ -36,7 +36,6 @@ class TestSupportUnit extends UnitPiece {
 
 	_setStats() {
 		this.style = 'support-unit';
-		this._moveStyle = 'teleport';
 		this._maxHp = 4;
 		this._moveRange = 2;
 	}
