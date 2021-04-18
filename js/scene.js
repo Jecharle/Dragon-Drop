@@ -180,7 +180,7 @@ class BattleScene extends Scene {
 		this._reinforcementData.forEach(data => {
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
-				newPiece._addTimedClass(500, 'spawn');
+				newPiece.addTimedClass(500, 'spawn');
 				anySpawns = true;
 			}
 		});
@@ -645,7 +645,6 @@ BattleScene.PlayerPhase = 1;
 BattleScene.EnemyPhase = 2;
 BattleScene.EndPhase = -1;
 
-
 /***************************************************
  Battle scene -> Team
 ***************************************************/
@@ -663,7 +662,7 @@ class Team {
 
 	get size() {
 		return this.members.reduce((count, member) => {
-			if (member.alive) return count+1;
+			if (member.alive && member.square) return count+1;
 			else return count;
 		}, 0);
 	}
@@ -672,17 +671,17 @@ class Team {
 		return this.members.every(member => member.dead || (member.canMove && member.canAct));
 	}
 
-	add(piece) {
-		if (!this.members.includes(piece)) {
-			this.members.push(piece);
-			if (this.style) piece.el.classList.add(this.style);
+	add(unit) {
+		if (!this.members.includes(unit)) {
+			this.members.push(unit);
+			if (this.style) unit.el.classList.add(this.style);
 		}
 	}
-	remove(piece) {
-		var index = this.members.indexOf(piece);
+	remove(unit) {
+		var index = this.members.indexOf(unit);
 		if (index > -1) {
 			this.members.splice(index, 1);
-			if (this.style) piece.el.classList.remove(this.style);
+			if (this.style) unit.el.classList.remove(this.style);
 		}
 	}
 

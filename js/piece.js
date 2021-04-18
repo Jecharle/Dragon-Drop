@@ -441,9 +441,9 @@ class UnitPiece extends Piece {
 
 	animateBump(target, origin) {
 		var direction = this.square.direction(target);
-		var dx = this.square.screenX + Square.screenX(...direction) / 2;
-		var dy = this.square.screenY + Square.screenY(...direction) / 2;
-		var dz = this.square.screenZ + Square.screenZ(...direction) / 2;
+		var dx = this.square.screenX + Square.screenX(...direction, 0) / 2;
+		var dy = this.square.screenY + Square.screenY(...direction, 0) / 2;
+		var dz = this.square.screenZ + Square.screenZ(...direction, 0) / 2;
 		var time = 200;
 
 		var keyframes = [
@@ -768,7 +768,7 @@ class SkillPiece extends Piece {
 
 	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
-		this.user._addTimedClass(200, 'attack');
+		this.user.addTimedClass(200, 'attack');
 
 		this._showEffect(target, this.user.square, "test-attack-effect");
 		

@@ -54,10 +54,9 @@ class TestRangedSkill extends TestAttackSkill {
 	}
 
 	_startEffects(target, _squares, _units) {
-		var time = this.user.animateBump(target);
-		this.user.addTimedClass(time, 'attack');
+		this.user.addTimedClass(200, 'attack');
 		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
-		return time;
+		return 200;
 	}
 };
 
@@ -214,10 +213,9 @@ class TestAreaSkill extends SkillPiece {
 	}
 
 	_startEffects(target, _squares, _units) {
-		var time = this.user.animateBump(target);
-		this.user.addTimedClass(time, 'attack');
+		this.user.addTimedClass(200, 'attack');
 		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, "arc");
-		return time * 2;
+		return 400;
 	}
 
 	_unitEffects(unit, target) {
