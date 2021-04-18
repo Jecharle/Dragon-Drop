@@ -8,6 +8,7 @@
 	width: var(--game-w);
 	height: var(--game-h);
 	overflow: hidden;
+	border: 1px solid black; /*TEMP?*/
 }
 
 .scene {
@@ -78,7 +79,6 @@
 	align-items: flex-end;
 	position: absolute;
 	bottom: 0px;
-	left: 12px;
 	width: 40%;
 }
 	/*Selected unit info*/
@@ -636,13 +636,3 @@
 
 	}
 }
-
-/*Layout debugging styles*/
-.game-window {
-	border: 1px solid black;
-}
-
-/*.nav-bar, .skill-list {
-	border: 1px solid black;
-	box-sizing: border-box;
-}/**/

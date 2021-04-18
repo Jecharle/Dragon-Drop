@@ -613,7 +613,7 @@ class BattleScene extends Scene {
 	keydown(key) {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
-		if (key == "Escape" || key == "Delete" || key == "Backspace") {
+		if (key == "Escape") {
 			this._goBack();
 			this.refresh();
 		}
@@ -623,7 +623,7 @@ class BattleScene extends Scene {
 			this.refresh();
 		}
 
-		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
+		if (key == "Enter") { // TEMP?
 			this._nextTurn();
 		}
 
