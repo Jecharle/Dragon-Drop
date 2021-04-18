@@ -535,6 +535,7 @@ class Square extends Position {
 		switch (this._terrain) {
 			case Square.Wall:
 				this.el.classList.remove('wall');
+				this.el.style.zIndex = this.screenZ-31;
 				break;
 			case Square.Pit:
 				this.el.classList.remove('pit');
@@ -552,6 +553,7 @@ class Square extends Position {
 		switch (this._terrain) {
 			case Square.Wall:
 				this.el.classList.add('wall');
+				this.el.style.zIndex = this.screenZ;
 				break;
 			case Square.Pit:
 				this.el.classList.add('pit');
