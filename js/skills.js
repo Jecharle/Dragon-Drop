@@ -49,14 +49,14 @@ class TestRangedSkill extends TestAttackSkill {
 
 	_setStats() {
 		super._setStats();
-		this._range = 7;
+		this._range = 9;
 		this._minRange = 2;
 	}
 
 	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
-		this.user._addTimedClass(200, 'attack');
-		this._showEffect(target, "test-shot-effect").animateMove(this.user.square);
+		this.user.addTimedClass(200, 'attack');
+		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
 		return 200;
 	}
 };
@@ -95,7 +95,7 @@ class TestHealSkill extends SkillPiece {
 		return 0;
 	}
 	_unitEffects(unit, _target) {
-		this._showEffect(unit.square, "test-heal-effect");
+		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.heal(this.power);
 		return 200;
 	}
@@ -138,7 +138,7 @@ class TestBuildSkill extends SkillPiece {
 	_squareEffects(square, _target) {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
-		wall._addTimedClass(500, 'spawn');
+		wall.addTimedClass(500, 'spawn');
 		return 500;
 	}
 };
@@ -215,8 +215,8 @@ class TestAreaSkill extends SkillPiece {
 
 	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
-		this.user._addTimedClass(200, 'attack');
-		this._showEffect(target, "test-arc-effect").animateMove(this.user.square, "arc");
+		this.user.addTimedClass(200, 'attack');
+		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, "arc");
 		return 400;
 	}
 
@@ -278,13 +278,12 @@ class TestRushSkill extends SkillPiece {
 
 	_startEffects(target) {
 		this.user.animateBump(target, this.user.square);
-		this.user._addTimedClass(200, 'attack');
+		this.user.addTimedClass(200, 'attack');
 		this.user.pull(target, 2);
 
-		if (target.x < this.user.square.x || target.y > this.user.square.y) this._showEffect(target, "test-attack-effect", "left");
-		else this._showEffect(target, "test-attack-effect");
+		this._showEffect(target, this.user.square, "test-attack-effect");
 
-		return 100;
+		return 200;
 	}
 	_unitEffects(unit) {
 		unit.takeDamage(this.power);
@@ -310,13 +309,13 @@ class TestPositionSkill extends SkillPiece {
 		return "Throw";
 	}
 	get _description() {
-		return "Throw the unit in front of you to the target square";
+		return "Toss the unit in front of you to the target square";
 	}
 
 	_setStats() {
 		super._setStats();
 		this._range = 4;
-		this._minRange = 3;
+		this._minRange = 2;
 		this._baseCooldown = 2;
 	}
 
@@ -346,10 +345,16 @@ class TestPositionSkill extends SkillPiece {
 		}
 		return false;
 	}
+	_startEffects(target) {
+		this.user.animateBump(target);
+		this.user.addTimedClass(200, 'attack');
+		return 100;
+	}
 	_unitEffects(unit, target) {
 		var startSquare = unit.square;
 		target.parent.movePiece(unit, target);
 		unit.animateMove([startSquare], "jump");
-		return 400;
+		unit.addTimedClass(500, 'damaged');
+		return 500;
 	}
 };

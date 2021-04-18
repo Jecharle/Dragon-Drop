@@ -61,6 +61,11 @@ class Piece extends SpriteElObj {
 		}
 	}
 
+	addTimedClass(duration, ...classList) {
+		this.el.classList.add(...classList);
+		setTimeout(() => this.el.classList.remove(...classList), duration);
+	}
+
 	_click(ev) {
 		ev.stopPropagation();
 		var piece = ev.currentTarget.obj;
@@ -212,8 +217,8 @@ class UnitPiece extends Piece {
 		this.hp -= power;
 
 		if (power > 0) {
-			this._addTimedClass(450, 'damaged');
-			this._addTimedClass(1200, 'hp-change');
+			this.addTimedClass(450, 'damaged');
+			this.addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
@@ -223,7 +228,7 @@ class UnitPiece extends Piece {
 		this.hp += power;
 
 		if (power > 0) {
-			this._addTimedClass(1200, 'hp-change');
+			this.addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
@@ -232,10 +237,6 @@ class UnitPiece extends Piece {
 	_showPopup(value) {
 		var popup = new PopupText(value);
 		this.el.appendChild(popup.el);
-	}
-	_addTimedClass(duration, ...classList) {
-		this.el.classList.add(...classList);
-		setTimeout(() => this.el.classList.remove(...classList), duration);
 	}
 	_showDeathAnimation() {
 		if (!this.square) return;
@@ -353,22 +354,17 @@ class UnitPiece extends Piece {
 		}
 	}
 	animateMove(path, type) {
-		var moveTime = 0;
 		switch (type) {
 			case "jump":
-				moveTime = this._animateJump(path)
-				break;
+				return this._animateJump(path)
 
 			case "teleport":
-				moveTime = this._animateTeleport(path);
-				break;
+				return this._animateTeleport(path);
 
 			default:
 			case "path":
-				moveTime = this._animatePath(path);
-				break;
+				return this._animatePath(path);
 		}
-		this._addTimedClass(moveTime, 'moving');
 	}
 	_animatePath(path) {
 		var keyframes = [{}];
@@ -478,7 +474,8 @@ class UnitPiece extends Piece {
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
 			this.homeSquare = oldSquare;
-			this.animateMove(target.path, this._moveStyle);
+			var moveTime = this.animateMove(target.path, this._moveStyle);
+			this.addTimedClass(moveTime, 'moving');
 			this.face(target, target.path[0]);
 			this.refresh();
 			return true;
@@ -772,9 +769,7 @@ class SkillPiece extends Piece {
 		this.user.animateBump(target);
 		this.user._addTimedClass(200, 'attack');
 
-		// TODO: Make an easier way to inherit facing?
-		if (target.x < this.user.square.x || target.y > this.user.square.y) this._showEffect(target, "test-attack-effect", "left");
-		else this._showEffect(target, "test-attack-effect");
+		this._showEffect(target, this.user.square, "test-attack-effect");
 		
 		return 100;
 	}
@@ -783,10 +778,11 @@ class SkillPiece extends Piece {
 	_unitEffects(_unit, _target) { return 0; }
 	_endEffects(_target, _squares, _units) { return 0; }
 
-	_showEffect(square, ...styles) {
-		if (!square) return;
-		var vfx = new SpriteEffect(square, 1000, "unit", ...styles);
-		square.parent.el.appendChild(vfx.el);
+	_showEffect(target, origin, ...styles) {
+		if (!target) return;
+		var vfx = new SpriteEffect(target, 1000, "unit", ...styles);
+		if (origin && target.screenX < origin.screenX) vfx.el.classList.toggle('left');
+		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
 
