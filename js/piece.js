@@ -461,6 +461,7 @@ class UnitPiece extends Piece {
 			};
 		}
 		this.el.animate(keyframes, {duration: time, easing: "ease-out"});
+		return time;
 	}
 
 	canPass(square) {

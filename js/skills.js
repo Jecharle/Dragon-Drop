@@ -54,10 +54,10 @@ class TestRangedSkill extends TestAttackSkill {
 	}
 
 	_startEffects(target, _squares, _units) {
-		this.user.animateBump(target);
-		this.user.addTimedClass(200, 'attack');
+		var time = this.user.animateBump(target);
+		this.user.addTimedClass(time, 'attack');
 		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
-		return 200;
+		return time;
 	}
 };
 
@@ -179,8 +179,8 @@ class TestMoveSkill extends SkillPiece {
 	_startEffects(target, _squares, _units) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
-		this.user.animateMove([startSquare], "jump");
-		return 400;
+		var time = this.user.animateMove([startSquare], "jump");
+		return time;
 	}
 };
 
@@ -214,10 +214,10 @@ class TestAreaSkill extends SkillPiece {
 	}
 
 	_startEffects(target, _squares, _units) {
-		this.user.animateBump(target);
-		this.user.addTimedClass(200, 'attack');
+		var time = this.user.animateBump(target);
+		this.user.addTimedClass(time, 'attack');
 		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, "arc");
-		return 400;
+		return time * 2;
 	}
 
 	_unitEffects(unit, target) {
@@ -277,13 +277,13 @@ class TestRushSkill extends SkillPiece {
 	}
 
 	_startEffects(target) {
-		this.user.animateBump(target, this.user.square);
-		this.user.addTimedClass(200, 'attack');
+		var time = this.user.animateBump(target, this.user.square);
+		this.user.addTimedClass(time, 'attack');
 		this.user.pull(target, 2);
 
 		this._showEffect(target, this.user.square, "test-attack-effect");
 
-		return 200;
+		return time;
 	}
 	_unitEffects(unit) {
 		unit.takeDamage(this.power);
@@ -320,7 +320,6 @@ class TestPositionSkill extends SkillPiece {
 	}
 
 	inRange(origin, target) {
-		// TODO: near a unit other than the user
 		return super.inRange(origin, target)
 			&& this._inLine(origin, target);
 	}
@@ -346,15 +345,16 @@ class TestPositionSkill extends SkillPiece {
 		return false;
 	}
 	_startEffects(target) {
-		this.user.animateBump(target);
-		this.user.addTimedClass(200, 'attack');
-		return 100;
+		var time = this.user.animateBump(target);
+		this.user.addTimedClass(time, 'attack');
+		return time/2;
 	}
 	_unitEffects(unit, target) {
 		var startSquare = unit.square;
 		target.parent.movePiece(unit, target);
-		unit.animateMove([startSquare], "jump");
-		unit.addTimedClass(500, 'damaged');
-		return 500;
+
+		var time = unit.animateMove([startSquare], "jump");
+		unit.addTimedClass(time+100, 'damaged');
+		return time+100;
 	}
 };
