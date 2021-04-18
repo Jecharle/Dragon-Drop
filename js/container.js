@@ -57,9 +57,6 @@ class Board extends Container {
 		for (var y = 0; y < this.h; y++) {
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
-				
-				square.el.style.transform = square.screenPosition;
-				square.el.style.zIndex = square.screenZ-31;
 				this.squares[(y * this.w) + x] = square;
 				this.el.appendChild(square.el);
 			}
@@ -465,11 +462,13 @@ class Square extends Position {
 		super(parent);
 		this._x = x;
 		this._y = y;
+		this._z = 0;
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
 		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
+		this._refresh();
 	}
 
 	get elClass() {
@@ -482,28 +481,43 @@ class Square extends Position {
 	get y() {
 		return this._y;
 	}
+	get z() {
+		return this._z;
+	}
+	set z(value) {
+		this._z = value;
+		this._refresh();
+	}
 
-	static screenX(x, y) {
+	static screenX(x, y, _z) {
 		return 64*(x - y);
 	}
-	static screenY(x, y) {
-		return 32*(x + y);
+	static screenY(x, y, z) {
+		return 32*(x + y - z);
 	}
-	static screenZ(x, y) {
-		return Square.screenY(x, y);
+	static screenZ(x, y, z) {
+		return Square.screenY(x, y, z) + z*64;
 	}
 
 	get screenX() {
-		return Square.screenX(this.x, this.y);
+		return Square.screenX(this.x, this.y, this.z);
 	}
 	get screenY() {
-		return Square.screenY(this.x, this.y);
+		return Square.screenY(this.x, this.y, this.z);
 	}
 	get screenZ() {
-		return Square.screenZ(this.x, this.y);;
+		return Square.screenZ(this.x, this.y, this.z + 1);
+	}
+	get _selfScreenZ() {
+		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get screenPosition() {
 		return `translate(${this.screenX}px, ${this.screenY}px)`;
+	}
+
+	_refresh() {
+		this.el.style.transform = this.screenPosition;
+		this.el.style.zIndex = this._selfScreenZ;
 	}
 
 	distance(square) {
@@ -535,7 +549,7 @@ class Square extends Position {
 		switch (this._terrain) {
 			case Square.Wall:
 				this.el.classList.remove('wall');
-				this.el.style.zIndex = this.screenZ-31;
+				this.z = 0;
 				break;
 			case Square.Pit:
 				this.el.classList.remove('pit');
@@ -553,7 +567,7 @@ class Square extends Position {
 		switch (this._terrain) {
 			case Square.Wall:
 				this.el.classList.add('wall');
-				this.el.style.zIndex = this.screenZ;
+				this.z = 1;
 				break;
 			case Square.Pit:
 				this.el.classList.add('pit');

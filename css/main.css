@@ -214,7 +214,6 @@
 		}
 		.wall>.sprite {
 			background-position-y: calc(-3*var(--square-total-h));
-			top: -32px;
 		}
 		.rough>.sprite {
 			background-position-y: calc(-4*var(--square-total-h));
