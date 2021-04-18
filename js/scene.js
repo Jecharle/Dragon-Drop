@@ -35,8 +35,8 @@ class Scene extends ElObj {
 		this._dataIn = data;
 	}
 
-	selectPiece(piece, dragging) { }
-	selectPosition(position, dragId) { }
+	pieceEvent(piece, dragging) { }
+	positionEvent(position, dragId) { }
 	mouseOver(position, dragId) { }
 	rightClick() { }
 
@@ -505,7 +505,7 @@ class BattleScene extends Scene {
 	}
 
 
-	selectPiece(piece, dragging) {
+	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
 		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
@@ -525,7 +525,7 @@ class BattleScene extends Scene {
 				} else if (this._unit == piece) {
 					this._deselectUnit();
 				} else if (piece.square) {
-					this.selectPosition(piece.square);
+					this.positionEvent(piece.square);
 				}
 			}
 		} else { // non-deploy phase
@@ -536,7 +536,7 @@ class BattleScene extends Scene {
 					this._deselectSkill();
 				}
 			} else if (this._skill && piece.square && !dragging) {
-				this.selectPosition(piece.square);
+				this.positionEvent(piece.square);
 				return;
 			}
 
@@ -552,7 +552,7 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	}
-	selectPosition(square, dragId) {
+	positionEvent(square, dragId) {
 		if (!square || this._autoPhase || this.busy) return;
 
 		if (this._phase == BattleScene.DeployPhase) {

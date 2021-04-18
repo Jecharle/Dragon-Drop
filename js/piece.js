@@ -69,13 +69,13 @@ class Piece extends SpriteElObj {
 	_click(ev) {
 		ev.stopPropagation();
 		var piece = ev.currentTarget.obj;
-		if (Game.scene) Game.scene.selectPiece(piece);
+		if (Game.scene) Game.scene.pieceEvent(piece);
 	}
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.currentTarget.id);
 		var piece = ev.currentTarget.obj;
 		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
-		if (Game.scene) Game.scene.selectPiece(piece, true);
+		if (Game.scene) Game.scene.pieceEvent(piece, true);
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");

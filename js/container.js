@@ -439,7 +439,7 @@ class Board extends Container {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
-				Game.scene.selectPosition(square, elId);
+				Game.scene.positionEvent(square, elId);
 			}
 		}
 	}
@@ -448,7 +448,7 @@ class Board extends Container {
 		if (ev.target) {
 			var square = ev.target.obj;
 			if (square) {
-				if (Game.scene) Game.scene.selectPosition(square);
+				if (Game.scene) Game.scene.positionEvent(square);
 			}
 		}
 	}
