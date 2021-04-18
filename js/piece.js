@@ -770,6 +770,7 @@ class SkillPiece extends Piece {
 
 	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
+		this.user._addTimedClass(200, 'attack');
 
 		// TODO: Make an easier way to inherit facing?
 		if (target.x < this.user.square.x || target.y > this.user.square.y) this._showEffect(target, "test-attack-effect", "left");
