@@ -24,6 +24,9 @@ class Scene extends ElObj {
 		return false;
 	}
 
+	start() { }
+	end() { }
+
 	//#region inter-scene communication
 	get lastScene() {
 		this._lastScene;
@@ -32,9 +35,6 @@ class Scene extends ElObj {
 		this._dataIn = data;
 	}
 	//#endregion inter-scene communication
-
-	start() { }
-	end() { }
 
 	//#region block during some async
 	setBusy() {
@@ -92,9 +92,6 @@ class BattleScene extends Scene {
 	start() {
 		this._deploy();
 	}	
-	_endBattle() {
-		alert("The battle is now over"); // TEMP
-	}
 
 	//#region ui setup
 	_createTurnTitle() {
@@ -359,6 +356,10 @@ class BattleScene extends Scene {
 		endScreen.el.onclick = ev => this._endBattle(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
+
+	_endBattle() {
+		alert("The battle is now over"); // TEMP
+	}
 	//#endregion phases
 
 	//#region action processing
@@ -379,8 +380,9 @@ class BattleScene extends Scene {
 	}
 	async _moveUnit(unit, square) {
 		this.setBusy();
-		var success = await unit.move(square);
-		if (success) {
+		var success = unit.move(square);
+		this._clearAreas();
+		if (await success) {
 			this._moveStack.push(unit);
 			this._deselectTarget();
 		}
@@ -426,8 +428,9 @@ class BattleScene extends Scene {
 	}
 	async _useSkill(skill, square) {
 		this.setBusy();
-		var success = await skill.use(square)
-		if (success) {
+		var success = skill.use(square);
+		this._clearAreas();
+		if (await success) {
 			this._clearMoves();
 			this._deselectSkill();
 			this._isBattleOver();
@@ -474,7 +477,7 @@ class BattleScene extends Scene {
 	}
 	//#endregion action processing
 
-	//#region input
+	//#region input events
 	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
@@ -609,14 +612,16 @@ class BattleScene extends Scene {
 			}
 		}
 	}
+	//#endregion input events
 
+	//#region ai
 	async _aiProcessTurn() {
-		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
+		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
 		await Game.asyncPause(1000);
 
-		while (this._aiControlUnits.length > 0) {
-			this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-			this._selectUnit(this._aiControlUnits.pop());
+		while (aiControlUnits.length > 0) {
+			aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+			this._selectUnit(aiControlUnits.pop());
 			
 			if (!this._unit) continue;
 			
@@ -656,11 +661,10 @@ class BattleScene extends Scene {
 			await this._addReinforcements();
 		}
 
-		this._aiControlUnits = null;
 		this._nextTurn();
 		return;
 	}
-	//#endregion input
+	//#endregion ai
 
 };
 

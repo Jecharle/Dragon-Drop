@@ -293,7 +293,7 @@ class UnitPiece extends Piece {
 
 	//#region turn state
 	get canMove() {
-		return this.alive && !this.homeSquare && !this.actionUsed && (this.moveRange > 0);
+		return this.alive && !this.homeSquare && !this.actionUsed;
 	}
 	get canAct() {
 		return this.alive && !this.actionUsed;
@@ -483,7 +483,7 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		if (this._facing < 0) vfx.spriteEl.classList.add("left");
+		if (this._facing < 0) vfx.el.classList.add("left");
 		this.square.parent.el.appendChild(vfx.el);
 	}
 	//#endregion animate
@@ -731,7 +731,7 @@ class SkillPiece extends Piece {
 	}
 	//#endregion selection
 
-	//#region skill use
+	//#region use skill
 	async use(target) {
 		if (!target || !this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
@@ -785,7 +785,7 @@ class SkillPiece extends Piece {
 		if (this.hasCooldown) this.cooldown = this.cooldownCost;
 		if (this.hasLimitedUses) this.usesLeft--;
 	}
-	//#endregion skill use
+	//#endregion use skill
 
 	//#region animation
 	_showEffect(target, origin, ...styles) {

@@ -282,7 +282,7 @@ class Board extends Container {
 		}
 	}
 	setMoveArea(unit) {
-		if (!unit) return;
+		if (!unit || !unit.canMove) return;
 		var preview = !unit.myTurn;
 
 		var origin = unit.square;
@@ -291,7 +291,7 @@ class Board extends Container {
 		this._paintMoveRange(origin, unit.moveRange, [], true, preview);
 		var edges = [origin];
 		
-		if (!unit.canMove || !unit.moveRange) return;
+		if (!unit.moveRange) return;
 
 		while (edges.length > 0) {
 			var newEdge = edges.pop();
