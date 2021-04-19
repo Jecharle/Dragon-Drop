@@ -81,6 +81,7 @@ class BattleScene extends Scene {
 		alert("The battle is now over"); // TEMP
 	}
 
+	//#region setup
 	_createTurnTitle() {
 		var turnTitle = document.createElement("span");
 		turnTitle.classList.add('turn-title');
@@ -131,21 +132,6 @@ class BattleScene extends Scene {
 		this.enemyTeam = new Team(1, "enemy", true);
 		this._setActiveTeam(null);
 	}
-	_setActiveTeam(team) {
-		if (team == this._activeTeam) return;
-
-		if (this._activeTeam) {
-			this._activeTeam.endTurn();
-		}
-		this._activeTeam = team;
-		if (this._activeTeam) {
-			this._activeTeam.startTurn();
-		}
-	}
-	get _autoPhase() {
-		if (!this._activeTeam) return false;
-		else return this._activeTeam.isAuto;
-	}
 
 	_addParty(partyUnits) {
 		if (!partyUnits) return;
@@ -174,23 +160,77 @@ class BattleScene extends Scene {
 		}
 		return null;
 	}
-	async _addReinforcements() {
-		for (var i = 0; i < this._reinforcementData.length; i++) {
-			var data = this._reinforcementData[i];
-			if (data.turn == this._turn) {
-				var newPiece = this._addMapUnit(data);
-				newPiece.addTimedClass(500, 'spawn');
-				await Game.asyncPause(500);
-			}
-		}
-		return;
-	}
+	//#endregion setup
 
+	//#region refresh
 	refresh() {
 		this._refreshArea();
 		this._refreshTargetArea();
 		this._refreshUi();
 	}
+
+	_refreshArea() {
+		this._board.resetAreas();
+		if (this._phase == BattleScene.DeployPhase) {
+			if (this._unit && !this._unit.myTurn) {
+				this._board.setMoveArea(this._unit);
+			}
+			this._board.setDeployArea(this._unit && this._unit.myTurn);
+		} else if (this._skill) {
+			this._board.setSkillArea(this._skill);
+		} else if (this._unit) {
+			this._board.setMoveArea(this._unit);
+		}
+	}
+	_refreshTargetArea() {
+		this._board.clearTargeting();
+		if (this._target && this._phase != BattleScene.DeployPhase) {
+			if (this._skill) this._board.showAoE(this._skill, this._target);
+			else if (this._unit) this._board.showPath(this._target);
+		} else if (this._phase == BattleScene.DeployPhase) {
+			this._board.showDeploySwap(this._unit, this._target);
+		}
+	}
+	_clearAreas() {
+		this._board.resetAreas();
+		this._board.clearTargeting();
+	}
+
+	_refreshUi() {
+		if (this._phase == BattleScene.DeployPhase) {
+			this._turnTitleEl.innerText = "Reposition";
+		} else if (this._maxTurns && this._turn >= this._maxTurns) {
+			this._turnTitleEl.innerText = "Last turn";
+		} else if (this._maxTurns) {
+			this._turnTitleEl.innerText = (1 + this._maxTurns - this._turn)+" turns left";
+		} else {
+			this._turnTitleEl.innerText = "Turn " + this._turn;
+		}
+
+		this._menuButtonEl.innerText = "Menu";
+		this._menuButtonEl.disabled = true;
+
+		if (this._phase == BattleScene.DeployPhase) {
+			this._endTurnButtonEl.innerText = "Ready";
+		} else {
+			this._endTurnButtonEl.innerText = "End Turn";
+		}
+		this._endTurnButtonEl.disabled = !!this._autoPhase;
+
+		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
+			this._undoButtonEl.innerText = "Back";
+		} else {
+			this._undoButtonEl.innerText = "Undo Move";
+		}
+		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
+	}
+	//#endregion refresh
+
+	//#region phases
+	static get DeployPhase() { return 0; }
+	static get PlayerPhase() { return 1; }
+	static get EnemyPhase() { return 2; }
+	static get EndPhase() { return -1; }
 
 	_deploy() {
 		this._turn = 1;
@@ -241,6 +281,22 @@ class BattleScene extends Scene {
 		}
 	}
 
+	_setActiveTeam(team) {
+		if (team == this._activeTeam) return;
+
+		if (this._activeTeam) {
+			this._activeTeam.endTurn();
+		}
+		this._activeTeam = team;
+		if (this._activeTeam) {
+			this._activeTeam.startTurn();
+		}
+	}
+	get _autoPhase() {
+		if (!this._activeTeam) return false;
+		else return this._activeTeam.isAuto;
+	}
+
 	_isBattleOver() {
 		if (this.playerTeam.size == 0) {
 			this._lose();
@@ -286,36 +342,9 @@ class BattleScene extends Scene {
 		endScreen.el.onclick = ev => this.end(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
+	//#endregion phases
 
-	_refreshUi() {
-		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Reposition";
-		} else if (this._maxTurns && this._turn >= this._maxTurns) {
-			this._turnTitleEl.innerText = "Last turn";
-		} else if (this._maxTurns) {
-			this._turnTitleEl.innerText = (1 + this._maxTurns - this._turn)+" turns left";
-		} else {
-			this._turnTitleEl.innerText = "Turn " + this._turn;
-		}
-
-		this._menuButtonEl.innerText = "Menu";
-		this._menuButtonEl.disabled = true;
-
-		if (this._phase == BattleScene.DeployPhase) {
-			this._endTurnButtonEl.innerText = "Ready";
-		} else {
-			this._endTurnButtonEl.innerText = "End Turn";
-		}
-		this._endTurnButtonEl.disabled = !!this._autoPhase;
-
-		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
-			this._undoButtonEl.innerText = "Back";
-		} else {
-			this._undoButtonEl.innerText = "Undo Move";
-		}
-		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
-	}
-
+	//#region action processing
 	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();
@@ -403,29 +432,6 @@ class BattleScene extends Scene {
 		this._target = null;
 	}
 
-	_refreshArea() {
-		this._board.resetAreas();
-		if (this._phase == BattleScene.DeployPhase) {
-			if (this._unit && !this._unit.myTurn) {
-				this._board.setMoveArea(this._unit);
-			}
-			this._board.setDeployArea(this._unit && this._unit.myTurn);
-		} else if (this._skill) {
-			this._board.setSkillArea(this._skill);
-		} else if (this._unit) {
-			this._board.setMoveArea(this._unit);
-		}
-	}
-	_refreshTargetArea() {
-		this._board.clearTargeting();
-		if (this._target && this._phase != BattleScene.DeployPhase) {
-			if (this._skill) this._board.showAoE(this._skill, this._target);
-			else if (this._unit) this._board.showPath(this._target);
-		} else if (this._phase == BattleScene.DeployPhase) {
-			this._board.showDeploySwap(this._unit, this._target);
-		}
-	}
-
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
@@ -438,58 +444,20 @@ class BattleScene extends Scene {
 		}
 	}
 
-	async _aiProcessTurn() {
-		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		await Game.asyncPause(1000);
-
-		while (this._aiControlUnits.length > 0) {
-			this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-			this._selectUnit(this._aiControlUnits.pop());
-			
-			if (!this._unit) continue;
-			
-			this.refresh();
-			this._unit.aiCalculate();
-
-			this._selectTarget(this._unit.aiMoveTarget);
-			this._refreshTargetArea();
-
-			if (this._target && this._target != this._unit.square) {
-				await Game.asyncPause(250);
-				await this._moveUnit(this._unit, this._target);
-				this.refresh();
+	async _addReinforcements() {
+		for (var i = 0; i < this._reinforcementData.length; i++) {
+			var data = this._reinforcementData[i];
+			if (data.turn == this._turn) { // TODO: Other requirements?
+				var newPiece = this._addMapUnit(data);
+				newPiece.addTimedClass(500, 'spawn');
+				await Game.asyncPause(500);
 			}
-
-			this._selectSkill(this._unit.aiSkill);
-			this.refresh();
-
-			if (!this._skill) {
-				this._deselectUnit();
-				continue;
-			}
-
-			this._selectTarget(this._unit.aiSkillTarget);
-			this._refreshTargetArea();
-
-			if (this._target) {
-				await Game.asyncPause(250);
-				await this._useSkill(this._skill, this._target);
-			}
-			this._deselectUnit();
-			this.refresh();
 		}
-		await Game.asyncPause(250);
-
-		if (this._phase == BattleScene.EnemyPhase) {
-			await this._addReinforcements();
-		}
-
-		this._aiControlUnits = null;
-		this._nextTurn();
 		return;
 	}
+	//#endregion action processing
 
-
+	//#region input
 	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
@@ -576,7 +544,6 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	}
-
 	mouseOver(square, dragId) {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
@@ -590,14 +557,12 @@ class BattleScene extends Scene {
 			this._refreshTargetArea();
 		}
 	}
-
 	rightClick() {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
 		this._goBack();
 		this.refresh();
 	}
-
 	keydown(key) {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
@@ -627,11 +592,60 @@ class BattleScene extends Scene {
 			}
 		}
 	}
+
+	async _aiProcessTurn() {
+		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
+		await Game.asyncPause(1000);
+
+		while (this._aiControlUnits.length > 0) {
+			this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+			this._selectUnit(this._aiControlUnits.pop());
+			
+			if (!this._unit) continue;
+			
+			this.refresh();
+			this._unit.aiCalculate();
+
+			this._selectTarget(this._unit.aiMoveTarget);
+			this._refreshTargetArea();
+
+			if (this._target && this._target != this._unit.square) {
+				await Game.asyncPause(250);
+				await this._moveUnit(this._unit, this._target);
+				this.refresh();
+			}
+
+			this._selectSkill(this._unit.aiSkill);
+			this.refresh();
+
+			if (!this._skill) {
+				this._deselectUnit();
+				continue;
+			}
+
+			this._selectTarget(this._unit.aiSkillTarget);
+			this._refreshTargetArea();
+
+			if (this._target) {
+				await Game.asyncPause(250);
+				await this._useSkill(this._skill, this._target);
+			}
+			this._deselectUnit();
+			this.refresh();
+		}
+		await Game.asyncPause(250);
+
+		if (this._phase == BattleScene.EnemyPhase) {
+			await this._addReinforcements();
+		}
+
+		this._aiControlUnits = null;
+		this._nextTurn();
+		return;
+	}
+	//#endregion input
+
 };
-BattleScene.DeployPhase = 0;
-BattleScene.PlayerPhase = 1;
-BattleScene.EnemyPhase = 2;
-BattleScene.EndPhase = -1;
 
 /***************************************************
  Battle scene -> Team
