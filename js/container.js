@@ -70,6 +70,8 @@ class Board extends Container {
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
+		this.el.onmousemove = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {
@@ -437,21 +439,33 @@ class Board extends Container {
 	}
 	_drop(ev) {
 		ev.preventDefault();
-		var elId = ev.dataTransfer.getData("piece");
-		if (elId && ev.target?.obj) {
+		var dragElId = ev.dataTransfer.getData("piece");
+		if (dragElId && ev.target?.obj) {
 			var square = ev.target.obj;
 			square = square.square || square;
 			if (Game.scene) {
-				Game.scene.positionEvent(square, elId);
+				Game.scene.positionEvent(square, dragElId);
 			}
 		}
 	}
 	_click(ev) {
 		ev.stopPropagation();
-		if (ev.target) {
+		if (ev.target && ev.target?.obj) {
 			var square = ev.target.obj;
-			if (square) {
-				if (Game.scene) Game.scene.positionEvent(square);
+			if (square && Game.scene) {
+				Game.scene.positionEvent(square);
+			}
+		}
+	}
+	_mouseOver(ev) {
+		ev.stopPropagation();
+		if (ev.target && ev.target?.obj) {
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.target.obj;
+			square = square.square || square;
+			if (square && Game.scene) { 
+				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
+				else Game.scene.mouseOver(null, dragElId);
 			}
 		}
 	}
@@ -470,8 +484,6 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this.el.onmousemove = this._mouseOver;
-		this.el.ondragenter = this._mouseOver;
 		this._refresh();
 	}
 
@@ -603,19 +615,6 @@ class Square extends Position {
 	}
 	//#endregion terrain
 
-	//#region input events
-	_mouseOver(ev) {
-		ev.stopPropagation();
-		if (ev.currentTarget) {
-			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.currentTarget.obj;
-			if (square && Game.scene) { 
-				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
-				else Game.scene.mouseOver(null, dragElId);
-			}
-		}
-	}
-	//#endregion input events
 };
 
 /***************************************************
@@ -691,7 +690,6 @@ class UnitInfo extends ElObj {
 	get unit() {
 		return this._unit;
 	}
-
 	set unit(unit) {
 		if (unit) {
 			this._unit = unit;

@@ -105,9 +105,6 @@ class UnitPiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 
 		this._initialize();
-
-		this.el.onmousemove = this._mouseOver;
-		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {
@@ -495,18 +492,6 @@ class UnitPiece extends Piece {
 	}
 	deselect() {
 		this.el.classList.remove('selected');
-	}
-
-	_mouseOver(ev) {
-		ev.stopPropagation();
-		if (ev.currentTarget) {
-			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.currentTarget.obj.square;
-			if (square && Game.scene) { 
-				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
-				else Game.scene.mouseOver(null, dragElId);
-			}
-		}
 	}
 	//#endregion input events
 
