@@ -632,13 +632,6 @@ class SkillList extends Container {
 		this.el.appendChild(this._userInfo.el);
 	}
 
-	_hide() {
-		this.el.style.visibility = "hidden";
-	}
-	_show() {
-		this.el.style.visibility = "visible";
-	}
-
 	setUser(user) {
 		this._clearSkills();
 		this._user = user;

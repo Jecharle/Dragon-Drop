@@ -29,6 +29,13 @@ class ElObj {
 		this._style = value;
 	}
 
+	_hide() {
+		this.el.style.visibility = "hidden";
+	}
+	_show() {
+		this.el.style.visibility = "visible";
+	}
+
 	addTimedClass(duration, ...classList) {
 		this.el.classList.add(...classList);
 		setTimeout(() => this.el.classList.remove(...classList), duration);
