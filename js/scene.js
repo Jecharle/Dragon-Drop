@@ -77,11 +77,11 @@ class BattleScene extends Scene {
 	start() {
 		this._deploy();
 	}	
-	end() {
+	_endBattle() {
 		alert("The battle is now over"); // TEMP
 	}
 
-	//#region setup
+	//#region ui setup
 	_createTurnTitle() {
 		var turnTitle = document.createElement("span");
 		turnTitle.classList.add('turn-title');
@@ -126,7 +126,9 @@ class BattleScene extends Scene {
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
 	}
+	//#endregion ui setup
 
+	//#region unit setup
 	_initTeams() {
 		this.playerTeam = new Team(0, "ally");
 		this.enemyTeam = new Team(1, "enemy", true);
@@ -160,7 +162,7 @@ class BattleScene extends Scene {
 		}
 		return null;
 	}
-	//#endregion setup
+	//#endregion unit setup
 
 	//#region refresh
 	refresh() {
@@ -339,7 +341,7 @@ class BattleScene extends Scene {
 	}
 	_showEndScreen(text) {
 		var endScreen = new EndScreen(text);
-		endScreen.el.onclick = ev => this.end(); // TEMP
+		endScreen.el.onclick = ev => this._endBattle(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
 	//#endregion phases

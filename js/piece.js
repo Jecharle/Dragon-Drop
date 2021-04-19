@@ -20,11 +20,16 @@ class Piece extends SpriteElObj {
 	static nextId() {
 		return "piece" + Piece._id++;
 	}
-
 	idMatch(id) {
 		return (!id || id == this.el.id);
 	}
 
+	get type() { return Piece.None; }
+	static get None() { return 0; }
+	static get Unit() { return 1; }
+	static get Skill() { return 2; }
+
+	//#region parent
 	setParent(container) {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
@@ -35,14 +40,10 @@ class Piece extends SpriteElObj {
 	get parent() {
 		return this._parent;
 	}
+	//#endregion parent
 
-	select() { return false; }
-	deselect() { }
-	get type() { return Piece.None; }
-	static get None() { return 0; }
-	static get Unit() { return 1; }
-	static get Skill() { return 2; }
-
+	//#region refresh
+	refresh() { }
 	_setSelectable(selectable) {
 		this.el.setAttribute("draggable", Boolean(selectable));
 		if (selectable) {
@@ -60,11 +61,11 @@ class Piece extends SpriteElObj {
 			this.el.classList.remove('unselectable');
 		}
 	}
+	//#endregion
 
-	addTimedClass(duration, ...classList) {
-		this.el.classList.add(...classList);
-		setTimeout(() => this.el.classList.remove(...classList), duration);
-	}
+	//#region input events
+	select() { return false; }
+	deselect() { }
 
 	_click(ev) {
 		ev.stopPropagation();
@@ -81,6 +82,7 @@ class Piece extends SpriteElObj {
 		ev.dataTransfer.clearData("piece");
 		// the drop target handles the rest
 	}
+	//#endregion input events
 };
 
 /***************************************************
@@ -92,9 +94,9 @@ class UnitPiece extends Piece {
 		this._team = null;
 		this._partyMember = partyMember;
 		this.square = null;
+
 		this.size = 1;
 		this._moveStyle = "path";
-
 		this._setStats();
 		this._setSkills();
 
@@ -102,36 +104,59 @@ class UnitPiece extends Piece {
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
 
-		this.initialize();
+		this._initialize();
 
 		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
-	}
-
-	// TODO: Better place for this?
-	_mouseOver(ev) {
-		ev.stopPropagation();
-		if (ev.currentTarget) {
-			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
-			var square = ev.currentTarget.obj.square;
-			if (square && Game.scene) { 
-				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
-				else Game.scene.mouseOver(null, dragElId);
-			}
-		}
 	}
 
 	get elClass() {
 		return 'unit';
 	}
 
+	get type() {
+		return Piece.Unit;
+	}
+
 	get targetable() {
 		return true;
 	}
 
-	get size() {
-		return this._size;
+	//#region text
+	get name() {
+		return "[Unit name]";
 	}
+	get characterName() {
+		return this._partyMember?.name || this.name;
+	}
+	get _description() {
+		return "[Unit description]";
+	}
+	get fullDescription() {
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		return description;
+	}
+	//#endregion text
+
+	//#region setup
+	_setStats() {
+		this._maxHp = 1;
+		this._moveRange = 2;
+	}
+	_setSkills() {
+		this._skills = [];
+	}
+	_initialize() {
+		this.myTurn = false;
+		this.actionUsed = false;
+		this.homeSquare = null;
+		this._facing = 1;
+		this.refresh();
+	}
+	//#endregion setup
+
+	//#region attributes
+	get size() { return this._size; }
 	set size(value) {
 		if (this._size > 1) {
 			this.el.classList.remove("x"+this.size);
@@ -140,11 +165,6 @@ class UnitPiece extends Piece {
 		if (this._size > 1) {
 			this.el.classList.add("x"+this.size);
 		}
-	}
-
-	_setStats() {
-		this._maxHp = 1;
-		this._moveRange = 2;
 	}
 
 	get team() {
@@ -166,11 +186,6 @@ class UnitPiece extends Piece {
 	isEnemy(piece) {
 		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
-	}
-
-	canStand(square) {
-		if (square.blocksMove) return false;
-		else return (square.piece == null || square.piece == this);
 	}
 
 	get hp() {
@@ -195,15 +210,16 @@ class UnitPiece extends Piece {
 		return !this.dead;
 	}
 
-	dieIfDead() {
-		if (this.dead) {
-			this._showDeathAnimation();
-			this.setParent(null);
-			this.setTeam(null);
-			if (this._partyMember) this._partyMember.alive = false;
-		}
+	get moveRange() {
+		return this._moveRange;
 	}
 
+	get skills() {
+		return this._skills;
+	}
+	//#endregion attributes
+
+	//#region refresh
 	refresh() {
 		this._lifebar.maxValue = this.maxHp;
 		this._lifebar.value = this.hp;
@@ -212,7 +228,20 @@ class UnitPiece extends Piece {
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
 		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
 	}
+	_refreshSkills() {
+		this._skills.forEach(skill => skill.refresh());
+	}
+	dieIfDead() {
+		if (this.dead) {
+			this._showDeathAnimation();
+			this.setParent(null);
+			this.setTeam(null);
+			if (this._partyMember) this._partyMember.alive = false;
+		}
+	}
+	//#endregion refresh
 
+	//#region effects
 	takeDamage(power, _props) {
 		this.hp -= power;
 
@@ -234,17 +263,6 @@ class UnitPiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	_showPopup(value) {
-		var popup = new PopupText(value);
-		this.el.appendChild(popup.el);
-	}
-	_showDeathAnimation() {
-		if (!this.square) return;
-		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		if (this._facing < 0) vfx.spriteEl.classList.add("left");
-		this.square.parent.el.appendChild(vfx.el);
-	}
-
 
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
@@ -271,49 +289,9 @@ class UnitPiece extends Piece {
 		}
 		return false;
 	}
+	//#endregion effects
 
-	// status effects
-	// TODO: status effects are stored in a dictionary, and occasionally looped through?
-	/*hasStatus(name) {
-		return false;
-	}
-	addStatus(effect) {
-		return false;
-	}
-	removeStatus(name) {
-		return false;
-	}
-	statusList() {
-
-	}*/
-
-	_setSkills() {
-		this._skills = [];
-	}
-
-	get name() {
-		return "[Unit name]";
-	}
-	get characterName() {
-		return this._partyMember?.name || this.name;
-	}
-	get _description() {
-		return "[Unit description]";
-	}
-
-	get fullDescription() {
-		var description = `<strong>${this.name}</strong><br>${this._description}`;
-		return description;
-	}
-
-	get moveRange() {
-		return this._moveRange;
-	}
-
-	get skills() {
-		return this._skills;
-	}
-
+	//#region turn state
 	get canMove() {
 		return this.alive && !this.homeSquare && !this.actionUsed && (this.moveRange > 0);
 	}
@@ -321,13 +299,6 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 
-	initialize() {
-		this.myTurn = false;
-		this.actionUsed = false;
-		this.homeSquare = null;
-		this._facing = 1;
-		this.refresh();
-	}
 	startTurn() {
 		this.myTurn = true;
 		this.refresh();
@@ -339,30 +310,61 @@ class UnitPiece extends Piece {
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
+	//#endregion turn state
 
-	face(target, from) {
-		if (!from) from = this.square;
-		if (!from || !target || from.parent != target.parent) return;
+	//#region move
+	async move(target) {
+		if (this.square == target) return false;
 
-		var facing = (target.x - target.y) - (from.x - from.y);
-		if (facing < 0) {
-			this.el.classList.add('left');
-			this._facing = -1;
-		} else if (facing > 0) {
-			this.el.classList.remove('left');
-			this._facing = 1;
+		var oldSquare = this.square;
+		if (target.parent.movePiece(this, target)) {
+			var moveTime = this.animateMove(target.path, this._moveStyle);
+			this.addTimedClass(moveTime, 'moving');
+			this.face(target, target.path[0]);
+			await Game.asyncPause(moveTime);
+
+			this.homeSquare = oldSquare;
+			this.refresh();
+			return true;
 		}
+		return false;
 	}
+	undoMove() {
+		if (this.homeSquare == null) return false;
+		
+		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
+			this.homeSquare = null;
+			this.refresh();
+			return true;
+		}
+		return false;
+	}
+
+	canStand(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || square.piece == this);
+	}
+	canPass(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || this.isAlly(square.piece));
+	}
+	//#endregion move
+
+	//#region animation
+	static get Path() { return 0; }
+	static get Jump() { return 1; }
+	static get Teleport() { return 2; }
+
 	animateMove(path, type) {
 		switch (type) {
-			case "jump":
+			case UnitPiece.Jump:
 				return this._animateJump(path)
 
-			case "teleport":
+			case UnitPiece.Teleport:
 				return this._animateTeleport(path);
 
 			default:
-			case "path":
+			case UnitPiece.Path:
 				return this._animatePath(path);
 		}
 	}
@@ -439,6 +441,20 @@ class UnitPiece extends Piece {
 		return time;
 	}
 
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent) return;
+
+		var facing = (target.x - target.y) - (from.x - from.y);
+		if (facing < 0) {
+			this.el.classList.add('left');
+			this._facing = -1;
+		} else if (facing > 0) {
+			this.el.classList.remove('left');
+			this._facing = 1;
+		}
+	}
+
 	animateBump(target, origin) {
 		var direction = this.square.direction(target);
 		var dx = this.square.screenX + Square.screenX(...direction, 0) / 2;
@@ -464,42 +480,15 @@ class UnitPiece extends Piece {
 		return time;
 	}
 
-	canPass(square) {
-		if (square.blocksMove) return false;
-		else return (square.piece == null || this.isAlly(square.piece));
+	_showDeathAnimation() {
+		if (!this.square) return;
+		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
+		if (this._facing < 0) vfx.spriteEl.classList.add("left");
+		this.square.parent.el.appendChild(vfx.el);
 	}
+	//#endregion animation
 
-	async move(target) {
-		if (this.square == target) return false;
-
-		var oldSquare = this.square;
-		if (target.parent.movePiece(this, target)) {
-			var moveTime = this.animateMove(target.path, this._moveStyle);
-			this.addTimedClass(moveTime, 'moving');
-			this.face(target, target.path[0]);
-			await Game.asyncPause(moveTime);
-
-			this.homeSquare = oldSquare;
-			this.refresh();
-			return true;
-		}
-		return false;
-	}
-	undoMove() {
-		if (this.homeSquare == null) return false;
-		
-		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
-			this.homeSquare = null;
-			this.refresh();
-			return true;
-		}
-		return false;
-	}
-
-	_refreshSkills() {
-		this._skills.forEach(skill => skill.refresh());
-	}
-
+	//#region input events
 	select() {
 		this.el.classList.add('selected');
 		return true;
@@ -507,15 +496,25 @@ class UnitPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	get type() {
-		return Piece.Unit;
-	}
 
+	_mouseOver(ev) {
+		ev.stopPropagation();
+		if (ev.currentTarget) {
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var square = ev.currentTarget.obj.square;
+			if (square && Game.scene) { 
+				if (square.inRange && !square.invalid) Game.scene.mouseOver(square, dragElId);
+				else Game.scene.mouseOver(null, dragElId);
+			}
+		}
+	}
+	//#endregion input events
+
+	//#region ai
 	get aiUnitScore() {
 		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
 		else return 0;
 	}
-
 	_aiGetBestSkill(square) {
 		return this.skills.reduce((best, skill) => {
 			if (!skill.canUse()) return best;
@@ -530,10 +529,8 @@ class UnitPiece extends Piece {
 			skill: null, target: null, score: 0
 		});
 	}
-
-	// assumes the unit has been selected, and move range is visible
 	aiCalculate() {
-
+		// assumes the unit has been selected, and move range is visible
 		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
@@ -570,13 +567,10 @@ class UnitPiece extends Piece {
 		}
 	}
 
-	// distance to nearby units of interest
-
 	_maxDistance() {
 		var board = this.parent;
 		return board.h + board.w;
 	}
-
 	_nearestPieceDistance(origin, targetFunction) {
 		var nearestDistance = origin.parent.pieces.reduce((nearest, piece) => {
 			if (targetFunction.call(this, piece)) {
@@ -587,7 +581,6 @@ class UnitPiece extends Piece {
 		}, this._maxDistance());
 		return nearestDistance;
 	}
-
 	_averagePieceDistance(origin, targetFunction) {
 		var targetCount = 0;
 		var totalDistance = origin.parent.pieces.reduce((sum, piece) => {
@@ -600,6 +593,7 @@ class UnitPiece extends Piece {
 		}, 0);
 		return targetCount > 0 ? (totalDistance / targetCount) : 0;
 	}
+	//#endregion ai
 };
 
 /***************************************************
@@ -622,19 +616,21 @@ class SkillPiece extends Piece {
 		this.refresh();
 	}
 
-	_setStats() {
-		this._range = 1;
-		this._minRange = 1;
-		this._area = 0;
-		this._baseCooldown = 0;
-		this._maxUses = 0;
-		this._basePower = 2;
-	}
-
 	get elClass() {
 		return 'skill';
 	}
 
+	get type() {
+		return Piece.Skill;
+	}
+
+	//#region text
+	get name() {
+		return "[Skill name]";
+	}
+	get _description() {
+		return "[Skill description]";
+	}
 	get fullDescription() {
 		var description = `<strong>${this.name}</strong><br>${this._description}`;
 		if (this.hasLimitedUses) {
@@ -649,30 +645,18 @@ class SkillPiece extends Piece {
 		}
 		return description;
 	}
+	//#endregion text
 
-	get name() {
-		return "[Skill name]";
-	}
-	get _description() {
-		return "[Skill description]";
-	}
-
+	//#region attributes
 	get range() {
 		return this._range;
 	}
 	get minRange() {
 		return this._minRange;
 	}
-	inRange(origin, target) {
-		var distance = origin.distance(target);
-		return distance <= this.range && distance >= this.minRange;
-	}
 
 	get area() {
 		return this._area;
-	}
-	inArea(origin, target) {
-		return origin.distance(target) <= this.area;
 	}
 
 	get cooldownCost() {
@@ -693,10 +677,61 @@ class SkillPiece extends Piece {
 		return this._basePower;
 	}
 
+	_setStats() {
+		this._range = 1;
+		this._minRange = 1;
+		this._area = 0;
+		this._baseCooldown = 0;
+		this._maxUses = 0;
+		this._basePower = 2;
+	}
+	//#endregion attributes
+
+	//#region selection
 	canUse() {
 		return this.user.myTurn && this.user.canAct
 		&& this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
+	inRange(origin, target) {
+		var distance = origin.distance(target);
+		return distance <= this.range && distance >= this.minRange;
+	}
+	validTarget(target) {
+		return !!target;
+	}
+	inArea(origin, target) {
+		return origin.distance(target) <= this.area;
+	}
+
+	_affectedSquares(target) {
+		if (!target) return [];
+
+		return target.parent.getAoE(this, target);
+	}
+	_affectedUnits(squares) {
+		if (!squares) return [];
+
+		var units = [];
+		squares.forEach(square => {
+			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
+				units.push(square.piece);
+			}
+		});
+		return units;
+	}
+	_targetOrder(squareA, squareB) {
+		return this._target.distance(squareA) - this._target.distance(squareB);
+	}
+
+	endTurn() {
+		this.cooldown--;
+		if (this.cooldown < 0) {
+			this.cooldown = 0;
+		}
+	}
+	//#endregion selection
+
+	//#region skill use
 	async use(target) {
 		if (!target || !this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
@@ -733,29 +768,6 @@ class SkillPiece extends Piece {
 		return true;
 	}
 
-	validTarget(target) {
-		return !!target;
-	}
-	_affectedSquares(target) {
-		if (!target) return [];
-
-		return target.parent.getAoE(this, target);
-	}
-	_affectedUnits(squares) {
-		if (!squares) return [];
-
-		var units = [];
-		squares.forEach(square => {
-			if (square.piece && square.piece.targetable && !units.includes(square.piece)) {
-				units.push(square.piece);
-			}
-		});
-		return units;
-	}
-	_targetOrder(squareA, squareB) {
-		return this._target.distance(squareA) - this._target.distance(squareB);
-	}
-
 	_startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
 		this.user.addTimedClass(200, 'attack');
@@ -764,11 +776,18 @@ class SkillPiece extends Piece {
 		
 		return 100;
 	}
-
 	_squareEffects(_square, _target) { return 0; }
 	_unitEffects(_unit, _target) { return 0; }
 	_endEffects(_target, _squares, _units) { return 0; }
 
+	_payCost() {
+		this.user.actionUsed = true;
+		if (this.hasCooldown) this.cooldown = this.cooldownCost;
+		if (this.hasLimitedUses) this.usesLeft--;
+	}
+	//#endregion skill use
+
+	//#region animation
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
 		var vfx = new SpriteEffect(target, 1000, "unit", ...styles);
@@ -776,24 +795,16 @@ class SkillPiece extends Piece {
 		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
+	//#endregion animation
 
-	_payCost() {
-		this.user.actionUsed = true;
-		if (this.hasCooldown) this.cooldown = this.cooldownCost;
-		if (this.hasLimitedUses) this.usesLeft--;
-	}
-
-	endTurn() {
-		this.cooldown--;
-		if (this.cooldown < 0) {
-			this.cooldown = 0;
-		}
-	}
-
+	//#region refresh
 	refresh() {
 		var usable = this.canUse();
 		this._setSelectable(usable);
 		this._setUnselectable(!usable);
+		this._refreshLabels();
+	}
+	_refreshLabels() {
 		// TEMP - two separate labels?
 		if (this.cooldown > 0) {
 			this._cooldownLabel.value = this.cooldown;
@@ -804,7 +815,9 @@ class SkillPiece extends Piece {
 		}
 		this._tooltip.value = this.fullDescription;
 	}
+	//#endregion refresh
 
+	//#region input events
 	select() {
 		if (!this.canUse()) return false;
 		this.el.classList.add('selected');
@@ -813,10 +826,9 @@ class SkillPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	get type() {
-		return Piece.Skill;
-	}
+	//#endregion input events
 
+	//#region ai
 	_aiBaseTargetScore(target) {
 		return 0;
 	}
@@ -852,8 +864,9 @@ class SkillPiece extends Piece {
 		});
 		return best;
 	}
+	//#endregion ai
 
-	// targeting shapes
+	//#region range / area shapes
 
 	_inSquare(origin, target, size) {
 		if (!origin || !target) return false;
@@ -872,11 +885,9 @@ class SkillPiece extends Piece {
 		return (dx == dy);
 	}
 
-	// other targeting rules
 	_canSeeSquare(square) {
 		return (!square.blocksSight && !square.piece);
 	}
-
 	_canSee(origin, target) {
 		if (!origin || !target || origin.parent != target.parent) return false;
 		
@@ -898,15 +909,16 @@ class SkillPiece extends Piece {
 			if (square && !this._canSeeSquare(square)) return false;
 		}
 	}
+
 	_nearTarget(_origin, target, targetFunction) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
 			return (targetFunction && targetFunction.call(this.user, square));
 		});
 	}
+	//#endregion range / area shapes
 
-	// targeting directions (for area effects)
-
+	//#region directional areas
 	_ahead(origin, target, direction) {
 		var dx = target.x - origin.x;
 		var dy = target.y - origin.y;
@@ -931,4 +943,5 @@ class SkillPiece extends Piece {
 		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
 		return (sideways >= 0 && sideways >= forward);
 	}
+	//#endregion directional areas
 };

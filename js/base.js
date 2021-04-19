@@ -28,6 +28,11 @@ class ElObj {
 		}
 		this._style = value;
 	}
+
+	addTimedClass(duration, ...classList) {
+		this.el.classList.add(...classList);
+		setTimeout(() => this.el.classList.remove(...classList), duration);
+	}
 }
 
 class SpriteElObj extends ElObj {

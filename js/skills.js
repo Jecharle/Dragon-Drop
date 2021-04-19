@@ -178,7 +178,7 @@ class TestMoveSkill extends SkillPiece {
 	_startEffects(target, _squares, _units) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
-		var time = this.user.animateMove([startSquare], "jump");
+		var time = this.user.animateMove([startSquare], UnitPiece.Jump);
 		return time;
 	}
 };
@@ -351,7 +351,7 @@ class TestPositionSkill extends SkillPiece {
 		var startSquare = unit.square;
 		target.parent.movePiece(unit, target);
 
-		var time = unit.animateMove([startSquare], "jump");
+		var time = unit.animateMove([startSquare], UnitPiece.Jump);
 		unit.addTimedClass(time+100, 'damaged');
 		return time+100;
 	}
