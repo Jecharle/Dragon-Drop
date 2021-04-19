@@ -331,11 +331,15 @@ class BattleScene extends Scene {
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
-	_moveUnit(unit, square) {
-		if (unit.move(square)) {
+	async _moveUnit(unit, square) {
+		this.busy = true;
+		var success = await unit.move(square);
+		if (success) {
 			this._moveStack.push(unit);
 			this._deselectTarget();
 		}
+		this.busy = false;
+		return success;
 	}
 	_undoMove() {
 		var unit = this._moveStack.pop();
@@ -436,7 +440,7 @@ class BattleScene extends Scene {
 
 	async _aiProcessTurn() {
 		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		await Game.asyncPause(1200);
+		await Game.asyncPause(1000);
 
 		while (this._aiControlUnits.length > 0) {
 			this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
@@ -452,7 +456,7 @@ class BattleScene extends Scene {
 
 			if (this._target && this._target != this._unit.square) {
 				await Game.asyncPause(250);
-				this._moveUnit(this._unit, this._target);
+				await this._moveUnit(this._unit, this._target);
 				this.refresh();
 			}
 
@@ -468,7 +472,7 @@ class BattleScene extends Scene {
 			this._refreshTargetArea();
 
 			if (this._target) {
-				await Game.asyncPause(500);
+				await Game.asyncPause(250);
 				await this._useSkill(this._skill, this._target);
 			}
 			this._deselectUnit();
@@ -559,7 +563,7 @@ class BattleScene extends Scene {
 				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
-					this._moveUnit(this._unit, square);
+					this._moveUnit(this._unit, square).then(() => this.refresh());
 				} else {
 					this._selectTarget(square);
 					this._refreshTargetArea();

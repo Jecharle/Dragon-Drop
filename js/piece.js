@@ -469,15 +469,17 @@ class UnitPiece extends Piece {
 		else return (square.piece == null || this.isAlly(square.piece));
 	}
 
-	move(target) {
+	async move(target) {
 		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			this.homeSquare = oldSquare;
 			var moveTime = this.animateMove(target.path, this._moveStyle);
 			this.addTimedClass(moveTime, 'moving');
 			this.face(target, target.path[0]);
+			await Game.asyncPause(moveTime);
+
+			this.homeSquare = oldSquare;
 			this.refresh();
 			return true;
 		}
@@ -696,7 +698,7 @@ class SkillPiece extends Piece {
 		&& this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
 	async use(target) {
-		if (!this.canUse() || !this.validTarget(target)) return false;
+		if (!target || !this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
 
 		this._target = target;
