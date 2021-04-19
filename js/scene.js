@@ -556,14 +556,18 @@ class BattleScene extends Scene {
 				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
 				if (square == this._target) {
+					// async function
 					this._useSkill(this._skill, square).then(() => this.refresh());
+					return;
 				} else if (!square.invalid) {
 					this._selectTarget(square);
 					this._refreshTargetArea();
 				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
+					// async function
 					this._moveUnit(this._unit, square).then(() => this.refresh());
+					return;
 				} else {
 					this._selectTarget(square);
 					this._refreshTargetArea();
