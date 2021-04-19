@@ -76,13 +76,10 @@ class Board extends Container {
 		return 'board';
 	}
 
-	get w() {
-		return 8;
-	}
-	get h() {
-		return 8;
-	}
+	get w() { return 8; }
+	get h() { return 8; }
 
+	//#region setup
 	_loadTerrain(terrainData) {
 		if (!terrainData) return;
 		terrainData.forEach(data => {
@@ -92,18 +89,20 @@ class Board extends Container {
 	_loadDeployArea(deployData) {
 		if (!deployData) return;
 		deployData.forEach(data => {
-			this.addDeploySquare(this.at(data.x, data.y));
+			this._addDeploySquare(this.at(data.x, data.y));
 		});
 	}
 
-	addDeploySquare(square) {
+	_addDeploySquare(square) {
 		if (!square || square.parent != this) return;
 
 		if (!this.deployArea.includes(square)) {
 			this.deployArea.push(square);
 		}
 	}
+	//#endregion setup
 
+	//#region access and areas
 	at(x, y) {
 		if (x == null || x < 0 || x >= this.w) return null;
 		if (y == null || y < 0 || y >= this.h) return null;
@@ -125,6 +124,27 @@ class Board extends Container {
 			}
 		}
 		return area;
+	}
+	getAoE(skill, origin) {
+		if (!skill || !origin) return [];
+		return this.squares.filter(square => skill.inArea(origin, square));
+	}
+	getAdjacent(square) {
+		var adjacent = [];
+
+		var left = this.at(square.x-1, square.y);
+		if (left) adjacent.push(left);
+
+		var right = this.at(square.x+1, square.y);
+		if (right) adjacent.push(right);
+
+		var up = this.at(square.x, square.y-1);
+		if (up) adjacent.push(up);
+
+		var down = this.at(square.x, square.y+1);
+		if (down) adjacent.push(down);
+
+		return adjacent;
 	}
 
 	canFit(unit, centerSquare) {
@@ -154,7 +174,9 @@ class Board extends Container {
 		});
 		return nearestSquare;
 	}
+	//#endregion access and areas
 
+	//#region moving pieces
 	movePiece(piece, square) {
 		if (!piece || !square) return false;
 
@@ -240,7 +262,9 @@ class Board extends Container {
 			return false;
 		}
 	}
+	//#endregion moving pieces
 
+	//#region highlighting areas
 	setDeployArea(hasUnit) {
 		this.deployArea.forEach(square => this._paintDeployRange(square, hasUnit));
 	}
@@ -357,7 +381,9 @@ class Board extends Container {
 		square.movesLeft = null;
 		square.path = null;
 	}
+	//#endregion highlighting areas
 
+	//#region highlighting targets
 	showPath(target) {
 		if (!target?.path?.length) return;
 
@@ -385,11 +411,6 @@ class Board extends Container {
 			previous = square;
 		});
 	}
-
-	getAoE(skill, origin) {
-		if (!skill || !origin) return [];
-		return this.squares.filter(square => skill.inArea(origin, square));
-	}
 	showAoE(skill, origin) {
 		if (!skill || !origin) return;
 		this.getAoE(skill, origin).forEach(square => {
@@ -397,38 +418,20 @@ class Board extends Container {
 			if (square.piece) square.piece.el.classList.add('in-area');
 		});
 	}
-
 	showDeploySwap(unit, target) {
 		if (!unit || !unit.square) return;
 		unit.square.el.classList.add('selected');
 		if (target) target.el.classList.add('selected');
 	}
-
 	clearTargeting() {
 		this.squares.forEach(square => {
 			square.el.classList.remove('move-path', 'move-end', 'left', 'up', 'right', 'down', 'selected');
 			if (square.piece) square.piece.el.classList.remove('in-area');
 		});
 	}
+	//#endregion highlighting targets
 
-	getAdjacent(square) {
-		var adjacent = [];
-
-		var left = this.at(square.x-1, square.y);
-		if (left) adjacent.push(left);
-
-		var right = this.at(square.x+1, square.y);
-		if (right) adjacent.push(right);
-
-		var up = this.at(square.x, square.y-1);
-		if (up) adjacent.push(up);
-
-		var down = this.at(square.x, square.y+1);
-		if (down) adjacent.push(down);
-
-		return adjacent;
-	}
-
+	//#region input events
 	_allowDrop(ev) {
 		ev.preventDefault();
 	}
@@ -452,6 +455,7 @@ class Board extends Container {
 			}
 		}
 	}
+	//#endregion input events
 };
 
 /***************************************************
@@ -475,20 +479,15 @@ class Square extends Position {
 		return 'square';
 	}
 
-	get x() {
-		return this._x;
-	}
-	get y() {
-		return this._y;
-	}
-	get z() {
-		return this._z;
-	}
+	get x() { return this._x; }
+	get y() { return this._y; }
+	get z() { return this._z; }
 	set z(value) {
 		this._z = value;
 		this._refresh();
 	}
 
+	//#region isometric
 	static screenX(x, y, _z) {
 		return Math.floor(64 * (x - y));
 	}
@@ -519,12 +518,13 @@ class Square extends Position {
 		this.el.style.transform = this.screenPosition;
 		this.el.style.zIndex = this._selfScreenZ;
 	}
+	//#endregion isometric
 
+	//#region utilities
 	distance(square) {
 		if (!square || this.parent != square.parent) return null;
 		return Math.abs(this.x - square.x) + Math.abs(this.y - square.y);
 	}
-
 	direction(square) {
 		if (!square || this.parent != square.parent) return null;
 
@@ -541,6 +541,18 @@ class Square extends Position {
 			else return [0, -1];
 		}
 	}
+	//#endregion utilities
+
+	//#region terrain
+	static get _BlockMove() { return 1; }
+	static get _BlockSight() { return 2; }
+	static get _SlowMove() { return 4; }
+
+	static get Flat() { return 0; }
+	static get Pit() { return Square._BlockMove; }
+	static get Cover() { return Square._BlockSight; }
+	static get Wall() { return Square._BlockMove | Square._BlockSight; }
+	static get Rough() { return Square._SlowMove; }
 
 	get terrain() {
 		return this._terrain;
@@ -589,7 +601,9 @@ class Square extends Position {
 	get slowsMove() {
 		return (this.terrain&Square._SlowMove) == Square._SlowMove;
 	}
+	//#endregion terrain
 
+	//#region input events
 	_mouseOver(ev) {
 		ev.stopPropagation();
 		if (ev.currentTarget) {
@@ -601,17 +615,8 @@ class Square extends Position {
 			}
 		}
 	}
+	//#endregion input events
 };
-// TODO: Convert to getters, to ensure they can't be tampered?
-Square._BlockMove = 1;
-Square._BlockSight = 2;
-Square._SlowMove = 4;
-
-Square.Flat = 0;
-Square.Pit = Square._BlockMove;
-Square.Cover = Square._BlockSight;
-Square.Wall = Square._BlockMove | Square._BlockSight;
-Square.Rough = Square._SlowMove;
 
 /***************************************************
  Skill list
@@ -621,10 +626,17 @@ class SkillList extends Container {
 		super();
 		this._user = null;
 		this.el.classList.add('skill-list');
-		this.el.style.visibility = "hidden";
+		this._hide();
 
 		this._userInfo = new UnitInfo();
 		this.el.appendChild(this._userInfo.el);
+	}
+
+	_hide() {
+		this.el.style.visibility = "hidden";
+	}
+	_show() {
+		this.el.style.visibility = "visible";
 	}
 
 	setUser(user) {
@@ -632,26 +644,24 @@ class SkillList extends Container {
 		this._user = user;
 		this._userInfo.unit = user;
 		if (!user) {
-			this.el.style.visibility = "hidden";
+			this._hide();
 			return false;
+		} else {
+			user.skills.forEach(skill => this._addSkill(skill));
+			this._show();
+			return true;
 		}
-
-		user.skills.forEach(skill => this._addSkill(skill));
-		this.el.style.visibility = "visible";
-		return true;
 	}
 
 	get skills() {
 		return this.pieces;
 	}
-
 	_addSkill(piece) {
 		if (piece) {
 			piece.setParent(this);
 			this.el.appendChild(piece.el);
 		}
 	}
-
 	_clearSkills() {
 		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
 	}
@@ -665,7 +675,7 @@ class UnitInfo extends ElObj {
 		super();
 
 		this._portrait = document.createElement("div");
-		this._portrait.classList.add('face'); // TODO: Replace with 'face' and add portraits
+		this._portrait.classList.add('face');
 		this.el.appendChild(this._portrait);
 
 		this._lifebar = new Lifebar(0, 0);
