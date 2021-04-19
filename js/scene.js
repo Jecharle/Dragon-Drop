@@ -680,21 +680,7 @@ class Team {
 		this.members = [];
 	}
 
-	get isAuto() {
-		return this._auto;
-	}
-
-	get size() {
-		return this.members.reduce((count, member) => {
-			if (member.alive && member.square) return count+1;
-			else return count;
-		}, 0);
-	}
-
-	get untouched() {
-		return this.members.every(member => member.dead || (member.canMove && member.canAct));
-	}
-
+	//#region units
 	add(unit) {
 		if (!this.members.includes(unit)) {
 			this.members.push(unit);
@@ -708,6 +694,21 @@ class Team {
 			if (this.style) unit.el.classList.remove(this.style);
 		}
 	}
+	get size() {
+		return this.members.reduce((count, member) => {
+			if (member.alive && member.square) return count+1;
+			else return count;
+		}, 0);
+	}
+	//#endregion units
+
+	//#region turn
+	get untouched() {
+		return this.members.every(member => member.dead || (member.canMove && member.canAct));
+	}
+	get isAuto() {
+		return this._auto;
+	}
 
 	startTurn() {
 		this.members.forEach(piece => piece.startTurn());
@@ -715,7 +716,9 @@ class Team {
 	endTurn() {
 		this.members.forEach(piece => piece.endTurn());
 	}
+	//#endregion turn
 
+	//#region friend-or-foe
 	isAlly(otherTeam) {
 		if (!otherTeam) return false;
 		return otherTeam.group == this.group;
@@ -724,4 +727,5 @@ class Team {
 		if (!otherTeam) return false;
 		return otherTeam.group != this.group;
 	}
+	//#endregion friend-or-foe
 }
