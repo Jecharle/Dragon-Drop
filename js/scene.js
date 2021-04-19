@@ -8,7 +8,7 @@ class Scene extends ElObj {
 		super();
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
-		this.busy = false;
+		this.setDone();
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -20,21 +20,35 @@ class Scene extends ElObj {
 		return 'scene';
 	}
 
-	get lastScene() {
-		this._lastScene;
-	}
-
 	get unsaved() {
 		return false;
 	}
 
-	start() { }
-	end() { }
-
+	//#region inter-scene communication
+	get lastScene() {
+		this._lastScene;
+	}
 	sendData(data) {
 		this._dataIn = data;
 	}
+	//#endregion inter-scene communication
 
+	start() { }
+	end() { }
+
+	//#region block during some async
+	setBusy() {
+		this._busy = true;
+	}
+	setDone() {
+		this._busy = false;
+	}
+	get busy() {
+		return !!this._busy;
+	}
+	//#endregion block during some async
+
+	//#region input events
 	pieceEvent(piece, dragging) { }
 	positionEvent(position, dragId) { }
 	mouseOver(position, dragId) { }
@@ -42,6 +56,7 @@ class Scene extends ElObj {
 
 	keydown(key) { }
 	keyup(key) { }
+	//#endregion input events
 }
 
 /***************************************************
@@ -363,13 +378,13 @@ class BattleScene extends Scene {
 		this._skillList.setUser(null);
 	}
 	async _moveUnit(unit, square) {
-		this.busy = true;
+		this.setBusy();
 		var success = await unit.move(square);
 		if (success) {
 			this._moveStack.push(unit);
 			this._deselectTarget();
 		}
-		this.busy = false;
+		this.setDone();
 		return success;
 	}
 	_undoMove() {
@@ -410,14 +425,14 @@ class BattleScene extends Scene {
 		this._skill = null;
 	}
 	async _useSkill(skill, square) {
-		this.busy = true;
+		this.setBusy();
 		var success = await skill.use(square)
 		if (success) {
 			this._clearMoves();
 			this._deselectSkill();
 			this._isBattleOver();
 		}
-		this.busy = false;
+		this.setDone();
 		return success;
 	}
 

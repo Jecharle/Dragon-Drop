@@ -350,7 +350,7 @@ class UnitPiece extends Piece {
 	}
 	//#endregion move
 
-	//#region animation
+	//#region animate
 	static get Path() { return 0; }
 	static get Jump() { return 1; }
 	static get Teleport() { return 2; }
@@ -486,7 +486,7 @@ class UnitPiece extends Piece {
 		if (this._facing < 0) vfx.spriteEl.classList.add("left");
 		this.square.parent.el.appendChild(vfx.el);
 	}
-	//#endregion animation
+	//#endregion animate
 
 	//#region input events
 	select() {

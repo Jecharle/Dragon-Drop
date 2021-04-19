@@ -165,6 +165,7 @@ class SpriteEffect extends SpriteElObj {
 		return 'vfx-sprite';
 	}
 
+	//#region animate
 	static get Straight() { return 0; }
 	static get Arc() { return 1; }
 	static get Return() { return 2; }
@@ -219,4 +220,5 @@ class SpriteEffect extends SpriteElObj {
 		var time = 200;
 		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});
 	}
+	//#endregion animate
 }
