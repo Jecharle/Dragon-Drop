@@ -623,7 +623,7 @@ class BattleScene extends Scene {
 	async _aiProcessTurn() {
 		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
 
-		var waitTime = 250; // TODO: Adjustable via settings?
+		var waitTime = 300; // TODO: Adjustable via settings?
 
 		while (aiControlUnits.length > 0) {
 			aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
@@ -660,6 +660,8 @@ class BattleScene extends Scene {
 			}
 			this._deselectUnit();
 			this.refresh();
+
+			if (this._phase == BattleScene.EndPhase) return;
 		}
 		await Game.asyncPause(waitTime);
 
