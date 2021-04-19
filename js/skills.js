@@ -221,7 +221,7 @@ class TestAreaSkill extends SkillPiece {
 	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(target, 1);
-		return 0;
+		return 150;
 	}
 
 	_endEffects(_target, _squares, _units) {

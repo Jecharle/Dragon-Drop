@@ -174,16 +174,16 @@ class BattleScene extends Scene {
 		}
 		return null;
 	}
-	_addReinforcements() {
-		var anySpawns = false;
-		this._reinforcementData.forEach(data => {
+	async _addReinforcements() {
+		for (var i = 0; i < this._reinforcementData.length; i++) {
+			var data = this._reinforcementData[i];
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
 				newPiece.addTimedClass(500, 'spawn');
-				anySpawns = true;
+				await Game.asyncPause(500);
 			}
-		});
-		return anySpawns;
+		}
+		return;
 	}
 
 	refresh() {
@@ -237,7 +237,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	
 		if (this._autoPhase) {
-			setTimeout(() => this._aiTurnStart(), 1600);
+			this._aiProcessTurn();
 		}
 	}
 
@@ -434,71 +434,55 @@ class BattleScene extends Scene {
 		}
 	}
 
-	_aiTurnStart() {
+	async _aiProcessTurn() {
 		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		this._aiSelectUnit();
-	}
-	_aiSelectUnit() {
-		if (this._aiControlUnits.length == 0) {
-			setTimeout(() => this._aiTurnEnd(), 400);
-			return;
-		}
+		await Game.asyncPause(1200);
 
-		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-		if (!this._selectUnit(this._aiControlUnits.pop())) {
-			this._aiSelectUnit(); // warning: technically recursive
-		}
-		this.refresh();
-		this._unit.aiCalculate();
-
-		this._selectTarget(this._unit.aiMoveTarget);
-		this._refreshTargetArea();
-		if (this._target && this._target != this._unit.square) {
-			setTimeout(() => this._aiMoveUnit(), 250);
-		} else {
-			this._aiSelectSkill();
-		}
-	}
-	_aiMoveUnit() {
-		this._moveUnit(this._unit, this._target);
-		this.refresh();
-		this._aiSelectSkill();
-	}
-
-	_aiSelectSkill() {
-		if (!this._selectSkill(this._unit.aiSkill)) {
-			this._aiSelectUnit();
-			return;
-		}
-		this.refresh();
-
-		this._selectTarget(this._unit.aiSkillTarget)
-		this._refreshTargetArea();
-		if (this._target) {
-			setTimeout(() => this._aiUseSkill(), 500);
-		} else {
-			this._deselectSkill();
+		while (this._aiControlUnits.length > 0) {
+			this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+			this._selectUnit(this._aiControlUnits.pop());
+			
+			if (!this._unit) continue;
+			
 			this.refresh();
-			this._aiSelectUnit();
-		}
-	}
-	_aiUseSkill() {
-		this._useSkill(this._skill, this._target).then(() => {
+			this._unit.aiCalculate();
+
+			this._selectTarget(this._unit.aiMoveTarget);
+			this._refreshTargetArea();
+
+			if (this._target && this._target != this._unit.square) {
+				await Game.asyncPause(250);
+				this._moveUnit(this._unit, this._target);
+				this.refresh();
+			}
+
+			this._selectSkill(this._unit.aiSkill);
+			this.refresh();
+
+			if (!this._skill) {
+				this._deselectUnit();
+				continue;
+			}
+
+			this._selectTarget(this._unit.aiSkillTarget);
+			this._refreshTargetArea();
+
+			if (this._target) {
+				await Game.asyncPause(500);
+				await this._useSkill(this._skill, this._target);
+			}
 			this._deselectUnit();
 			this.refresh();
+		}
+		await Game.asyncPause(250);
 
-			this._aiSelectUnit();
-		});
-	}
-	
-	_aiTurnEnd() {
+		if (this._phase == BattleScene.EnemyPhase) {
+			await this._addReinforcements();
+		}
+
 		this._aiControlUnits = null;
-		if (this._phase == BattleScene.EnemyPhase && this._addReinforcements()) {
-			setTimeout(() => this._nextTurn(), 750);
-		}
-		else {
-			this._nextTurn();
-		}
+		this._nextTurn();
+		return;
 	}
 
 
