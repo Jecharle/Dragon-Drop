@@ -67,16 +67,12 @@ class BattleScene extends Scene {
 		super();
 		this._initTeams();
 		this._board = new Board(mapData);
-		this._skillList = new SkillList();
 
 		this._addParty(partyUnits);
-		if (mapData) this._addMapUnits(mapData.units);
+		this._addMapUnits(mapData?.units);
+		this._addTurnLimit(mapData);
 
-		// TODO: Box these assignments up as well?
-		this._maxTurns = mapData.maxTurns;
-		this._minTurns = mapData.minTurns;
-		this._defaultVictory = mapData.defaultVictory;
-
+		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
@@ -91,7 +87,7 @@ class BattleScene extends Scene {
 
 	start() {
 		this._deploy();
-	}	
+	}
 
 	//#region ui setup
 	_createTurnTitle() {
@@ -175,6 +171,15 @@ class BattleScene extends Scene {
 		return null;
 	}
 	//#endregion unit setup
+
+	//#region rule setup
+	_addTurnLimit(mapData) {
+		if (!mapData) return;
+		this._maxTurns = mapData.maxTurns;
+		this._minTurns = mapData.minTurns;
+		this._defaultVictory = mapData.defaultVictory;
+	}
+	//#endregion rule setup
 
 	//#region refresh
 	refresh() {
