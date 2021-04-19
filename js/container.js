@@ -490,13 +490,13 @@ class Square extends Position {
 	}
 
 	static screenX(x, y, _z) {
-		return 64*(x - y);
+		return Math.floor(64 * (x - y));
 	}
 	static screenY(x, y, z) {
-		return 32*(x + y - z);
+		return Math.floor(32 * (x + y - z));
 	}
 	static screenZ(x, y, z) {
-		return Square.screenY(x, y, z) + z*64;
+		return Math.floor(32 * (x + y + z));
 	}
 
 	get screenX() {
@@ -506,10 +506,10 @@ class Square extends Position {
 		return Square.screenY(this.x, this.y, this.z);
 	}
 	get screenZ() {
-		return Square.screenZ(this.x, this.y, this.z + 1);
+		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get _selfScreenZ() {
-		return Square.screenZ(this.x, this.y, this.z);
+		return Square.screenZ(this.x, this.y, this.z - 1);
 	}
 	get screenPosition() {
 		return `translate(${this.screenX}px, ${this.screenY}px)`;
@@ -549,7 +549,6 @@ class Square extends Position {
 		switch (this._terrain) {
 			case Square.Wall:
 				this.el.classList.remove('wall');
-				this.z = 0;
 				break;
 			case Square.Pit:
 				this.el.classList.remove('pit');
@@ -562,6 +561,7 @@ class Square extends Position {
 				break;
 		}
 
+		this.z = 0;
 		this._terrain = value;
 
 		switch (this._terrain) {
@@ -602,6 +602,7 @@ class Square extends Position {
 		}
 	}
 };
+// TODO: Convert to getters, to ensure they can't be tampered?
 Square._BlockMove = 1;
 Square._BlockSight = 2;
 Square._SlowMove = 4;

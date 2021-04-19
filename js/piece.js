@@ -695,8 +695,8 @@ class SkillPiece extends Piece {
 		return this.user.myTurn && this.user.canAct
 		&& this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
-	use(target, callback) {
-		if (!this.validTarget(target)) callback(false);
+	async use(target) {
+		if (!this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
 
 		this._target = target;
@@ -705,34 +705,21 @@ class SkillPiece extends Piece {
 		this._units = this._affectedUnits(this._squares);
 		
 		var waitTime = this._startEffects(this._target, this._squares, this._units);
-		setTimeout(() => this._squareEffectIterator(this._squares.values(), callback), waitTime);
-	}
-	_squareEffectIterator(squareIterator, callback) {
-		var next = squareIterator.next();
-		var waitTime = 0;
-		if (next.value) {
-			waitTime = this._squareEffects(next.value, this._target);
+		await Game.asyncPause(waitTime);
+		
+		for (var i = 0; i < this._squares.length; i++) {
+			waitTime = this._squareEffects(this._squares[i], this._target);
+			await Game.asyncPause(waitTime);
 		}
-		if (next.done) {
-			this._unitEffectIterator(this._units.values(), callback);
-		} else {
-			setTimeout(() => this._squareEffectIterator(squareIterator, callback), waitTime);
+
+		for (var i = 0; i < this._units.length; i++) {
+			waitTime = this._unitEffects(this._units[i], this._target);
+			await Game.asyncPause(waitTime);
 		}
-	}
-	_unitEffectIterator(unitIterator, callback) {
-		var next = unitIterator.next();
-		var waitTime = 0;
-		if (next.value) {
-			waitTime = this._unitEffects(next.value, this._target);
-		}
-		if (next.done) {
-			this._finishUse(callback);
-		} else {
-			setTimeout(() => this._unitEffectIterator(unitIterator, callback), waitTime);
-		}
-	}
-	_finishUse(callback) {
-		this._endEffects(this._target, this._squares, this._units);
+		
+		waitTime = this._endEffects(this._target, this._squares, this._units);
+		await Game.asyncPause(waitTime);
+
 		this._payCost();
 		this._units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
@@ -740,7 +727,8 @@ class SkillPiece extends Piece {
 		this._target = null;
 		this._units = null;
 		this._squares = null;
-		if (callback) callback(true);
+
+		return true;
 	}
 
 	validTarget(target) {

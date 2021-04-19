@@ -32,6 +32,15 @@ class Game {
 		return null//Game.scene.unsaved || null; // DISABLED FOR TESTING
 	}
 
+	static async asyncPause(milliseconds) {
+		if (!milliseconds || milliseconds < 0) return;
+
+		var timeout = new Promise((resolve, _reject) => {
+			setTimeout(() => resolve(), milliseconds);
+		});
+		return await timeout;
+	}
+
 	static begin() {
 		document.addEventListener('keydown', Game.globalKeydown);
 		document.addEventListener('keyup', Game.globalKeyup);

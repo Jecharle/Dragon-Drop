@@ -92,8 +92,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
 		/*button.onclick = () => {
-			this._undoMove();
-			this.refresh();
+			TODO: Open the menu
 		};*/
 		return button;
 	}
@@ -375,18 +374,16 @@ class BattleScene extends Scene {
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
-	_useSkill(skill, square, callback) {
-		// TODO: Make this run on promises, not callbacks?
+	async _useSkill(skill, square) {
 		this.busy = true;
-		skill.use(square, success => {
-			if (success) {
-				this._deselectSkill();
-				this._clearMoves();
-				this._isBattleOver();
-			}
-			this.busy = false;
-			if (callback) callback();
-		});
+		var success = await skill.use(square)
+		if (success) {
+			this._clearMoves();
+			this._deselectSkill();
+			this._isBattleOver();
+		}
+		this.busy = false;
+		return success;
 	}
 
 	_selectTarget(square) {
@@ -486,7 +483,7 @@ class BattleScene extends Scene {
 		}
 	}
 	_aiUseSkill() {
-		this._useSkill(this._skill, this._target, () => {
+		this._useSkill(this._skill, this._target).then(() => {
 			this._deselectUnit();
 			this.refresh();
 
@@ -514,7 +511,6 @@ class BattleScene extends Scene {
 			} else {
 				this._deselectUnit();
 			}
-			// TODO: Deselect when the mouse leaves...?
 		}
 
 		if (this._phase == BattleScene.DeployPhase) {
@@ -572,7 +568,7 @@ class BattleScene extends Scene {
 				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
 				if (square == this._target) {
-					this._useSkill(this._skill, square, () => this.refresh());
+					this._useSkill(this._skill, square).then(() => this.refresh());
 				} else if (!square.invalid) {
 					this._selectTarget(square);
 					this._refreshTargetArea();
