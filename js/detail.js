@@ -165,16 +165,20 @@ class SpriteEffect extends SpriteElObj {
 		return 'vfx-sprite';
 	}
 
+	static get Straight() { return 0; }
+	static get Arc() { return 1; }
+	static get Return() { return 2; }
+
 	animateMove(origin, style) {
 		switch (style) {
-			case "arc":
+			case SpriteEffect.Arc:
 				this._animateArc(origin);
 				break;
-			case "return":
+			case SpriteEffect.Return:
 				this._animateReturn(origin);
 				break;
 			default:
-			case "straight":
+			case SpriteEffect.Straight:
 				this._animateStraight(origin);
 				break;
 		}

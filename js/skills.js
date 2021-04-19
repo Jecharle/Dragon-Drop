@@ -214,7 +214,7 @@ class TestAreaSkill extends SkillPiece {
 
 	_startEffects(target, _squares, _units) {
 		this.user.addTimedClass(200, 'attack');
-		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, "arc");
+		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, SpriteEffect.Arc);
 		return 400;
 	}
 
