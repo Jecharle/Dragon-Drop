@@ -291,7 +291,7 @@ class BattleScene extends Scene {
 		this.refresh();
 	
 		if (this._autoPhase) {
-			this._aiProcessTurn();
+			Game.asyncPause(1000).then(() => this._aiProcessTurn());
 		}
 	}
 
@@ -617,7 +617,8 @@ class BattleScene extends Scene {
 	//#region ai
 	async _aiProcessTurn() {
 		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		await Game.asyncPause(1000);
+
+		var waitTime = 250; // TODO: Adjustable via settings?
 
 		while (aiControlUnits.length > 0) {
 			aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
@@ -632,7 +633,7 @@ class BattleScene extends Scene {
 			this._refreshTargetArea();
 
 			if (this._target && this._target != this._unit.square) {
-				await Game.asyncPause(250);
+				await Game.asyncPause(waitTime);
 				await this._moveUnit(this._unit, this._target);
 				this.refresh();
 			}
@@ -649,13 +650,13 @@ class BattleScene extends Scene {
 			this._refreshTargetArea();
 
 			if (this._target) {
-				await Game.asyncPause(250);
+				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
 			this._deselectUnit();
 			this.refresh();
 		}
-		await Game.asyncPause(250);
+		await Game.asyncPause(waitTime);
 
 		if (this._phase == BattleScene.EnemyPhase) {
 			await this._addReinforcements();
