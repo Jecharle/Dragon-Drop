@@ -43,6 +43,16 @@ class Position extends SpriteElObj {
 	get parent() {
 		return this._parent;
 	}
+
+	get screenX() { return 0; }
+	get screenY() { return 0; }
+	get screenZ() { return 0; }
+	get screenPosition() { return `translate(${this.screenX}px, ${this.screenY}px)`; }
+	
+	_refresh() {
+		this.el.style.transform = this.screenPosition;
+		this.el.style.zIndex = this.screenZ;
+	}
 };
 
 
@@ -499,7 +509,7 @@ class Square extends Position {
 		this._refresh();
 	}
 
-	//#region isometric
+	//#region screen position
 	static screenX(x, y, _z) {
 		return Math.floor(64 * (x - y));
 	}
@@ -521,9 +531,6 @@ class Square extends Position {
 	}
 	get _selfScreenZ() {
 		return Square.screenZ(this.x, this.y, this.z - 1);
-	}
-	get screenPosition() {
-		return `translate(${this.screenX}px, ${this.screenY}px)`;
 	}
 
 	_refresh() {
@@ -706,5 +713,23 @@ class UnitInfo extends ElObj {
 			this._nameSpan.innerText = "";
 			this._tooltip.value = "";
 		}
+	}
+}
+
+/***************************************************
+ World Map
+***************************************************/
+class OverworldMap extends Container {
+	get elClass() {
+		return 'overworld-map';
+	}
+}
+
+/***************************************************
+ World Map -> Map Node
+***************************************************/
+class MapNode extends Position {
+	get elClass() {
+		return 'map-node';
 	}
 }

@@ -63,8 +63,8 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(mapData, partyUnits) {
-		super();
+	constructor(lastScene, mapData, partyUnits) {
+		super(lastScene);
 		this._initTeams();
 		this._board = new Board(mapData);
 
@@ -735,4 +735,33 @@ class Team {
 		return otherTeam.group != this.group;
 	}
 	//#endregion friend-or-foe
+}
+
+/***************************************************
+ Map scene
+***************************************************/
+class MapScene extends Scene {
+	constructor(lastScene) {
+		super(lastScene);
+
+		this._map = new OverworldMap();
+		this._piece = new MapPiece();
+	}
+
+	positionEvent(node, dragId) {
+		if (this.busy || !this._piece.idMatch(dragId)) return;
+
+		// TODO: Most of the logic, probably
+	}
+	mouseOver(node, dragId) {
+		if (this.busy || !this._piece.idMatch(dragId)) return;
+
+		// TODO: Update information
+	}
+	rightClick() {
+		if (this.busy) return;
+	}
+	keydown(key) {
+		if (this.busy) return;
+	}
 }

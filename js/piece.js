@@ -28,6 +28,7 @@ class Piece extends SpriteElObj {
 	static get None() { return 0; }
 	static get Unit() { return 1; }
 	static get Skill() { return 2; }
+	static get Map() { return 3; }
 
 	//#region parent
 	setParent(container) {
@@ -930,3 +931,15 @@ class SkillPiece extends Piece {
 	}
 	//#endregion directional areas
 };
+
+/***************************************************
+ Map Piece
+***************************************************/
+class MapPiece extends Piece { // TEMP name?
+
+	get type() { return Piece.Map; }
+
+	get elClass() {
+		return 'map-piece';
+	}
+}
