@@ -773,7 +773,7 @@ class SkillPiece extends Piece {
 	}
 	//#endregion use skill
 
-	//#region animation
+	//#region animate
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
 		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
@@ -781,7 +781,7 @@ class SkillPiece extends Piece {
 		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
-	//#endregion animation
+	//#endregion animate
 
 	//#region refresh
 	refresh() {
@@ -962,11 +962,26 @@ class MapPiece extends Piece {
 
 		this.node = node;
 		this.refresh();
+		if (node.path) {
+			var time = this.animateMovement(node.path);
+			await Game.asyncPause(time);
+		}
 
 		return true;
 	}
 
-	//TODO: Animate movement
+	animateMovement(path) {
+		var keyframes = [{}];
+		path.forEach(square => {
+			keyframes.unshift({
+				transform: square.screenPosition,
+				zIndex: square.screenZ
+			});
+		});
+		var time = 500*(keyframes.length-1);
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+		return time;
+	}
 	//#endregion movement
 
 	//#region refresh

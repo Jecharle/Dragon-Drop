@@ -756,16 +756,22 @@ class MapScene extends Scene {
 	//#region refresh
 	refresh() {
 		this._map.resetReachableNodes();
-		this._map.setReachableNodes(this._piece.node, 1);
+		this._map.setReachableNodes(this._piece.node, 10); // temporary very high range
 	}
 	//#endregion refresh
+
+	async _movePiece(node) {
+		this.setBusy();
+		await this._piece.move(node);
+		this.setDone();
+	}
 
 	//#region input events
 	positionEvent(node, dragId) {
 		if (this.busy || !this._piece.idMatch(dragId)) return;
 
 		if (node.inRange) {
-			this._piece.move(node).then(result => this.refresh());
+			this._movePiece(node).then(result => this.refresh());
 			return;
 		}
 		// TODO: Ability to activate events, and such

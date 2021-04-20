@@ -570,45 +570,46 @@
 /*#endregion*/
 
 /*#region Map Scene*/
-	.overworld-map {
-		display: flex;
-		justify-content: center;
-		position: absolute;
-	}
-	.map-node {
-		display: flex;
-		justify-content: center;
-		position: absolute;
-		background-color: red;
-		width: 64px;
-		height: 32px;
-		box-sizing: border-box;
-		border-radius: 50%;
-	}
-	.selectable.map-node:hover {
-		border: 2px solid yellow;
-	}
+.overworld-map {
+	display: flex;
+	justify-content: center;
+	position: absolute;
+}
+.map-node {
+	display: flex;
+	justify-content: center;
+	position: absolute;
+	bottom: 0;
+	background-color: salmon;
+	width: 64px;
+	height: 32px;
+	box-sizing: border-box;
+	border-radius: 50%;
+}
+.selectable.map-node:hover {
+	border: 2px solid yellow;
+}
 
-	.map-piece {
+.map-piece {
+	width: 64px;
+	height: 64px;
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+}
+	.map-piece>.sprite {
 		width: 64px;
 		height: 64px;
 		box-sizing: border-box;
 		position: absolute;
-		top: -32px;
-		display: flex;
-		justify-content: center;
+		z-index: 0;
+		bottom: 0px;
+		background-repeat: no-repeat;
+		background-position: 0px 0px;
+		background-image: url(../img/testMeleeUnit.png);
 	}
-		.map-piece>.sprite {
-			width: 64px;
-			height: 64px;
-			box-sizing: border-box;
-			position: absolute;
-			z-index: 0;
-			bottom: 0px;
-			background-repeat: no-repeat;
-			background-position: 0px 0px;
-			background-image: url(../img/testMeleeUnit.png);
-		}
 /*#endregion*/
 
 /*#region Sprite Effects*/
