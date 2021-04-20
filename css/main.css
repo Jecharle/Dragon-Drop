@@ -393,7 +393,7 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	top: 0px;
+	top: -12px;
 	display: flex;
 	justify-content: center;
 }
@@ -407,6 +407,17 @@
 		background-repeat: no-repeat;
 		background-position: 0px 0px;
 		transition: transform 0.2s;
+	}
+	.unit::after {
+		content: "";
+		position: absolute;
+		z-index: -1;
+		bottom: 0px;
+		width: 100%;
+		height: 100%;
+		background-repeat: no-repeat;
+		background-image: url(../img/shadow.png);
+		opacity: 40%;
 	}
 
 	/*Unit details*/
@@ -460,22 +471,22 @@
 		drop-shadow(0px 2px yellow)
 		drop-shadow(0px -2px yellow);
 	}
-	.moving .sprite {
+	.moving>.sprite {
 		background-position-y: calc(-1*var(--unit-h));
 		background-position-x: calc(-2*var(--unit-w));
 		animation: sprite-animation 0.3s steps(2) infinite;
 	}
-	.attack .sprite {
+	.attack>.sprite {
 		background-position-y: calc(-3*var(--unit-h));
 	}
-	.damaged .sprite {
+	.damaged>.sprite {
 		background-position-y: calc(-2*var(--unit-h));
 		animation: shake 150ms;
 	}
-	.spawn .sprite {
+	.spawn>.sprite {
 		animation: drop-in 0.2s ease-in;
 	}
-	.dead .sprite {
+	.dead>.sprite {
 		background-position-y: calc(-2*var(--unit-h));
 		animation: darken-and-fade 1s 0.2s both;
 	}

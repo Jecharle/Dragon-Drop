@@ -408,9 +408,9 @@ class UnitPiece extends Piece {
 
 		var jumpframes = [
 			{ },
-			{ top: "-128px" }
+			{ bottom: "128px" }
 		];
-		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return time;
 	}
 	_animateTeleport(path) {
