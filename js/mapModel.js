@@ -64,6 +64,7 @@ class TestMap extends MapModel { // TEMP
 
 			// reinforcements
 			{turn: 1, type: TestEnemyUnit, x: 4, y: 3, enemy: true},
+			{turn: 1, type: TestEnemyUnit, x: 4, y: 3, enemy: true},
 			{turn: 2, type: TestEnemyUnit, x: 5, y: 3, enemy: true}
 		);
 

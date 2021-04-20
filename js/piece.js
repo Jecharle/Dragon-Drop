@@ -20,11 +20,16 @@ class Piece extends SpriteElObj {
 	static nextId() {
 		return "piece" + Piece._id++;
 	}
-
 	idMatch(id) {
 		return (!id || id == this.el.id);
 	}
 
+	get type() { return Piece.None; }
+	static get None() { return 0; }
+	static get Unit() { return 1; }
+	static get Skill() { return 2; }
+
+	//#region parent
 	setParent(container) {
 		if (this.parent && this.parent != container) {
 			this.parent.removePiece(this);
@@ -35,20 +40,18 @@ class Piece extends SpriteElObj {
 	get parent() {
 		return this._parent;
 	}
+	//#endregion parent
 
-	select() { return false; }
-	deselect() { }
-	get type() { return Piece.None; }
-	static get None() { return 0; }
-	static get Unit() { return 1; }
-	static get Skill() { return 2; }
-
+	//#region refresh
+	refresh() { }
 	_setSelectable(selectable) {
 		this.el.setAttribute("draggable", Boolean(selectable));
 		if (selectable) {
 			this.el.classList.add('selectable');
+			this.el.classList.remove('viewable');
 		} else {
 			this.el.classList.remove('selectable');
+			this.el.classList.add('viewable');
 		}
 	}
 	_setUnselectable(unselectable) {
@@ -58,53 +61,99 @@ class Piece extends SpriteElObj {
 			this.el.classList.remove('unselectable');
 		}
 	}
+	//#endregion
+
+	//#region input events
+	select() { return false; }
+	deselect() { }
 
 	_click(ev) {
 		ev.stopPropagation();
-		var piece = ev.target.obj;
-		if (Game.scene) Game.scene.selectPiece(piece);
+		var piece = ev.currentTarget.obj;
+		if (Game.scene) Game.scene.pieceEvent(piece);
 	}
 	_drag(ev) {
-		ev.dataTransfer.setData("piece", ev.target.id);
-		var piece = ev.target.obj;
-		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP coordinates
-		if (Game.scene) Game.scene.selectPiece(piece, true);
+		ev.dataTransfer.setData("piece", ev.currentTarget.id);
+		var piece = ev.currentTarget.obj;
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
+		if (Game.scene) Game.scene.pieceEvent(piece, true);
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
 		// the drop target handles the rest
 	}
+	//#endregion input events
 };
 
 /***************************************************
- Targetable piece
+ Unit piece
 ***************************************************/
-class TargetablePiece extends Piece {
+class UnitPiece extends Piece {
 	constructor(partyMember) {
 		super();
 		this._team = null;
 		this._partyMember = partyMember;
 		this.square = null;
-		this.size = 1;
 
+		this.size = 1;
+		this._moveStyle = "path";
 		this._setStats();
+		this._setSkills();
 
 		this.hp = this.maxHp;
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
+
+		this._initialize();
 	}
 
 	get elClass() {
 		return 'unit';
 	}
 
+	get type() {
+		return Piece.Unit;
+	}
+
 	get targetable() {
 		return true;
 	}
 
-	get size() {
-		return this._size;
+	//#region text
+	get name() {
+		return "[Unit name]";
 	}
+	get characterName() {
+		return this._partyMember?.name || this.name;
+	}
+	get _description() {
+		return "[Unit description]";
+	}
+	get fullDescription() {
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		return description;
+	}
+	//#endregion text
+
+	//#region setup
+	_setStats() {
+		this._maxHp = 1;
+		this._moveRange = 2;
+	}
+	_setSkills() {
+		this._skills = [];
+	}
+	_initialize() {
+		this.myTurn = false;
+		this.actionUsed = false;
+		this.homeSquare = null;
+		this._facing = 1;
+		this.refresh();
+	}
+	//#endregion setup
+
+	//#region attributes
+	get size() { return this._size; }
 	set size(value) {
 		if (this._size > 1) {
 			this.el.classList.remove("x"+this.size);
@@ -113,10 +162,6 @@ class TargetablePiece extends Piece {
 		if (this._size > 1) {
 			this.el.classList.add("x"+this.size);
 		}
-	}
-
-	_setStats() {
-		this._maxHp = 1;
 	}
 
 	get team() {
@@ -138,11 +183,6 @@ class TargetablePiece extends Piece {
 	isEnemy(piece) {
 		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
-	}
-
-	canStand(square) {
-		if (square.blocksMove) return false;
-		else return (square.piece == null || square.piece == this);
 	}
 
 	get hp() {
@@ -167,25 +207,44 @@ class TargetablePiece extends Piece {
 		return !this.dead;
 	}
 
+	get moveRange() {
+		return this._moveRange;
+	}
+
+	get skills() {
+		return this._skills;
+	}
+	//#endregion attributes
+
+	//#region refresh
+	refresh() {
+		this._lifebar.maxValue = this.maxHp;
+		this._lifebar.value = this.hp;
+
+		this._refreshSkills();
+		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
+	}
+	_refreshSkills() {
+		this._skills.forEach(skill => skill.refresh());
+	}
 	dieIfDead() {
 		if (this.dead) {
+			this._showDeathAnimation();
 			this.setParent(null);
 			this.setTeam(null);
 			if (this._partyMember) this._partyMember.alive = false;
 		}
 	}
+	//#endregion refresh
 
-	refresh() {
-		this._lifebar.maxValue = this.maxHp;
-		this._lifebar.value = this.hp;
-	}
-
+	//#region effects
 	takeDamage(power, _props) {
 		this.hp -= power;
 
 		if (power > 0) {
-			this._addTimedClass('damaged', 1200);
-			this._addTimedClass('hp-change', 1200);
+			this.addTimedClass(450, 'damaged');
+			this.addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
@@ -195,26 +254,17 @@ class TargetablePiece extends Piece {
 		this.hp += power;
 
 		if (power > 0) {
-			this._addTimedClass('hp-change', 1200);
+			this.addTimedClass(1200, 'hp-change');
 		}
 
 		this.refresh();
 		return power;
 	}
-	_showPopup(value) {
-		var popup = new PopupText(value);
-		this.el.appendChild(popup.el);
-	}
-	_addTimedClass(className, duration) {
-		this.el.classList.add(className);
-		setTimeout(() => this.el.classList.remove(className), duration);
-	}
-
 
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
 		var previousSquare = this.square;
-		var distanceMoved = this.parent.shiftPiece(this, origin, distance);
+		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
 		}
@@ -236,66 +286,16 @@ class TargetablePiece extends Piece {
 		}
 		return false;
 	}
+	//#endregion effects
 
-	// status effects
-	// TODO: status effects are stored in a dictionary, and occasionally looped through
-	/*hasStatus(name) {
-		return false;
-	}
-	addStatus(effect) {
-		return false;
-	}
-	removeStatus(name) {
-		return false;
-	}
-	statusList() {
-
-	}*/
-};
-
-/***************************************************
- Controllable piece
-***************************************************/
-class ControllablePiece extends TargetablePiece {
-	constructor() {
-		super();
-		this._setSkills();
-
-		this.initialize();
-		this._moveStyle = "path";
-	}
-
-	_setStats() {
-		super._setStats();
-		this._moveRange = 2;
-	}
-
-	_setSkills() {
-		this._skills = [];
-	}
-
-	get moveRange() {
-		return this._moveRange;
-	}
-
-	get skills() {
-		return this._skills;
-	}
-
+	//#region turn state
 	get canMove() {
-		return this.alive && !this.homeSquare && !this.actionUsed && (this.moveRange > 0);
+		return this.alive && !this.homeSquare && !this.actionUsed;
 	}
 	get canAct() {
 		return this.alive && !this.actionUsed;
 	}
 
-	initialize() {
-		this.myTurn = false;
-		this.actionUsed = false;
-		this.homeSquare = null;
-		this._facing = 0;
-		this.refresh();
-	}
 	startTurn() {
 		this.myTurn = true;
 		this.refresh();
@@ -307,131 +307,20 @@ class ControllablePiece extends TargetablePiece {
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
+	//#endregion turn state
 
-	face(target, from) {
-		if (!from) from = this.square;
-		if (!from || !target || from.parent != target.parent) return;
-
-		var facing = (target.x - target.y) - (from.x - from.y);
-		if (facing < 0) {
-			this.el.classList.add('left');
-			this._facing = 180;
-		} else if (facing > 0) {
-			this.el.classList.remove('left');
-			this._facing = 0;
-		}
-	}
-	animateMove(path, type) {
-		var moveTime = 0;
-		switch (type) {
-			case "jump":
-				moveTime = this._animateJump(path)
-				break;
-
-			case "teleport":
-				moveTime = this._animateTeleport(path);
-				break;
-
-			default:
-			case "path":
-				moveTime = this._animatePath(path);
-				break;
-		}
-		this._addTimedClass('moving', moveTime);
-	}
-	_animatePath(path) {
-		var target = this.square;
-
-		var keyframes = [{}];
-		path.forEach(square => {
-			var dx = 64*(square.x - target.x - square.y + target.y);
-			var dy = 32*(square.x - target.x + square.y - target.y);
-			var dz = dy;
-
-			keyframes.push({
-				transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)`
-			});
-		});
-		keyframes.reverse();
-		var time = 100*keyframes.length
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});		
-		return time;
-	}
-	_animateJump(path) {
-		var target = this.square;
-		var origin = path[path.length-1];
-
-		var dx = 64*(origin.x - target.x - origin.y + target.y);
-		var dy = 32*(origin.x - target.x + origin.y - target.y);
-		var dz = dy;
-		var time = 400;
-
-		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
-			{ }
-		];
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
-
-		var jumpframes = [
-			{ },
-			{ bottom: "128px" }
-		];
-		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
-		return time;
-	}
-	_animateTeleport(path) {
-		var target = this.square;
-		var origin = path[path.length-1];
-
-		var dx = 64*(origin.x - target.x - origin.y + target.y);
-		var dy = 32*(origin.x - target.x + origin.y - target.y);
-		var dz = dy;
-		var time = 400;
-
-		var keyframes = [
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(90deg) scaleY(1.5)` },
-			{ transform: `translate3d(0, 0, 0) rotateY(90deg) scaleY(1.5)` },
-			{ }
-		];
-		this.spriteEl.animate(keyframes, {duration: time, easing: "linear"});
-		return time;
-	}
-
-	animateBump(target, origin) {
-		var dx = 32*(target.x - this.square.x - target.y + this.square.y);
-		var dy = 16*(target.x - this.square.x + target.y - this.square.y);
-		var dz = dy;
-		var time = 200;
-
-		var keyframes = [
-			{ },
-			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` },
-			{ }
-		];
-		if (origin) {
-			dx = 32*(origin.x - this.square.x - origin.y + this.square.y);
-			dy = 16*(origin.x - this.square.x + origin.y - this.square.y);
-			dz = dy;
-			keyframes[0] = { transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateY(${this._facing}deg)` };
-		}
-		this.spriteEl.animate(keyframes, {duration: time, easing: "ease-out"});
-		// TODO: Add attacking style, or leave that elsewhere?
-	}
-
-	canPass(square) {
-		if (square.blocksMove) return false;
-		else return (square.piece == null || this.isAlly(square.piece));
-	}
-
-	move(target) {
+	//#region move
+	async move(target) {
 		if (this.square == target) return false;
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
-			this.homeSquare = oldSquare;
-			this.animateMove(target.path, this._moveStyle);
+			var moveTime = this.animateMove(target.path, this._moveStyle);
+			this.addTimedClass(moveTime, 'moving');
 			this.face(target, target.path[0]);
+			await Game.asyncPause(moveTime);
+
+			this.homeSquare = oldSquare;
 			this.refresh();
 			return true;
 		}
@@ -448,16 +337,155 @@ class ControllablePiece extends TargetablePiece {
 		return false;
 	}
 
-	refresh() {
-		super.refresh();
-		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
+	canStand(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || square.piece == this);
 	}
-	_refreshSkills() {
-		this._skills.forEach(skill => skill.refresh());
+	canPass(square) {
+		if (square.blocksMove) return false;
+		else return (square.piece == null || this.isAlly(square.piece));
+	}
+	//#endregion move
+
+	//#region animate
+	static get Path() { return 1; }
+	static get Jump() { return 2; }
+	static get Teleport() { return 3; }
+
+	animateMove(path, type) {
+		switch (type) {
+			case UnitPiece.Jump:
+				return this._animateJump(path)
+
+			case UnitPiece.Teleport:
+				return this._animateTeleport(path);
+
+			default:
+			case UnitPiece.Path:
+				return this._animatePath(path);
+		}
+	}
+	_animatePath(path) {
+		var keyframes = [{}];
+		var turnframes = [{}];
+		var lastSquare = null, facing = this._facing;
+		path.forEach(square => {
+			keyframes.unshift({
+				transform: square.screenPosition,
+				zIndex: square.screenZ
+			});
+			if (lastSquare) {
+				if (square.screenX > lastSquare.screenX) facing = -1;
+				else if (square.screenX < lastSquare.screenX) facing = 1;
+				turnframes.unshift({
+					transform: `scaleX(${facing})`
+				});
+				turnframes.unshift({
+					transform: `scaleX(${facing})`
+				});
+			}
+			lastSquare = square;
+		});
+		turnframes.unshift({
+			transform: `scaleX(${this._facing})`
+		});
+		var time = 200*(keyframes.length-1);
+		this.el.animate(keyframes, {duration: time, easing: "linear"});	
+		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
+		return time;
+	}
+	_animateJump(path) {
+		var origin = path[path.length-1];
+		var keyframes = [
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			},
+			{ }
+		];
+		var time = 400;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+
+		var jumpframes = [
+			{ },
+			{ bottom: "128px" }
+		];
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		return time;
+	}
+	_animateTeleport(path) {
+		var origin = path[path.length-1];
+
+		var time = 400;
+		var keyframes = [
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			},
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			}
+		];
+		this.el.animate(keyframes, time/2);
+
+		var twistframes = [
+			{ transform: `scaleX(${this._facing})`},
+			{ transform: `scaleX(0) scaleY(1.5)` },
+			{ }
+		];
+		this.spriteEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
+		return time;
 	}
 
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent) return;
+
+		var facing = (target.x - target.y) - (from.x - from.y);
+		if (facing < 0) {
+			this.el.classList.add('left');
+			this._facing = -1;
+		} else if (facing > 0) {
+			this.el.classList.remove('left');
+			this._facing = 1;
+		}
+	}
+
+	animateBump(target, origin) {
+		var direction = this.square.direction(target);
+		var dx = this.square.screenX + Square.screenX(...direction, 0) / 2;
+		var dy = this.square.screenY + Square.screenY(...direction, 0) / 2;
+		var dz = this.square.screenZ + Square.screenZ(...direction, 0) / 2;
+		var time = 200;
+
+		var keyframes = [
+			{ },
+			{
+				transform: `translate(${dx}px, ${dy}px)`,
+				zIndex: dz
+			},
+			{ }
+		];
+		if (origin) {
+			keyframes[0] = { 
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			};
+		}
+		this.el.animate(keyframes, {duration: time, easing: "ease-out"});
+		return time;
+	}
+
+	_showDeathAnimation() {
+		if (!this.square) return;
+		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
+		if (this._facing < 0) vfx.el.classList.add("left");
+		this.square.parent.el.appendChild(vfx.el);
+	}
+	//#endregion animate
+
+	//#region input events
 	select() {
 		this.el.classList.add('selected');
 		return true;
@@ -465,15 +493,13 @@ class ControllablePiece extends TargetablePiece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	get type() {
-		return Piece.Unit;
-	}
+	//#endregion input events
 
+	//#region ai
 	get aiUnitScore() {
 		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
 		else return 0;
 	}
-
 	_aiGetBestSkill(square) {
 		return this.skills.reduce((best, skill) => {
 			if (!skill.canUse()) return best;
@@ -488,10 +514,8 @@ class ControllablePiece extends TargetablePiece {
 			skill: null, target: null, score: 0
 		});
 	}
-
-	// assumes the unit has been selected, and move range is visible
 	aiCalculate() {
-
+		// assumes the unit has been selected, and move range is visible
 		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
@@ -528,29 +552,25 @@ class ControllablePiece extends TargetablePiece {
 		}
 	}
 
-	// distance to nearby units of interest
-
 	_maxDistance() {
 		var board = this.parent;
 		return board.h + board.w;
 	}
-
 	_nearestPieceDistance(origin, targetFunction) {
 		var nearestDistance = origin.parent.pieces.reduce((nearest, piece) => {
 			if (targetFunction.call(this, piece)) {
-				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				var distance = origin.distance(piece.square);
 				return Math.min(nearest, distance);
 			}
 			return nearest;
 		}, this._maxDistance());
 		return nearestDistance;
 	}
-
 	_averagePieceDistance(origin, targetFunction) {
 		var targetCount = 0;
 		var totalDistance = origin.parent.pieces.reduce((sum, piece) => {
 			if (targetFunction.call(this, piece)){
-				var distance = Math.abs(piece.square.x - origin.x) + Math.abs(piece.square.y - origin.y);
+				var distance = origin.distance(piece.square);
 				targetCount += 1;
 				return sum + distance;
 			}
@@ -558,6 +578,7 @@ class ControllablePiece extends TargetablePiece {
 		}, 0);
 		return targetCount > 0 ? (totalDistance / targetCount) : 0;
 	}
+	//#endregion ai
 };
 
 /***************************************************
@@ -580,57 +601,47 @@ class SkillPiece extends Piece {
 		this.refresh();
 	}
 
-	_setStats() {
-		this._range = 1;
-		this._minRange = 1;
-		this._area = 0;
-		this._baseCooldown = 0;
-		this._maxUses = 0;
-		this._basePower = 1;
-	}
-
 	get elClass() {
 		return 'skill';
 	}
 
-	get fullDescription() {
-		var desc = `<strong>${this._name}</strong><br>${this._description}`;
-		if (this.hasLimitedUses) {
-			desc += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
-		}
-		if (this.hasCooldown) {
-			if (this.cooldown > 0) {
-				desc += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
-			} else {
-				desc += `<br><em>${this.cooldownCost} turn cooldown</em>`;
-			}
-		}
-		return desc;
+	get type() {
+		return Piece.Skill;
 	}
 
-	get _name() {
+	//#region text
+	get name() {
 		return "[Skill name]";
 	}
 	get _description() {
 		return "[Skill description]";
 	}
+	get fullDescription() {
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		if (this.hasLimitedUses) {
+			description += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
+		}
+		if (this.hasCooldown) {
+			if (this.cooldown > 0) {
+				description += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
+			} else {
+				description += `<br><em>${this.cooldownCost} turn cooldown</em>`;
+			}
+		}
+		return description;
+	}
+	//#endregion text
 
+	//#region attributes
 	get range() {
 		return this._range;
 	}
 	get minRange() {
 		return this._minRange;
 	}
-	inRange(origin, target) {
-		return this._inCircle(origin, target, this.range)
-			&& !this._inCircle(origin, target, this.minRange-1);
-	}
 
 	get area() {
 		return this._area;
-	}
-	inArea(origin, target) {
-		return this._inCircle(origin, target, this.area);
 	}
 
 	get cooldownCost() {
@@ -651,59 +662,32 @@ class SkillPiece extends Piece {
 		return this._basePower;
 	}
 
+	_setStats() {
+		this._range = 1;
+		this._minRange = 1;
+		this._area = 0;
+		this._baseCooldown = 0;
+		this._maxUses = 0;
+		this._basePower = 2;
+	}
+	//#endregion attributes
+
+	//#region selection
 	canUse() {
-		return this.user.canAct && this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
+		return this.user.myTurn && this.user.canAct
+		&& this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
 	}
-	use(target, callback) {
-		if (!this.validTarget(target)) callback(false);
-		this.user.face(target);
-
-		this._target = target;
-		this._squares = this._affectedSquares(this._target);
-		this._units = this._affectedUnits(this._squares);
-		
-		var waitTime = this._startEffects(this._target, this._squares, this._units);
-		setTimeout(() => this._squareEffectIterator(this._squares.values(), callback), waitTime);
+	inRange(origin, target) {
+		var distance = origin.distance(target);
+		return distance <= this.range && distance >= this.minRange;
 	}
-	_squareEffectIterator(squareIterator, callback) {
-		var next = squareIterator.next();
-		var waitTime = 0;
-		if (next.value) {
-			waitTime = this._squareEffects(next.value, this._target);
-		}
-		if (next.done) {
-			this._unitEffectIterator(this._units.values(), callback);
-		} else {
-			setTimeout(() => this._squareEffectIterator(squareIterator, callback), waitTime);
-		}
-	}
-	_unitEffectIterator(unitIterator, callback) {
-		var next = unitIterator.next();
-		var waitTime = 0;
-		if (next.value) {
-			waitTime = this._unitEffects(next.value, this._target);
-		}
-		if (next.done) {
-			this._finishUse(callback);
-		} else {
-			setTimeout(() => this._unitEffectIterator(unitIterator, callback), waitTime);
-		}
-	}
-	_finishUse(callback) {
-		this._endEffects(this._target, this._squares, this._units);
-		this._payCost();
-		this._units.forEach(piece => piece.dieIfDead());
-		this.user.refresh();
-		
-		this._target = null;
-		this._units = null;
-		this._squares = null;
-		if (callback) callback(true);
-	}
-
 	validTarget(target) {
 		return !!target;
 	}
+	inArea(origin, target) {
+		return origin.distance(target) <= this.area;
+	}
+
 	_affectedSquares(target) {
 		if (!target) return [];
 
@@ -720,20 +704,8 @@ class SkillPiece extends Piece {
 		});
 		return units;
 	}
-
-	_startEffects(target, squares, units) {
-		this.user.animateBump(target);
-		return 100;
-	}
-
-	_squareEffects(square, target) { return 0; }
-	_unitEffects(unit, target) { return 0; }
-	_endEffects(target, squares, units) { return 0; }
-
-	_payCost() {
-		this.user.actionUsed = true;
-		if (this.hasCooldown) this.cooldown = this.cooldownCost;
-		if (this.hasLimitedUses) this.usesLeft--;
+	_targetOrder(squareA, squareB) {
+		return this._target.distance(squareA) - this._target.distance(squareB);
 	}
 
 	endTurn() {
@@ -742,11 +714,82 @@ class SkillPiece extends Piece {
 			this.cooldown = 0;
 		}
 	}
+	//#endregion selection
 
+	//#region use skill
+	async use(target) {
+		if (!target || !this.canUse() || !this.validTarget(target)) return false;
+		this.user.face(target);
+
+		this._target = target;
+		this._squares = this._affectedSquares(this._target);
+		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
+		this._units = this._affectedUnits(this._squares);
+		
+		var waitTime = this._startEffects(this._target, this._squares, this._units);
+		await Game.asyncPause(waitTime);
+		
+		for (var i = 0; i < this._squares.length; i++) {
+			waitTime = this._squareEffects(this._squares[i], this._target);
+			await Game.asyncPause(waitTime);
+		}
+
+		for (var i = 0; i < this._units.length; i++) {
+			waitTime = this._unitEffects(this._units[i], this._target);
+			await Game.asyncPause(waitTime);
+		}
+		
+		waitTime = this._endEffects(this._target, this._squares, this._units);
+		await Game.asyncPause(waitTime);
+
+		this._payCost();
+		this._units.forEach(piece => piece.dieIfDead());
+		this.user.refresh();
+		
+		this._target = null;
+		this._units = null;
+		this._squares = null;
+
+		return true;
+	}
+
+	_startEffects(target, _squares, _units) {
+		this.user.animateBump(target);
+		this.user.addTimedClass(200, 'attack');
+
+		this._showEffect(target, this.user.square, "test-attack-effect");
+		
+		return 100;
+	}
+	_squareEffects(_square, _target) { return 0; }
+	_unitEffects(_unit, _target) { return 0; }
+	_endEffects(_target, _squares, _units) { return 0; }
+
+	_payCost() {
+		this.user.actionUsed = true;
+		if (this.hasCooldown) this.cooldown = this.cooldownCost;
+		if (this.hasLimitedUses) this.usesLeft--;
+	}
+	//#endregion use skill
+
+	//#region animation
+	_showEffect(target, origin, ...styles) {
+		if (!target) return;
+		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
+		if (origin && target.screenX < origin.screenX) vfx.el.classList.toggle('left');
+		target.parent.el.appendChild(vfx.el);
+		return vfx;
+	}
+	//#endregion animation
+
+	//#region refresh
 	refresh() {
 		var usable = this.canUse();
 		this._setSelectable(usable);
 		this._setUnselectable(!usable);
+		this._refreshLabels();
+	}
+	_refreshLabels() {
 		// TEMP - two separate labels?
 		if (this.cooldown > 0) {
 			this._cooldownLabel.value = this.cooldown;
@@ -757,7 +800,9 @@ class SkillPiece extends Piece {
 		}
 		this._tooltip.value = this.fullDescription;
 	}
+	//#endregion refresh
 
+	//#region input events
 	select() {
 		if (!this.canUse()) return false;
 		this.el.classList.add('selected');
@@ -766,17 +811,16 @@ class SkillPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
-	get type() {
-		return Piece.Skill;
-	}
+	//#endregion input events
 
+	//#region ai
 	_aiBaseTargetScore(target) {
 		return 0;
 	}
 	_aiAreaTargetScore(square) {
-		if (this.user.isEnemy(square.piece)) return 1;
-		else if (this.user.isAlly(square.piece)) return -0.9;
-		else if (square.piece) return 0.1;
+		if (this.user.isEnemy(square.piece)) return this.power;
+		else if (this.user.isAlly(square.piece)) return -this.power*0.9;
+		else if (square.piece) return this.power*0.1;
 		else return 0;
 	}
 	_aiTargetScore(target) {
@@ -805,15 +849,10 @@ class SkillPiece extends Piece {
 		});
 		return best;
 	}
+	//#endregion ai
 
-	// targeting shapes
+	//#region range / area shapes
 
-	_inCircle(origin, target, size) {
-		if (!origin || !target) return false;
-		var dx = Math.abs(origin.x - target.x);
-		var dy = Math.abs(origin.y - target.y);
-		return (dx + dy <= size);
-	}
 	_inSquare(origin, target, size) {
 		if (!origin || !target) return false;
 		var dx = Math.abs(origin.x - target.x);
@@ -831,11 +870,9 @@ class SkillPiece extends Piece {
 		return (dx == dy);
 	}
 
-	// other targeting rules
 	_canSeeSquare(square) {
 		return (!square.blocksSight && !square.piece);
 	}
-
 	_canSee(origin, target) {
 		if (!origin || !target || origin.parent != target.parent) return false;
 		
@@ -857,15 +894,16 @@ class SkillPiece extends Piece {
 			if (square && !this._canSeeSquare(square)) return false;
 		}
 	}
+
 	_nearTarget(_origin, target, targetFunction) {
 		if (!target) return false;
 		return target.parent.getAdjacent(target).some(square => {
 			return (targetFunction && targetFunction.call(this.user, square));
 		});
 	}
+	//#endregion range / area shapes
 
-	// targeting directions (for area effects)
-
+	//#region directional areas
 	_ahead(origin, target, direction) {
 		var dx = target.x - origin.x;
 		var dy = target.y - origin.y;
@@ -890,4 +928,5 @@ class SkillPiece extends Piece {
 		var sideways = Math.abs(dx * direction[1] - dy * direction[0]);
 		return (sideways >= 0 && sideways >= forward);
 	}
+	//#endregion directional areas
 };

@@ -78,16 +78,16 @@ class Lifebar extends Detail {
 	}
 
 	set value(value) {
-		if (value >= 0 && this.maxValue > 0 && this._subEl) {
+		if (value >= 0 && this.maxValue >= 0 && this._subEl) {
 			var delta = this._value - value;
 			this._value = value;
-			this._subEl.style.width = String(value*6+2)+"px";
-			
+			this._subEl.style.width = Lifebar.width(value);
+
 			if (delta) {
-				var leftEdge = Math.min(value, value+delta);
-				this._deltaEl.style.width = String(Math.abs(delta)*6+2)+"px";
-				this._deltaEl.style.backgroundPositionX = String(-leftEdge*6)+"px";
-				this._deltaEl.style.left = String(leftEdge*6)+"px";
+				var leftEdge = Lifebar.width(Math.min(value, value+delta));
+				this._deltaEl.style.width = Lifebar.width(Math.abs(delta), true);
+				this._deltaEl.style.backgroundPositionX = "-"+leftEdge;
+				this._deltaEl.style.left = leftEdge;
 			}
 		}
 	}
@@ -96,10 +96,16 @@ class Lifebar extends Detail {
 		return this._maxValue;
 	}
 	set maxValue(value) {
-		if (value > 0) {
+		if (value >= 0) {
 			this._maxValue = value;
-			this.el.style.width = String(value*6+2)+"px";
+			this.el.style.width = Lifebar.width(value);
 		}
+	}
+
+	static width(value, noPadding) {
+		var width = value*6;
+		if (width > 0 && !noPadding) width += 2;
+		return width+"px";
 	}
 }
 
@@ -138,4 +144,81 @@ class SkillDescription extends Detail {
 	get elClass() {
 		return 'skill-description';
 	}
+}
+
+/***************************************************
+ Animated sprite effect
+***************************************************/
+class SpriteEffect extends SpriteElObj {
+	constructor(square, duration, ...classList) {
+		super();
+		this.el.classList.add(...classList)
+		setTimeout(() => {
+			this.el.parentElement.removeChild(this.el);
+		}, duration);
+		this.square = square;
+		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
+		this.el.style.zIndex = square.screenZ;
+	}
+
+	get elClass() {
+		return 'vfx-sprite';
+	}
+
+	//#region animate
+	static get Straight() { return 0; }
+	static get Arc() { return 1; }
+	static get Return() { return 2; }
+
+	animateMove(origin, style) {
+		switch (style) {
+			case SpriteEffect.Arc:
+				this._animateArc(origin);
+				break;
+			case SpriteEffect.Return:
+				this._animateReturn(origin);
+				break;
+			default:
+			case SpriteEffect.Straight:
+				this._animateStraight(origin);
+				break;
+		}
+	}
+	_animateStraight(origin) {
+		var keyframes = [
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 200;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+	}
+	_animateArc(origin) {
+		var keyframes = [
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 400;
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+
+		var jumpframes = [
+			{ },
+			{ top: "-128px" }
+		];
+		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+	}
+	_animateReturn(origin) {
+		var keyframes = [
+			{
+				transform: origin.screenPosition,
+				zIndex: origin.screenZ
+			},
+			{}];
+		var time = 200;
+		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});
+	}
+	//#endregion animate
 }

@@ -8,7 +8,7 @@ class Scene extends ElObj {
 		super();
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
-		this.busy = false;
+		this.setDone();
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -20,10 +20,6 @@ class Scene extends ElObj {
 		return 'scene';
 	}
 
-	get lastScene() {
-		this._lastScene;
-	}
-
 	get unsaved() {
 		return false;
 	}
@@ -31,17 +27,36 @@ class Scene extends ElObj {
 	start() { }
 	end() { }
 
+	//#region inter-scene communication
+	get lastScene() {
+		this._lastScene;
+	}
 	sendData(data) {
 		this._dataIn = data;
 	}
+	//#endregion inter-scene communication
 
-	selectPiece(piece, dragging) { }
-	selectPosition(position, dragId) { }
+	//#region block during some async
+	setBusy() {
+		this._busy = true;
+	}
+	setDone() {
+		this._busy = false;
+	}
+	get busy() {
+		return !!this._busy;
+	}
+	//#endregion block during some async
+
+	//#region input events
+	pieceEvent(piece, dragging) { }
+	positionEvent(position, dragId) { }
 	mouseOver(position, dragId) { }
 	rightClick() { }
 
 	keydown(key) { }
 	keyup(key) { }
+	//#endregion input events
 }
 
 /***************************************************
@@ -52,16 +67,13 @@ class BattleScene extends Scene {
 		super();
 		this._initTeams();
 		this._board = new Board(mapData);
-		this._skillList = new SkillList();
 
 		this._addParty(partyUnits);
-		if (mapData) this._addMapUnits(mapData.units);
+		this._addMapUnits(mapData?.units);
+		this._addTurnLimit(mapData);
 
-		// TODO: Box these assignments up as well?
-		this._maxTurns = mapData.maxTurns;
-		this._minTurns = mapData.minTurns;
-		this._defaultVictory = mapData.defaultVictory;
-
+		this._skillList = new SkillList();
+		this._menuButtonEl = this._createMenuButton();
 		this._undoButtonEl = this._createUndoButton();
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
@@ -75,13 +87,27 @@ class BattleScene extends Scene {
 
 	start() {
 		this._deploy();
-	}	
-	end() {
-		alert("The battle is now over"); // TEMP
 	}
 
+	//#region ui setup
+	_createTurnTitle() {
+		var turnTitle = document.createElement("span");
+		turnTitle.classList.add('turn-title');
+		turnTitle.style.textAlign = "center";
+		return turnTitle;
+	}
+	_createMenuButton() {
+		var button = document.createElement("button");
+		button.classList.add('nav-button', 'menu-button');
+		button.type = "button";
+		/*button.onclick = () => {
+			TODO: Open the menu
+		};*/
+		return button;
+	}
 	_createUndoButton() {
 		var button = document.createElement("button");
+		button.classList.add('nav-button', 'undo-button');
 		button.type = "button";
 		button.onclick = () => {
 			this._undoMove();
@@ -89,13 +115,9 @@ class BattleScene extends Scene {
 		};
 		return button;
 	}
-	_createTurnTitle() {
-		var turnTitle = document.createElement("span");
-		turnTitle.style.textAlign = "center";
-		return turnTitle;
-	}
 	_createEndTurnButton() {
 		var button = document.createElement("button");
+		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
 			this._nextTurn();
@@ -104,36 +126,21 @@ class BattleScene extends Scene {
 	}
 
 	_buildDOM() {
-		var navBar =  document.createElement("div");
-		navBar.classList.add("nav-bar");
-		navBar.appendChild(this._undoButtonEl);
-		navBar.appendChild(this._turnTitleEl);
-		navBar.appendChild(this._endTurnButtonEl);
-		this.el.appendChild(navBar);
+		this.el.appendChild(this._turnTitleEl);
+		this.el.appendChild(this._menuButtonEl);
+		this.el.appendChild(this._undoButtonEl);
+		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
 	}
+	//#endregion ui setup
 
+	//#region unit setup
 	_initTeams() {
-		this.playerTeam = new Team(0, false);
-		this.enemyTeam = new Team(1, true);
+		this.playerTeam = new Team(0, "ally");
+		this.enemyTeam = new Team(1, "enemy", true);
 		this._setActiveTeam(null);
-	}
-	_setActiveTeam(team) {
-		if (team == this._activeTeam) return;
-
-		if (this._activeTeam) {
-			this._activeTeam.endTurn();
-		}
-		this._activeTeam = team;
-		if (this._activeTeam) {
-			this._activeTeam.startTurn();
-		}
-	}
-	get _autoPhase() {
-		if (!this._activeTeam) return false;
-		else return this._activeTeam.isAuto;
 	}
 
 	_addParty(partyUnits) {
@@ -163,20 +170,86 @@ class BattleScene extends Scene {
 		}
 		return null;
 	}
-	_addReinforcements() {
-		this._reinforcementData.forEach(data => {
-			if (data.turn == this._turn) {
-				var newPiece = this._addMapUnit(data);
-				newPiece._addTimedClass('spawn', 500);
-			}
-		});
-	}
+	//#endregion unit setup
 
+	//#region rule setup
+	_addTurnLimit(mapData) {
+		if (!mapData) return;
+		this._maxTurns = mapData.maxTurns;
+		this._minTurns = mapData.minTurns;
+		this._defaultVictory = mapData.defaultVictory;
+	}
+	//#endregion rule setup
+
+	//#region refresh
 	refresh() {
 		this._refreshArea();
 		this._refreshTargetArea();
 		this._refreshUi();
 	}
+
+	_refreshArea() {
+		this._board.resetAreas();
+		if (this._phase == BattleScene.DeployPhase) {
+			if (this._unit && !this._unit.myTurn) {
+				this._board.setMoveArea(this._unit);
+			}
+			this._board.setDeployArea(this._unit && this._unit.myTurn);
+		} else if (this._skill) {
+			this._board.setSkillArea(this._skill);
+		} else if (this._unit) {
+			this._board.setMoveArea(this._unit);
+		}
+	}
+	_refreshTargetArea() {
+		this._board.clearTargeting();
+		if (this._target && this._phase != BattleScene.DeployPhase) {
+			if (this._skill) this._board.showAoE(this._skill, this._target);
+			else if (this._unit) this._board.showPath(this._target);
+		} else if (this._phase == BattleScene.DeployPhase) {
+			this._board.showDeploySwap(this._unit, this._target);
+		}
+	}
+	_clearAreas() {
+		this._board.resetAreas();
+		this._board.clearTargeting();
+	}
+
+	_refreshUi() {
+		if (this._phase == BattleScene.DeployPhase) {
+			this._turnTitleEl.innerText = "Reposition";
+		} else if (this._maxTurns && this._turn >= this._maxTurns) {
+			this._turnTitleEl.innerText = "Last turn";
+		} else if (this._maxTurns) {
+			this._turnTitleEl.innerText = (1 + this._maxTurns - this._turn)+" turns left";
+		} else {
+			this._turnTitleEl.innerText = "Turn " + this._turn;
+		}
+
+		this._menuButtonEl.innerText = "Menu";
+		this._menuButtonEl.disabled = true;
+
+		if (this._phase == BattleScene.DeployPhase) {
+			this._endTurnButtonEl.innerText = "Ready";
+		} else {
+			this._endTurnButtonEl.innerText = "End Turn";
+		}
+		this._endTurnButtonEl.disabled = !!this._autoPhase;
+
+		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
+			this._undoButtonEl.innerText = "Back";
+		} else {
+			this._undoButtonEl.innerText = "Undo Move";
+		}
+		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
+	}
+	//#endregion refresh
+
+	//#region phases
+	static get DeployPhase() { return 0; }
+	static get PlayerPhase() { return 1; }
+	static get EnemyPhase() { return 2; }
+	static get EndPhase() { return -1; }
 
 	_deploy() {
 		this._turn = 1;
@@ -212,7 +285,6 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.EnemyPhase:
-				this._addReinforcements();
 				this._turn++;
 				if (!this._isBattleOver()) {
 					this._phase = BattleScene.PlayerPhase;
@@ -224,8 +296,24 @@ class BattleScene extends Scene {
 		this.refresh();
 	
 		if (this._autoPhase) {
-			setTimeout(() => this._aiTurnStart(), 1600);
+			Game.asyncPause(1000).then(() => this._aiProcessTurn());
 		}
+	}
+
+	_setActiveTeam(team) {
+		if (team == this._activeTeam) return;
+
+		if (this._activeTeam) {
+			this._activeTeam.endTurn();
+		}
+		this._activeTeam = team;
+		if (this._activeTeam) {
+			this._activeTeam.startTurn();
+		}
+	}
+	get _autoPhase() {
+		if (!this._activeTeam) return false;
+		else return this._activeTeam.isAuto;
 	}
 
 	_isBattleOver() {
@@ -250,6 +338,7 @@ class BattleScene extends Scene {
 	_win() {
 		if (this.lastScene) this.lastScene.sendData({ victory: true });
 		this._phase = BattleScene.EndPhase;
+		this._deselectUnit();
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Victory!");
@@ -257,6 +346,7 @@ class BattleScene extends Scene {
 	_lose() {
 		if (this.lastScene) this.lastScene.sendData({ victory: false });
 		this._phase = BattleScene.EndPhase;
+		this._deselectUnit();
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Defeat");
@@ -268,38 +358,16 @@ class BattleScene extends Scene {
 	}
 	_showEndScreen(text) {
 		var endScreen = new EndScreen(text);
-		endScreen.el.onclick = ev => this.end(); // TEMP
+		endScreen.el.onclick = ev => this._endBattle(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
 
-	_refreshUi() {
-		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Positioning";
-		} else if (this._autoPhase) {
-			this._turnTitleEl.innerText = "Enemy turn";
-		} else if (this._maxTurns && this._turn >= this._maxTurns) {
-			this._turnTitleEl.innerText = "Last turn";
-		} else if (this._maxTurns) {
-			this._turnTitleEl.innerText = (1 + this._maxTurns - this._turn)+" turns left";
-		} else {
-			this._turnTitleEl.innerText = "Turn " + this._turn;
-		}
-
-		if (this._phase == BattleScene.DeployPhase) {
-			this._endTurnButtonEl.innerText = "Ready";
-		} else {
-			this._endTurnButtonEl.innerText = "End Turn";
-		}
-		this._endTurnButtonEl.disabled = !!this._autoPhase;
-
-		if (!this._lastMove && this._canRedeploy) {
-			this._undoButtonEl.innerText = "Reposition";
-		} else {
-			this._undoButtonEl.innerText = "Undo Move";
-		}
-		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
+	_endBattle() {
+		alert("The battle is now over"); // TEMP
 	}
+	//#endregion phases
 
+	//#region action processing
 	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();
@@ -309,26 +377,22 @@ class BattleScene extends Scene {
 		this._skillList.setUser(unit);
 		return true;
 	}
-	_selectDeployUnit(unit) {
-		if (unit && !unit.select()) return false;
-		if (this._unit != unit) this._deselectUnit();
-		
-		if (unit) this._selectTarget(unit.square);
-
-		this._unit = unit;
-		return true;
-	}
 	_deselectUnit() {
 		this._deselectTarget();
 		if (this._unit) this._unit.deselect();
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
-	_moveUnit(unit, square) {
-		if (unit.move(square)) {
+	async _moveUnit(unit, square) {
+		this.setBusy();
+		var success = unit.move(square);
+		this._clearAreas();
+		if (await success) {
 			this._moveStack.push(unit);
 			this._deselectTarget();
 		}
+		this.setDone();
+		return success;
 	}
 	_undoMove() {
 		var unit = this._moveStack.pop();
@@ -348,14 +412,9 @@ class BattleScene extends Scene {
 	}
 	_swapDeploySquares(piece, target) {
 		if (target.piece) {
-			var previousSquare = piece.square;
 			this._board.swapPieces(piece, target.piece);
-			piece.animateMove([previousSquare]);
-			previousSquare.piece.animateMove([piece.square]);
 		} else {
-			var previousSquare = piece.square;
 			this._board.movePiece(piece, target);
-			piece.animateMove([previousSquare]);
 		}
 		this._deselectUnit();
 	}
@@ -372,18 +431,17 @@ class BattleScene extends Scene {
 		if (this._skill) this._skill.deselect();
 		this._skill = null;
 	}
-	_useSkill(skill, square, callback) {
-		// TODO: Make this run on promises, not callbacks?
-		this.busy = true;
-		skill.use(square, success => {
-			if (success) {
-				this._deselectSkill();
-				this._clearMoves();
-				this._isBattleOver();
-			}
-			this.busy = false;
-			if (callback) callback();
-		});
+	async _useSkill(skill, square) {
+		this.setBusy();
+		var success = skill.use(square);
+		this._clearAreas();
+		if (await success) {
+			this._clearMoves();
+			this._deselectSkill();
+			this._isBattleOver();
+		}
+		this.setDone();
+		return success;
 	}
 
 	_selectTarget(square) {
@@ -399,26 +457,6 @@ class BattleScene extends Scene {
 		this._target = null;
 	}
 
-	_refreshArea() {
-		this._board.resetAreas();
-		if (this._phase == BattleScene.DeployPhase) {
-			this._board.setDeployArea(this._unit != null);
-		} else if (this._skill) {
-			this._board.setSkillArea(this._skill);
-		} else if (this._unit) {
-			this._board.setMoveArea(this._unit);
-		}
-	}
-	_refreshTargetArea() {
-		this._board.clearTargeting();
-		if (this._target && this._phase != BattleScene.DeployPhase) {
-			if (this._skill) this._board.showAoE(this._skill, this._target);
-			else if (this._unit) this._board.showPath(this._target);
-		} else if (this._phase == BattleScene.DeployPhase) {
-			this._board.showDeploySwap(this._unit, this._target);
-		}
-	}
-
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
@@ -431,83 +469,43 @@ class BattleScene extends Scene {
 		}
 	}
 
-	_aiTurnStart() {
-		this._aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
-		this._aiSelectUnit();
-	}
-	_aiSelectUnit() {
-		if (this._aiControlUnits.length == 0) {
-			setTimeout(() => this._aiTurnEnd(), 400);
-			return;
+	async _addReinforcements() {
+		for (var i = 0; i < this._reinforcementData.length; i++) {
+			var data = this._reinforcementData[i];
+			if (data.turn == this._turn) { // TODO: Other requirements?
+				var newPiece = this._addMapUnit(data);
+				newPiece.addTimedClass(500, 'spawn');
+				await Game.asyncPause(500);
+			}
 		}
-
-		this._aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
-		if (!this._selectUnit(this._aiControlUnits.pop())) {
-			this._aiSelectUnit(); // warning: technically recursive
-		}
-		this.refresh();
-		this._unit.aiCalculate();
-
-		this._selectTarget(this._unit.aiMoveTarget);
-		this._refreshTargetArea();
-		if (this._target && this._target != this._unit.square) {
-			setTimeout(() => this._aiMoveUnit(), 250);
-		} else {
-			this._aiSelectSkill();
-		}
+		return;
 	}
-	_aiMoveUnit() {
-		this._moveUnit(this._unit, this._target);
-		this.refresh();
-		this._aiSelectSkill();
-	}
+	//#endregion action processing
 
-	_aiSelectSkill() {
-		if (!this._selectSkill(this._unit.aiSkill)) {
-			this._aiSelectUnit();
-			return;
-		}
-		this.refresh();
-
-		this._selectTarget(this._unit.aiSkillTarget)
-		this._refreshTargetArea();
-		if (this._target) {
-			setTimeout(() => this._aiUseSkill(), 500);
-		} else {
-			this._deselectSkill();
-			this.refresh();
-			this._aiSelectUnit();
-		}
-	}
-	_aiUseSkill() {
-		this._useSkill(this._skill, this._target, () => {
-			this._deselectUnit();
-			this.refresh();
-
-			this._aiSelectUnit();
-		});
-	}
-	
-	_aiTurnEnd() {
-		this._aiControlUnits = null;
-		this._nextTurn();
-	}
-
-
-	selectPiece(piece, dragging) {
+	//#region input events
+	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
+
+		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
+			if (this._unit != piece) {
+				this._selectUnit(piece);
+			} else {
+				this._deselectUnit();
+			}
+		}
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
-				if (!this._unit || dragging) {
-					this._selectDeployUnit(piece);
+				if (!this._unit || !this._unit.myTurn || dragging) {
+					this._selectUnit(piece);
+					this._selectTarget(piece.square);
 				} else if (this._unit == piece) {
 					this._deselectUnit();
 				} else if (piece.square) {
-					this.selectPosition(piece.square);
+					this.positionEvent(piece.square);
 				}
 			}
-		} else {
+		} else { // non-deploy phase
 			if (piece.type == Piece.Skill) {
 				if (this._skill != piece) {
 					this._selectSkill(piece);
@@ -515,7 +513,7 @@ class BattleScene extends Scene {
 					this._deselectSkill();
 				}
 			} else if (this._skill && piece.square && !dragging) {
-				this.selectPosition(piece.square);
+				this.positionEvent(piece.square);
 				return;
 			}
 
@@ -531,13 +529,13 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	}
-	selectPosition(square, dragId) {
+	positionEvent(square, dragId) {
 		if (!square || this._autoPhase || this.busy) return;
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
 				this._deselectUnit();
-			} else if (this._unit) {
+			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
 					this._swapDeploySquares(this._unit, square);
 				} else {
@@ -545,20 +543,24 @@ class BattleScene extends Scene {
 					this._refreshTargetArea();
 				}
 			}
-		} else {
+		} else { // non-deploy phase
 			if (!square.inRange) {
 				this._deselectSkill();
 				if (square.piece != this._unit) this._deselectUnit();
 			} else if (this._skill && this._skill.idMatch(dragId)) {
 				if (square == this._target) {
-					this._useSkill(this._skill, square, () => this.refresh());
+					// async function
+					this._useSkill(this._skill, square).then(() => this.refresh());
+					return;
 				} else if (!square.invalid) {
 					this._selectTarget(square);
 					this._refreshTargetArea();
 				}
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
-					this._moveUnit(this._unit, square);
+					// async function
+					this._moveUnit(this._unit, square).then(() => this.refresh());
+					return;
 				} else {
 					this._selectTarget(square);
 					this._refreshTargetArea();
@@ -567,7 +569,6 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 	}
-
 	mouseOver(square, dragId) {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
@@ -581,18 +582,16 @@ class BattleScene extends Scene {
 			this._refreshTargetArea();
 		}
 	}
-
 	rightClick() {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
 		this._goBack();
 		this.refresh();
 	}
-
 	keydown(key) {
 		if (this._autoPhase || this.busy) return; // TEMP?
 
-		if (key == "Escape" || key == "Delete" || key == "Backspace") {
+		if (key == "Escape") {
 			this._goBack();
 			this.refresh();
 		}
@@ -602,7 +601,7 @@ class BattleScene extends Scene {
 			this.refresh();
 		}
 
-		if (key == "Spacebar" || key == " " || key == "Enter") { // TEMP?
+		if (key == "Enter") { // TEMP?
 			this._nextTurn();
 		}
 
@@ -618,48 +617,104 @@ class BattleScene extends Scene {
 			}
 		}
 	}
-};
-BattleScene.DeployPhase = 0;
-BattleScene.PlayerPhase = 1;
-BattleScene.EnemyPhase = 2;
-BattleScene.EndPhase = -1;
+	//#endregion input events
 
+	//#region ai
+	async _aiProcessTurn() {
+		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
+
+		var waitTime = 300; // TODO: Adjustable via settings?
+
+		while (aiControlUnits.length > 0) {
+			aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+			this._selectUnit(aiControlUnits.pop());
+			
+			if (!this._unit) continue;
+			
+			this.refresh();
+			this._unit.aiCalculate();
+
+			this._selectTarget(this._unit.aiMoveTarget);
+			this._refreshTargetArea();
+
+			if (this._target && this._target != this._unit.square) {
+				await Game.asyncPause(waitTime);
+				await this._moveUnit(this._unit, this._target);
+				this.refresh();
+			}
+
+			this._selectSkill(this._unit.aiSkill);
+			this.refresh();
+
+			if (!this._skill) {
+				this._deselectUnit();
+				continue;
+			}
+
+			this._selectTarget(this._unit.aiSkillTarget);
+			this._refreshTargetArea();
+
+			if (this._target) {
+				await Game.asyncPause(waitTime);
+				await this._useSkill(this._skill, this._target);
+			}
+			this._deselectUnit();
+			this.refresh();
+
+			if (this._phase == BattleScene.EndPhase) return;
+		}
+		await Game.asyncPause(waitTime);
+
+		if (this._phase == BattleScene.EnemyPhase) {
+			await this._addReinforcements();
+		}
+
+		this._nextTurn();
+		return;
+	}
+	//#endregion ai
+
+};
 
 /***************************************************
  Battle scene -> Team
 ***************************************************/
 class Team {
-	constructor(group, isAuto) {
+	constructor(group, style, isAuto) {
 		this.group = group;
-		this.members = [];
+		this.style = style;
 		this._auto = isAuto || false;
+		this.members = [];
 	}
 
-	get isAuto() {
-		return this._auto;
+	//#region units
+	add(unit) {
+		if (!this.members.includes(unit)) {
+			this.members.push(unit);
+			if (this.style) unit.el.classList.add(this.style);
+		}
 	}
-
+	remove(unit) {
+		var index = this.members.indexOf(unit);
+		if (index > -1) {
+			this.members.splice(index, 1);
+			if (this.style) unit.el.classList.remove(this.style);
+		}
+	}
 	get size() {
 		return this.members.reduce((count, member) => {
-			if (member.alive) return count+1;
+			if (member.alive && member.square) return count+1;
 			else return count;
 		}, 0);
 	}
+	//#endregion units
 
+	//#region turn
 	get untouched() {
 		return this.members.every(member => member.dead || (member.canMove && member.canAct));
 	}
-
-	add(piece) {
-		if (!this.members.includes(piece)) {
-			this.members.push(piece);
-		}
-	}
-	remove(piece) {
-		var index = this.members.indexOf(piece);
-		if (index > -1) {
-			this.members.splice(index, 1);
-		}
+	get isAuto() {
+		return this._auto;
 	}
 
 	startTurn() {
@@ -668,7 +723,9 @@ class Team {
 	endTurn() {
 		this.members.forEach(piece => piece.endTurn());
 	}
+	//#endregion turn
 
+	//#region friend-or-foe
 	isAlly(otherTeam) {
 		if (!otherTeam) return false;
 		return otherTeam.group == this.group;
@@ -677,4 +734,5 @@ class Team {
 		if (!otherTeam) return false;
 		return otherTeam.group != this.group;
 	}
+	//#endregion friend-or-foe
 }

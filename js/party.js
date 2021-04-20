@@ -53,6 +53,9 @@ class PartyMember {
 	}
 
 	// TODO: Also provide the unit's skill list
+	get name() {
+		return "";
+	}
 
 	getUnit() {
 		// TODO: also fill out the skill list?
@@ -68,13 +71,25 @@ class PartyMember {
 }
 
 class TestMeleePartyMember extends PartyMember {
+	get name() { return "Alice"; }
+
 	getUnit() {
 		return new TestMeleeUnit(this);
 	}
 }
 
 class TestSupportPartyMember extends PartyMember {
+	get name() { return "Bob"; }
+
 	getUnit() {
 		return new TestSupportUnit(this);
+	}
+}
+
+class TestPositionPartyMember extends PartyMember {
+	get name() { return "Carol"; }
+
+	getUnit() {
+		return new TestPositionUnit(this);
 	}
 }
