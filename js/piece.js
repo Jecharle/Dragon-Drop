@@ -348,9 +348,9 @@ class UnitPiece extends Piece {
 	//#endregion move
 
 	//#region animate
-	static get Path() { return 0; }
-	static get Jump() { return 1; }
-	static get Teleport() { return 2; }
+	static get Path() { return 1; }
+	static get Jump() { return 2; }
+	static get Teleport() { return 3; }
 
 	animateMove(path, type) {
 		switch (type) {
@@ -775,7 +775,7 @@ class SkillPiece extends Piece {
 	//#region animation
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
-		var vfx = new SpriteEffect(target, 1000, "unit", ...styles);
+		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
 		if (origin && target.screenX < origin.screenX) vfx.el.classList.toggle('left');
 		target.parent.el.appendChild(vfx.el);
 		return vfx;

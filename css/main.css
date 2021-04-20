@@ -457,20 +457,6 @@
 			visibility: visible;
 		}
 
-	
-	/*TODO: Testing enemy indicators*/
-	.enemy>.sprite {
-		animation: enemy-highlight 1.5s infinite alternate;
-	}
-	@keyframes enemy-highlight {
-		to {
-			filter: drop-shadow(2px 0px 1px lightcoral)
-			drop-shadow(-2px 0px 1px lightcoral)
-			drop-shadow(0px -2px 1px lightcoral)
-			drop-shadow(0px 2px 1px lightcoral);
-		}
-	}
-
 	/*Unit states and motions*/
 	.unit.x2 {
 		--unit-w: 128px;
@@ -481,9 +467,7 @@
 	}
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
 		filter: drop-shadow(2px 0px yellow)
-		drop-shadow(-2px 0px yellow)
-		drop-shadow(0px 2px yellow)
-		drop-shadow(0px -2px yellow);
+		drop-shadow(-2px 0px yellow);
 	}
 	.moving>.sprite {
 		background-position-y: calc(-1*var(--unit-h));
@@ -504,6 +488,9 @@
 		background-position-y: calc(-2*var(--unit-h));
 		animation: darken-and-fade 1s 0.2s both;
 	}
+		.dead::after {
+			animation: darken-and-fade 1s 0.2s both;
+		}
 
 	/*Unit skins*/
 	.melee-unit>.sprite {
@@ -539,6 +526,24 @@
 	}
 
 	/*Sprite Effects*/
+	.sprite-effect {
+		width: var(--unit-w);
+		height: var(--unit-h);
+		box-sizing: border-box;
+		position: absolute;
+		top: -12px;
+		display: flex;
+		justify-content: center;
+	}
+		.sprite-effect>.sprite {
+			width: var(--unit-w);
+			height: var(--unit-h);
+			box-sizing: border-box;
+			position: absolute;
+			z-index: 0;
+			bottom: 0px;
+			background-repeat: no-repeat;
+		}
 	.test-attack-effect>.sprite {
 		background-image: url("../img/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));

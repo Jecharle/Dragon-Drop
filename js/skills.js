@@ -29,7 +29,7 @@ class TestAttackSkill extends SkillPiece {
 
 	_unitEffects(unit, _target) {
 		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1);
+		unit.push(this.user.square, 1, {animation: UnitPiece.Path});
 		return 200;
 	}
 };
@@ -220,7 +220,7 @@ class TestAreaSkill extends SkillPiece {
 
 	_unitEffects(unit, target) {
 		unit.takeDamage(this.power);
-		unit.push(target, 1);
+		unit.push(target, 1, {animation: UnitPiece.Path});
 		return 150;
 	}
 
@@ -285,7 +285,7 @@ class TestRushSkill extends SkillPiece {
 	}
 	_unitEffects(unit) {
 		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1);
+		unit.push(this.user.square, 1, { animation: UnitPiece.Path });
 		return 200;
 	}
 
