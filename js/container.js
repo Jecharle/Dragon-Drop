@@ -720,16 +720,86 @@ class UnitInfo extends ElObj {
  World Map
 ***************************************************/
 class OverworldMap extends Container {
+	constructor() {
+		this.nodes = [];
+	}
+
 	get elClass() {
 		return 'overworld-map';
 	}
+
+	//#region input events
+	_allowDrop(ev) {
+		ev.preventDefault();
+	}
+	_drop(ev) {
+		ev.preventDefault();
+		var dragElId = ev.dataTransfer.getData("piece");
+		if (dragElId && ev.target?.obj) {
+			var node = ev.target.obj;
+			node = node.node || node;
+			if (Game.scene) {
+				Game.scene.positionEvent(node, dragElId);
+			}
+		}
+	}
+	_click(ev) {
+		ev.stopPropagation();
+		if (ev.target && ev.target?.obj) {
+			var node = ev.target.obj;
+			if (node && Game.scene) {
+				Game.scene.positionEvent(node);
+			}
+		}
+	}
+	_mouseOver(ev) {
+		ev.stopPropagation();
+		if (ev.target && ev.target?.obj) {
+			var dragElId = ev.dataTransfer ? ev.dataTransfer.getData("piece") : null;
+			var node = ev.target.obj;
+			node = node.square || node;
+			if (Game.scene) { 
+				Game.scene.mouseOver(node, dragElId);
+				// TODO: Limitations for which nodes respond to hovering?
+			}
+		}
+	}
+	//#endregion
 }
 
 /***************************************************
  World Map -> Map Node
 ***************************************************/
 class MapNode extends Position {
+	constructor() {
+		this._edges = [];
+	}
+
 	get elClass() {
 		return 'map-node';
 	}
+
+	//#region edges
+	get edges() {
+		return this._edges;
+	}
+	addEdge(node) {
+		if (!node || this._edges.includes(node)) return;
+		this._edges.push(node);
+	}
+	removeEdge(node) {
+		var nodeIndex = this._edges.indexOf(node);
+		if (nodeIndex >= 0) this._edges.splice(nodeIndex, 1);
+	}
+	connectNodes(node) {
+		if (!node) return;
+		this.addEdge(node);
+		node.addSingleLink(this);
+	}
+	disconnectNodes(node) {
+		if (!node) return;
+		this.removeEdge(node);
+		node.removeSingleLink(this);
+	}
+	//#endregion edges
 }
