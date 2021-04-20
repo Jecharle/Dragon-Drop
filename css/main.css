@@ -58,6 +58,8 @@
 	.end-turn-button {
 		bottom: 12px;
 		right: 12px;
+		height: 96px;
+		border-radius: 16px;
 	}
 	.menu-button {
 		top: 12px;
