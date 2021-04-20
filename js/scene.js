@@ -744,19 +744,36 @@ class MapScene extends Scene {
 	constructor(lastScene) {
 		super(lastScene);
 
-		this._map = new OverworldMap();
+		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
+
+		this._piece.move(this._map.nodes[0]);
+
+		this.el.appendChild(this._map.el);
+		this.refresh();
 	}
 
+	//#region refresh
+	refresh() {
+		this._map.resetReachableNodes();
+		this._map.setReachableNodes(this._piece.node, 1);
+	}
+	//#endregion refresh
+
+	//#region input events
 	positionEvent(node, dragId) {
 		if (this.busy || !this._piece.idMatch(dragId)) return;
 
-		// TODO: Most of the logic, probably
+		if (node.inRange) {
+			this._piece.move(node).then(result => this.refresh());
+			return;
+		}
+		// TODO: Ability to activate events, and such
 	}
 	mouseOver(node, dragId) {
 		if (this.busy || !this._piece.idMatch(dragId)) return;
 
-		// TODO: Update information
+		// TODO: Update information?
 	}
 	rightClick() {
 		if (this.busy) return;
@@ -764,4 +781,5 @@ class MapScene extends Scene {
 	keydown(key) {
 		if (this.busy) return;
 	}
+	//#endregion
 }

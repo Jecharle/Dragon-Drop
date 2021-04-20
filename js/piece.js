@@ -935,11 +935,46 @@ class SkillPiece extends Piece {
 /***************************************************
  Map Piece
 ***************************************************/
-class MapPiece extends Piece { // TEMP name?
+class MapPiece extends Piece {
+
+	constructor() {
+		super();
+		this.node = null;
+
+		this.el.draggable = true;
+		this.el.classList.add('selectable');
+
+		this.refresh();
+	}
 
 	get type() { return Piece.Map; }
 
 	get elClass() {
 		return 'map-piece';
 	}
+
+	//#region movement
+	async move(node) {
+		if (!node || this.node == node) return false;
+		
+		this.setParent(node.parent);
+		if (!this.parent.el.contains(this.el)) this.parent.el.appendChild(this.el);
+
+		this.node = node;
+		this.refresh();
+
+		return true;
+	}
+
+	//TODO: Animate movement
+	//#endregion movement
+
+	//#region refresh
+	refresh() {
+		if (this.node) {
+			this.el.style.transform = this.node.screenPosition;
+			this.el.style.zIndex = this.node.screenZ;
+		}
+	}
+	//#endregion refresh
 }

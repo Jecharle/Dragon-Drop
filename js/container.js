@@ -49,7 +49,7 @@ class Position extends SpriteElObj {
 	get screenZ() { return 0; }
 	get screenPosition() { return `translate(${this.screenX}px, ${this.screenY}px)`; }
 	
-	_refresh() {
+	refresh() {
 		this.el.style.transform = this.screenPosition;
 		this.el.style.zIndex = this.screenZ;
 	}
@@ -382,16 +382,16 @@ class Board extends Container {
 		this.squaresInRange = [];
 	}
 	_clearPaint(square) {
+		square.inRange = false;
+		square.invalid = false;
+		square.movesLeft = null;
+		square.path = null;
 		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'enemy-preview', 'invalid', 'selectable');
 		square.el.ondragover = null;
 		if (square.piece) {
 			square.piece.el.ondragover = null;
 			square.piece.el.classList.remove('in-range');
 		}
-		square.inRange = false;
-		square.invalid = false;
-		square.movesLeft = null;
-		square.path = null;
 	}
 	//#endregion highlighting areas
 
@@ -494,22 +494,22 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
-		this._refresh();
+		this.refresh();
 	}
 
 	get elClass() {
 		return 'square';
 	}
 
+	//#region position
 	get x() { return this._x; }
 	get y() { return this._y; }
 	get z() { return this._z; }
 	set z(value) {
 		this._z = value;
-		this._refresh();
+		this.refresh();
 	}
 
-	//#region screen position
 	static screenX(x, y, _z) {
 		return Math.floor(64 * (x - y));
 	}
@@ -533,7 +533,7 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z - 1);
 	}
 
-	_refresh() {
+	refresh() {
 		this.el.style.transform = this.screenPosition;
 		this.el.style.zIndex = this._selfScreenZ;
 	}
@@ -721,12 +721,53 @@ class UnitInfo extends ElObj {
 ***************************************************/
 class OverworldMap extends Container {
 	constructor() {
+		super();
 		this.nodes = [];
+
+		this.el.onclick = this._click;
+		this.el.ondrop = this._drop;
+		this.el.onmousemove = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {
 		return 'overworld-map';
 	}
+
+	//#region move range
+	setReachableNodes(origin, range) {
+		if (!origin || origin.parent != this || range < 0) return;
+		this._paintReachableNode(origin, range);
+		var edges = [origin];
+
+		while (edges.length > 0) {
+			var newEdge = edges.pop();
+			var movesLeft = newEdge.movesLeft-1;
+
+			newEdge.edges.forEach(node => {
+				if (node.hidden) return;
+				if (node.movesLeft && node.movesLeft >= movesLeft) return;
+				this._paintReachableNode(node, movesLeft);
+				if (movesLeft > 0) edges.shift(node);
+			});
+		}
+	}
+	_paintReachableNode(node, movesLeft) {
+		node.inRange = true;
+		node.movesLeft = movesLeft;
+		node.el.classList.add('selectable');
+		node.el.ondragover = this._allowDrop;
+	}
+	resetReachableNodes() {
+		this.nodes.forEach(node => this._clearPaint(node))
+	}
+	_clearPaint(node) {
+		node.inRange = false;
+		node.movesLeft = null;
+		node.el.classList.remove('selectable');
+		node.el.ondragover = null;
+	}
+	//#endregion move range
 
 	//#region input events
 	_allowDrop(ev) {
@@ -771,13 +812,51 @@ class OverworldMap extends Container {
  World Map -> Map Node
 ***************************************************/
 class MapNode extends Position {
-	constructor() {
+	constructor(x, y, parent) {
+		super();
+		this._x = x;
+		this._y = y;
+		this._parent = parent;
+
+		this._complete = false;
+
 		this._edges = [];
+		this.inRange = false;
+		this.movesLeft = null;
 	}
 
 	get elClass() {
 		return 'map-node';
 	}
+
+	//#region position
+	get x() { return this._x; }
+	get y() { return this._y; }
+
+	get screenX() {
+		return this.x * 64;
+	}
+	get screenY() {
+		return this.y * 64;
+	}
+	get screenZ() {
+		return 0;
+	}
+	//#endregion position
+
+	//#region show/hide
+	get hidder() {
+		return this._hidden;
+	}
+	hide() {
+		this._hide();
+		this._hidden = true;
+	}
+	show() {
+		this._show();
+		this._hidden = false;
+	}
+	//#endregion show/hide
 
 	//#region edges
 	get edges() {
@@ -791,15 +870,38 @@ class MapNode extends Position {
 		var nodeIndex = this._edges.indexOf(node);
 		if (nodeIndex >= 0) this._edges.splice(nodeIndex, 1);
 	}
-	connectNodes(node) {
+	connect(node) {
 		if (!node) return;
 		this.addEdge(node);
-		node.addSingleLink(this);
+		node.addEdge(this);
 	}
-	disconnectNodes(node) {
+	disconnect(node) {
 		if (!node) return;
 		this.removeEdge(node);
-		node.removeSingleLink(this);
+		node.removeEdge(this);
 	}
 	//#endregion edges
+}
+
+class TestOverworldMap extends OverworldMap {
+	constructor() {
+		super();
+
+		this.nodes.push(new MapNode(-2, -1, this));
+		this.nodes.push(new MapNode(2, -2, this));
+		this.nodes.push(new MapNode(2, 2, this));
+		this.nodes.push(new MapNode(-2, 2, this));
+		this.nodes.push(new MapNode(1, 4, this));
+
+		this.nodes[0].connect(this.nodes[1]);
+		this.nodes[1].connect(this.nodes[2]);
+		this.nodes[2].connect(this.nodes[3]);
+		this.nodes[2].connect(this.nodes[4]);
+		this.nodes[3].connect(this.nodes[0]);
+
+		this.nodes.forEach(node => {
+			this.el.appendChild(node.el);
+			node.refresh();
+		});
+	}
 }
