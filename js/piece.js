@@ -961,7 +961,9 @@ class MapPiece extends Piece {
 		if (!this.parent.el.contains(this.el)) this.parent.el.appendChild(this.el);
 
 		this.node = node;
-		this.refresh();
+		this.el.style.transform = this.node.screenPosition;
+		this.el.style.zIndex = this.node.screenZ;
+
 		if (node.path) {
 			var time = this.animateMovement(node.path);
 			await Game.asyncPause(time);
@@ -969,7 +971,9 @@ class MapPiece extends Piece {
 
 		return true;
 	}
+	//#endregion movement
 
+	//#region animate
 	animateMovement(path) {
 		var keyframes = [{}];
 		path.forEach(square => {

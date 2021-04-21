@@ -734,6 +734,10 @@ class OverworldMap extends Container {
 		return 'overworld-map';
 	}
 
+	refresh() {
+		this.nodes.forEach(node => node.refresh());
+	}
+
 	//#region node management
 	getNode(id) {
 		id = id.toLowerCase();
@@ -859,12 +863,14 @@ class MapNode extends Position {
 		this._y = y;
 		this._parent = parent;
 
-		this._incomplete = false;
-
 		this._edges = [];
+		this._event = null;
 		this.inRange = false;
 		this.movesLeft = null;
 		this.path = null;
+
+		/*this._tooltip = new SkillDescription(this.name);
+		this.el.appendChild(this._tooltip.el);*/
 
 		this.refresh();
 	}
@@ -877,8 +883,28 @@ class MapNode extends Position {
 		return this._id;
 	}
 
-	get complete() {
-		return !this._incomplete;
+	//#region text
+	get name() { return this._event?.name || this.id; } // TEMP
+	get _description() { return this._event?.description || ""; }
+	get fullDescription() {
+		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		return description;
+	}
+	//#endregion text
+
+	get incomplete() {
+		return this._event && !this._event.complete;
+	}
+	explore() {
+		if (!this._event) return false;
+		this._event.complete = true;
+		return true;
+	}
+
+	refresh() {
+		super.refresh();
+		this.el.classList.toggle('incomplete', this.incomplete);
+		//this._tooltip.value = this.name;
 	}
 
 	//#region position
@@ -940,5 +966,7 @@ class TestOverworldMap extends OverworldMap {
 		this.connect('fork', 'tail');
 		this.connect('fork', 'last');
 		this.connect('last', 'start');
+
+		this.getNode('last')._event = { description: "Test event" };
 	}
 }

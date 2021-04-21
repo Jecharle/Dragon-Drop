@@ -749,21 +749,76 @@ class MapScene extends Scene {
 
 		this._piece.move(this._map.getNode('start'));
 
+		this._exploreButtonEl = this._createExploreButton();
+		this._eventDescriptionEl = this._createEventDescription();
+		
 		this.el.appendChild(this._map.el);
+		this.el.appendChild(this._exploreButtonEl);
+		this.el.appendChild(this._eventDescriptionEl);
+		
 		this.refresh();
 	}
 
+	//#region ui setup
+	_createExploreButton() {
+		var button = document.createElement("button");
+		button.classList.add('nav-button', 'explore-button');
+		button.type = "button";
+		button.onclick = () => {
+			this._exploreCurrentNode();
+			this.refresh(); // TEMP
+		};
+		return button;
+	}
+	_createEventDescription() {
+		var textBox = document.createElement("div");
+		textBox.classList.add('map-node-description');
+		return textBox;
+	}
+	//#endregion ui setup
+
 	//#region refresh
 	refresh() {
+		this._refreshNodes();
+		this._refreshUi();
+	}
+
+	_refreshNodes() {
+		this._map.refresh();
 		this._map.resetReachableNodes();
 		this._map.setReachableNodes(this._piece.node, 10); // temporary very high range
 	}
+
+	_refreshUi() {
+		this._exploreButtonEl.innerText = "Explore";
+
+		if (this._currentNode.incomplete) {
+			this._eventDescriptionEl.innerHTML = this._currentNode.fullDescription;
+			this._exploreButtonEl.style.visibility = "visible";
+			this._eventDescriptionEl.style.visibility = "visible";
+		} else {
+			this._exploreButtonEl.style.visibility = "hidden";
+			this._eventDescriptionEl.style.visibility = "hidden";
+		}
+	}
 	//#endregion refresh
+
+	get _currentNode() {
+		return this._piece.node;
+	}
 
 	async _movePiece(node) {
 		this.setBusy();
+		this.el.classList.add('moving');
 		await this._piece.move(node);
+		this.el.classList.remove('moving');
 		this.setDone();
+	}
+
+	_exploreCurrentNode() {
+		if (!this._currentNode) return false;
+		return this._currentNode.explore();
+		// TODO: This will likely start a different game scene, so don't expect to process the result right away
 	}
 
 	//#region input events
