@@ -747,7 +747,7 @@ class MapScene extends Scene {
 		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
 
-		this._piece.move(this._map.nodes[0]);
+		this._piece.move(this._map.getNode('start'));
 
 		this.el.appendChild(this._map.el);
 		this.refresh();

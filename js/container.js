@@ -735,23 +735,39 @@ class OverworldMap extends Container {
 	}
 
 	//#region node management
-	addNode(x, y) {
-		var node = new MapNode(x, y, this);
+	getNode(id) {
+		id = id.toLowerCase();
+		return this.nodes.find(node => node.id == id);
+	}
+	addNode(x, y, id) {
+		id = id.toLowerCase();
+		if (this.getNode(id)) return null; // a node with this ID already exists
+
+		var node = new MapNode(x, y, id, this);
 		this.nodes.push(node);
 		this.el.appendChild(node.el);
+
 		return node;
 	}
-	connect(node1, node2) {
-		if (!node1 || !node2) return false;
-		node1.addEdge(node2);
-		node2.addEdge(node1);
-		return true;
+	connect(id1, id2) {
+		var node1 = this.getNode(id1.toLowerCase());
+		var node2 = this.getNode(id2.toLowerCase());
+		if (node1 && node2) {
+			node1.addEdge(node2);
+			node2.addEdge(node1);
+			return true;
+		}
+		return false;
 	}
-	disconnect(node1, node2) {
-		if (!node1 || !node2) return false;
-		node1.removeEdge(node2);
-		node2.removeEdge(node1);
-		return true;
+	disconnect(id1, id2) {
+		var node1 = this.getNode(id1.toLowerCase());
+		var node2 = this.getNode(id2.toLowerCase());
+		if (node1 && node2) {
+			node1.removeEdge(node2);
+			node2.removeEdge(node1);
+			return true;
+		}
+		return false;
 	}
 	//#endregion node management
 
@@ -767,8 +783,7 @@ class OverworldMap extends Container {
 			var path = [newEdge].concat(newEdge.path);
 
 			newEdge.edges.forEach(node => {
-				if (node.hidden) return;
-				if (node.inRange) return;
+				if (node.hidden || node.inRange) return;
 				this._paintReachableNode(node, movesLeft, path);
 				if (movesLeft > 0) edges.unshift(node);
 			});
@@ -782,7 +797,7 @@ class OverworldMap extends Container {
 		node.el.ondragover = this._allowDrop;
 	}
 	resetReachableNodes() {
-		this.nodes.forEach(node => this._clearPaint(node))
+		this.nodes.forEach(node => this._clearPaint(node));
 	}
 	_clearPaint(node) {
 		node.inRange = false;
@@ -836,13 +851,15 @@ class OverworldMap extends Container {
  World Map -> Map Node
 ***************************************************/
 class MapNode extends Position {
-	constructor(x, y, parent) {
+	constructor(x, y, id, parent) {
 		super();
+		this._id = id;
+		this.el.id = id+'Node';
 		this._x = x;
 		this._y = y;
 		this._parent = parent;
 
-		this._complete = false;
+		this._incomplete = false;
 
 		this._edges = [];
 		this.inRange = false;
@@ -854,6 +871,14 @@ class MapNode extends Position {
 
 	get elClass() {
 		return 'map-node';
+	}
+
+	get id() {
+		return this._id;
+	}
+
+	get complete() {
+		return !this._incomplete;
 	}
 
 	//#region position
@@ -904,16 +929,16 @@ class TestOverworldMap extends OverworldMap {
 	constructor() {
 		super();
 
-		var start = this.addNode(-2, -1);
-		var second = this.addNode(-2, 2);
-		var fork = this.addNode(2, 2);
-		var tail = this.addNode(1, 4);
-		var last = this.addNode(2, -2);
+		this.addNode(-2, -1, 'start');
+		this.addNode(-2, 2, 'second');
+		this.addNode(2, 2, 'fork');
+		this.addNode(1, 4, 'tail');
+		this.addNode(2, -2, 'last');
 
-		this.connect(start, second);
-		this.connect(second, fork);
-		this.connect(fork, tail);
-		this.connect(fork, last);
-		this.connect(last, start);
+		this.connect('start', 'second');
+		this.connect('second', 'fork');
+		this.connect('fork', 'tail');
+		this.connect('fork', 'last');
+		this.connect('last', 'start');
 	}
 }
