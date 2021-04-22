@@ -580,6 +580,7 @@
 		position: absolute;
 		top: 50%;
 		left: 50%;
+		box-sizing: border-box;
 		border: 1px dotted black;
 	}
 
@@ -601,7 +602,7 @@
 	position: absolute;
 	bottom: 12px;
 	width: 50%;
-	height: 4em;
+	height: 5em;
 	background-color: white;
 	border: 1px solid black;
 	padding: 12px;

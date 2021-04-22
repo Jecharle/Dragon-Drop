@@ -746,7 +746,7 @@ class MapScene extends Scene {
 
 		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
-		this._camera = new ScrollingView(768, 768);
+		this._camera = new ScrollingView();
 
 		this._piece.move(this._map.getNode('start'));
 		this._camera.focus(this._piece.node);
@@ -754,7 +754,10 @@ class MapScene extends Scene {
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
 		
+		this._camera.setScrollingSize(1024, 1000);
+		this._camera.setViewSize(1024, 768);
 		this._camera.addContent(this._map.el);
+
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
@@ -854,20 +857,24 @@ class MapScene extends Scene {
 ***************************************************/
 
 class ScrollingView extends ElObj {
-	constructor(width, height) {
+	constructor(width, height, viewWidth, viewHeight) {
 		super();
 		this._innerEl = document.createElement(this.elType);
 		this._innerEl.classList.add('inner');
 		this.el.appendChild(this._innerEl);
 
-		this._size(width, height);
-		this.center(0, 0);
+		this.setScrollingSize(width || 0, height || 0);
+		if (viewWidth && viewHeight) this.setViewSize(viewWidth, viewHeight);
 	}
 
 	get elClass() { return 'scrolling-view'; }
 
 	addContent(element) {
 		this._innerEl.appendChild(element);
+	}
+
+	refresh() {
+		this.center(this.x, this.y);
 	}
 
 	//#region size
@@ -877,13 +884,20 @@ class ScrollingView extends ElObj {
 	get h() {
 		return this._h;
 	}
-	_size(w, h) {
+	setScrollingSize(w, h) {
 		this._w = w;
 		this._h = h;
 		this._innerEl.style.width = w+"px";
 		this._innerEl.style.height = h+"px";
+		this.refresh();
 	}
-	//#endregion
+	setViewSize(w, h) {
+		this._viewW = w;
+		this._viewH = h;
+		// TODO: Hard-set the size of the panel...?
+		this.refresh();
+	}
+	//#endregion size
 
 	//#region position
 	get x() {
@@ -897,26 +911,48 @@ class ScrollingView extends ElObj {
 		this.center(position.screenX, position.screenY);
 	}
 	center(x, y) {
-		// TODO: enforce scroll edges
+		x = this._clampX(x);
+		y = this._clampY(y);
 		this._x = x;
 		this._y = y;
-		this._innerEl.style.transform = this._scrollPosition(this.x, this.y);
+		this._innerEl.style.transform = this._scrollPosition(x, y);
 	}
 	_scrollPosition(x, y) {
-		// TODO: enforce scroll edges
 		return `translate(${-x}px, ${-y}px)`;
 	}
 
-	// TODO: establish scroll edges
-
+	_clampX(x) {
+		x = x || 0;
+		if (!this._viewW) return x;
+		return Math.max(this._minX, Math.min(x, this._maxX));
+	}
+	_clampY(y) {
+		y = y || 0;
+		if (!this._viewH) return y;
+		return Math.max(this._minY, Math.min(y, this._maxY));
+	}
+	get _maxX() {
+		return this._w - this._viewW / 2;
+	}
+	get _minX() {
+		return this._viewW / 2;
+	}
+	get _maxY() {
+		return this._h - this._viewH / 2;
+	}
+	get _minY() {
+		return this._viewH / 2;
+	}
 	//#endregion position
 
 	//#region animate
 	animateMove(path, speed, delay) {
 		var keyframes = [{}];
 		path.forEach(position => {
+			var x = this._clampX(position.screenX);
+			var y = this._clampY(position.screenY);
 			keyframes.unshift({
-				transform: this._scrollPosition(position.screenX, position.screenY)
+				transform: this._scrollPosition(x, y)
 			});
 		});
 
