@@ -743,11 +743,11 @@ class OverworldMap extends Container {
 		id = id.toLowerCase();
 		return this.nodes.find(node => node.id == id);
 	}
-	addNode(x, y, id) {
+	addNode(id, x, y) {
 		id = id.toLowerCase();
 		if (this.getNode(id)) return null; // a node with this ID already exists
 
-		var node = new MapNode(x, y, id, this);
+		var node = new MapNode(id, x, y, this);
 		this.nodes.push(node);
 		this.el.appendChild(node.el);
 
@@ -855,7 +855,7 @@ class OverworldMap extends Container {
  World Map -> Map Node
 ***************************************************/
 class MapNode extends Position {
-	constructor(x, y, id, parent) {
+	constructor(id, x, y, parent) {
 		super();
 		this._id = id;
 		this.el.id = id+'Node';
@@ -953,11 +953,11 @@ class TestOverworldMap extends OverworldMap {
 	constructor() {
 		super();
 
-		this.addNode(4*64, 5*64, 'start');
-		this.addNode(4*64, 8*64, 'second');
-		this.addNode(8*64, 8*64, 'fork');
-		this.addNode(7*64, 10*64, 'tail');
-		this.addNode(8*64, 4*64, 'last');
+		this.addNode('start', 4*64, 5*64);
+		this.addNode('second', 4*64, 8*64);
+		this.addNode('fork', 8*64, 8*64);
+		this.addNode('tail', 7*64, 10*64);
+		this.addNode('last', 8*64, 4*64);
 
 		this.connect('start', 'second');
 		this.connect('second', 'fork');
