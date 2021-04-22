@@ -573,12 +573,15 @@
 .scrolling-view {
 	width: 100%;
 	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
 	position: absolute;
 	overflow: hidden;
 }
+	.scrolling-view>.inner {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		border: 1px dotted black;
+	}
 
 .overworld-map {
 	display: flex;

@@ -746,7 +746,7 @@ class MapScene extends Scene {
 
 		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
-		this._camera = new ScrollingView();
+		this._camera = new ScrollingView(768, 768);
 
 		this._piece.move(this._map.getNode('start'));
 		this._camera.focus(this._piece.node);
@@ -754,7 +754,7 @@ class MapScene extends Scene {
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
 		
-		this._camera.el.appendChild(this._map.el);
+		this._camera.addContent(this._map.el);
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
@@ -854,13 +854,36 @@ class MapScene extends Scene {
 ***************************************************/
 
 class ScrollingView extends ElObj {
-	constructor() {
+	constructor(width, height) {
 		super();
-		// TODO: Setup with scroll edges
+		this._innerEl = document.createElement(this.elType);
+		this._innerEl.classList.add('inner');
+		this.el.appendChild(this._innerEl);
+
+		this._size(width, height);
 		this.center(0, 0);
 	}
 
 	get elClass() { return 'scrolling-view'; }
+
+	addContent(element) {
+		this._innerEl.appendChild(element);
+	}
+
+	//#region size
+	get w() {
+		return this._w;
+	}
+	get h() {
+		return this._h;
+	}
+	_size(w, h) {
+		this._w = w;
+		this._h = h;
+		this._innerEl.style.width = w+"px";
+		this._innerEl.style.height = h+"px";
+	}
+	//#endregion
 
 	//#region position
 	get x() {
@@ -877,7 +900,7 @@ class ScrollingView extends ElObj {
 		// TODO: enforce scroll edges
 		this._x = x;
 		this._y = y;
-		this.el.style.transform = this._scrollPosition(this.x, this.y);
+		this._innerEl.style.transform = this._scrollPosition(this.x, this.y);
 	}
 	_scrollPosition(x, y) {
 		// TODO: enforce scroll edges
@@ -899,7 +922,7 @@ class ScrollingView extends ElObj {
 
 		var time = speed*(keyframes.length-1);
 		delay = delay || 0;
-		this.el.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
+		this._innerEl.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
 		return time;
 	}
 	//#endregion animate

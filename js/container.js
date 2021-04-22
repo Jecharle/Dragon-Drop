@@ -869,9 +869,6 @@ class MapNode extends Position {
 		this.movesLeft = null;
 		this.path = null;
 
-		/*this._tooltip = new SkillDescription(this.name);
-		this.el.appendChild(this._tooltip.el);*/
-
 		this.refresh();
 	}
 
@@ -889,7 +886,7 @@ class MapNode extends Position {
 	get fullDescription() {
 		var description = "";
 		if (this.name) description +=`<strong>${this.name}</strong><br>`
-		if (this._description) description = `${this._description}`;
+		if (this._description) description += `${this._description}`;
 		return description;
 	}
 	//#endregion text
@@ -906,7 +903,6 @@ class MapNode extends Position {
 	refresh() {
 		super.refresh();
 		this.el.classList.toggle('incomplete', this.incomplete);
-		//this._tooltip.value = this.name;
 	}
 
 	//#region position
@@ -914,10 +910,10 @@ class MapNode extends Position {
 	get y() { return this._y; }
 
 	get screenX() {
-		return this.x * 64;
+		return this.x;
 	}
 	get screenY() {
-		return this.y * 64;
+		return this.y;
 	}
 	get screenZ() {
 		return 0;
@@ -957,11 +953,11 @@ class TestOverworldMap extends OverworldMap {
 	constructor() {
 		super();
 
-		this.addNode(-2, -1, 'start');
-		this.addNode(-2, 2, 'second');
-		this.addNode(2, 2, 'fork');
-		this.addNode(1, 4, 'tail');
-		this.addNode(2, -2, 'last');
+		this.addNode(4*64, 5*64, 'start');
+		this.addNode(4*64, 8*64, 'second');
+		this.addNode(8*64, 8*64, 'fork');
+		this.addNode(7*64, 10*64, 'tail');
+		this.addNode(8*64, 4*64, 'last');
 
 		this.connect('start', 'second');
 		this.connect('second', 'fork');
@@ -969,6 +965,9 @@ class TestOverworldMap extends OverworldMap {
 		this.connect('fork', 'last');
 		this.connect('last', 'start');
 
-		this.getNode('last')._event = { description: "Test event" };
+		this.getNode('last')._event = {
+			name: "Test event",
+			description: "Eventually, this will start a test battle"
+		};
 	}
 }
