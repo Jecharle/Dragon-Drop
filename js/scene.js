@@ -857,14 +857,14 @@ class MapScene extends Scene {
 ***************************************************/
 
 class ScrollingView extends ElObj {
-	constructor(width, height, viewWidth, viewHeight) {
+	constructor(viewWidth, viewHeight, scrollWidth, scrollHeight) {
 		super();
 		this._innerEl = document.createElement(this.elType);
 		this._innerEl.classList.add('inner');
 		this.el.appendChild(this._innerEl);
 
-		this.setScrollingSize(width || 0, height || 0);
 		if (viewWidth && viewHeight) this.setViewSize(viewWidth, viewHeight);
+		if (scrollWidth && scrollHeight) this.setScrollingSize(scrollWidth, scrollHeight);
 	}
 
 	get elClass() { return 'scrolling-view'; }
@@ -879,14 +879,14 @@ class ScrollingView extends ElObj {
 
 	//#region size
 	get w() {
-		return this._w;
+		return this._scrollW;
 	}
 	get h() {
-		return this._h;
+		return this._scrollH;
 	}
 	setScrollingSize(w, h) {
-		this._w = w;
-		this._h = h;
+		this._scrollW = w;
+		this._scrollH = h;
 		this._innerEl.style.width = w+"px";
 		this._innerEl.style.height = h+"px";
 		this.refresh();
@@ -920,30 +920,32 @@ class ScrollingView extends ElObj {
 	_scrollPosition(x, y) {
 		return `translate(${-x}px, ${-y}px)`;
 	}
+	//#endregion position
 
+	//#region scroll boundaries
 	_clampX(x) {
 		x = x || 0;
-		if (!this._viewW) return x;
+		if (!this._viewW || !this._scrollW) return x;
 		return Math.max(this._minX, Math.min(x, this._maxX));
 	}
 	_clampY(y) {
 		y = y || 0;
-		if (!this._viewH) return y;
+		if (!this._viewH || !this._scrollH) return y;
 		return Math.max(this._minY, Math.min(y, this._maxY));
 	}
 	get _maxX() {
-		return this._w - this._viewW / 2;
+		return this._scrollW - this._viewW / 2;
 	}
 	get _minX() {
 		return this._viewW / 2;
 	}
 	get _maxY() {
-		return this._h - this._viewH / 2;
+		return this._scrollH - this._viewH / 2;
 	}
 	get _minY() {
 		return this._viewH / 2;
 	}
-	//#endregion position
+	//#endregion scroll boundaries
 
 	//#region animate
 	animateMove(path, speed, delay) {
