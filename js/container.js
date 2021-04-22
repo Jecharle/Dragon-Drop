@@ -884,10 +884,12 @@ class MapNode extends Position {
 	}
 
 	//#region text
-	get name() { return this._event?.name || this.id; } // TEMP
+	get name() { return this._event?.name || ""; } // TEMP
 	get _description() { return this._event?.description || ""; }
 	get fullDescription() {
-		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		var description = "";
+		if (this.name) description +=`<strong>${this.name}</strong><br>`
+		if (this._description) description = `${this._description}`;
 		return description;
 	}
 	//#endregion text

@@ -790,7 +790,7 @@ class MapScene extends Scene {
 	}
 
 	_refreshUi() {
-		this._exploreButtonEl.innerText = "Explore";
+		this._exploreButtonEl.innerText = "Start";
 
 		if (this._currentNode.incomplete) {
 			this._eventDescriptionEl.innerHTML = this._currentNode.fullDescription;
@@ -829,18 +829,15 @@ class MapScene extends Scene {
 			this._movePiece(node).then(result => this.refresh());
 			return;
 		}
-		// TODO: Ability to activate events, and such
 	}
-	mouseOver(node, dragId) {
+	/*mouseOver(node, dragId) {
 		if (this.busy || !this._piece.idMatch(dragId)) return;
-
-		// TODO: Update information?
-	}
-	rightClick() {
+	}*/
+	/*rightClick() {
 		if (this.busy) return;
-	}
-	keydown(key) {
+	}*/
+	/*keydown(key) {
 		if (this.busy) return;
-	}
+	}*/
 	//#endregion
 }

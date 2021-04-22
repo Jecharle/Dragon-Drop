@@ -614,10 +614,7 @@
 		background-color: salmon;
 	}
 	.selectable.map-node:hover {
-		border: 4px solid skyblue;
-	}
-	.map-node:hover .skill-description {
-		display: block;
+		border: 4px solid yellow;
 	}
 
 .map-piece {
