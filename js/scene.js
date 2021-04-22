@@ -746,13 +746,16 @@ class MapScene extends Scene {
 
 		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
+		this._camera = new ScrollingView();
 
 		this._piece.move(this._map.getNode('start'));
+		this._camera.focus(this._piece.node);
 
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
 		
-		this.el.appendChild(this._map.el);
+		this._camera.el.appendChild(this._map.el);
+		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
 		
@@ -810,7 +813,11 @@ class MapScene extends Scene {
 	async _movePiece(node) {
 		this.setBusy();
 		this.el.classList.add('moving');
+		
+		this._camera.focus(node);
+		this._camera.animateMove(node.path, 750, 150);
 		await this._piece.move(node);
+
 		this.el.classList.remove('moving');
 		this.setDone();
 	}
@@ -840,4 +847,60 @@ class MapScene extends Scene {
 		if (this.busy) return;
 	}*/
 	//#endregion
+}
+
+/***************************************************
+ Scrolling view pane
+***************************************************/
+
+class ScrollingView extends ElObj {
+	constructor() {
+		super();
+		// TODO: Setup with scroll edges
+		this.center(0, 0);
+	}
+
+	get elClass() { return 'scrolling-view'; }
+
+	//#region position
+	get x() {
+		return this._x;
+	}
+	get y() {
+		return this._y;
+	}
+	focus(position) {
+		if (!position) return;
+		this.center(position.screenX, position.screenY);
+	}
+	center(x, y) {
+		// TODO: enforce scroll edges
+		this._x = x;
+		this._y = y;
+		this.el.style.transform = this._scrollPosition(this.x, this.y);
+	}
+	_scrollPosition(x, y) {
+		// TODO: enforce scroll edges
+		return `translate(${-x}px, ${-y}px)`;
+	}
+
+	// TODO: establish scroll edges
+
+	//#endregion position
+
+	//#region animate
+	animateMove(path, speed, delay) {
+		var keyframes = [{}];
+		path.forEach(position => {
+			keyframes.unshift({
+				transform: this._scrollPosition(position.screenX, position.screenY)
+			});
+		});
+
+		var time = speed*(keyframes.length-1);
+		delay = delay || 0;
+		this.el.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
+		return time;
+	}
+	//#endregion animate
 }

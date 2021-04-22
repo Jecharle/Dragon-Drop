@@ -976,13 +976,13 @@ class MapPiece extends Piece {
 	//#region animate
 	animateMovement(path) {
 		var keyframes = [{}];
-		path.forEach(square => {
+		path.forEach(node => {
 			keyframes.unshift({
-				transform: square.screenPosition,
-				zIndex: square.screenZ
+				transform: node.screenPosition,
+				zIndex: node.screenZ
 			});
 		});
-		var time = 500*(keyframes.length-1);
+		var time = 750*(keyframes.length-1);
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
 		return time;
 	}

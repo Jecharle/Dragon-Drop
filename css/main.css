@@ -570,9 +570,20 @@
 /*#endregion*/
 
 /*#region Map Scene*/
+.scrolling-view {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	overflow: hidden;
+}
+
 .overworld-map {
 	display: flex;
 	justify-content: center;
+	align-items: center;
 	position: absolute;
 }
 
