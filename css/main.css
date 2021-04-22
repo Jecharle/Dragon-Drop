@@ -595,7 +595,7 @@
 	transition: bottom 1s;
 }
 	.moving .explore-button, .moving .map-node-description {
-		bottom: -50%;
+		bottom: -20%;
 	}
 
 
