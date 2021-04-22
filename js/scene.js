@@ -746,18 +746,16 @@ class MapScene extends Scene {
 
 		this._map = new TestOverworldMap();
 		this._piece = new MapPiece();
-		this._camera = new ScrollingView();
+		this._camera = new ScrollingView(1024, 1000);
+		this._camera.setViewSize(1024, 768);
 
 		this._piece.move(this._map.getNode('start'));
 		this._camera.focus(this._piece.node);
 
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
-		
-		this._camera.setScrollingSize(1024, 1000);
-		this._camera.setViewSize(1024, 768);
-		this._camera.addContent(this._map.el);
 
+		this._camera.el.appendChild(this._map.el);
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
@@ -857,21 +855,14 @@ class MapScene extends Scene {
 ***************************************************/
 
 class ScrollingView extends ElObj {
-	constructor(viewWidth, viewHeight, scrollWidth, scrollHeight) {
+	constructor(scrollWidth, scrollHeight, viewWidth, viewHeight) {
 		super();
-		this._innerEl = document.createElement(this.elType);
-		this._innerEl.classList.add('inner');
-		this.el.appendChild(this._innerEl);
 
+		this.setSize(scrollWidth, scrollHeight);
 		if (viewWidth && viewHeight) this.setViewSize(viewWidth, viewHeight);
-		if (scrollWidth && scrollHeight) this.setScrollingSize(scrollWidth, scrollHeight);
 	}
 
 	get elClass() { return 'scrolling-view'; }
-
-	addContent(element) {
-		this._innerEl.appendChild(element);
-	}
 
 	refresh() {
 		this.center(this.x, this.y);
@@ -884,11 +875,11 @@ class ScrollingView extends ElObj {
 	get h() {
 		return this._scrollH;
 	}
-	setScrollingSize(w, h) {
+	setSize(w, h) {
 		this._scrollW = w;
 		this._scrollH = h;
-		this._innerEl.style.width = w+"px";
-		this._innerEl.style.height = h+"px";
+		this.el.style.width = w+"px";
+		this.el.style.height = h+"px";
 		this.refresh();
 	}
 	setViewSize(w, h) {
@@ -915,7 +906,7 @@ class ScrollingView extends ElObj {
 		y = this._clampY(y);
 		this._x = x;
 		this._y = y;
-		this._innerEl.style.transform = this._scrollPosition(x, y);
+		this.el.style.transform = this._scrollPosition(x, y);
 	}
 	_scrollPosition(x, y) {
 		return `translate(${-x}px, ${-y}px)`;
@@ -925,12 +916,12 @@ class ScrollingView extends ElObj {
 	//#region scroll boundaries
 	_clampX(x) {
 		x = x || 0;
-		if (!this._viewW || !this._scrollW) return x;
+		if (!this._viewW) return x;
 		return Math.max(this._minX, Math.min(x, this._maxX));
 	}
 	_clampY(y) {
 		y = y || 0;
-		if (!this._viewH || !this._scrollH) return y;
+		if (!this._viewH) return y;
 		return Math.max(this._minY, Math.min(y, this._maxY));
 	}
 	get _maxX() {
@@ -960,7 +951,7 @@ class ScrollingView extends ElObj {
 
 		var time = speed*(keyframes.length-1);
 		delay = delay || 0;
-		this._innerEl.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
+		this.el.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
 		return time;
 	}
 	//#endregion animate
