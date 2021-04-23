@@ -56,7 +56,6 @@ class TestMap extends MapSceneModel { // TEMP
 			{id: 'tail', x: 9*64, y: 9*64},
 			{id: 'last', x: 8*64, y: 4*64},
 		);
-
 		this._connections.push(
 			{a: 'start', b: 'second'},
 			{a: 'second', b: 'fork'},
@@ -65,6 +64,18 @@ class TestMap extends MapSceneModel { // TEMP
 			{a: 'last', b: 'start'},
 		);
 
-		// TODO: Events
+		this._events.push(
+			{
+				node: 'last',
+				name: "Battle Test",
+				description: "This will link back to the battle scene test",
+			},
+			{
+				node: 'second',
+				name: "Story Test",
+				description: "This will contain some text to test out cutscenes\
+				<br/>Let's go multiple lines!",
+			},
+		)
 	}
 }

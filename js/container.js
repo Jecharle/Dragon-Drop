@@ -760,7 +760,14 @@ class OverworldMap extends Container {
 
 	_loadEvents(eventData) {
 		eventData.forEach(data => {
-			// TODO: Add events to the map nodes
+			var node = this.getNode(data.node);
+			if (node) {
+				// TEMP
+				node._event = {
+					name: data.name,
+					description: data.description
+				};
+			}
 		});
 	}
 	//#endregion loading
