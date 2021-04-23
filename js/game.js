@@ -53,8 +53,8 @@ class Game {
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		//Game.setScene(new BattleScene( null, new TestMap(), Party.getUnits() ));
-		Game.setScene( new MapScene() );
+		//Game.setScene(new BattleScene( null, new TestBattle(), Party.getUnits() ));
+		Game.setScene(new MapScene( null, new TestMap() ));
 	}
 }
 Game.begin();

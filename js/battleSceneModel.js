@@ -38,7 +38,7 @@ class BattleSceneModel {
 }
 
 /***************************************************
- TestMap
+ TestBattle
 ***************************************************/
 class TestBattle extends BattleSceneModel { // TEMP
 	constructor() {

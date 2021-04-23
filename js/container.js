@@ -720,9 +720,15 @@ class UnitInfo extends ElObj {
  World Map
 ***************************************************/
 class OverworldMap extends Container {
-	constructor() {
+	constructor(mapData) {
 		super();
 		this.nodes = [];
+
+		if (mapData) {
+			this._loadNodes(mapData.nodes);
+			this._loadConnections(mapData.connections);
+			this._loadEvents(mapData.events);
+		}
 
 		this.el.onclick = this._click;
 		this.el.ondrop = this._drop;
@@ -737,6 +743,27 @@ class OverworldMap extends Container {
 	refresh() {
 		this.nodes.forEach(node => node.refresh());
 	}
+
+	//#region loading
+	_loadNodes(nodeData) {
+		nodeData.forEach(data => {
+			var newNode = this.addNode(data.id, data.x, data.y);
+			if (data.hidden) newNode.hide();
+		});
+	}
+
+	_loadConnections(connectionData) {
+		connectionData.forEach(data => {
+			this.connect(data.a, data.b);
+		});
+	}
+
+	_loadEvents(eventData) {
+		eventData.forEach(data => {
+			// TODO: Add events to the map nodes
+		});
+	}
+	//#endregion loading
 
 	//#region node management
 	getNode(id) {
@@ -947,32 +974,4 @@ class MapNode extends Position {
 		if (nodeIndex >= 0) this._edges.splice(nodeIndex, 1);
 	}
 	//#endregion edges
-}
-
-class TestOverworldMap extends OverworldMap {
-	constructor() {
-		super();
-
-		this.addNode('start', 4*64, 5*64);
-		this.addNode('second', 4*64, 8*64);
-		this.addNode('fork', 7*64, 7*64);
-		this.addNode('tail', 9*64, 9*64);
-		this.addNode('last', 8*64, 4*64);
-
-		this.connect('start', 'second');
-		this.connect('second', 'fork');
-		this.connect('fork', 'tail');
-		this.connect('fork', 'last');
-		this.connect('last', 'start');
-
-		this.getNode('last')._event = {
-			name: "Test event",
-			description: "Eventually, this will start a test battle"
-		};
-
-		this.getNode('second')._event = {
-			name: "Another Event",
-			description: "Dunno what to do this one, but I want two events in place"
-		};
-	}
 }

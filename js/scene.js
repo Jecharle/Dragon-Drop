@@ -741,15 +741,15 @@ class Team {
  Map scene
 ***************************************************/
 class MapScene extends Scene {
-	constructor(lastScene) {
+	constructor(lastScene, mapData) {
 		super(lastScene);
 
-		this._map = new TestOverworldMap();
+		this._camera = new ScrollingView(mapData.width, mapData.height);
+		this._map = new OverworldMap(mapData);
 		this._piece = new MapPiece();
-		this._camera = new ScrollingView(1024, 1000);
-		this._camera.setViewSize(1024, 768);
 
-		this._piece.move(this._map.getNode('start'));
+		this._camera.setViewSize(1024, 768); // TEMP
+		this._piece.move(this._map.getNode(mapData.startNode));
 		this._camera.focus(this._piece.node);
 
 		this._exploreButtonEl = this._createExploreButton();
