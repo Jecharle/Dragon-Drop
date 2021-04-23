@@ -60,7 +60,7 @@ class Position extends SpriteElObj {
  Game board
 ***************************************************/
 class Board extends Container {
-	constructor(mapData) {
+	constructor(sceneData) {
 		super();
 		this.squares = [];
 
@@ -71,10 +71,10 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
-		if (mapData) this._loadTerrain(mapData.terrain);
+		if (sceneData) this._loadTerrain(sceneData.terrain);
 
 		this.deployArea = [];
-		if (mapData) this._loadDeployArea(mapData.deployment);
+		if (sceneData) this._loadDeployArea(sceneData.deployment);
 
 		this.squaresInRange = [];
 

@@ -1,8 +1,8 @@
 /***************************************************
- MapModel
-Used to store map data loaded from elsewhere
+ BattleSceneModel
+Used to store battle data loaded from elsewhere
 ***************************************************/
-class MapModel {
+class BattleSceneModel {
 	constructor() {
 		// TODO: Load from an XML file?
 		this._deployment = []; // x, y
@@ -40,7 +40,7 @@ class MapModel {
 /***************************************************
  TestMap
 ***************************************************/
-class TestMap extends MapModel { // TEMP
+class TestBattle extends BattleSceneModel { // TEMP
 	constructor() {
 		super();
 

@@ -63,14 +63,14 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(lastScene, mapData, partyUnits) {
+	constructor(lastScene, sceneData, partyUnits) {
 		super(lastScene);
 		this._initTeams();
-		this._board = new Board(mapData);
+		this._board = new Board(sceneData);
 
 		this._addParty(partyUnits);
-		this._addMapUnits(mapData?.units);
-		this._addTurnLimit(mapData);
+		this._addMapUnits(sceneData?.units);
+		this._addTurnLimit(sceneData);
 
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
@@ -173,11 +173,11 @@ class BattleScene extends Scene {
 	//#endregion unit setup
 
 	//#region rule setup
-	_addTurnLimit(mapData) {
-		if (!mapData) return;
-		this._maxTurns = mapData.maxTurns;
-		this._minTurns = mapData.minTurns;
-		this._defaultVictory = mapData.defaultVictory;
+	_addTurnLimit(sceneData) {
+		if (!sceneData) return;
+		this._maxTurns = sceneData.maxTurns;
+		this._minTurns = sceneData.minTurns;
+		this._defaultVictory = sceneData.defaultVictory;
 	}
 	//#endregion rule setup
 
