@@ -61,6 +61,41 @@ class TestRangedSkill extends TestAttackSkill {
 };
 
 /***************************************************
+ Test ranged attack skill
+***************************************************/
+class TestPullSkill extends TestAttackSkill {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	get name() {
+		return "Pull Attack";
+	}
+	get _description() {
+		return `Deal ${this.power} damage and pull the target 1 space<br/>Does not damage allies`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._range = 3;
+		this._minRange = 1;
+	}
+
+	_startEffects(target, _squares, _units) {
+		this.user.addTimedClass(200, 'attack');
+		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
+		return 200;
+	}
+
+	_unitEffects(unit, _target) {
+		if (!this.user.isAlly(unit)) unit.takeDamage(this.power);
+		unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+		return 200;
+	}
+};
+
+/***************************************************
  Test heal skill
 ***************************************************/
 class TestHealSkill extends SkillPiece {

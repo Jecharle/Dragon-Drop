@@ -955,8 +955,8 @@ class TestOverworldMap extends OverworldMap {
 
 		this.addNode('start', 4*64, 5*64);
 		this.addNode('second', 4*64, 8*64);
-		this.addNode('fork', 8*64, 8*64);
-		this.addNode('tail', 7*64, 10*64);
+		this.addNode('fork', 7*64, 7*64);
+		this.addNode('tail', 9*64, 9*64);
 		this.addNode('last', 8*64, 4*64);
 
 		this.connect('start', 'second');
@@ -968,6 +968,11 @@ class TestOverworldMap extends OverworldMap {
 		this.getNode('last')._event = {
 			name: "Test event",
 			description: "Eventually, this will start a test battle"
+		};
+
+		this.getNode('second')._event = {
+			name: "Another Event",
+			description: "Dunno what to do this one, but I want two events in place"
 		};
 	}
 }

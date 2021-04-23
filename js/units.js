@@ -66,6 +66,7 @@ class TestPositionUnit extends UnitPiece {
 
 	_setSkills() {
 		this._skills = [
+			new TestPullSkill(this),
 			new TestAreaSkill(this),
 			new TestPositionSkill(this),
 		]

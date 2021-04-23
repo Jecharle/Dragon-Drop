@@ -601,7 +601,7 @@ class BattleScene extends Scene {
 			this.refresh();
 		}
 
-		if (key == "Enter") { // TEMP?
+		if (key == "Enter") {
 			this._nextTurn();
 		}
 
@@ -844,9 +844,14 @@ class MapScene extends Scene {
 	/*rightClick() {
 		if (this.busy) return;
 	}*/
-	/*keydown(key) {
+	keydown(key) {
 		if (this.busy) return;
-	}*/
+
+		if (key == "Enter") {
+			this._exploreCurrentNode();
+			this.refresh();
+		}
+	}
 	//#endregion
 }
 
