@@ -741,16 +741,12 @@ class Team {
  Map scene
 ***************************************************/
 class MapScene extends Scene {
-	constructor(lastScene, mapData) {
+	constructor(lastScene, mapData, startNodeId) {
 		super(lastScene);
 
 		this._camera = new ScrollingView(mapData.width, mapData.height);
 		this._map = new OverworldMap(mapData);
 		this._piece = new MapPiece();
-
-		this._camera.setViewSize(1024, 768); // TEMP
-		this._piece.move(this._map.getNode(mapData.startNode));
-		this._camera.focus(this._piece.node);
 
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
@@ -760,6 +756,15 @@ class MapScene extends Scene {
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
 		
+		var startNode = this._map.getNode(startNodeId);
+		if (startNode) {
+			this._piece.move(this._map.getNode(startNode));
+		} else {
+			this._piece.move(this._map.getNode(mapData.startNode));
+		}
+		this._camera.setViewSize(1024, 768); // TEMP, until I can pull the resolution in natively
+		this._camera.focus(this._piece.node);
+
 		this.refresh();
 	}
 
@@ -795,15 +800,8 @@ class MapScene extends Scene {
 
 	_refreshUi() {
 		this._exploreButtonEl.innerText = "Start";
-
-		if (this._currentNode.incomplete) {
-			this._eventDescriptionEl.innerHTML = this._currentNode.fullDescription;
-			this._exploreButtonEl.style.visibility = "visible";
-			this._eventDescriptionEl.style.visibility = "visible";
-		} else {
-			this._exploreButtonEl.style.visibility = "hidden";
-			this._eventDescriptionEl.style.visibility = "hidden";
-		}
+		this.el.classList.toggle('hide-description', !this._currentNode.accessible);
+		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
 	}
 	//#endregion refresh
 
@@ -811,15 +809,15 @@ class MapScene extends Scene {
 		return this._piece.node;
 	}
 
+	//#region actions
 	async _movePiece(node) {
 		this.setBusy();
-		this.el.classList.add('moving');
+		this.el.classList.add('hide-description'); // TEMP?
 		
 		this._camera.focus(node);
 		this._camera.animateMove(node.path, 750, 150);
 		await this._piece.move(node);
 
-		this.el.classList.remove('moving');
 		this.setDone();
 	}
 
@@ -828,6 +826,7 @@ class MapScene extends Scene {
 		return this._currentNode.explore();
 		// TODO: This will likely start a different game scene, so don't expect to process the result right away
 	}
+	//#endregion actions
 
 	//#region input events
 	positionEvent(node, dragId) {
@@ -853,6 +852,117 @@ class MapScene extends Scene {
 		}
 	}
 	//#endregion
+}
+
+
+/***************************************************
+ Map Scene -> Map Event
+***************************************************/
+class MapEvent {
+	constructor(type, modelPath) {
+		/*
+		commands for the event to run?
+			1. Start a scene (battle, etc)
+				Branch based on an outcome?
+			2. Move the character
+			3. Add/remove a connection
+			4. Show/hide a node
+			5. Set itself as "complete"
+		*/
+		this._type = type;
+		this._modelPath = modelPath;
+		// TODO: Data load target (scene data filename, based on type?)
+		this._name = "";
+		this._description = "";
+		this._complete = false;
+		this._repeatable = false;
+	}
+
+	//#region event type
+	static get None() { return 0; }
+	static get Battle() { return 1; }
+	static get Story() { return 2; }
+	static get Movement() { return 3; }
+	static get Other() { return -1; }
+
+	get type() {
+		return this._type;
+	}
+	get modelPath() {
+		return this._modelPath;
+	}
+	//#endregion event type
+
+	//#region temporary setup
+	set description(value) {
+		this._description = value;
+	}
+	set name(value) {
+		this._name = value;
+	}
+	set repeatable(value) {
+		this._repeatable = value;
+	}
+	//#endregion temporary setup
+
+	// TODO: Actual setup
+
+	//#region text
+	get name() {
+		return this._name
+	}
+	get description() {
+		return this._description;
+	}
+	get fullDescription() {
+		var description = "";
+		if (this.name) description +=`<strong>${this.name}</strong><br>`
+		if (this.description) description += `${this.description}`;
+		return description;
+		// TODO: This section will evolve with more data options
+	}
+	//#endregion text
+
+	//#region completion state
+	get complete() {
+		return this._complete;
+	}
+	get repeatable() {
+		return this._repeatable;
+	}
+	get accessible() {
+		return !this.complete || this.repeatable;
+	}
+	//#endregion completion state
+
+	//#region run event
+	run() {
+		if (this.complete && !this.repeatable) return false;
+
+		// TODO: Use _modelPath to specify the file it loads the scene from
+		switch (this.type) {
+			case MapEvent.Battle:
+				alert("Fight a battle");
+				break;
+
+			case MapEvent.Story:
+				alert("Watch a cutscene");
+				break;
+
+			case MapEvent.Movement:
+				alert("Change map");
+				break;
+
+			default:
+				alert("Unknown event type");
+				break;
+		}
+		
+		// TODO: Completion happens after the scene is done, not within this function
+		this._complete = true;
+		return true;
+	}
+	//#endregion run event
 }
 
 /***************************************************

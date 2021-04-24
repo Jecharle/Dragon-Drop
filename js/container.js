@@ -754,19 +754,20 @@ class OverworldMap extends Container {
 
 	_loadConnections(connectionData) {
 		connectionData.forEach(data => {
-			this.connect(data.a, data.b);
+			this.connect(data.a, data.b, data.oneWay);
 		});
 	}
 
 	_loadEvents(eventData) {
 		eventData.forEach(data => {
 			var node = this.getNode(data.node);
-			if (node) {
-				// TEMP
-				node._event = {
-					name: data.name,
-					description: data.description
-				};
+			if (node && data.type) {
+				var newEvent = new MapEvent(data.type);
+				// TODO: Figure out a better way to fill out all of the fields at once
+				newEvent.name = data.name;
+				newEvent.description = data.description;
+				newEvent.repeatable = !!data.repeatable;
+				node.setEvent(newEvent);
 			}
 		});
 	}
@@ -774,10 +775,12 @@ class OverworldMap extends Container {
 
 	//#region node management
 	getNode(id) {
+		if (!id) return null;
 		id = id.toLowerCase();
 		return this.nodes.find(node => node.id == id);
 	}
 	addNode(id, x, y) {
+		if (!id) return null;
 		id = id.toLowerCase();
 		if (this.getNode(id)) return null; // a node with this ID already exists
 
@@ -787,12 +790,12 @@ class OverworldMap extends Container {
 
 		return node;
 	}
-	connect(id1, id2) {
-		var node1 = this.getNode(id1.toLowerCase());
-		var node2 = this.getNode(id2.toLowerCase());
+	connect(id1, id2, oneWay) {
+		var node1 = this.getNode(id1);
+		var node2 = this.getNode(id2);
 		if (node1 && node2) {
 			node1.addEdge(node2);
-			node2.addEdge(node1);
+			if (!oneWay) node2.addEdge(node1);
 			return true;
 		}
 		return false;
@@ -914,29 +917,34 @@ class MapNode extends Position {
 		return this._id;
 	}
 
-	//#region text
-	get name() { return this._event?.name || ""; } // TEMP
-	get _description() { return this._event?.description || ""; }
-	get fullDescription() {
-		var description = "";
-		if (this.name) description +=`<strong>${this.name}</strong><br>`
-		if (this._description) description += `${this._description}`;
-		return description;
-	}
-	//#endregion text
 
+	//#region map event
+	setEvent(event) {
+		this._event = event;
+		this.refresh();
+	}
+	get event() {
+		return this._event;
+	}
 	get incomplete() {
-		return this._event && !this._event.complete;
+		return this.event && !this.event.complete;
+	}
+	get repeatable() {
+		return this.event && this.event.complete && this.event.repeatable;
+	}
+	get accessible() {
+		return this.incomplete || this.repeatable;
 	}
 	explore() {
-		if (!this._event) return false;
-		this._event.complete = true;
-		return true;
+		if (!this.event) return false;
+		return this.event.run();
 	}
+	//#endregion map event
 
 	refresh() {
 		super.refresh();
 		this.el.classList.toggle('incomplete', this.incomplete);
+		this.el.classList.toggle('repeatable', this.repeatable);
 	}
 
 	//#region position

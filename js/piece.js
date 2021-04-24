@@ -24,11 +24,14 @@ class Piece extends SpriteElObj {
 		return (!id || id == this.el.id);
 	}
 
-	get type() { return Piece.None; }
+	//#region piece type
 	static get None() { return 0; }
 	static get Unit() { return 1; }
 	static get Skill() { return 2; }
 	static get Map() { return 3; }
+
+	get type() { return Piece.None; }
+	//#endregion piece type
 
 	//#region parent
 	setParent(container) {

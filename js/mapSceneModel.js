@@ -67,11 +67,14 @@ class TestMap extends MapSceneModel { // TEMP
 		this._events.push(
 			{
 				node: 'last',
+				type: MapEvent.Battle,
+				repeatable: true,
 				name: "Battle Test",
 				description: "This will link back to the battle scene test",
 			},
 			{
 				node: 'second',
+				type: MapEvent.Story,
 				name: "Story Test",
 				description: "This will contain some text to test out cutscenes\
 				<br/>Let's go multiple lines!",

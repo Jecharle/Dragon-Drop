@@ -604,7 +604,7 @@
 	border-radius: 8px;
 	transition: bottom 1s;
 }
-	.moving .explore-button, .moving .map-node-description {
+	.hide-description .explore-button, .hide-description .map-node-description {
 		bottom: -20%;
 	}
 
@@ -622,6 +622,9 @@
 }
 	.map-node.incomplete {
 		background-color: salmon;
+	}
+	.map-node.repeatable {
+		background-color: cornflowerblue;
 	}
 	.selectable.map-node:hover {
 		border: 4px solid yellow;
