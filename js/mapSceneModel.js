@@ -71,6 +71,7 @@ class TestMap extends MapSceneModel { // TEMP
 				repeatable: true,
 				name: "Battle Test",
 				description: "This will link back to the battle scene test",
+				saveId: 'testMapTestBattle'
 			},
 			{
 				node: 'tail',

@@ -762,18 +762,15 @@ class OverworldMap extends Container {
 		eventData.forEach(data => {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
-				var newEvent = new MapEvent(data.type, data.filename, data.saveId);
-				// TODO: Figure out a better way to fill out all of the fields at once
-				newEvent.name = data.name;
-				newEvent.description = data.description;
-				newEvent.repeatable = !!data.repeatable;
+				var newEvent = new MapEvent(data);
+				if (newEvent.complete) this.revealAdjacent(node);
 				node.setEvent(newEvent);
 			}
 		});
 	}
 	//#endregion loading
 
-	//#region node management
+	//#region node setup
 	getNode(id) {
 		if (!id) return null;
 		id = id.toLowerCase();
@@ -810,7 +807,14 @@ class OverworldMap extends Container {
 		}
 		return false;
 	}
-	//#endregion node management
+	//#endregion node setup
+
+	revealAdjacent(node) {
+		node.edges.forEach(adjacent => {
+			adjacent._show(); // TEMP
+		});
+		// TODO: Option to animate this?
+	}
 
 	//#region move range
 	setReachableNodes(origin, range) {
@@ -927,13 +931,13 @@ class MapNode extends Position {
 		return this._event;
 	}
 	get incomplete() {
-		return this.event && !this.event.complete;
+		return !!(this.event && !this.event.complete);
 	}
 	get repeatable() {
-		return this.event && this.event.complete && this.event.repeatable;
+		return !!(this.event && this.event.complete && this.event.repeatable);
 	}
 	get canExplore() {
-		return this.incomplete || this.repeatable;
+		return !!(this.incomplete || this.repeatable);
 	}
 	//#endregion map event
 

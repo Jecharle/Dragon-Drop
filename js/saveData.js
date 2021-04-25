@@ -7,9 +7,11 @@ class SaveData {
 	static options = {};
 
 	static setEventClear(eventId) {
-		this.mapEvent[i] = true;
+		if (!eventId) return;
+		this.mapEvent[eventId] = true;
 	}
 	static getEventClear(eventId) {
-		return !!this.mapEvent[i];
+		if (!eventId) return false;
+		return !!this.mapEvent[eventId];
 	}
 }

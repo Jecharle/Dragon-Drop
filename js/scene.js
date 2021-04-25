@@ -853,9 +853,7 @@ class MapScene extends Scene {
 
 	_completeNode(node) {
 		node.event?.setComplete();
-		node.edges.forEach(adjacent => {
-			adjacent._show(); // TEMP
-		});
+		this._map.revealAdjacent(node);
 		// TODO: Make this visually interesting? Animations, etc?
 	}
 	//#endregion actions
@@ -890,7 +888,7 @@ class MapScene extends Scene {
  Map Scene -> Map Event
 ***************************************************/
 class MapEvent {
-	constructor(type, modelPath, saveId) {
+	constructor(eventData) {
 		/*
 		commands for the event to run?
 			1. Start a scene (battle, etc)
@@ -899,14 +897,15 @@ class MapEvent {
 			3. Add/remove a connection
 			4. Show/hide another node
 		*/
-		this._type = type;
-		this._modelPath = modelPath;
-		this._saveId = saveId;
-		// TODO: Data load target (scene data filename, based on type?)
-		this._name = "";
-		this._description = "";
-		this._complete = false;
-		this._repeatable = false;
+		this._type = eventData.type;
+		this._filename = eventData.filename;
+
+		this._name = eventData.name;
+		this._description = eventData.description;
+		this._repeatable = eventData.repeatable;
+
+		this._saveId = eventData.saveId;
+		this._complete = (this._saveId && SaveData.getEventClear(this._saveId));
 	}
 
 	//#region event type
@@ -919,24 +918,10 @@ class MapEvent {
 	get type() {
 		return this._type;
 	}
-	get modelPath() {
-		return this._modelPath;
+	get filename() {
+		return this._filename;
 	}
 	//#endregion event type
-
-	//#region temporary setup
-	set description(value) {
-		this._description = value;
-	}
-	set name(value) {
-		this._name = value;
-	}
-	set repeatable(value) {
-		this._repeatable = value;
-	}
-	//#endregion temporary setup
-
-	// TODO: Actual setup
 
 	//#region text
 	get name() {
