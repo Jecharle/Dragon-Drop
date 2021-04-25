@@ -1,21 +1,15 @@
 /***************************************************
  Static objects containing progress, settings etc.
 ***************************************************/
-class Progress {
-	constructor() {
-		this._nodeStatus = {};
-	}
+class SaveData {
 
-	// TODO: store other forms of progress, too? 
+	static mapEvent = {};
+	static options = {};
 
-	//#region node status
-	static nodeStatus(fullId) {
-		return this._nodeStatus[fullId];
+	static setEventClear(eventId) {
+		this.mapEvent[i] = true;
 	}
-	static setNodeStatus(fullId, value) {
-		this._nodeStatus[fullId] = value;
+	static getEventClear(eventId) {
+		return !!this.mapEvent[i];
 	}
-	//#endregion node status
 }
-
-// TODO: Options, other unlocks, etc?

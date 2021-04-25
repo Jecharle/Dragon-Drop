@@ -890,7 +890,7 @@ class MapScene extends Scene {
  Map Scene -> Map Event
 ***************************************************/
 class MapEvent {
-	constructor(type, modelPath) {
+	constructor(type, modelPath, saveId) {
 		/*
 		commands for the event to run?
 			1. Start a scene (battle, etc)
@@ -901,6 +901,7 @@ class MapEvent {
 		*/
 		this._type = type;
 		this._modelPath = modelPath;
+		this._saveId = saveId;
 		// TODO: Data load target (scene data filename, based on type?)
 		this._name = "";
 		this._description = "";
@@ -963,11 +964,14 @@ class MapEvent {
 	get accessible() {
 		return !this.complete || this.repeatable;
 	}
-	//#endregion completion state
 
 	setComplete() {
 		this._complete = true;
+		if (this._saveId) {
+			SaveData.setEventClear(this._saveId);
+		}
 	}
+	//#endregion completion state
 
 	getScene(lastScene) {
 		switch (this.type) {

@@ -762,7 +762,7 @@ class OverworldMap extends Container {
 		eventData.forEach(data => {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
-				var newEvent = new MapEvent(data.type);
+				var newEvent = new MapEvent(data.type, data.filename, data.saveId);
 				// TODO: Figure out a better way to fill out all of the fields at once
 				newEvent.name = data.name;
 				newEvent.description = data.description;

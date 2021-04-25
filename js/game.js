@@ -7,21 +7,21 @@ class Game {
 	}
 
 	static get scene() {
-		return Game._scene;
+		return this._scene;
 	}
 	static setScene(scene) {
-		if (Game._scene == scene) return;
+		if (this._scene == scene) return;
 
-		if (Game._scene) {
-			Game.el.removeChild(Game._scene.el);
-			Game._scene.end();
+		if (this._scene) {
+			this.el.removeChild(this._scene.el);
+			this._scene.end();
 		}
 
-		Game._scene = scene;
+		this._scene = scene;
 
-		if (Game._scene) {
-			Game.el.appendChild(scene.el);
-			Game._scene.start();
+		if (this._scene) {
+			this.el.appendChild(this._scene.el);
+			this._scene.start();
 		}
 	}
 
@@ -45,19 +45,19 @@ class Game {
 	}
 
 	static begin() {
-		document.addEventListener('keydown', Game.globalKeydown);
-		document.addEventListener('keyup', Game.globalKeyup);
+		document.addEventListener('keydown', this.globalKeydown);
+		document.addEventListener('keyup', this.globalKeyup);
 
-		Game.el = document.createElement("div");
-		Game.el.classList.add("game-window");
-		document.body.appendChild(Game.el);
+		this.el = document.createElement("div");
+		this.el.classList.add("game-window");
+		document.body.appendChild(this.el);
 
 		// TEMP
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		//Game.setScene(new BattleScene( null, new TestBattle(), Party.getUnits() ));
-		Game.setScene(new MapScene( null, new TestMap() ));
+		//this.setScene(new BattleScene( null, new TestBattle(), Party.getUnits() ));
+		this.setScene(new MapScene( null, new TestMap() ));
 	}
 }
 Game.begin();
