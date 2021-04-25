@@ -932,12 +932,8 @@ class MapNode extends Position {
 	get repeatable() {
 		return this.event && this.event.complete && this.event.repeatable;
 	}
-	get accessible() {
+	get canExplore() {
 		return this.incomplete || this.repeatable;
-	}
-	explore() {
-		if (!this.event) return false;
-		return this.event.run();
 	}
 	//#endregion map event
 

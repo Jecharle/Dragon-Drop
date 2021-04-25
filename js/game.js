@@ -12,14 +12,17 @@ class Game {
 	static setScene(scene) {
 		if (Game._scene == scene) return;
 
-		if (Game._scene != null) {
+		if (Game._scene) {
 			Game.el.removeChild(Game._scene.el);
 			Game._scene.end();
 		}
 
 		Game._scene = scene;
-		Game.el.appendChild(scene.el);
-		Game._scene.start();
+
+		if (Game._scene) {
+			Game.el.appendChild(scene.el);
+			Game._scene.start();
+		}
 	}
 
 	static globalKeydown(ev) {
@@ -29,7 +32,7 @@ class Game {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 	static beforeUnload(ev) {
-		return null//Game.scene.unsaved || null; // DISABLED FOR TESTING
+		return Game.scene.unsaved || null;
 	}
 
 	static async asyncPause(milliseconds) {

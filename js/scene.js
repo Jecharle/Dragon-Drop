@@ -8,6 +8,7 @@ class Scene extends ElObj {
 		super();
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
+		this._paused = false;
 		this.setDone();
 
 		this.el.oncontextmenu = ev => {
@@ -27,12 +28,18 @@ class Scene extends ElObj {
 	start() { }
 	end() { }
 
+	get paused() { return this._paused; }
+	_pause() { this._paused = true; }
+	_resume() { this._paused = false; }
+
 	//#region inter-scene communication
-	get lastScene() {
-		this._lastScene;
-	}
 	sendData(data) {
 		this._dataIn = data;
+	}
+	_getData() {
+		var data = this._dataIn;
+		this._dataIn = null;
+		return data;
 	}
 	//#endregion inter-scene communication
 
@@ -336,7 +343,7 @@ class BattleScene extends Scene {
 		return false;
 	}
 	_win() {
-		if (this.lastScene) this.lastScene.sendData({ victory: true });
+		if (this._lastScene) this._lastScene.sendData({ complete: true });
 		this._phase = BattleScene.EndPhase;
 		this._deselectUnit();
 		this._setActiveTeam(null);
@@ -344,7 +351,7 @@ class BattleScene extends Scene {
 		this._showEndScreen("Victory!");
 	}
 	_lose() {
-		if (this.lastScene) this.lastScene.sendData({ victory: false });
+		if (this._lastScene) this._lastScene.sendData({ complete: false });
 		this._phase = BattleScene.EndPhase;
 		this._deselectUnit();
 		this._setActiveTeam(null);
@@ -363,7 +370,7 @@ class BattleScene extends Scene {
 	}
 
 	_endBattle() {
-		alert("The battle is now over"); // TEMP
+		Game.setScene(this._lastScene);
 	}
 	//#endregion phases
 
@@ -763,8 +770,17 @@ class MapScene extends Scene {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
 		this._camera.setViewSize(1024, 768); // TEMP, until I can pull the resolution in natively
-		this._camera.focus(this._piece.node);
+	}
 
+	start() {
+		if (this._paused) {
+			var data = this._getData();
+			if (data.complete && this._currentNode.event) {
+				this._currentNode.event.setComplete();
+			}
+			this._resume();
+		}
+		this._camera.focus(this._piece.node);
 		this.refresh();
 	}
 
@@ -799,8 +815,8 @@ class MapScene extends Scene {
 	}
 
 	_refreshUi() {
-		this._exploreButtonEl.innerText = "Start";
-		this.el.classList.toggle('hide-description', !this._currentNode.accessible);
+		this._exploreButtonEl.innerText = "Start"; // TODO: Text changes by event type
+		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
 		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
 	}
 	//#endregion refresh
@@ -822,9 +838,12 @@ class MapScene extends Scene {
 	}
 
 	_exploreCurrentNode() {
-		if (!this._currentNode) return false;
-		return this._currentNode.explore();
-		// TODO: This will likely start a different game scene, so don't expect to process the result right away
+		if (!this._currentNode?.canExplore) return false;
+		var newScene = this._currentNode.event?.getScene(this);
+		if (!newScene) return false;
+		this._pause();
+		Game.setScene(newScene);
+		return true;
 	}
 	//#endregion actions
 
@@ -866,8 +885,7 @@ class MapEvent {
 				Branch based on an outcome?
 			2. Move the character
 			3. Add/remove a connection
-			4. Show/hide a node
-			5. Set itself as "complete"
+			4. Show/hide another node
 		*/
 		this._type = type;
 		this._modelPath = modelPath;
@@ -935,34 +953,29 @@ class MapEvent {
 	}
 	//#endregion completion state
 
-	//#region run event
-	run() {
-		if (this.complete && !this.repeatable) return false;
+	setComplete() {
+		this._complete = true;
+	}
 
-		// TODO: Use _modelPath to specify the file it loads the scene from
+	getScene(lastScene) {
 		switch (this.type) {
 			case MapEvent.Battle:
-				alert("Fight a battle");
-				break;
+				// TEMP data until I have more stuff to load
+				return new BattleScene(lastScene, new TestBattle(), Party.getUnits());
 
 			case MapEvent.Story:
 				alert("Watch a cutscene");
-				break;
+				return null;
 
 			case MapEvent.Movement:
 				alert("Change map");
-				break;
-
+				return null;
+			
 			default:
 				alert("Unknown event type");
-				break;
+				return null;
 		}
-		
-		// TODO: Completion happens after the scene is done, not within this function
-		this._complete = true;
-		return true;
 	}
-	//#endregion run event
 }
 
 /***************************************************
@@ -1000,7 +1013,6 @@ class ScrollingView extends ElObj {
 	setViewSize(w, h) {
 		this._viewW = w;
 		this._viewH = h;
-		// TODO: Hard-set the size of the panel...?
 		this.refresh();
 	}
 	//#endregion size

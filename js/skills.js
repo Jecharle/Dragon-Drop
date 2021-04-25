@@ -78,7 +78,7 @@ class TestPullSkill extends TestAttackSkill {
 
 	_setStats() {
 		super._setStats();
-		this._range = 3;
+		this._range = 2;
 		this._minRange = 1;
 	}
 
