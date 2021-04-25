@@ -69,6 +69,8 @@ class TestBattle extends BattleSceneModel { // TEMP
 		);
 
 		// must wait until last reinforcements have appeared
-		this._minTurns = 3;
+		//this._minTurns = 3;
+		this._maxTurns = 1;
+		this._defaultVictory = true;
 	}
 }

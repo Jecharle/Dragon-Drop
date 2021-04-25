@@ -773,14 +773,16 @@ class MapScene extends Scene {
 	}
 
 	start() {
+		this._camera.focus(this._piece.node);
+
 		if (this._paused) {
 			var data = this._getData();
 			if (data.complete && this._currentNode.event) {
-				this._currentNode.event.setComplete();
+				this._completeNode(this._currentNode);
 			}
 			this._resume();
 		}
-		this._camera.focus(this._piece.node);
+
 		this.refresh();
 	}
 
@@ -790,8 +792,7 @@ class MapScene extends Scene {
 		button.classList.add('nav-button', 'explore-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._exploreCurrentNode();
-			this.refresh(); // TEMP
+			this._exploreNode(this._currentNode);
 		};
 		return button;
 	}
@@ -828,7 +829,7 @@ class MapScene extends Scene {
 	//#region actions
 	async _movePiece(node) {
 		this.setBusy();
-		this.el.classList.add('hide-description'); // TEMP?
+		this.el.classList.add('hide-description');
 		
 		this._camera.focus(node);
 		this._camera.animateMove(node.path, 750, 150);
@@ -837,13 +838,25 @@ class MapScene extends Scene {
 		this.setDone();
 	}
 
-	_exploreCurrentNode() {
-		if (!this._currentNode?.canExplore) return false;
-		var newScene = this._currentNode.event?.getScene(this);
-		if (!newScene) return false;
-		this._pause();
-		Game.setScene(newScene);
+	_exploreNode(node) {
+		if (!node || !node.canExplore) return false;
+		var newScene = node.event.getScene(this);
+		if (!newScene) {
+			this._completeNode(node);
+			this.refresh();
+		} else {
+			this._pause();
+			Game.setScene(newScene);
+		}
 		return true;
+	}
+
+	_completeNode(node) {
+		node.event?.setComplete();
+		node.edges.forEach(adjacent => {
+			adjacent._show(); // TEMP
+		});
+		// TODO: Make this visually interesting? Animations, etc?
 	}
 	//#endregion actions
 
@@ -866,8 +879,7 @@ class MapScene extends Scene {
 		if (this.busy) return;
 
 		if (key == "Enter") {
-			this._exploreCurrentNode();
-			this.refresh();
+			this._exploreNode(this._currentNode);
 		}
 	}
 	//#endregion
