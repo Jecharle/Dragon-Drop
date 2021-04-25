@@ -19,7 +19,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	animation: fade-out 1s reverse;
+	animation: fade-out 1s reverse; /*TEMP?*/
 }
 /*#endregion*/
 
@@ -248,7 +248,7 @@
 	--face-w: 96px;	
 	--face-h: 80px;
 
-	--lifebar-h: 12px;
+	--lifebar-h: 14px;
 
 	--skill-w: 64px;
 	--skill-h: 64px;
