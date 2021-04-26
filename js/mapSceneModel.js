@@ -55,6 +55,9 @@ class TestMap extends MapSceneModel { // TEMP
 			{id: 'fork', x: 7*64, y: 7*64},
 			{id: 'tail', x: 9*64, y: 9*64, hidden: true},
 			{id: 'last', x: 8*64, y: 4*64},
+
+			{id: 'island', x: 12*64, y: 12*64},
+			{id: 'island2', x: 11*64, y: 13*64},
 		);
 		this._connections.push(
 			{a: 'start', b: 'second'},
@@ -62,6 +65,8 @@ class TestMap extends MapSceneModel { // TEMP
 			{a: 'fork', b: 'tail'},
 			{a: 'fork', b: 'last'},
 			{a: 'last', b: 'start'},
+
+			{a: 'island', b: 'island2'},
 		);
 
 		this._events.push(
@@ -73,8 +78,24 @@ class TestMap extends MapSceneModel { // TEMP
 				description: "This will link back to the battle scene test",
 				saveId: 'testMapTestBattle'
 			},
-			{
+			{ 
 				node: 'tail',
+				type: MapEvent.Move,
+				param: 'island',
+				repeatable: true,
+				name: "Ferry",
+				description: "The ferry will take you to the island"
+			},
+			{ 
+				node: 'island',
+				type: MapEvent.Move,
+				param: 'tail',
+				repeatable: true,
+				name: "Ferry",
+				description: "The ferry will take you back to the mainland"
+			},
+			{
+				node: 'island2',
 				type: MapEvent.Story,
 				name: "Story Test",
 				description: "This will contain some text to test out cutscenes\

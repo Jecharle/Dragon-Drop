@@ -114,6 +114,8 @@ class BattleScene extends Scene {
 		/*button.onclick = () => {
 			TODO: Open the menu
 		};*/
+		button.innerText = "Menu";
+		button.disabled = true; // TEMP
 		return button;
 	}
 	_createUndoButton() {
@@ -236,9 +238,6 @@ class BattleScene extends Scene {
 		} else {
 			this._turnTitleEl.innerText = "Turn " + this._turn;
 		}
-
-		this._menuButtonEl.innerText = "Menu";
-		this._menuButtonEl.disabled = true;
 
 		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Ready";
@@ -814,6 +813,8 @@ class MapScene extends Scene {
 		/*button.onclick = () => {
 			TODO: Open the menu
 		};*/
+		button.innerText = "Menu";
+		button.disabled = true; // TEMP
 		return button;
 	}
 	//#endregion ui setup
@@ -827,12 +828,12 @@ class MapScene extends Scene {
 	_refreshNodes() {
 		this._map.refresh();
 		this._map.resetReachableNodes();
-		this._map.setReachableNodes(this._piece.node, 10); // temporary very high range
+		this._map.setReachableNodes(this._piece.node, 10); // TEMP very high range
 	}
 
 	_refreshUi() {
-		this._menuButtonEl.innerText = "Menu";
 		this._exploreButtonEl.innerText = "Start"; // TODO: Text changes by event type
+
 		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
 		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
 	}
@@ -857,12 +858,16 @@ class MapScene extends Scene {
 	_exploreNode(node) {
 		if (!node || !node.canExplore) return false;
 		var newScene = node.event.getScene(this);
-		if (!newScene) {
-			this._completeNode(node);
-			this.refresh();
-		} else {
+		if (newScene) {
 			this._pause();
 			Game.setScene(newScene);
+		} else {
+			if (node.event.param && node.event.type == MapEvent.Move) {
+				var destination = this._map.getNode(node.event.param);
+				if (destination) this._movePiece(destination);
+			}
+			this._completeNode(node);
+			this.refresh();
 		}
 		return true;
 	}
@@ -905,16 +910,9 @@ class MapScene extends Scene {
 ***************************************************/
 class MapEvent {
 	constructor(eventData) {
-		/*
-		commands for the event to run?
-			1. Start a scene (battle, etc)
-				Branch based on an outcome?
-			2. Move the character
-			3. Add/remove a connection
-			4. Show/hide another node
-		*/
 		this._type = eventData.type;
 		this._filename = eventData.filename;
+		this._param = eventData.param;
 
 		this._name = eventData.name;
 		this._description = eventData.description;
@@ -928,7 +926,8 @@ class MapEvent {
 	static get None() { return 0; }
 	static get Battle() { return 1; }
 	static get Story() { return 2; }
-	static get Movement() { return 3; }
+	static get Move() { return 3; }
+
 	static get Other() { return -1; }
 
 	get type() {
@@ -936,6 +935,9 @@ class MapEvent {
 	}
 	get filename() {
 		return this._filename;
+	}
+	get param() {
+		return this._param;
 	}
 	//#endregion event type
 
@@ -976,6 +978,7 @@ class MapEvent {
 
 	getScene(lastScene) {
 		switch (this.type) {
+			// TODO: If filename is null, always return null
 			case MapEvent.Battle:
 				// TEMP data until I can load via filename
 				return new BattleScene(lastScene, new TestBattle());
@@ -984,12 +987,11 @@ class MapEvent {
 				alert("Watch a cutscene");
 				return null;
 
-			case MapEvent.Movement:
-				alert("Change map");
+			case MapEvent.Move:
+				if (this.filename) alert("Change map");
 				return null;
 			
 			default:
-				alert("Unknown event type");
 				return null;
 		}
 	}
@@ -1084,6 +1086,7 @@ class ScrollingView extends ElObj {
 
 	//#region animate
 	animateMove(path, speed, delay) {
+		if (!path || !speed) return 0;
 		var keyframes = [{}];
 		path.forEach(position => {
 			var x = this._clampX(position.screenX);
