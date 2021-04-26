@@ -236,7 +236,7 @@
 	position: absolute;
 	z-index: 5;
 	animation: end-screen 2s linear backwards;
-	animation-delay: 1s;
+	animation-delay: 0.25s;
 }
 /*#endregion*/
 
