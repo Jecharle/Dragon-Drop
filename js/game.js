@@ -49,14 +49,13 @@ class Game {
 		document.addEventListener('keyup', this.globalKeyup);
 
 		this.el = document.createElement("div");
-		this.el.classList.add("game-window");
+		this.el.classList.add('game-window');
 		document.body.appendChild(this.el);
 
 		// TEMP
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		//this.setScene(new BattleScene( null, new TestBattle(), Party.getUnits() ));
 		this.setScene(new MapScene( null, new TestMap() ));
 	}
 }

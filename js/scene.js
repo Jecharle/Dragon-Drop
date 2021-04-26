@@ -75,7 +75,11 @@ class BattleScene extends Scene {
 		this._initTeams();
 		this._board = new Board(sceneData);
 
-		this._addParty(partyUnits);
+		if (partyUnits) {
+			this._addParty(partyUnits);
+		} else {
+			this._addParty(Party.getUnits());
+		}
 		this._addMapUnits(sceneData?.units);
 		this._addTurnLimit(sceneData);
 
@@ -757,11 +761,13 @@ class MapScene extends Scene {
 
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
+		this._menuButtonEl = this._createMenuButton();
 
 		this._camera.el.appendChild(this._map.el);
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
+		this.el.appendChild(this._menuButtonEl);
 		
 		var startNode = this._map.getNode(startNodeId);
 		if (startNode) {
@@ -801,6 +807,15 @@ class MapScene extends Scene {
 		textBox.classList.add('map-node-description');
 		return textBox;
 	}
+	_createMenuButton() {
+		var button = document.createElement("button");
+		button.classList.add('nav-button', 'menu-button');
+		button.type = "button";
+		/*button.onclick = () => {
+			TODO: Open the menu
+		};*/
+		return button;
+	}
 	//#endregion ui setup
 
 	//#region refresh
@@ -816,6 +831,7 @@ class MapScene extends Scene {
 	}
 
 	_refreshUi() {
+		this._menuButtonEl.innerText = "Menu";
 		this._exploreButtonEl.innerText = "Start"; // TODO: Text changes by event type
 		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
 		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
@@ -961,8 +977,8 @@ class MapEvent {
 	getScene(lastScene) {
 		switch (this.type) {
 			case MapEvent.Battle:
-				// TEMP data until I have more stuff to load
-				return new BattleScene(lastScene, new TestBattle(), Party.getUnits());
+				// TEMP data until I can load via filename
+				return new BattleScene(lastScene, new TestBattle());
 
 			case MapEvent.Story:
 				alert("Watch a cutscene");
