@@ -19,7 +19,6 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	animation: fade-out 1s reverse; /*TEMP?*/
 }
 /*#endregion*/
 
@@ -29,6 +28,13 @@
 }
 .unselectable>.sprite {
 	filter: grayscale(100%);
+}
+
+.intro {
+	animation: fade-out 0.5s reverse backwards;
+}
+.outro {
+	animation: fade-out 0.5s forwards;
 }
 /*#endregion*/
 

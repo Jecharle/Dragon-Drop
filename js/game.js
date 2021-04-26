@@ -9,12 +9,14 @@ class Game {
 	static get scene() {
 		return this._scene;
 	}
-	static setScene(scene) {
+	static async setScene(scene) {
 		if (this._scene == scene) return;
 
 		if (this._scene) {
-			this.el.removeChild(this._scene.el);
 			this._scene.end();
+			this._scene.addTimedClass(550, "outro");
+			await this.asyncPause(500);
+			this.el.removeChild(this._scene.el);
 		}
 
 		this._scene = scene;
@@ -22,6 +24,7 @@ class Game {
 		if (this._scene) {
 			this.el.appendChild(this._scene.el);
 			this._scene.start();
+			this._scene.addTimedClass(550, "intro");
 		}
 	}
 
