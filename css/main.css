@@ -1,4 +1,4 @@
-/*#region Game window*/
+/*#region game window*/
 :root {
 	--game-w: 1024px;
 	--game-h: 768px;
@@ -20,9 +20,9 @@
 	justify-content: center;
 	align-items: center;
 }
-/*#endregion*/
+/*#endregion game window*/
 
-/*#region Common styles*/
+/*#region common styles*/
 .selectable, .viewable {
 	cursor: pointer;
 }
@@ -36,10 +36,10 @@
 .outro {
 	animation: fade-out 0.5s forwards;
 }
-/*#endregion*/
+/*#endregion common styles*/
 
-/*#region Battle Scene*/
-/*#region Battle Scene UI*/
+/*#region battle scene*/
+/*#region battle scene UI*/
 .nav-button {
 	display: inline-block;
 	font-size: 18px;
@@ -80,9 +80,9 @@
 	top: 24px;
 	right: 32px;
 }
-/*#endregion*/
+/*#endregion battle scene UI*/
 
-/*#region Skill list*/
+/*#region skill list*/
 .skill-list {
 	display: flex;
 	flex-flow: row wrap;
@@ -92,7 +92,7 @@
 	bottom: 0px;
 	width: 40%;
 }
-	/*#region Selected unit info*/
+	/*#region selected unit info*/
 	.unit-info {
 		position: relative;
 		height: var(--face-h);
@@ -127,10 +127,10 @@
 			display: block;
 			bottom: 130%;
 		}
-	/*#endregion*/
-/*#endregion*/
+	/*#endregion selected unit info*/
+/*#endregion skill list*/
 
-/*#region Skill base and info*/
+/*#region skill piece*/
 .skill {
 	width: var(--skill-w);
 	height: var(--skill-h);
@@ -176,7 +176,7 @@
 		position: absolute;
 	}
 
-	/*#region Skill states*/
+	/*#region skill states*/
 	.selectable.skill:hover, .skill.selected {
 		bottom: 4px;
 	}
@@ -186,9 +186,9 @@
 	.skill:hover .skill-description {
 		display: block;
 	}
-	/*#endregion*/
+	/*#endregion skill states*/
 
-	/*#region Skill icons*/
+	/*#region skill icons*/
 	.attack-skill>.sprite {
 		background-color: red;
 		border-radius: 25%;
@@ -205,10 +205,10 @@
 		background-color: cornflowerblue;
 		border-radius: 25%;
 	}
-	/*#endregion*/
-/*#endregion*/
+	/*#endregion skill icons*/
+/*#endregion skill piece*/
 
-/*#region Phase change & end screens*/
+/*#region phase change & end screens*/
 .phase-banner {
 	font-size: 40px;
 	font-weight: bold;
@@ -238,9 +238,9 @@
 	animation: end-screen 2s linear backwards;
 	animation-delay: 0.25s;
 }
-/*#endregion*/
+/*#endregion phase change & end screens*/
 
-/*#region Board structure*/
+/*#region board structure*/
 :root {
 	--square-size: 128px;
 
@@ -299,7 +299,7 @@
 		animation: fade-out 0.1s 0.5s reverse both;
 	}
 
-	/*#region Terrain types*/
+	/*#region terrain types*/
 	.square>.sprite {
 		position: absolute;
 		z-index: -2;
@@ -329,9 +329,9 @@
 			.rough:hover::before {
 				content: "Rough terrain costs 2 squares of movement to enter";
 			}
-	/*#endregion*/
+	/*#endregion terrain types*/
 
-	/*#region Square highlighting*/
+	/*#region range / area highlighting*/
 	.square>.sprite::after {
 		content: "";
 		position: absolute;
@@ -365,9 +365,9 @@
 		.invalid>.sprite::after {
 			opacity: 35%;
 		}
-	/*#endregion*/
+	/*#endregion range / area highlighting*/
 
-	/*#region Move path*/
+	/*#region move path*/
 	.square.move-path>.sprite::before {
 		content: "";
 		position: absolute;
@@ -392,7 +392,7 @@
 		.down>.sprite::before {
 			background-position: 0 calc(-3*var(--square-h));
 		}
-		/*#endregion*/
+		/*#endregion single direction*/
 		/*#region straight*/
 		.left.right>.sprite::before {
 			background-position: calc(-1*var(--square-w)) 0;
@@ -400,7 +400,7 @@
 		.up.down>.sprite::before {
 			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-h));
 		}
-		/*#endregion*/
+		/*#endregion straight*/
 		/*#region corners*/
 		.left.up>.sprite::before {
 			background-position: calc(-2*var(--square-w)) 0;
@@ -414,7 +414,7 @@
 		.down.left>.sprite::before {
 			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-h));
 		}
-		/*#endregion*/
+		/*#endregion corners*/
 		/*#region arrows*/
 		.left.move-end>.sprite::before {
 			background-position: calc(-3*var(--square-w)) 0;
@@ -428,11 +428,11 @@
 		.down.move-end>.sprite::before {
 			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-h));
 		}
-		/*#endregion*/
-	/*#endregion*/
-/*#endregion*/
+		/*#endregion arrows*/
+	/*#endregion move path*/
+/*#endregion board structure*/
 
-/*#region Unit*/
+/*#region unit*/
 .unit {
 	width: var(--unit-w);
 	height: var(--unit-h);
@@ -465,7 +465,7 @@
 		opacity: 40%;
 	}
 
-	/*#region Unit details*/
+	/*#region unit details*/
 	.lifebar {
 		position: absolute;
 		z-index: 2;
@@ -501,9 +501,9 @@
 		.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
 			visibility: visible;
 		}
-	/*#endregion*/
+	/*#endregion unit details*/
 
-	/*#region Unit states and motions*/
+	/*#region unit states and motions*/
 	.unit.x2 {
 		--unit-w: 128px;
 		--unit-h: 128px;
@@ -538,9 +538,9 @@
 		.dead::after {
 			animation: darken-and-fade 1s 0.2s both;
 		}
-	/*#endregion*/
+	/*#endregion unit states and motions*/
 
-	/*#region Unit skins*/
+	/*#region unit skins*/
 	.melee-unit>.sprite {
 		background-image: url("../img/testMeleeUnit.png");
 	}
@@ -572,11 +572,11 @@
 	.rock>.sprite {
 		background-image: url("../img/testObject.png");
 	}
-	/*#endregion*/
-/*#endregion*/
-/*#endregion*/
+	/*#endregion unit skins*/
+/*#endregion unit*/
+/*#endregion battle scene*/
 
-/*#region Map Scene*/
+/*#region map scene*/
 .scrolling-view {
 	position: absolute;
 	top: 50%;
@@ -657,9 +657,9 @@
 		background-position: 0px 0px;
 		background-image: url(../img/testMeleeUnit.png);
 	}
-/*#endregion*/
+/*#endregion map scene*/
 
-/*#region Sprite Effects*/
+/*#region sprite effects*/
 .sprite-effect {
 	width: var(--unit-w);
 	height: var(--unit-h);
@@ -679,7 +679,7 @@
 		background-repeat: no-repeat;
 	}
 
-	/*#region Sprite Effect skins*/
+	/*#region sprite effect skins*/
 	.test-attack-effect>.sprite {
 		background-image: url("../img/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));
@@ -700,10 +700,10 @@
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.4s both;
 	}
-	/*#endregion*/
-/*#endregion*/
+	/*#endregion sprite effect skins*/
+/*#endregion sprite effects*/
 
-/*#region Popup Text*/
+/*#region popup text*/
 .popup-text {
 	font-size: 24px;
 	font-weight: bold;
@@ -716,9 +716,9 @@
 	z-index: 4;
 	animation: rise-up 1s ease-out;
 }
-/*#endregion*/
+/*#endregion popup text*/
 
-/*#region Holding area for keyframes*/
+/*#region holding area for keyframes*/
 @keyframes sprite-animation {
 	from {
 		background-position-x: 0px;
@@ -804,4 +804,4 @@
 
 	}
 }
-/*#endregion*/
+/*#endregion holding area for keyframes*/
