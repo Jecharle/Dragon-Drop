@@ -832,7 +832,20 @@ class MapScene extends Scene {
 	}
 
 	_refreshUi() {
-		this._exploreButtonEl.innerText = "Start"; // TODO: Text changes by event type
+		switch (this._currentNode.event?.type) {
+			case MapEvent.Battle:
+				this._exploreButtonEl.innerText = "Fight";
+				break;
+			case MapEvent.Story:
+				this._exploreButtonEl.innerText = "View"; // TEMP?
+				break;
+			case MapEvent.Move:
+				this._exploreButtonEl.innerText = "Go";
+				break;
+			default:
+				this._exploreButtonEl.innerText = "Start";
+				break;
+		}
 
 		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
 		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
@@ -854,6 +867,8 @@ class MapScene extends Scene {
 
 		this.setDone();
 	}
+
+	// TODO: teleport a unit around the map without following a path
 
 	_exploreNode(node) {
 		if (!node || !node.canExplore) return false;
