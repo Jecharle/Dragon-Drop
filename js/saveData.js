@@ -18,18 +18,39 @@ class SaveData {
 	//#endregion mapEvent
 
 	//#region save / load
-	static _save(attribute) {
+	static _saveAttribute(attribute) {
 		var textData = JSON.stringify(this[attribute]);
-		localStorage.setItem(attribute, textData);
+		if (textData) {
+			localStorage.setItem(attribute, textData);
+		} else {
+			this._clearAttribute(attribute);
+		}
 	}
-	static _load(attribute) {
+	static _loadAttribute(attribute) {
 		var textData = localStorage.getItem(attribute);
 		if (textData) {
 			this[attribute] = JSON.parse(textData);
 		}
 	}
-	static _delete(attribute) {
+	static _clearAttribute(attribute) {
 		localStorage.removeItem(attribute);
 	}
+
+	static loadAll() {
+		this._loadAttribute('mapEvent');
+		this._loadAttribute('options');
+	}
+	static saveAll() {
+		this._saveAttribute('mapEvent');
+		this._saveAttribute('options');
+	}
+	/**
+	 * WARNING: THIS WILL IN FACT ERASE *ALL* SAVED PROGRESS AND SETTINGS
+	 */
+	static clearAll() {
+		localStorage.clear();
+	}
+
+	// TODO: Specific load/save functions for different groupings of data?
 	//#endregion save / load
 }

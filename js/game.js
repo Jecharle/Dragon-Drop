@@ -55,6 +55,8 @@ class Game {
 		this.el.classList.add('game-window');
 		document.body.appendChild(this.el);
 
+		//SaveData.loadAll(); // TEMP disabled for testing
+
 		// TEMP
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());

@@ -891,6 +891,9 @@ class MapScene extends Scene {
 		node.event?.setComplete();
 		this._map.revealAdjacent(node);
 		// TODO: Make this visually interesting? Animations, etc?
+		if (node.event?.saved) {
+			SaveData.saveAll(); // TEMP probably don't need to save everything here
+		}
 	}
 	//#endregion actions
 
@@ -934,7 +937,7 @@ class MapEvent {
 		this._repeatable = eventData.repeatable;
 
 		this._saveId = eventData.saveId;
-		this._complete = (this._saveId && SaveData.getEventClear(this._saveId));
+		this._complete = (this.saved && SaveData.getEventClear(this._saveId));
 	}
 
 	//#region event type
@@ -983,9 +986,13 @@ class MapEvent {
 		return !this.complete || this.repeatable;
 	}
 
+	get saved() {
+		return !!this._saveId;
+	}
+
 	setComplete() {
 		this._complete = true;
-		if (this._saveId) {
+		if (this.saved) {
 			SaveData.setEventClear(this._saveId);
 		}
 	}
