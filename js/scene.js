@@ -70,16 +70,12 @@ class Scene extends ElObj {
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
-	constructor(lastScene, sceneData, partyUnits) {
+	constructor(lastScene, sceneData) {
 		super(lastScene);
 		this._initTeams();
 		this._board = new Board(sceneData);
 
-		if (partyUnits) {
-			this._addParty(partyUnits);
-		} else {
-			this._addParty(Party.getUnits());
-		}
+		this._addParty(Party.getUnits());
 		this._addMapUnits(sceneData?.units);
 		this._addTurnLimit(sceneData);
 
