@@ -957,20 +957,24 @@ class MapPiece extends Piece {
 	}
 
 	//#region movement
-	async move(node) {
+	async move(node, skipPath) {
 		if (!node || this.node == node) return false;
 		
 		this.setParent(node.parent);
 		if (!this.parent.el.contains(this.el)) this.parent.el.appendChild(this.el);
 
+		var startNode = this.node;
 		this.node = node;
 		this.el.style.transform = this.node.screenPosition;
 		this.el.style.zIndex = this.node.screenZ;
 
-		if (node.path) {
-			var time = this.animateMovement(node.path);
-			await Game.asyncPause(time);
+		var time = 0;
+		if (skipPath && startNode) {
+			time = this.animateMovement([startNode]);
+		} else if (node.path) {
+			time = this.animateMovement(node.path);
 		}
+		await Game.asyncPause(time);
 
 		return true;
 	}

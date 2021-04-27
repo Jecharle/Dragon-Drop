@@ -853,13 +853,17 @@ class MapScene extends Scene {
 	}
 
 	//#region actions
-	async _movePiece(node) {
+	async _movePiece(node, skipPath) {
 		this.setBusy();
 		this.el.classList.add('hide-description');
 		
 		this._camera.focus(node);
-		this._camera.animateMove(node.path, 750, 150);
-		await this._piece.move(node);
+		if (skipPath) {
+			this._camera.animateMove([this._piece.node], 750, 150);
+		} else {
+			this._camera.animateMove(node.path, 750, 150);
+		}
+		await this._piece.move(node, skipPath);
 
 		this.setDone();
 	}
@@ -875,7 +879,7 @@ class MapScene extends Scene {
 		} else {
 			if (node.event.param && node.event.type == MapEvent.Move) {
 				var destination = this._map.getNode(node.event.param);
-				if (destination) this._movePiece(destination);
+				if (destination) this._movePiece(destination, true);
 			}
 			this._completeNode(node);
 			this.refresh();
@@ -1107,6 +1111,7 @@ class ScrollingView extends ElObj {
 		if (!path || !speed) return 0;
 		var keyframes = [{}];
 		path.forEach(position => {
+			if (!position) return;
 			var x = this._clampX(position.screenX);
 			var y = this._clampY(position.screenY);
 			keyframes.unshift({
