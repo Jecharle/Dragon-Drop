@@ -853,17 +853,17 @@ class MapScene extends Scene {
 	}
 
 	//#region actions
-	async _movePiece(node, skipPath) {
+	async _movePiece(node) {
 		this.setBusy();
 		this.el.classList.add('hide-description');
 		
 		this._camera.focus(node);
-		if (skipPath) {
-			this._camera.animateMove([this._piece.node], 750, 150);
-		} else {
+		if (node.path) {
 			this._camera.animateMove(node.path, 750, 150);
+		} else if (this._piece.node) {
+			this._camera.animateMove([this._piece.node], 750, 150);
 		}
-		await this._piece.move(node, skipPath);
+		await this._piece.move(node);
 
 		this.setDone();
 	}
@@ -879,7 +879,7 @@ class MapScene extends Scene {
 		} else {
 			if (node.event.param && node.event.type == MapEvent.Move) {
 				var destination = this._map.getNode(node.event.param);
-				if (destination) this._movePiece(destination, true);
+				if (destination) this._movePiece(destination);
 			}
 			this._completeNode(node);
 			this.refresh();

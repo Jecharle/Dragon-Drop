@@ -957,7 +957,7 @@ class MapPiece extends Piece {
 	}
 
 	//#region movement
-	async move(node, skipPath) {
+	async move(node) {
 		if (!node || this.node == node) return false;
 		
 		this.setParent(node.parent);
@@ -969,10 +969,10 @@ class MapPiece extends Piece {
 		this.el.style.zIndex = this.node.screenZ;
 
 		var time = 0;
-		if (skipPath && startNode) {
-			time = this.animateMovement([startNode]);
-		} else if (node.path) {
+		if (node.path) {
 			time = this.animateMovement(node.path);
+		} else if (startNode) {
+			time = this.animateMovement([startNode]);
 		}
 		await Game.asyncPause(time);
 
