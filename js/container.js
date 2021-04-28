@@ -792,9 +792,8 @@ class OverworldMap extends Container {
 	connect(id1, id2, oneWay) {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
-		if (node1 && node2) {
-			// TODO: Avoid duplicate connections
-			var newEdge = new Line(node1, node2, oneWay);
+		if (node1 && node2 && !this._isConnected(node1, node2)) {
+			var newEdge = new Edge(node1, node2, oneWay);
 			this.edges.push(newEdge);
 			this.el.appendChild(newEdge.el);
 			return true;
@@ -805,10 +804,18 @@ class OverworldMap extends Container {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
 		if (node1 && node2) {
-			// TODO: Find and remove any edges matching both nodes
+			for (var i = 0; i < this.edges.length; i++) {
+				if (this.edges[i].otherNode(node1) == node2) {
+					this.edges.splice(i, 1);
+					i--;
+				}
+			}
 			return true;
 		}
 		return false;
+	}
+	_isConnected(start, end) {
+		return this.edges.find(edge => edge.otherNode(start) == end);
 	}
 	//#endregion node setup
 
@@ -995,7 +1002,7 @@ class MapNode extends Position {
 /***************************************************
  Map Node -> Line
 ***************************************************/
-class Line extends ElObj {
+class Edge extends ElObj {
 	constructor(startPosition, endPosition, oneWay) {
 		super();
 		this._start = startPosition;
