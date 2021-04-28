@@ -765,7 +765,7 @@ class OverworldMap extends Container {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
 				var newEvent = new MapEvent(data);
-				if (newEvent.complete) this.revealAdjacent(node);
+				if (newEvent.complete) this.revealAdjacent(node, true);
 				node.setEvent(newEvent);
 			}
 		});
@@ -817,13 +817,28 @@ class OverworldMap extends Container {
 	_isConnected(start, end) {
 		return this.edges.find(edge => edge.otherNode(start) == end);
 	}
+	_allEdges(node) {
+		return this.edges.filter(edge => edge.start == node || edge.end == node);
+	}
 	//#endregion node setup
 
-	revealAdjacent(node) {
-		node.adjacent.forEach(adjacent => {
-			adjacent._show(); // TEMP
-		});
-		// TODO: Option to animate this?
+	async revealAdjacent(node, noAnimation) {
+		var adjacents = node.adjacent;
+		for (var i = 0; i < adjacents.length; i++) {
+			var adjacent = adjacents[i];
+			if (adjacent.hidden) {
+				adjacent.show();
+				if (!noAnimation) {
+					adjacent.addTimedClass(1000, 'reveal');
+					this._allEdges(adjacent).forEach(edge => {
+						if (edge.hidden) return;
+						edge.refresh();
+						edge.addTimedClass(2000, 'reveal');
+					});
+					await Game.asyncPause(1000);
+				}
+			}
+		}
 	}
 
 	//#region move range
@@ -986,7 +1001,7 @@ class MapNode extends Position {
 	}
 	//#endregion show/hide
 
-	//#region edges
+	//#region connections
 	get adjacent() {
 		if (!this.parent?.edges) return [];
 		var adjacent = [];
@@ -996,7 +1011,7 @@ class MapNode extends Position {
 		})
 		return adjacent;
 	}
-	//#endregion edges
+	//#endregion connections
 }
 
 /***************************************************
@@ -1017,6 +1032,10 @@ class Edge extends ElObj {
 	get end() { return this._end; }
 	get oneWay() { return this._oneWay; }
 
+	get hidden() {
+		return (this._end.hidden || this._start.hidden);
+	}
+
 	otherNode(node) {
 		if (node == this.start) return this.end;
 		else if (node == this.end && !this._oneWay) return this.start;
@@ -1028,8 +1047,8 @@ class Edge extends ElObj {
 		var dy = (this._end.screenY - this._start.screenY);
 		var width = Math.sqrt(dx*dx + dy*dy);
 		var angle = Math.atan2(dy, dx)*180/Math.PI;
-		var screenX = this._start.screenX + dx/2;
-		var screenY = this._start.screenY + dy/2;
+		var screenX = this._start.screenX;
+		var screenY = this._start.screenY;
 
 		this.el.style.transform = `translate(${screenX}px, ${screenY}px) rotate(${angle}deg)`;
 		this.el.style.width = `${width}px`;

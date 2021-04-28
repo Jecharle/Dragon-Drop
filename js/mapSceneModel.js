@@ -51,10 +51,10 @@ class TestMap extends MapSceneModel { // TEMP
 
 		this._nodes.push(
 			{id: 'start', x: 4*64, y: 5*64},
-			{id: 'second', x: 4*64, y: 8*64},
+			{id: 'second', x: 4*64, y: 8*64, hidden: true},
 			{id: 'fork', x: 7*64, y: 7*64},
 			{id: 'tail', x: 9*64, y: 9*64, hidden: true},
-			{id: 'last', x: 8*64, y: 4*64},
+			{id: 'last', x: 8*64, y: 4*64, hidden: true},
 
 			{id: 'island', x: 12*64, y: 12*64},
 			{id: 'island2', x: 11*64, y: 13*64},
@@ -70,6 +70,13 @@ class TestMap extends MapSceneModel { // TEMP
 		);
 
 		this._events.push(
+			{
+				node: 'start',
+				type: MapEvent.Story,
+				name: "Story Test",
+				description: "This will contain some text to test out cutscenes\
+				<br/>Let's go multiple lines!",
+			},
 			{
 				node: 'fork',
 				type: MapEvent.Battle,
@@ -93,13 +100,6 @@ class TestMap extends MapSceneModel { // TEMP
 				repeatable: true,
 				name: "Ferry",
 				description: "The ferry will take you back to the mainland"
-			},
-			{
-				node: 'island2',
-				type: MapEvent.Story,
-				name: "Story Test",
-				description: "This will contain some text to test out cutscenes\
-				<br/>Let's go multiple lines!",
 			},
 		)
 	}
