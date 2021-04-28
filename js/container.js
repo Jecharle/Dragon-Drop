@@ -791,18 +791,19 @@ class OverworldMap extends Container {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
 		if (node1 && node2) {
-			node1.addEdge(node2);
-			if (!oneWay) node2.addEdge(node1);
+			node1.addConnection(node2);
+			if (!oneWay) node2.addConnection(node1);
+			node1.addLine(node2); // TODO: Consolidate this
 			return true;
 		}
 		return false;
 	}
 	disconnect(id1, id2) {
-		var node1 = this.getNode(id1.toLowerCase());
-		var node2 = this.getNode(id2.toLowerCase());
+		var node1 = this.getNode(id1);
+		var node2 = this.getNode(id2);
 		if (node1 && node2) {
-			node1.removeEdge(node2);
-			node2.removeEdge(node1);
+			node1.removeConnection(node2);
+			node2.removeConnection(node1);
 			return true;
 		}
 		return false;
@@ -810,7 +811,7 @@ class OverworldMap extends Container {
 	//#endregion node setup
 
 	revealAdjacent(node) {
-		node.edges.forEach(adjacent => {
+		node.adjacent.forEach(adjacent => {
 			adjacent._show(); // TEMP
 		});
 		// TODO: Option to animate this?
@@ -827,7 +828,7 @@ class OverworldMap extends Container {
 			var movesLeft = newEdge.movesLeft-1;
 			var path = [newEdge].concat(newEdge.path);
 
-			newEdge.edges.forEach(node => {
+			newEdge.adjacent.forEach(node => {
 				if (node.hidden || node.inRange) return;
 				this._paintReachableNode(node, movesLeft, path);
 				if (movesLeft > 0) edges.unshift(node);
@@ -904,6 +905,7 @@ class MapNode extends Position {
 		this._y = y;
 		this._parent = parent;
 
+		this._adjacent = [];
 		this._edges = [];
 		this._event = null;
 		this.inRange = false;
@@ -945,6 +947,7 @@ class MapNode extends Position {
 		super.refresh();
 		this.el.classList.toggle('incomplete', this.incomplete);
 		this.el.classList.toggle('repeatable', this.repeatable);
+		this._edges.forEach(edge => edge.refresh());
 	}
 
 	//#region position
@@ -977,16 +980,64 @@ class MapNode extends Position {
 	//#endregion show/hide
 
 	//#region edges
-	get edges() {
-		return this._edges;
+	get adjacent() {
+		return this._adjacent;
 	}
-	addEdge(node) {
-		if (!node || this._edges.includes(node)) return;
-		this._edges.push(node);
+	addConnection(node) {
+		if (!node || this._adjacent.includes(node)) return;
+		this._adjacent.push(node);
 	}
-	removeEdge(node) {
-		var nodeIndex = this._edges.indexOf(node);
-		if (nodeIndex >= 0) this._edges.splice(nodeIndex, 1);
+	removeConnection(node) {
+		var nodeIndex = this._adjacent.indexOf(node);
+		if (nodeIndex >= 0) {
+			this._adjacent.splice(nodeIndex, 1);
+			
+		}
 	}
+	// TODO: Consolidate lines/connections/etc so it all runs off one list
+	// TODO: Also, move the visible lines directly onto the board, so they can be layered properly
+	addLine(node) {
+		if (!node) return;
+		var newEdge = new Line(this, node);
+		this._edges.push(newEdge);
+		this.parent.el.appendChild(newEdge.el);
+	}
+	/*
+		TODO: Remove old lines when removing connections, as well
+		var removedEdges = this._edges.splice(nodeIndex, 1);
+		this.el.removeChild(removedEdges[0].el);
+	*/
 	//#endregion edges
+}
+
+/***************************************************
+ Map Node -> Line
+***************************************************/
+class Line extends ElObj {
+	constructor(startPosition, endPosition) {
+		super();
+		this._start = startPosition;
+		this._end = endPosition;
+		this.refresh();
+	}
+
+	get elClass() { return 'line'; }
+
+	get start() { return this._start; }
+	get end() { return this._end; }
+
+	refresh() {
+		var dx = (this._end.screenX - this._start.screenX);
+		var dy = (this._end.screenY - this._start.screenY);
+		var width = Math.sqrt(dx*dx + dy*dy);
+		var angle = Math.atan2(dy, dx)*180/Math.PI;
+		var screenX = this._start.screenX + dx/2;
+		var screenY = this._start.screenY + dy/2;
+
+		this.el.style.transform = `translate(${screenX}px, ${screenY}px) rotate(${angle}deg)`;
+		this.el.style.width = `${width}px`;
+
+		if (this._end.hidden || this._start.hidden) this._hide();
+		else this._show();
+	}
 }

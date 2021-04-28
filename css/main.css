@@ -637,6 +637,14 @@
 		border: 4px solid yellow;
 	}
 
+.overworld-map .line {
+	position: absolute;
+	z-index: -1;
+	border: 2px solid black;
+	pointer-events: none;
+	bottom: 16px;
+}
+
 .map-piece {
 	width: 64px;
 	height: 64px;
