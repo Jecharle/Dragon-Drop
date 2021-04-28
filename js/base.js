@@ -7,7 +7,6 @@ class ElObj {
 		this.el = document.createElement(this.elType);
 		if (this.elClass) this.el.classList.add(this.elClass);
 		this.el.obj = this;
-		this._hidden = false;
 	}
 
 	get elType() {
@@ -30,15 +29,10 @@ class ElObj {
 		this._style = value;
 	}
 
-	get hidden() {
-		return !!this._hidden;
-	}
 	_hide() {
-		this._hidden = true;
 		this.el.style.visibility = "hidden";
 	}
 	_show() {
-		this._hidden = false;
 		this.el.style.visibility = "visible";
 	}
 

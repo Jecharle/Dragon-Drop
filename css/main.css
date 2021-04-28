@@ -640,7 +640,8 @@
 .overworld-map .line {
 	position: absolute;
 	z-index: -1;
-	border: 2px solid black;
+	height: 2px;
+	background-color: black;
 	pointer-events: none;
 	bottom: 16px;
 }

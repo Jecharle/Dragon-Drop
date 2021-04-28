@@ -723,6 +723,7 @@ class OverworldMap extends Container {
 	constructor(mapData) {
 		super();
 		this.nodes = [];
+		this.edges = [];
 
 		if (mapData) {
 			this._loadNodes(mapData.nodes);
@@ -742,6 +743,7 @@ class OverworldMap extends Container {
 
 	refresh() {
 		this.nodes.forEach(node => node.refresh());
+		this.edges.forEach(edge => edge.refresh());
 	}
 
 	//#region loading
@@ -791,9 +793,10 @@ class OverworldMap extends Container {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
 		if (node1 && node2) {
-			node1.addConnection(node2);
-			if (!oneWay) node2.addConnection(node1);
-			node1.addLine(node2); // TODO: Consolidate this
+			// TODO: Avoid duplicate connections
+			var newEdge = new Line(node1, node2, oneWay);
+			this.edges.push(newEdge);
+			this.el.appendChild(newEdge.el);
 			return true;
 		}
 		return false;
@@ -802,8 +805,7 @@ class OverworldMap extends Container {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
 		if (node1 && node2) {
-			node1.removeConnection(node2);
-			node2.removeConnection(node1);
+			// TODO: Find and remove any edges matching both nodes
 			return true;
 		}
 		return false;
@@ -906,7 +908,6 @@ class MapNode extends Position {
 		this._parent = parent;
 
 		this._adjacent = [];
-		this._edges = [];
 		this._event = null;
 		this.inRange = false;
 		this.movesLeft = null;
@@ -947,7 +948,6 @@ class MapNode extends Position {
 		super.refresh();
 		this.el.classList.toggle('incomplete', this.incomplete);
 		this.el.classList.toggle('repeatable', this.repeatable);
-		this._edges.forEach(edge => edge.refresh());
 	}
 
 	//#region position
@@ -966,7 +966,7 @@ class MapNode extends Position {
 	//#endregion position
 
 	//#region show/hide
-	get hidder() {
+	get hidden() {
 		return this._hidden;
 	}
 	hide() {
@@ -981,32 +981,14 @@ class MapNode extends Position {
 
 	//#region edges
 	get adjacent() {
-		return this._adjacent;
+		if (!this.parent?.edges) return [];
+		var adjacent = [];
+		this.parent.edges.forEach(edge => {
+			var otherNode = edge.otherNode(this);
+			if (otherNode) adjacent.push(otherNode);
+		})
+		return adjacent;
 	}
-	addConnection(node) {
-		if (!node || this._adjacent.includes(node)) return;
-		this._adjacent.push(node);
-	}
-	removeConnection(node) {
-		var nodeIndex = this._adjacent.indexOf(node);
-		if (nodeIndex >= 0) {
-			this._adjacent.splice(nodeIndex, 1);
-			
-		}
-	}
-	// TODO: Consolidate lines/connections/etc so it all runs off one list
-	// TODO: Also, move the visible lines directly onto the board, so they can be layered properly
-	addLine(node) {
-		if (!node) return;
-		var newEdge = new Line(this, node);
-		this._edges.push(newEdge);
-		this.parent.el.appendChild(newEdge.el);
-	}
-	/*
-		TODO: Remove old lines when removing connections, as well
-		var removedEdges = this._edges.splice(nodeIndex, 1);
-		this.el.removeChild(removedEdges[0].el);
-	*/
 	//#endregion edges
 }
 
