@@ -1014,10 +1014,11 @@ class MapNode extends Position {
  Map Node -> Line
 ***************************************************/
 class Line extends ElObj {
-	constructor(startPosition, endPosition) {
+	constructor(startPosition, endPosition, oneWay) {
 		super();
 		this._start = startPosition;
 		this._end = endPosition;
+		this._oneWay = !!oneWay;
 		this.refresh();
 	}
 
@@ -1025,6 +1026,13 @@ class Line extends ElObj {
 
 	get start() { return this._start; }
 	get end() { return this._end; }
+	get oneWay() { return this._oneWay; }
+
+	otherNode(node) {
+		if (node == this.start) return this.end;
+		else if (node == this.end && !this._oneWay) return this.start;
+		else return null;
+	}
 
 	refresh() {
 		var dx = (this._end.screenX - this._start.screenX);
