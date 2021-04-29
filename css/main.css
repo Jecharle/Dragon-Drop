@@ -590,7 +590,7 @@
 	border: 1px solid black;
 }
 	.deploy-list::before {
-		content: "Reserves";
+		content: "Party";
 		position: absolute;
 		top: -1.5em;
 		left: 0px;
@@ -602,7 +602,6 @@
 		margin-top: 4px;
 	}
 /*#endregion deploy list*/
-
 /*#endregion battle scene*/
 
 /* TODO: Section up and organize the map scene styles */

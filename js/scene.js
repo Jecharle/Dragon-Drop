@@ -218,7 +218,7 @@ class BattleScene extends Scene {
 
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Formation";
+			this._turnTitleEl.innerText = "Deployment";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
 		} else if (this._maxTurns) {
@@ -235,7 +235,7 @@ class BattleScene extends Scene {
 		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
 
 		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
-			this._undoButtonEl.innerText = "Back";
+			this._undoButtonEl.innerText = "Redeploy";
 		} else {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
