@@ -99,8 +99,8 @@ class Board extends Container {
 		return 'board';
 	}
 
-	get w() { return 8; }
-	get h() { return 8; }
+	get w() { return 10; }
+	get h() { return 10; }
 
 	//#region setup
 	_loadTerrain(terrainData) {
@@ -511,6 +511,18 @@ class Square extends Position {
 		return 'square';
 	}
 
+	//#region static position utility
+	static screenX(x, y, _z) {
+		return Math.floor(48 * (x - y));
+	}
+	static screenY(x, y, z) {
+		return Math.floor(24 * (x + y - z));
+	}
+	static screenZ(x, y, z) {
+		return Math.floor(24 * (x + y + z));
+	}
+	//#endregion static position utility
+
 	//#region position
 	get x() { return this._x; }
 	get y() { return this._y; }
@@ -518,16 +530,6 @@ class Square extends Position {
 	set z(value) {
 		this._z = value;
 		this.refresh();
-	}
-
-	static screenX(x, y, _z) {
-		return Math.floor(64 * (x - y));
-	}
-	static screenY(x, y, z) {
-		return Math.floor(32 * (x + y - z));
-	}
-	static screenZ(x, y, z) {
-		return Math.floor(32 * (x + y + z));
 	}
 
 	get screenX() {

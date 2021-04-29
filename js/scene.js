@@ -218,7 +218,7 @@ class BattleScene extends Scene {
 
 	_refreshUi() {
 		if (this._phase == BattleScene.DeployPhase) {
-			this._turnTitleEl.innerText = "Reposition";
+			this._turnTitleEl.innerText = "Formation";
 		} else if (this._maxTurns && this._turn >= this._maxTurns) {
 			this._turnTitleEl.innerText = "Last turn";
 		} else if (this._maxTurns) {
@@ -770,7 +770,7 @@ class MapScene extends Scene {
 		} else {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
-		this._camera.setViewSize(1024, 768); // TEMP, until I can pull the resolution in natively
+		this._camera.setViewSize(1024, 576); // TEMP, until I can pull the resolution in natively
 	}
 
 	start() {

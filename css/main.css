@@ -1,7 +1,7 @@
 /*#region game window*/
 :root {
 	--game-w: 1024px;
-	--game-h: 768px;
+	--game-h: 576px;
 }
 
 .game-window {
@@ -77,8 +77,8 @@
 .turn-title {
 	font-size: 24px;
 	position: absolute;
-	top: 24px;
-	right: 32px;
+	top: 32px;
+	right: 64px;
 }
 /*#endregion battle scene UI*/
 
@@ -167,6 +167,7 @@
 			border-width: 5px;
 			border-style: solid;
 			border-color: black transparent transparent transparent;
+			pointer-events: none;
 		}
 	.cooldown-label {
 		font-size: 24px;
@@ -244,9 +245,9 @@
 :root {
 	--square-size: 128px;
 
-	--square-w: 128px;
-	--square-h: 64px;
-	--square-total-h: 128px;
+	--square-w: 96px;
+	--square-h: 48px;
+	--square-total-h: 96px;
 
 	--unit-w: 64px;	
 	--unit-h: 64px;
@@ -263,7 +264,7 @@
 	display: flex;
 	justify-content: center;
 	position: absolute;
-	top: 96px;
+	top: 24px;
 	z-index: 0;
 }
 	.square {
@@ -292,7 +293,7 @@
 		z-index: 2;
 		width: max-content;
 		height: max-content;
-		left: 0%;
+		left: 0;
 		bottom: 110%;
 		border-radius: 4px;
 		padding: 5px;
@@ -438,7 +439,7 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	top: -12px;
+	bottom: calc(8px - var(--square-h));
 	display: flex;
 	justify-content: center;
 }
@@ -578,18 +579,26 @@
 /*#region deploy list*/
 .deploy-list {
 	position: absolute;
-	width: var(--unit-w);
-	height: calc(var(--unit-h)*7);
+	width: calc(var(--unit-w)*3);
+	height: calc(var(--unit-h)*2);
 	left: 12px;
+	bottom: 12px;
 	display: flex;
-	flex-flow: column;
+	flex-flow: row wrap;
 	justify-content: flex-start;
 	background-color: lightgray;
 	border: 1px solid black;
 }
+	.deploy-list::before {
+		content: "Reserves";
+		position: absolute;
+		top: -1.5em;
+		left: 0px;
+		font-weight: bold;
+	}
 	.deploy-list .unit {
 		position: relative;
-		top: 0px;
+		bottom: 0px;
 		margin-top: 4px;
 	}
 /*#endregion deploy list*/

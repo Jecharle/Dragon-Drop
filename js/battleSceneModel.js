@@ -45,32 +45,30 @@ class TestBattle extends BattleSceneModel { // TEMP
 		super();
 
 		this._deployment.push(
-			{x: 2, y: 5},
-			{x: 3, y: 5},
-			{x: 4, y: 5},
-			{x: 5, y: 5}
+			{x: 3, y: 6},
+			{x: 4, y: 6},
+			{x: 5, y: 6},
+			{x: 6, y: 6}
 		);
 
 		this._terrain.push(
-			{type: Square.Wall, x: 1, y: 4},
-			{type: Square.Rough, x: 2, y: 4},
-			{type: Square.Wall, x: 3, y: 4},
-			{type: Square.Pit, x: 4, y: 4},
-			{type: Square.Cover, x: 5, y: 4}
+			{type: Square.Wall, x: 2, y: 5},
+			{type: Square.Rough, x: 3, y: 5},
+			{type: Square.Wall, x: 4, y: 5},
+			{type: Square.Pit, x: 5, y: 5},
+			{type: Square.Cover, x: 6, y: 5}
 		);
 
 		this._units.push(
-			{turn: 0, type: TestEnemyUnit, x: 3, y: 3, enemy: true},
+			{turn: 0, type: TestEnemyUnit, x: 4, y: 4, enemy: true},
 
 			// reinforcements
-			{turn: 1, type: TestEnemyUnit, x: 4, y: 3, enemy: true},
-			{turn: 1, type: TestEnemyUnit, x: 4, y: 3, enemy: true},
-			{turn: 2, type: TestEnemyUnit, x: 5, y: 3, enemy: true}
+			{turn: 1, type: TestEnemyUnit, x: 5, y: 4, enemy: true},
+			{turn: 1, type: TestEnemyUnit, x: 5, y: 4, enemy: true},
+			{turn: 2, type: TestEnemyUnit, x: 6, y: 4, enemy: true}
 		);
 
 		// must wait until last reinforcements have appeared
-		//this._minTurns = 3;
-		this._maxTurns = 1;
-		this._defaultVictory = true;
+		this._minTurns = 3;
 	}
 }
