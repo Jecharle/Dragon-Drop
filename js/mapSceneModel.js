@@ -51,7 +51,7 @@ class TestMap extends MapSceneModel { // TEMP
 
 		this._nodes.push(
 			{id: 'start', x: 4*64, y: 5*64},
-			{id: 'second', x: 4*64, y: 8*64, hidden: true},
+			{id: 'second', x: 4*64, y: 8*64},
 			{id: 'fork', x: 7*64, y: 7*64},
 			{id: 'tail', x: 9*64, y: 9*64, hidden: true},
 			{id: 'last', x: 8*64, y: 4*64, hidden: true},
@@ -71,14 +71,14 @@ class TestMap extends MapSceneModel { // TEMP
 
 		this._events.push(
 			{
-				node: 'start',
+				node: 'fork',
 				type: MapEvent.Story,
 				name: "Story Test",
 				description: "This will contain some text to test out cutscenes\
 				<br/>Let's go multiple lines!",
 			},
 			{
-				node: 'fork',
+				node: 'start',
 				type: MapEvent.Battle,
 				repeatable: true,
 				name: "Battle Test",

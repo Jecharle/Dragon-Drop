@@ -84,7 +84,7 @@ class TestPullSkill extends TestAttackSkill {
 
 	_startEffects(target, _squares, _units) {
 		this.user.addTimedClass(200, 'attack');
-		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
+		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square, SpriteEffect.Return);
 		return 200;
 	}
 
