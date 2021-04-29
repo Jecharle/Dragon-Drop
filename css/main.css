@@ -579,6 +579,7 @@
 /*#region deploy list*/
 .deploy-list {
 	position: absolute;
+	z-index: 0;
 	width: calc(var(--unit-w)*3);
 	height: calc(var(--unit-h)*2);
 	left: 12px;
@@ -586,8 +587,9 @@
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: flex-start;
-	background-color: lightgray;
-	border: 1px solid black;
+	background-color: white;
+	border: 2px solid black;
+	border-radius: 8px;
 }
 	.deploy-list::before {
 		content: "Party";
@@ -599,7 +601,7 @@
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0px;
-		margin-top: 4px;
+		margin-top: 2px;
 	}
 /*#endregion deploy list*/
 /*#endregion battle scene*/
