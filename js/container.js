@@ -7,8 +7,14 @@ class Container extends ElObj {
 	constructor() {
 		super();
 		this.pieces = [];
+
+		this.el.onclick = this._click;
+		this.el.ondrop = this._drop;
+		this.el.onmousemove = this._mouseOver;
+		this.el.ondragenter = this._mouseOver;
 	}
 
+	//#region piece list
 	addPiece(piece) {
 		if (!piece) return false;
 		if (piece.parent && piece.parent != this) return false;
@@ -28,6 +34,16 @@ class Container extends ElObj {
 
 		return true;
 	}
+	//#endregion piece list
+
+	//#region input events
+	_allowDrop(ev) {
+		ev.preventDefault();
+	}
+	_drop(ev) { }
+	_click(ev) { }
+	_mouseOver(ev) { }
+	//#endregion input events
 };
 
 /***************************************************
@@ -77,11 +93,6 @@ class Board extends Container {
 		if (sceneData) this._loadDeployArea(sceneData.deployment);
 
 		this.squaresInRange = [];
-
-		this.el.onclick = this._click;
-		this.el.ondrop = this._drop;
-		this.el.onmousemove = this._mouseOver;
-		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {
@@ -213,6 +224,8 @@ class Board extends Container {
 		if (super.removePiece(piece)) {
 			this._fillPiece(null, piece.square, piece.size);
 			piece.square = null;
+			piece.el.style.transform = "";
+			piece.el.style.zIndex = "";
 			return true;
 		}
 		return false;
@@ -431,8 +444,8 @@ class Board extends Container {
 		});
 	}
 	showDeploySwap(unit, target) {
-		if (!unit || !unit.square) return;
-		unit.square.el.classList.add('selected');
+		if (!unit) return;
+		if (unit.square) unit.square.el.classList.add('selected');
 		if (target) target.el.classList.add('selected');
 	}
 	clearTargeting() {
@@ -444,9 +457,6 @@ class Board extends Container {
 	//#endregion highlighting targets
 
 	//#region input events
-	_allowDrop(ev) {
-		ev.preventDefault();
-	}
 	_drop(ev) {
 		ev.preventDefault();
 		var dragElId = ev.dataTransfer.getData("piece");
@@ -625,19 +635,54 @@ class Square extends Position {
 };
 
 /***************************************************
+ Unit list
+***************************************************/
+class DeployUnitList extends Container {
+	constructor(unitList, team) {
+		super();
+		if (unitList) unitList.forEach(unit => {
+			unit.setParent(this);
+			if (team) unit.setTeam(team);
+		});
+		this.el.ondragover = this._allowDrop;
+	}
+
+	addPiece(piece) {
+		super.addPiece(piece);
+		this.el.appendChild(piece.el);
+	}
+
+	get elClass() {
+		return 'deploy-list';
+	}
+
+	hide() {
+		this._hide();
+	}
+	show() {
+		this._show();
+	}
+	// TODO: Allow board units to be dragged back on
+}
+
+/***************************************************
  Skill list
 ***************************************************/
 class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
-		this.el.classList.add('skill-list');
 		this._hide();
 
 		this._userInfo = new UnitInfo();
 		this.el.appendChild(this._userInfo.el);
 	}
 
+	get elClass() {
+		return 'skill-list';
+	}
+
+	//#region list management
 	setUser(user) {
 		this._clearSkills();
 		this._user = user;
@@ -664,6 +709,7 @@ class SkillList extends Container {
 	_clearSkills() {
 		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
 	}
+	//#endregion list management
 }
 
 /***************************************************
@@ -694,6 +740,7 @@ class UnitInfo extends ElObj {
 		return 'unit-info';
 	}
 
+	//#region unit
 	get unit() {
 		return this._unit;
 	}
@@ -714,6 +761,7 @@ class UnitInfo extends ElObj {
 			this._tooltip.value = "";
 		}
 	}
+	//#endregion unit
 }
 
 /***************************************************
@@ -730,11 +778,6 @@ class OverworldMap extends Container {
 			this._loadConnections(mapData.connections);
 			this._loadEvents(mapData.events);
 		}
-
-		this.el.onclick = this._click;
-		this.el.ondrop = this._drop;
-		this.el.onmousemove = this._mouseOver;
-		this.el.ondragenter = this._mouseOver;
 	}
 
 	get elClass() {

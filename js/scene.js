@@ -75,10 +75,10 @@ class BattleScene extends Scene {
 		this._initTeams();
 		this._board = new Board(sceneData);
 
-		this._addParty(Party.getUnits());
 		this._addMapUnits(sceneData?.units);
 		this._addTurnLimit(sceneData);
 
+		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
 		this._undoButtonEl = this._createUndoButton();
@@ -142,6 +142,7 @@ class BattleScene extends Scene {
 
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
+		this.el.appendChild(this._deployList.el);
 	}
 	//#endregion ui setup
 
@@ -152,15 +153,6 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 	}
 
-	_addParty(partyUnits) {
-		if (!partyUnits) return;
-
-		partyUnits.forEach((piece, index) => {
-			var square = this._board.deployArea[index];
-			if (square) this._board.movePiece(piece, square);
-			piece.setTeam(this.playerTeam);
-		});
-	}
 	_addMapUnits(unitData) {
 		if (!unitData) return;
 
@@ -240,7 +232,7 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.disabled = !!this._autoPhase;
+		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
 
 		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
 			this._undoButtonEl.innerText = "Back";
@@ -261,6 +253,7 @@ class BattleScene extends Scene {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
+		this._deployList.show();
 
 		this._deselectSkill();
 		this._deselectUnit();
@@ -279,6 +272,7 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		switch (this._phase) {
 			case BattleScene.DeployPhase:
+				this._deployList.hide();
 				this._phase = BattleScene.PlayerPhase;
 				this._canRedeploy = true;
 				this._showPhaseBanner("Battle Start");
@@ -417,9 +411,12 @@ class BattleScene extends Scene {
 		else return null;
 	}
 	_swapDeploySquares(piece, target) {
-		if (target.piece) {
+		if (target.piece && piece.square) {
 			this._board.swapPieces(piece, target.piece);
-		} else {
+		} else if (target.piece) {
+			target.piece.setParent(piece.parent);
+			this._board.movePiece(piece, target);
+	 	} else {
 			this._board.movePiece(piece, target);
 		}
 		this._deselectUnit();
@@ -509,6 +506,8 @@ class BattleScene extends Scene {
 					this._deselectUnit();
 				} else if (piece.square) {
 					this.positionEvent(piece.square);
+				} else if (!this._unit.square) { // selecting undeployed units
+					this._selectUnit(piece);
 				}
 			}
 		} else { // non-deploy phase
@@ -758,6 +757,7 @@ class MapScene extends Scene {
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
+		// TODO: Pack this away into a method
 		this._camera.el.appendChild(this._map.el);
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._exploreButtonEl);

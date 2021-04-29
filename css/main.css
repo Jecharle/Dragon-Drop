@@ -574,8 +574,29 @@
 	}
 	/*#endregion unit skins*/
 /*#endregion unit*/
+
+/*#region deploy list*/
+.deploy-list {
+	position: absolute;
+	width: var(--unit-w);
+	height: calc(var(--unit-h)*7);
+	left: 12px;
+	display: flex;
+	flex-flow: column;
+	justify-content: flex-start;
+	background-color: lightgray;
+	border: 1px solid black;
+}
+	.deploy-list .unit {
+		position: relative;
+		top: 0px;
+		margin-top: 4px;
+	}
+/*#endregion deploy list*/
+
 /*#endregion battle scene*/
 
+/* TODO: Section up and organize the map scene styles */
 /*#region map scene*/
 .scrolling-view {
 	position: absolute;

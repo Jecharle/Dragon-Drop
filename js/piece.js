@@ -35,8 +35,8 @@ class Piece extends SpriteElObj {
 
 	//#region parent
 	setParent(container) {
-		if (this.parent && this.parent != container) {
-			this.parent.removePiece(this);
+		if (this._parent && this._parent != container) {
+			this._parent.removePiece(this);
 		}
 		this._parent = container;
 		if (container) container.addPiece(this);
