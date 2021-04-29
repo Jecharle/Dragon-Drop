@@ -51,10 +51,10 @@ class TestMap extends MapSceneModel { // TEMP
 
 		this._nodes.push(
 			{id: 'start', x: 4*64, y: 5*64},
-			{id: 'second', x: 4*64, y: 8*64},
+			{id: 'second', x: 4*64, y: 8*64, hidden: true},
 			{id: 'fork', x: 7*64, y: 7*64},
 			{id: 'tail', x: 9*64, y: 9*64, hidden: true},
-			{id: 'last', x: 8*64, y: 4*64, hidden: true},
+			{id: 'last', x: 8*64, y: 4*64},
 
 			{id: 'island', x: 12*64, y: 12*64},
 			{id: 'island2', x: 11*64, y: 13*64},
