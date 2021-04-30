@@ -27,13 +27,12 @@ class SceneModel {
 class MapSceneModel extends SceneModel {
 	constructor() {
 		super();
-		// TODO: Load from a file?
 		this.width = 0;
 		this.height = 0;
 		this.startNode = "";
 		this.nodes = []; // id, x, y, hidden
-		this.events = []; // node id, name, description, eventual effects?
-		this.connections = []; // node id 1, node id 2
+		this.events = []; // node id, name, description, filename, extra parameters
+		this.connections = []; // node id 1, node id 2, one-way
 		// TODO: background image?
 	}
 }
@@ -42,16 +41,36 @@ class MapSceneModel extends SceneModel {
  BattleSceneModel
 ***************************************************/
 class BattleSceneModel extends SceneModel {
-	constructor() {
+	constructor(data) {
 		super();
-		// TODO: Load from a file?
-		this.deployment = []; // x, y
-		this.terrain = []; // x, y, terrainType
-		this.units = []; // x, y, turn, pieceType, enemy/object
-		this.maxTurns = 0;
-		this.minTurns = 0;
-		this.defaultVictory = false;
+
+		this.maxTurns = data?.maxTurns || 0;
+		this.minTurns = data?.minTurns || 0;
+		this.defaultVictory = data?.defaultVictory || false;
+
+		// x, y
+		this.deployment = data?.deployment || [];
+
+		// x, y, type*
+		this.terrain = data?.terrain?.map(square => {
+			square.type = Square.parseTerrain(square.type);
+			return square;
+		}) || [];
+
+		// x, y, turn, type*, isEnemy?
+		this.units = data?.units?.map(unit => {
+			unit.type = UnitPiece.parseUnitType(unit.type);
+			return unit;
+		}) || [];
+
 		// TODO: Tileset?
+	}
+
+	static async load(filename) {
+		var data = await SceneModel.load("battles", filename);
+		// TODO: Handle errors while loading
+		var sceneModel = new BattleSceneModel(data);
+		return sceneModel;
 	}
 }
 
@@ -90,19 +109,20 @@ class TestMap extends MapSceneModel {
 
 		this.events = [
 			{
+				node: 'start',
+				type: MapEvent.Battle,
+				filename: "testBattle",
+				repeatable: true,
+				name: "Battle Test",
+				description: "This will link back to the battle scene test",
+				saveId: 'testMapTestBattle'
+			},
+			{
 				node: 'fork',
 				type: MapEvent.Story,
 				name: "Story Test",
 				description: "This will contain some text to test out cutscenes\
 				<br/>Let's go multiple lines!",
-			},
-			{
-				node: 'start',
-				type: MapEvent.Battle,
-				repeatable: true,
-				name: "Battle Test",
-				description: "This will link back to the battle scene test",
-				saveId: 'testMapTestBattle'
 			},
 			{ 
 				node: 'tail',
@@ -119,43 +139,7 @@ class TestMap extends MapSceneModel {
 				repeatable: true,
 				name: "Ferry",
 				description: "The ferry will take you back to the mainland"
-			},
+			}
 		];
-	}
-}
-
-/***************************************************
- TEMP TestBattle
-***************************************************/
-class TestBattle extends BattleSceneModel {
-	constructor() {
-		super();
-
-		this.deployment = [
-			{x: 3, y: 6},
-			{x: 4, y: 6},
-			{x: 5, y: 6},
-			{x: 6, y: 6}
-		];
-
-		this.terrain = [
-			{type: Square.Wall, x: 2, y: 5},
-			{type: Square.Rough, x: 3, y: 5},
-			{type: Square.Wall, x: 4, y: 5},
-			{type: Square.Pit, x: 5, y: 5},
-			{type: Square.Cover, x: 6, y: 5}
-		];
-
-		this.units = [
-			{turn: 0, type: TestEnemyUnit, x: 4, y: 4, enemy: true},
-
-			// reinforcements
-			{turn: 1, type: TestEnemyUnit, x: 5, y: 4, enemy: true},
-			{turn: 1, type: TestEnemyUnit, x: 5, y: 4, enemy: true},
-			{turn: 2, type: TestEnemyUnit, x: 6, y: 4, enemy: true}
-		];
-
-		// must wait until last reinforcements have appeared
-		this.minTurns = 3;
 	}
 }

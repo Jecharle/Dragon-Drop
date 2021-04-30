@@ -1,0 +1,62 @@
+{
+	"type": "map",
+
+	"width": 1024,
+	"height": 1000,
+
+	"startNode": "start",
+
+	"nodes": [
+		{"id": "start", "x": 200, "y": 250},
+		{"id": "second", "x": 200, "y": 400, "hidden": true},
+		{"id": "fork", "x": 350, "y": 350},
+		{"id": "tail", "x": 450, "y": 450, "hidden": true},
+		{"id": "last", "x": 400, "y": 200},
+
+		{"id": "island", "x": 600, "y": 600},
+		{"id": "island2", "x": 550, "y": 650}
+	],
+	"connections": [
+		{"a": "start", "b": "second"},
+		{"a": "second", "b": "fork"},
+		{"a": "fork", "b": "tail"},
+		{"a": "fork", "b": "last"},
+		{"a": "last", "b": "start"},
+
+		{"a": "island", "b": "island2"}
+	],
+
+	"events": [
+		{
+			"node": "start",
+			"type": "battle",
+			"filename": "testBattle",
+			"repeatable": true,
+			"name": "Battle Test",
+			"description": "This will link back to the battle scene test",
+			"saveid": "testMapTestBattle"
+		},
+		{
+			"node": "fork",
+			"type": "story",
+			"name": "Story Test",
+			"description": "This will contain some text to test out cutscenes<br/>Let's go multiple lines!"
+		},
+		{ 
+			"node": "tail",
+			"type": "move",
+			"param": "island",
+			"repeatable": true,
+			"name": "Ferry",
+			"description": "The ferry will take you to the island"
+		},
+		{ 
+			"node": "island",
+			"type": "move",
+			"param": "tail",
+			"repeatable": true,
+			"name": "Ferry",
+			"description": "The ferry will take you back to the mainland"
+		}
+	]
+}

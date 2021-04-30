@@ -787,6 +787,11 @@ class MapScene extends Scene {
 		this.refresh();
 	}
 
+	// TODO: Allow selecting / deselecting the current node
+	get _currentNode() {
+		return this._piece.node;
+	}
+
 	//#region ui setup
 	_createExploreButton() {
 		var button = document.createElement("button");
@@ -848,10 +853,6 @@ class MapScene extends Scene {
 	}
 	//#endregion refresh
 
-	get _currentNode() {
-		return this._piece.node;
-	}
-
 	//#region actions
 	async _movePiece(node) {
 		this.setBusy();
@@ -868,11 +869,14 @@ class MapScene extends Scene {
 		this.setDone();
 	}
 
-	// TODO: teleport a unit around the map without following a path
-
-	_exploreNode(node) {
+	async _exploreNode(node) {
 		if (!node || !node.canExplore) return false;
-		var newScene = node.event.getScene(this);
+		
+		// TODO: Show the loading indicator during this
+		var newScene = await node.event.getScene(this);
+
+		// TODO: Check if it will have a scene FIRST, only load if it does
+			// I might want to re-distribute some of the scene change code in general here
 		if (newScene) {
 			this._pause();
 			Game.setScene(newScene);
@@ -998,12 +1002,17 @@ class MapEvent {
 	}
 	//#endregion completion state
 
-	getScene(lastScene) {
+	get hasScene() {
+		return !!this.filename;
+	}
+
+	async getScene(lastScene) {
+		//if (!this.filename) return null;
+
 		switch (this.type) {
-			// TODO: If filename is null, always return null
 			case MapEvent.Battle:
-				// TEMP data until I can load via filename
-				return new BattleScene(lastScene, new TestBattle());
+				var model = await BattleSceneModel.load(this.filename);
+				return new BattleScene(lastScene, model);
 
 			case MapEvent.Story:
 				alert("Watch a cutscene");

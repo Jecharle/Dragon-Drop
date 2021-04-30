@@ -1,4 +1,27 @@
 /***************************************************
+ Index function for looking up types by name
+***************************************************/
+UnitPiece.parseUnitType = function(string) {
+	if (!string) return UnitPiece;
+	switch (string.toLowerCase()) {
+		case "testmelee":
+			return TestMeleeUnit;
+
+		case "testsupport":
+			return TestSupportUnit;
+
+		case "testposition":
+			return TestPositionUnit;
+
+		case "testenemy":
+			return TestEnemyUnit;
+
+		default:
+			return UnitPiece;
+	}
+};
+
+/***************************************************
  Subtypes of UnitPiece
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {

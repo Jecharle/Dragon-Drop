@@ -1,4 +1,6 @@
 {
+	"type": "battle",
+
 	"minTurns": 3,
 
 	"deployment": [
@@ -17,10 +19,10 @@
 	],
 
 	"units": [
-		{"turn": 0, "type": "TestEnemyUnit", "x": 4, "y": 4, "enemy": true},
+		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4, "enemy": true},
 
-		{"turn": 1, "type": "TestEnemyUnit", "x": 5, "y": 4, "enemy": true},
-		{"turn": 1, "type": "TestEnemyUnit", "x": 5, "y": 4, "enemy": true},
-		{"turn": 2, "type": "TestEnemyUnit", "x": 6, "y": 4, "enemy": true}
+		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
+		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
+		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4, "enemy": true}
 	]
 }

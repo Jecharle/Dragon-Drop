@@ -585,6 +585,26 @@ class Square extends Position {
 	static get Wall() { return Square._BlockMove | Square._BlockSight; }
 	static get Rough() { return Square._SlowMove; }
 
+	static parseTerrain(string) {
+		if (!string) return this.Flat;
+		switch (string.toLowerCase()) {
+			case "hole":
+			case "pit":
+				return this.Pit;
+			case "bush":
+			case "grass":
+			case "cover":
+				return this.Cover;
+			case "wall":
+				return this.Wall;
+			case "mud":
+			case "rough":
+				return this.Rough;
+			default:
+				return this.Flat;
+		}
+	}
+
 	get terrain() {
 		return this._terrain;
 	}
@@ -664,7 +684,7 @@ class DeployUnitList extends Container {
 	show() {
 		this._show();
 	}
-	// TODO: Allow board units to be dragged back on
+	// TODO: Create "ContainerEvent" on scenes, for containers that don't use positions
 }
 
 /***************************************************
