@@ -57,11 +57,14 @@ class Game {
 
 		//SaveData.loadAll(); // TEMP disabled for testing
 
-		// TEMP
+		// TEMP initial party setup
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		this.setScene(new MapScene( null, new TestMap() ));
+
+		MapSceneModel.load("testMap").then(mapModel => {
+			this.setScene(new MapScene(null, mapModel));
+		})
 	}
 }
 Game.begin();

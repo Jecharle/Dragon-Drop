@@ -16,6 +16,7 @@
 		{"id": "island", "x": 600, "y": 600},
 		{"id": "island2", "x": 550, "y": 650}
 	],
+	
 	"connections": [
 		{"a": "start", "b": "second"},
 		{"a": "second", "b": "fork"},

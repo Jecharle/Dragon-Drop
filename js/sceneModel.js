@@ -25,15 +25,30 @@ class SceneModel {
  MapSceneModel
 ***************************************************/
 class MapSceneModel extends SceneModel {
-	constructor() {
+	constructor(data) {
 		super();
-		this.width = 0;
-		this.height = 0;
-		this.startNode = "";
-		this.nodes = []; // id, x, y, hidden
-		this.events = []; // node id, name, description, filename, extra parameters
-		this.connections = []; // node id 1, node id 2, one-way
+
+		this.width = data?.width || 0;
+		this.height = data?.height || 0;
+		this.startNode = data?.startNode || "";
+		
+		this.nodes = data?.nodes || []; // id, x, y, hidden
+
+		this.events = data?.events.map(event => { // node id, type*, filename, params, repeatable, name, description
+			event.type = MapEvent.parseEventType(event.type);
+			return event;
+		}) || [];
+
+		this.connections = data?.connections || []; // node id 1, node id 2, one-way
+		
 		// TODO: background image?
+	}
+
+	static async load(filename) {
+		var data = await SceneModel.load("maps", filename);
+		// TODO: Handle errors while loading?
+		var sceneModel = new this(data);
+		return sceneModel;
 	}
 }
 
@@ -68,78 +83,8 @@ class BattleSceneModel extends SceneModel {
 
 	static async load(filename) {
 		var data = await SceneModel.load("battles", filename);
-		// TODO: Handle errors while loading
-		var sceneModel = new BattleSceneModel(data);
+		// TODO: Handle errors while loading?
+		var sceneModel = new this(data);
 		return sceneModel;
-	}
-}
-
-
-/***************************************************
- TEMP TestMap
-***************************************************/
-class TestMap extends MapSceneModel {
-	constructor() {
-		super();
-
-		this.width = 1024;
-		this.height = 1000;
-
-		this.startNode = 'start';
-
-		this.nodes = [
-			{id: 'start', x: 4*64, y: 5*64},
-			{id: 'second', x: 4*64, y: 8*64, hidden: true},
-			{id: 'fork', x: 7*64, y: 7*64},
-			{id: 'tail', x: 9*64, y: 9*64, hidden: true},
-			{id: 'last', x: 8*64, y: 4*64},
-
-			{id: 'island', x: 12*64, y: 12*64},
-			{id: 'island2', x: 11*64, y: 13*64},
-		];
-		this.connections = [
-			{a: 'start', b: 'second'},
-			{a: 'second', b: 'fork'},
-			{a: 'fork', b: 'tail'},
-			{a: 'fork', b: 'last'},
-			{a: 'last', b: 'start'},
-
-			{a: 'island', b: 'island2'},
-		];
-
-		this.events = [
-			{
-				node: 'start',
-				type: MapEvent.Battle,
-				filename: "testBattle",
-				repeatable: true,
-				name: "Battle Test",
-				description: "This will link back to the battle scene test",
-				saveId: 'testMapTestBattle'
-			},
-			{
-				node: 'fork',
-				type: MapEvent.Story,
-				name: "Story Test",
-				description: "This will contain some text to test out cutscenes\
-				<br/>Let's go multiple lines!",
-			},
-			{ 
-				node: 'tail',
-				type: MapEvent.Move,
-				param: 'island',
-				repeatable: true,
-				name: "Ferry",
-				description: "The ferry will take you to the island"
-			},
-			{ 
-				node: 'island',
-				type: MapEvent.Move,
-				param: 'tail',
-				repeatable: true,
-				name: "Ferry",
-				description: "The ferry will take you back to the mainland"
-			}
-		];
 	}
 }

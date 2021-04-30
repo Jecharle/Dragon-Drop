@@ -952,6 +952,20 @@ class MapEvent {
 
 	static get Other() { return -1; }
 
+	static parseEventType(string) {
+		if (!string) return this.None;
+		switch (string.toLowerCase()) {
+			case "battle":
+				return this.Battle;
+			case "story":
+				return this.Story;
+			case "move":
+				return this.Move;
+			default:
+				return this.Other;
+		}
+	}
+
 	get type() {
 		return this._type;
 	}
