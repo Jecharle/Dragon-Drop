@@ -684,7 +684,28 @@ class DeployUnitList extends Container {
 	show() {
 		this._show();
 	}
-	// TODO: Create "ContainerEvent" on scenes, for containers that don't use positions
+	
+	//#region input events
+	_drop(ev) {
+		ev.preventDefault();
+		var dragElId = ev.dataTransfer.getData("piece");
+		if (dragElId && ev.target?.obj) {
+			var container = ev.target.obj;
+			if (Game.scene) {
+				Game.scene.containerEvent(container, dragElId);
+			}
+		}
+	}
+	_click(ev) {
+		ev.stopPropagation();
+		if (ev.target && ev.target?.obj) {
+			var container = ev.target.obj;
+			if (container && Game.scene) {
+				Game.scene.containerEvent(container);
+			}
+		}
+	}
+	//#endregion input events
 }
 
 /***************************************************

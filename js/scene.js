@@ -58,6 +58,7 @@ class Scene extends ElObj {
 	//#region input events
 	pieceEvent(piece, dragging) { }
 	positionEvent(position, dragId) { }
+	containerEvent(container, dragId) { }
 	mouseOver(position, dragId) { }
 	rightClick() { }
 
@@ -573,6 +574,19 @@ class BattleScene extends Scene {
 			}
 		}
 		this.refresh();
+	}
+	containerEvent(container, dragId) {
+		if (!container || this._autoPhase || this.busy) return; // TEMP?
+
+		if (this._phase == BattleScene.DeployPhase && container == this._deployList) {
+			if (this._unit && this._unit.idMatch(dragId)) {
+				if (this._unit.square) {
+					this._unit.setParent(container);
+				}
+				this._deselectUnit();
+			}
+			this.refresh();
+		}
 	}
 	mouseOver(square, dragId) {
 		if (this._autoPhase || this.busy) return; // TEMP?
