@@ -35,7 +35,7 @@ class Game {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 	static beforeUnload(ev) {
-		return Game.scene.unsaved || null;
+		return null;//Game.scene.unsaved || null; // TEMP disabled for testing
 	}
 
 	static async asyncPause(milliseconds) {

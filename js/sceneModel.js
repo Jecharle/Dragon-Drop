@@ -4,6 +4,21 @@
 ***************************************************/
 class SceneModel {
 	// TODO: Generically applicable file-loading routine
+	static async load(folder, filename) {
+		var fullpath = `data/${folder}/${filename}.json`;
+		return new Promise(function (resolve, reject) {
+			var request = new XMLHttpRequest();
+			request.open("GET", fullpath);
+			request.responseType = 'json';
+			request.onload = () => {
+				resolve(request.response);
+			};
+			request.onerror = () => {
+				reject(request.status);
+			};
+			request.send();
+		});
+	}
 }
 
 /***************************************************
