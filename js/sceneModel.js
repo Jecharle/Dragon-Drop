@@ -62,6 +62,9 @@ class BattleSceneModel extends SceneModel {
 		this.maxTurns = data?.maxTurns || 0;
 		this.minTurns = data?.minTurns || 0;
 		this.defaultVictory = data?.defaultVictory || false;
+		this.maxDeploy = data?.maxDeploy || 4;
+
+		// TODO: width / height override?
 
 		// x, y
 		this.deployment = data?.deployment || [];

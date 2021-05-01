@@ -290,13 +290,13 @@ class Board extends Container {
 	//#endregion moving pieces
 
 	//#region highlighting areas
-	setDeployArea(hasUnit) {
-		this.deployArea.forEach(square => this._paintDeployRange(square, hasUnit));
+	setDeployArea(hasUnit, swapOnly) {
+		this.deployArea.forEach(square => this._paintDeployRange(square, hasUnit, swapOnly));
 	}
-	_paintDeployRange(square, valid) {
+	_paintDeployRange(square, valid, swapOnly) {
 		square.inRange = true;
 		square.el.classList.add('deploy-range');
-		if (valid) {
+		if (valid && (!swapOnly || square.piece)) {
 			square.el.ondragover = this._allowDrop;
 			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);

@@ -12,7 +12,7 @@ class Party {
 		return this._members;
 	}
 	static add(member) {
-		if (!this._members.includes(member)) {
+		if (!this._members.includes(member) && this._members.length < this.partySize) {
 			this._members.push(member);
 			return true;
 		}
@@ -27,7 +27,7 @@ class Party {
 		return false;
 	}
 
-	static _partySize = 4
+	static _partySize = 6
 	static get partySize() {
 		return this._partySize;
 	}
@@ -39,7 +39,7 @@ class Party {
 	static getUnits() {
 		var pieces = [];
 		this.members.forEach(member => {
-			if (member.alive && pieces.length < this.partySize){
+			if (member.alive){
 				pieces.push(member.getUnit());
 			}
 		});

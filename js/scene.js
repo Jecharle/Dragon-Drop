@@ -180,6 +180,7 @@ class BattleScene extends Scene {
 		this._maxTurns = sceneData.maxTurns;
 		this._minTurns = sceneData.minTurns;
 		this._defaultVictory = sceneData.defaultVictory;
+		this._maxDeploy = sceneData.maxDeploy;
 	}
 	//#endregion rule setup
 
@@ -196,7 +197,7 @@ class BattleScene extends Scene {
 			if (this._unit && !this._unit.myTurn) {
 				this._board.setMoveArea(this._unit);
 			}
-			this._board.setDeployArea(this._unit && this._unit.myTurn);
+			this._board.setDeployArea((this._unit && this._unit.myTurn), (this.playerTeam.size >= this._maxDeploy));
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
