@@ -77,7 +77,7 @@ class BattleSceneModel extends SceneModel {
 			return square;
 		}) || [];
 
-		// x, y, turn, type*, isEnemy?
+		// x, y, turn, type*, enemy?, ally?
 		this.units = data?.units?.map(unit => {
 			unit.type = UnitPiece.parseUnitType(unit.type);
 			return unit;

@@ -853,7 +853,7 @@ class OverworldMap extends Container {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
 				var newEvent = new MapEvent(data);
-				if (newEvent.complete) this.revealNodes(newEvent.reveals, true);
+				if (newEvent.complete) this.unlockNodes(newEvent.unlocks, true);
 				node.setEvent(newEvent);
 			}
 		});
@@ -910,17 +910,17 @@ class OverworldMap extends Container {
 	}
 	//#endregion node setup
 
-	async revealNodes(nodeIdList, noAnimation) {
+	async unlockNodes(nodeIdList, noAnimation) {
 		for (var i = 0; i < nodeIdList.length; i++) {
 			var node = this.getNode(nodeIdList[i]);
 			if (node && node.hidden) {
 				node.show();
 				if (!noAnimation) {
-					node.addTimedClass(1000, 'reveal');
+					node.addTimedClass(500, 'unlock');
 					this._allEdges(node).forEach(edge => {
 						if (edge.hidden) return;
 						edge.refresh();
-						edge.addTimedClass(2000, 'reveal');
+						edge.addTimedClass(1000, 'unlock');
 					});
 					await Game.asyncPause(1000);
 				}

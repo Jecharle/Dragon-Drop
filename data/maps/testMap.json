@@ -36,7 +36,7 @@
 			"filename": "testBattle",
 			"saveid": "testMapTestBattle",
 			"gems": 1,
-			"reveals": [
+			"unlocks": [
 				"second"
 			]
 		},
@@ -47,7 +47,7 @@
 			"type": "story",
 			"oneTime": true,
 			"gold": 5,
-			"reveals": [
+			"unlocks": [
 				"tail",
 				"island",
 				"island2"

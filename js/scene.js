@@ -168,6 +168,8 @@ class BattleScene extends Scene {
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
+			else if (data.ally) newPiece.setTeam(this.playerTeam);
+			// TODO: Optionally, don't count towards the deploy limit?
 			return newPiece;
 		}
 		return null;
@@ -928,7 +930,7 @@ class MapScene extends Scene {
 		if (event.saved) {
 			SaveData.saveAll(); // TODO: Only save the part about the map
 		}
-		this._map.revealNodes(event.reveals).then(() => this.refresh());
+		this._map.unlockNodes(event.unlocks).then(() => this.refresh());
 
 	}
 	//#endregion actions
@@ -976,7 +978,7 @@ class MapEvent {
 		this._complete = (this.saved && SaveData.getEventClear(this._saveId));
 		this._goldReward = eventData.gold || 0;
 		this._gemReward = eventData.gems || 0;
-		this._reveals = eventData.reveals || [];
+		this._unlocks = eventData.unlocks || [];
 	}
 
 	//#region event type
@@ -1061,8 +1063,8 @@ class MapEvent {
 	get hasReward() {
 		return !!(this.gold || this.gems);
 	}
-	get reveals() {
-		return this._reveals;
+	get unlocks() {
+		return this._unlocks;
 	}
 	//#endregion clear rewards
 }

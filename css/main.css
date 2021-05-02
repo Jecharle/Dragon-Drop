@@ -667,8 +667,8 @@
 	.selectable.map-node:hover {
 		border: 4px solid yellow;
 	}
-	.map-node.reveal {
-		animation: fade-out 0.5s 0.5s reverse backwards;
+	.map-node.unlock {
+		animation: fade-out 0.5s reverse backwards;
 	}
 
 .overworld-map .line {
@@ -681,9 +681,10 @@
 	bottom: 16px;
 	left: 0px;
 }
-	.overworld-map .line.reveal {
-		animation: draw-line 1s 1s backwards;
+	.overworld-map .line.unlock {
+		animation: draw-line 1s 0.5s backwards;
 	}
+	/*TODO: Alternate settings if the line comes FROM the new node?*/
 
 .map-piece {
 	width: 64px;
