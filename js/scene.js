@@ -793,8 +793,9 @@ class MapScene extends Scene {
 
 		if (this._paused) {
 			var data = this._getData();
+			// TODO: Rather than the current node, store / read the event you were 'inside'
 			if (data.complete && this._currentNode.event) {
-				this._completeNode(this._currentNode);
+				this._completeEvent(this._currentNode.event);
 			}
 			this._resume();
 		}
@@ -887,32 +888,48 @@ class MapScene extends Scene {
 	async _exploreNode(node) {
 		if (!node || !node.canExplore) return false;
 		
-		// TODO: Show the loading indicator during this
-		var newScene = await node.event.getScene(this);
+		var event = node.event;
 
-		// TODO: Check if it will have a scene FIRST, only load if it does
-			// I might want to re-distribute some of the scene change code in general here
-		if (newScene) {
-			this._pause();
-			Game.setScene(newScene);
-		} else {
-			if (node.event.param && node.event.type == MapEvent.Move) {
-				var destination = this._map.getNode(node.event.param);
+		switch (event.type) {
+			case MapEvent.Battle:
+				var model = await BattleSceneModel.load(event.filename);
+				this._pause();
+				Game.setScene( new BattleScene(this, model) );
+				return true;
+
+			case MapEvent.Story:
+				// TEMP
+				alert("Watch a cutscene");
+				this._completeEvent(event);
+				this.refresh();
+				return true;
+
+			case MapEvent.Move:
+				// TODO: This only handles local moves- be sure to handle non-local as well?
+				var destination = this._map.getNode(event.param);
 				if (destination) this._movePiece(destination);
-			}
-			this._completeNode(node);
-			this.refresh();
+				this._completeEvent(event);
+				this.refresh();
+				return true;
+			
+			default:
+				// unrecognized event type
+				return false;
 		}
-		return true;
 	}
 
-	_completeNode(node) {
-		node.event?.setComplete();
-		this._map.revealAdjacent(node);
-		// TODO: Make this visually interesting? Animations, etc?
-		if (node.event?.saved) {
-			SaveData.saveAll(); // TEMP probably don't need to save everything here
+	_completeEvent(event) {
+		if (!event || event.complete) return;
+		// TODO: Hand out some currency
+		event.setComplete();
+		if (event.hasReward) {
+			alert(`Got ${event.gold} gold and ${event.gems} gems.`);
 		}
+		if (event.saved) {
+			SaveData.saveAll(); // TODO: Only save the part about the map
+		}
+		this._map.revealNodes(event.reveals).then(() => this.refresh());
+
 	}
 	//#endregion actions
 
@@ -951,12 +968,15 @@ class MapEvent {
 		this._filename = eventData.filename;
 		this._param = eventData.param;
 
-		this._name = eventData.name;
-		this._description = eventData.description;
-		this._repeatable = eventData.repeatable;
+		this._name = eventData.name || "";
+		this._description = eventData.description || "";
+		this._oneTime = eventData.oneTime;
 
 		this._saveId = eventData.saveId;
 		this._complete = (this.saved && SaveData.getEventClear(this._saveId));
+		this._goldReward = eventData.gold || 0;
+		this._gemReward = eventData.gems || 0;
+		this._reveals = eventData.reveals || [];
 	}
 
 	//#region event type
@@ -1013,7 +1033,7 @@ class MapEvent {
 		return this._complete;
 	}
 	get repeatable() {
-		return this._repeatable;
+		return !this._oneTime;
 	}
 	get accessible() {
 		return !this.complete || this.repeatable;
@@ -1031,30 +1051,20 @@ class MapEvent {
 	}
 	//#endregion completion state
 
-	get hasScene() {
-		return !!this.filename;
+	//#region clear rewards
+	get gold() {
+		return this._goldReward;
 	}
-
-	async getScene(lastScene) {
-		//if (!this.filename) return null;
-
-		switch (this.type) {
-			case MapEvent.Battle:
-				var model = await BattleSceneModel.load(this.filename);
-				return new BattleScene(lastScene, model);
-
-			case MapEvent.Story:
-				alert("Watch a cutscene");
-				return null;
-
-			case MapEvent.Move:
-				if (this.filename) alert("Change map");
-				return null;
-			
-			default:
-				return null;
-		}
+	get gems() {
+		return this._gemReward;
 	}
+	get hasReward() {
+		return !!(this.gold || this.gems);
+	}
+	get reveals() {
+		return this._reveals;
+	}
+	//#endregion clear rewards
 }
 
 /***************************************************

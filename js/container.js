@@ -684,6 +684,8 @@ class DeployUnitList extends Container {
 	show() {
 		this._show();
 	}
+
+	// TODO: Show unit count + max deploy count
 	
 	//#region input events
 	_drop(ev) {
@@ -851,7 +853,7 @@ class OverworldMap extends Container {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
 				var newEvent = new MapEvent(data);
-				if (newEvent.complete) this.revealAdjacent(node, true);
+				if (newEvent.complete) this.revealNodes(newEvent.reveals, true);
 				node.setEvent(newEvent);
 			}
 		});
@@ -908,15 +910,14 @@ class OverworldMap extends Container {
 	}
 	//#endregion node setup
 
-	async revealAdjacent(node, noAnimation) {
-		var adjacents = node.adjacent;
-		for (var i = 0; i < adjacents.length; i++) {
-			var adjacent = adjacents[i];
-			if (adjacent.hidden) {
-				adjacent.show();
+	async revealNodes(nodeIdList, noAnimation) {
+		for (var i = 0; i < nodeIdList.length; i++) {
+			var node = this.getNode(nodeIdList[i]);
+			if (node && node.hidden) {
+				node.show();
 				if (!noAnimation) {
-					adjacent.addTimedClass(1000, 'reveal');
-					this._allEdges(adjacent).forEach(edge => {
+					node.addTimedClass(1000, 'reveal');
+					this._allEdges(node).forEach(edge => {
 						if (edge.hidden) return;
 						edge.refresh();
 						edge.addTimedClass(2000, 'reveal');

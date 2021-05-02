@@ -13,8 +13,8 @@
 		{"id": "tail", "x": 450, "y": 450, "hidden": true},
 		{"id": "last", "x": 400, "y": 200},
 
-		{"id": "island", "x": 600, "y": 600},
-		{"id": "island2", "x": 550, "y": 650}
+		{"id": "island", "x": 600, "y": 600, "hidden": true},
+		{"id": "island2", "x": 550, "y": 650, "hidden": true}
 	],
 	
 	"connections": [
@@ -29,35 +29,43 @@
 
 	"events": [
 		{
+			"name": "Battle Test",
+			"description": "This will link back to the battle scene test",
 			"node": "start",
 			"type": "battle",
 			"filename": "testBattle",
-			"repeatable": true,
-			"name": "Battle Test",
-			"description": "This will link back to the battle scene test",
-			"saveid": "testMapTestBattle"
+			"saveid": "testMapTestBattle",
+			"gems": 1,
+			"reveals": [
+				"second"
+			]
 		},
 		{
+			"name": "Story Test",
+			"description": "This will contain some text to test out cutscenes<br/>Let's go multiple lines!",
 			"node": "fork",
 			"type": "story",
-			"name": "Story Test",
-			"description": "This will contain some text to test out cutscenes<br/>Let's go multiple lines!"
+			"oneTime": true,
+			"gold": 5,
+			"reveals": [
+				"tail",
+				"island",
+				"island2"
+			]
 		},
 		{ 
+			"name": "Ferry",
+			"description": "This ferry will take you to the island",
 			"node": "tail",
 			"type": "move",
-			"param": "island",
-			"repeatable": true,
-			"name": "Ferry",
-			"description": "The ferry will take you to the island"
+			"param": "island"
 		},
 		{ 
+			"name": "Ferry",
+			"description": "This ferry will take you back to the mainland",
 			"node": "island",
 			"type": "move",
-			"param": "tail",
-			"repeatable": true,
-			"name": "Ferry",
-			"description": "The ferry will take you back to the mainland"
+			"param": "tail"
 		}
 	]
 }

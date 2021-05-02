@@ -34,14 +34,16 @@ class MapSceneModel extends SceneModel {
 		
 		this.nodes = data?.nodes || []; // id, x, y, hidden
 
-		this.events = data?.events.map(event => { // node id, type*, filename, params, repeatable, name, description
+		this.connections = data?.connections || []; // node id 1, node id 2, one-way
+
+		this.events = data?.events.map(event => { // node id, type*, filename, params, oneTime, name, description
 			event.type = MapEvent.parseEventType(event.type);
 			return event;
 		}) || [];
-
-		this.connections = data?.connections || []; // node id 1, node id 2, one-way
 		
 		// TODO: background image?
+
+		// TODO: Decorative sprites?
 	}
 
 	static async load(filename) {
