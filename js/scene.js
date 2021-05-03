@@ -76,8 +76,8 @@ class BattleScene extends Scene {
 		this._initTeams();
 		this._board = new Board(sceneData);
 
-		this._addMapUnits(sceneData?.units);
-		this._addTurnLimit(sceneData);
+		this._addRestrictions(sceneData);
+		this._addMapUnits(sceneData.units);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
 		this._skillList = new SkillList();

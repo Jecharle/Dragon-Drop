@@ -775,7 +775,7 @@ class UnitInfo extends ElObj {
 		this._nameSpan.classList.add('name');
 		this.el.appendChild(this._nameSpan);
 
-		this._tooltip = new SkillDescription("");
+		this._tooltip = new HoverDescription("");
 		this.el.appendChild(this._tooltip.el);
 
 		this.unit = null;

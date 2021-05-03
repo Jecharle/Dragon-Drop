@@ -599,7 +599,10 @@ class SkillPiece extends Piece {
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
 
-		this._tooltip = new SkillDescription(this.fullDescription);
+		this._quantityLabel = new QuantityLabel("");
+		this.el.appendChild(this._quantityLabel.el);
+
+		this._tooltip = new HoverDescription(this.fullDescription);
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
@@ -794,14 +797,8 @@ class SkillPiece extends Piece {
 		this._refreshLabels();
 	}
 	_refreshLabels() {
-		// TEMP - two separate labels?
-		if (this.cooldown > 0) {
-			this._cooldownLabel.value = this.cooldown;
-		} else if (this.hasLimitedUses) {
-			this._cooldownLabel.value = "x"+this.usesLeft;
-		} else {
-			this._cooldownLabel.value = "";
-		}
+		this._cooldownLabel.value = this.cooldown > 0 ? this.cooldown : "";
+		this._quantityLabel.value = this.hasLimitedUses ? this.usesLeft : "";
 		this._tooltip.value = this.fullDescription;
 	}
 	//#endregion refresh

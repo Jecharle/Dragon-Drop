@@ -135,9 +135,35 @@ class CooldownLabel extends Detail {
 }
 
 /***************************************************
+ Limited quantity label
+***************************************************/
+class QuantityLabel extends Detail {
+	set value(value) {
+		value += "";
+		if (value.length) value = "x"+value;
+		this._value = value;
+		this.el.innerHTML = value;
+	}
+	get elClass() {
+		return 'quantity-label';
+	}
+}
+
+/***************************************************
+ Limited capacity label
+***************************************************/
+class CurrentMaxLabel extends Detail {
+	get elClass() {
+		return 'capacity-label';
+	}
+	// TODO: Current value and max value
+	// TODO: Also, text describing what it's counting?
+}
+
+/***************************************************
  Skill description
 ***************************************************/
-class SkillDescription extends Detail {
+class HoverDescription extends Detail {
 	get elType() {
 		return 'div';
 	}
