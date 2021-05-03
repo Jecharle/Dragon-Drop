@@ -80,6 +80,7 @@ class BattleScene extends Scene {
 		this._addMapUnits(sceneData.units);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
+		this._deployList.deployLimit = (this._maxDeploy - this._preDeployed);
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
 		this._undoButtonEl = this._createUndoButton();
@@ -168,8 +169,11 @@ class BattleScene extends Scene {
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			else if (data.ally) newPiece.setTeam(this.playerTeam);
-			// TODO: Optionally, don't count towards the deploy limit?
+			else if (data.ally) {
+				newPiece.setTeam(this.playerTeam);
+				this._preDeployed++;
+				this._maxDeploy++;
+			}
 			return newPiece;
 		}
 		return null;
@@ -177,12 +181,13 @@ class BattleScene extends Scene {
 	//#endregion unit setup
 
 	//#region rule setup
-	_addTurnLimit(sceneData) {
+	_addRestrictions(sceneData) {
 		if (!sceneData) return;
 		this._maxTurns = sceneData.maxTurns;
 		this._minTurns = sceneData.minTurns;
 		this._defaultVictory = sceneData.defaultVictory;
 		this._maxDeploy = sceneData.maxDeploy;
+		this._preDeployed = 0;
 	}
 	//#endregion rule setup
 
@@ -199,7 +204,8 @@ class BattleScene extends Scene {
 			if (this._unit && !this._unit.myTurn) {
 				this._board.setMoveArea(this._unit);
 			}
-			this._board.setDeployArea((this._unit && this._unit.myTurn), (this.playerTeam.size >= this._maxDeploy));
+			this._board.setDeployArea((this._unit && this._unit.myTurn),
+				(this.playerTeam.size >= this._maxDeploy + this._preDeployed));
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
@@ -423,6 +429,7 @@ class BattleScene extends Scene {
 	 	} else {
 			this._board.movePiece(piece, target);
 		}
+		this._deployList.deployed = (this.playerTeam.size - this._preDeployed);
 		this._deselectUnit();
 	}
 
@@ -584,7 +591,9 @@ class BattleScene extends Scene {
 		if (this._phase == BattleScene.DeployPhase && container == this._deployList) {
 			if (this._unit && this._unit.idMatch(dragId)) {
 				if (this._unit.square) {
+					// TODO: Should probably be an action to process undeploy, instead of doing it directly
 					this._unit.setParent(container);
+					this._deployList.deployed = (this.playerTeam.size - this._preDeployed);
 				}
 				this._deselectUnit();
 			}

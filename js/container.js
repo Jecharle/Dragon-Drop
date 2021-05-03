@@ -666,6 +666,10 @@ class DeployUnitList extends Container {
 			unit.setParent(this);
 			if (team) unit.setTeam(team);
 		});
+
+		this._deployCounter = new CurrentMaxLabel(0, 0);
+		this.el.appendChild(this._deployCounter.el);
+
 		this.el.ondragover = this._allowDrop;
 	}
 
@@ -676,6 +680,20 @@ class DeployUnitList extends Container {
 
 	get elClass() {
 		return 'deploy-list';
+	}
+
+	get deployed() {
+		return this._deployCounter.value;
+	}
+	set deployed(value) {
+		this._deployCounter.value = value;
+	}
+
+	get deployLimit() {
+		return this._deployCounter.maxValue;
+	}
+	set deployLimit(value) {
+		this._deployCounter.maxValue = value;
 	}
 
 	hide() {

@@ -150,14 +150,37 @@ class QuantityLabel extends Detail {
 }
 
 /***************************************************
- Limited capacity label
+ Label showing a current / max value
 ***************************************************/
 class CurrentMaxLabel extends Detail {
+	constructor(startValue, startMaxValue) {
+		super();
+
+		this.maxValue = startMaxValue;
+		this.value = startValue;
+	}
+
 	get elClass() {
 		return 'capacity-label';
 	}
-	// TODO: Current value and max value
+
+	set value(value) {
+		this._value = value;
+		this._updateText();	
+	}
+
+	get maxValue() {
+		return this._maxValue;
+	}
+	set maxValue(value) {
+		this._maxValue = value;
+		this._updateText();
+	}
+
 	// TODO: Also, text describing what it's counting?
+	_updateText() {
+		this.el.innerHTML = `${this._value}/${this._maxValue}`;
+	}
 }
 
 /***************************************************

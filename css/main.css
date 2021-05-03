@@ -612,6 +612,13 @@
 		bottom: 0px;
 		margin-top: 2px;
 	}
+
+	.deploy-list .capacity-label {
+		position: absolute;
+		top: -1.5em;
+		right: 0px;
+		font-weight: bold;
+	}
 /*#endregion deploy list*/
 /*#endregion battle scene*/
 
