@@ -78,8 +78,11 @@ class Position extends SpriteElObj {
 class Board extends Container {
 	constructor(sceneData) {
 		super();
-		this.squares = [];
+		
+		this._w = sceneData.width;
+		this._h = sceneData.height;
 
+		this.squares = [];
 		for (var y = 0; y < this.h; y++) {
 			for (var x = 0; x < this.w; x++) {
 				var square = new Square(x, y, this);
@@ -87,10 +90,10 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
-		if (sceneData) this._loadTerrain(sceneData.terrain);
+		this._loadTerrain(sceneData.terrain);
 
 		this.deployArea = [];
-		if (sceneData) this._loadDeployArea(sceneData.deployment);
+		this._loadDeployArea(sceneData.deployment);
 
 		this.squaresInRange = [];
 	}
@@ -99,8 +102,8 @@ class Board extends Container {
 		return 'board';
 	}
 
-	get w() { return 10; }
-	get h() { return 10; }
+	get w() { return this._w; }
+	get h() { return this._h; }
 
 	//#region setup
 	_loadTerrain(terrainData) {

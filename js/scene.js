@@ -199,7 +199,8 @@ class BattleScene extends Scene {
 			if (this._unit && !this._unit.myTurn) {
 				this._board.setMoveArea(this._unit);
 			}
-			this._board.setDeployArea( (this._unit && this._unit.myTurn), (this.playerTeam.size >= this._maxDeploy) );
+			this._board.setDeployArea( (this._unit && this._unit.myTurn),
+				(this.playerTeam.size >= this._maxDeploy && !this._unit?.square) );
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
 		} else if (this._unit) {
@@ -418,13 +419,19 @@ class BattleScene extends Scene {
 		if (target.piece && piece.square) {
 			this._board.swapPieces(piece, target.piece);
 		} else if (target.piece) {
-			target.piece.setParent(piece.parent);
+			this._retreatUnit(target.piece, piece.parent);
 			this._board.movePiece(piece, target);
 	 	} else {
 			this._board.movePiece(piece, target);
 		}
 		this._deployList.deployed = this.playerTeam.size;
 		this._deselectUnit();
+	}
+	_retreatUnit(piece, container) {
+		if (piece.square) {
+			piece.setParent(container);
+			this._deployList.deployed = this.playerTeam.size;
+		}
 	}
 
 	_selectSkill(skill) {
@@ -584,11 +591,7 @@ class BattleScene extends Scene {
 
 		if (this._phase == BattleScene.DeployPhase && container == this._deployList) {
 			if (this._unit && this._unit.idMatch(dragId)) {
-				if (this._unit.square) {
-					// TODO: Should probably be an action to process undeploy, instead of doing it directly
-					this._unit.setParent(container);
-					this._deployList.deployed = this.playerTeam.size;
-				}
+				this._retreatUnit(this._unit, container);
 				this._deselectUnit();
 			}
 			this.refresh();
