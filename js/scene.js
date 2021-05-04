@@ -95,7 +95,11 @@ class BattleScene extends Scene {
 	}
 
 	start() {
-		this._deploy();
+		if (this._board.deployArea.length > 0) {
+			this._deploy();
+		} else {
+			this._skipDeploy();
+		}
 	}
 
 	//#region ui setup
@@ -259,6 +263,18 @@ class BattleScene extends Scene {
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
 		this._deployList.show();
+
+		this._deselectSkill();
+		this._deselectUnit();
+		this._clearMoves();
+		this.refresh();
+	}
+	_skipDeploy() {
+		this._turn = 1;
+		this._phase = BattleScene.PlayerPhase;
+		this._setActiveTeam(this.playerTeam);
+		this._deployList.hide();
+		this._showPhaseBanner("Battle Start");
 
 		this._deselectSkill();
 		this._deselectUnit();
