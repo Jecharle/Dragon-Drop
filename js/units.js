@@ -4,6 +4,7 @@
 UnitPiece.parseUnitType = function(string) {
 	if (!string) return UnitPiece;
 	switch (string.toLowerCase()) {
+		// playable units
 		case "testmelee":
 			return TestMeleeUnit;
 
@@ -13,9 +14,15 @@ UnitPiece.parseUnitType = function(string) {
 		case "testposition":
 			return TestPositionUnit;
 
+		// enemies
 		case "testenemy":
 			return TestEnemyUnit;
 
+		// inanimate object
+		case "rockobject":
+			return TestRockObject;
+
+		// something has gone wrong
 		default:
 			return UnitPiece;
 	}

@@ -21,7 +21,7 @@
 	"units": [
 		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4, "enemy": true},
 		
-		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 7, "ally": true},
+		{"turn": 0, "type": "TestPosition", "x": 4, "y": 7, "ally": true},
 
 		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
 		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
