@@ -670,7 +670,7 @@ class BattleScene extends Scene {
 		var waitTime = 300; // TODO: Adjustable via settings?
 
 		while (aiControlUnits.length > 0) {
-			aiControlUnits.sort((a, b) => a.aiUnitScore - b.aiUnitScore);
+			aiControlUnits.sort((a, b) => (a.aiUnitScore - b.aiUnitScore) || (Math.random() - 0.5));
 			this._selectUnit(aiControlUnits.pop());
 			
 			if (!this._unit) continue;

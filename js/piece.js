@@ -510,8 +510,12 @@ class UnitPiece extends Piece {
 
 			var newSkill = skill.aiGetBestTarget(square);
 			newSkill.skill = skill;
-			if (newSkill.target && newSkill.score > best.score) return newSkill;
+			if (!newSkill.target) return best;
 			
+			if (newSkill.score > best.score) return newSkill;
+			if (newSkill.score < best.score) return best;
+
+			if( Math.random() > 0.5) return newSkill;
 			return best;
 		},
 		{
@@ -534,9 +538,12 @@ class UnitPiece extends Piece {
 			if (newPlan.move.inRange && !best.move?.inRange) return newPlan;
 			// better score wins
 			if (newPlan.score > best.score) return newPlan;
+			if (newPlan.score < best.score) return best;
 			// equal score, fewer moves wins
-			if (newPlan.score == best.score && newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
-			
+			if (newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
+			if (newPlan.move.movesLeft < best.move.movesLeft) return best;
+			// equal moves, toss a coin
+			if (Math.random() > 0.5) return newPlan;
 			return best;
 		},
 		{
@@ -835,13 +842,14 @@ class SkillPiece extends Piece {
 		var best = origin.parent.squares.reduce((best, target) => {
 			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
 
-			var score = this._aiTargetScore(target);
-			if (score >= best.score){
-				 return {
-					target: target,
-					score: score
-				};
+			var newTarget = {
+				score: this._aiTargetScore(target),
+				target: target
 			}
+			if (newTarget.score > best.score) return newTarget;
+			if (newTarget.score < best.score) return best;
+
+			if (Math.random() > 0.5) return newTarget;
 			return best;
 		},
 		{
