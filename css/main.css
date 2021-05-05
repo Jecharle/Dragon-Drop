@@ -448,7 +448,7 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	bottom: calc(8px - var(--square-h));
+	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
 }
