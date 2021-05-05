@@ -173,7 +173,10 @@ class BattleScene extends Scene {
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
 			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			else if (data.ally) newPiece.setTeam(this.playerTeam);
+			else if (data.ally) {
+				newPiece.setTeam(this.playerTeam);
+				newPiece.setAsGuest();
+			}
 			return newPiece;
 		}
 		return null;
@@ -262,6 +265,9 @@ class BattleScene extends Scene {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
+		this.playerTeam.members.forEach(unit => {
+			if (unit.guest) unit.endTurn();
+		});
 		this._deployList.show();
 
 		this._deselectSkill();
@@ -295,8 +301,11 @@ class BattleScene extends Scene {
 			case BattleScene.DeployPhase:
 				this._deployList.hide();
 				this._phase = BattleScene.PlayerPhase;
-				this._canRedeploy = true;
+				this.playerTeam.members.forEach(unit => {
+					if (unit.guest) unit.startTurn();
+				});
 				this._showPhaseBanner("Battle Start");
+				this._canRedeploy = true;
 				break;
 
 			case BattleScene.PlayerPhase:

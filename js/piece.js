@@ -101,6 +101,7 @@ class UnitPiece extends Piece {
 
 		this.size = 1;
 		this._moveStyle = "path";
+		this._guest = false;
 		this._setStats();
 		this._setSkills();
 
@@ -187,6 +188,12 @@ class UnitPiece extends Piece {
 	isEnemy(piece) {
 		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
+	}
+	get guest() {
+		return this._guest;
+	}
+	setAsGuest() {
+		this._guest = true;
 	}
 
 	get hp() {
