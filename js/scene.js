@@ -265,9 +265,7 @@ class BattleScene extends Scene {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
-		this.playerTeam.members.forEach(unit => {
-			if (unit.guest) unit.endTurn();
-		});
+		this._disableGuests(this.playerTeam);
 		this._deployList.show();
 
 		this._deselectSkill();
@@ -301,9 +299,7 @@ class BattleScene extends Scene {
 			case BattleScene.DeployPhase:
 				this._deployList.hide();
 				this._phase = BattleScene.PlayerPhase;
-				this.playerTeam.members.forEach(unit => {
-					if (unit.guest) unit.startTurn();
-				});
+				this._enableGuests(this.playerTeam);
 				this._showPhaseBanner("Battle Start");
 				this._canRedeploy = true;
 				break;
@@ -340,6 +336,16 @@ class BattleScene extends Scene {
 		if (this._activeTeam) {
 			this._activeTeam.startTurn();
 		}
+	}
+	_enableGuests(team) {
+		team.members.forEach(unit => {
+			if (unit.guest) unit.startTurn();
+		});
+	}
+	_disableGuests(team) {
+		team.members.forEach(unit => {
+			if (unit.guest) unit.endTurn();
+		});
 	}
 	get _autoPhase() {
 		if (!this._activeTeam) return false;
