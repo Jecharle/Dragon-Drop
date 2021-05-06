@@ -547,47 +547,47 @@
 		.status-list>.icon {
 			height: 16px;
 			width: 16px;
-			border-radius: 30%;
 			box-sizing: border-box;
 			font-size: 12px;
-			color: black;
+			color: transparent; /*TEMP until I get a better way to show the number*/
 			font-weight: bolder;
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			background-image: url(../img/statusIcons.png);
+			background-position: 0px 0px;
 		}
 
 		/*#region status icons*/
 		.status-list>.power-up {
-			background-color: orange;
+			background-position: 0px 0px;
 		}
 		.status-list>.power-down {
-			background-color: darkgoldenrod;
+			background-position: 0px -16px;
 		}
 
 		.status-list>.defense-up {
-			background-color: silver;
+			background-position: -16px 0px;
 		}
 		.status-list>.defense-down {
-			background-color: darkgrey;
+			background-position: -16px -16px;
 		}
 
 		.status-list>.speed-up {
-			background-color: deepskyblue;
+			background-position: -32px 0px;
 		}
 		.status-list>.speed-down {
-			background-color: blue;
-			color: silver;
+			background-position: -32px -16px;
 		}
 		
 		.status-list>.regenerate {
-			background-color: greenyellow;
+			background-position: 0px -32px;
 		}
 		.status-list>.poison {
-			background-color: darkgreen;
-			color: silver;
+			background-position: -16px -32px;
 		}
 
+		/*TODO: Get icons for these, too*/
 		.status-list>.evade {
 			background-color: black;
 			color: silver;
