@@ -12,9 +12,10 @@
 		{"id": "fork", "x": 350, "y": 350},
 		{"id": "tail", "x": 450, "y": 450, "hidden": true},
 		{"id": "last", "x": 400, "y": 200},
+		{"id": "dropoff", "x": 550, "y": 150},
 
 		{"id": "island", "x": 600, "y": 600, "hidden": true},
-		{"id": "island2", "x": 550, "y": 650, "hidden": true}
+		{"id": "island2", "x": 550, "y": 650}
 	],
 	
 	"connections": [
@@ -23,6 +24,7 @@
 		{"a": "fork", "b": "tail"},
 		{"a": "fork", "b": "last"},
 		{"a": "last", "b": "start"},
+		{"a": "last", "b": "dropoff"},
 
 		{"a": "island", "b": "island2"}
 	],
@@ -58,14 +60,28 @@
 			"description": "This ferry will take you to the island",
 			"node": "tail",
 			"type": "move",
-			"param": "island"
+			"filename": "/island"
 		},
 		{ 
 			"name": "Ferry",
 			"description": "This ferry will take you back to the mainland",
 			"node": "island",
 			"type": "move",
-			"param": "tail"
+			"filename": "/tail"
+		},
+		{ 
+			"name": "Descent",
+			"description": "This hole takes you to the underground",
+			"node": "dropoff",
+			"type": "move",
+			"filename": "testMap2/start"
+		},
+		{ 
+			"name": "Descent",
+			"description": "This hole takes you to the underground",
+			"node": "island2",
+			"type": "move",
+			"filename": "testMap2/last"
 		}
 	]
 }

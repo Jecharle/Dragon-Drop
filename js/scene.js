@@ -820,7 +820,7 @@ class MapScene extends Scene {
 		
 		var startNode = this._map.getNode(startNodeId);
 		if (startNode) {
-			this._piece.move(this._map.getNode(startNode));
+			this._piece.move(startNode);
 		} else {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
@@ -944,16 +944,22 @@ class MapScene extends Scene {
 				return true;
 
 			case MapEvent.Move:
-				// TODO: This only handles local moves- be sure to handle non-local as well?
-				var destination = this._map.getNode(event.param);
-				if (destination) this._movePiece(destination);
+				if (event.filename) {
+					var model = await MapSceneModel.load(event.filename);
+					this._pause();
+					Game.setScene( new MapScene(this._lastScene, model, event.param));
+				} else {
+					var destination = this._map.getNode(event.param);
+					if (destination) this._movePiece(destination);
+				}
 				this._completeEvent(event);
 				this.refresh();
 				return true;
 			
 			default:
-				// unrecognized event type
-				return false;
+				this._completeEvent(event);
+				this.refresh();
+				return true;
 		}
 	}
 
@@ -1004,8 +1010,7 @@ class MapScene extends Scene {
 class MapEvent {
 	constructor(eventData) {
 		this._type = eventData.type;
-		this._filename = eventData.filename;
-		this._param = eventData.param;
+		[this._filename, this._param] = eventData.filename?.split("/") || [];
 
 		this._name = eventData.name || "";
 		this._description = eventData.description || "";
