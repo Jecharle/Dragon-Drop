@@ -2,9 +2,8 @@ Motions are arranged vertically, with animation frames arranged horizontally
 
 Motions in order:
 0 Idle
-1 Selected
+1 Moving
 2 Hit
-3 Spawn
-4 Death
-5 Moving
-6 Acting
+3 Attacking
+4 Special 1
+5 Special 2

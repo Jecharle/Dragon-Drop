@@ -1,4 +1,34 @@
 /***************************************************
+ Index function for looking up types by name
+***************************************************/
+UnitPiece.parseUnitType = function(string) {
+	if (!string) return UnitPiece;
+	switch (string.toLowerCase()) {
+		// playable units
+		case "testmelee":
+			return TestMeleeUnit;
+
+		case "testsupport":
+			return TestSupportUnit;
+
+		case "testposition":
+			return TestPositionUnit;
+
+		// enemies
+		case "testenemy":
+			return TestEnemyUnit;
+
+		// inanimate object
+		case "rockobject":
+			return TestRockObject;
+
+		// something has gone wrong
+		default:
+			return UnitPiece;
+	}
+};
+
+/***************************************************
  Subtypes of UnitPiece
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {
@@ -66,6 +96,7 @@ class TestPositionUnit extends UnitPiece {
 
 	_setSkills() {
 		this._skills = [
+			new TestPullSkill(this),
 			new TestAreaSkill(this),
 			new TestPositionSkill(this),
 		]

@@ -1,0 +1,38 @@
+{
+	"type": "map",
+
+	"width": 1024,
+	"height": 1000,
+
+	"startNode": "start",
+
+	"nodes": [
+		{"id": "start", "x": 500, "y": 250},
+		{"id": "second", "x": 400, "y": 400},
+		{"id": "aside", "x": 550, "y": 350},
+		{"id": "last", "x": 600, "y": 550}
+	],
+	
+	"connections": [
+		{"a": "start", "b": "second"},
+		{"a": "second", "b": "aside"},
+		{"a": "second", "b": "last"}
+	],
+
+	"events": [
+		{ 
+			"name": "Ascend",
+			"description": "Climb back up to the surface",
+			"node": "start",
+			"type": "move",
+			"filename": "testMap/dropoff"
+		},
+		{ 
+			"name": "Ascend",
+			"description": "Climb back up to the surface",
+			"node": "last",
+			"type": "move",
+			"filename": "testMap/island2"
+		}
+	]
+}

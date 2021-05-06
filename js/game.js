@@ -7,19 +7,25 @@ class Game {
 	}
 
 	static get scene() {
-		return Game._scene;
+		return this._scene;
 	}
-	static setScene(scene) {
-		if (Game._scene == scene) return;
+	static async setScene(scene) {
+		if (this._scene == scene) return;
 
-		if (Game._scene != null) {
-			Game.el.removeChild(Game._scene.el);
-			Game._scene.end();
+		if (this._scene) {
+			this._scene.end();
+			this._scene.addTimedClass(550, "outro");
+			await this.asyncPause(500);
+			this.el.removeChild(this._scene.el);
 		}
 
-		Game._scene = scene;
-		Game.el.appendChild(scene.el);
-		Game._scene.start();
+		this._scene = scene;
+
+		if (this._scene) {
+			this.el.appendChild(this._scene.el);
+			this._scene.start();
+			this._scene.addTimedClass(550, "intro");
+		}
 	}
 
 	static globalKeydown(ev) {
@@ -29,7 +35,7 @@ class Game {
 		if (Game.scene && !ev.repeat) Game.scene.keyup(ev.key);
 	}
 	static beforeUnload(ev) {
-		return null//Game.scene.unsaved || null; // DISABLED FOR TESTING
+		return null;//Game.scene.unsaved || null; // TEMP disabled for testing
 	}
 
 	static async asyncPause(milliseconds) {
@@ -40,20 +46,31 @@ class Game {
 		});
 		return await timeout;
 	}
+	static showLoading() {
+		this.el.classList.add('loading');
+	}
+	static hideLoading() {
+		this.el.classList.remove('loading');
+	}
 
 	static begin() {
-		document.addEventListener('keydown', Game.globalKeydown);
-		document.addEventListener('keyup', Game.globalKeyup);
+		document.addEventListener('keydown', this.globalKeydown);
+		document.addEventListener('keyup', this.globalKeyup);
 
-		Game.el = document.createElement("div");
-		Game.el.classList.add("game-window");
-		document.body.appendChild(Game.el);
+		this.el = document.createElement("div");
+		this.el.classList.add('game-window');
+		document.body.appendChild(this.el);
 
-		// TEMP
+		//SaveData.loadAll(); // TEMP disabled for testing
+
+		// TEMP initial party setup
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		Game.setScene(new BattleScene( new TestMap(), Party.getUnits() ));
+
+		MapSceneModel.load("testMap").then(mapModel => {
+			this.setScene(new MapScene(null, mapModel));
+		})
 	}
 }
 Game.begin();

@@ -24,15 +24,19 @@ class Piece extends SpriteElObj {
 		return (!id || id == this.el.id);
 	}
 
-	get type() { return Piece.None; }
+	//#region piece type
 	static get None() { return 0; }
 	static get Unit() { return 1; }
 	static get Skill() { return 2; }
+	static get Map() { return 3; }
+
+	get type() { return Piece.None; }
+	//#endregion piece type
 
 	//#region parent
 	setParent(container) {
-		if (this.parent && this.parent != container) {
-			this.parent.removePiece(this);
+		if (this._parent && this._parent != container) {
+			this._parent.removePiece(this);
 		}
 		this._parent = container;
 		if (container) container.addPiece(this);
@@ -97,6 +101,7 @@ class UnitPiece extends Piece {
 
 		this.size = 1;
 		this._moveStyle = "path";
+		this._guest = false;
 		this._setStats();
 		this._setSkills();
 
@@ -183,6 +188,12 @@ class UnitPiece extends Piece {
 	isEnemy(piece) {
 		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
+	}
+	get guest() {
+		return this._guest;
+	}
+	setAsGuest() {
+		this._guest = true;
 	}
 
 	get hp() {
@@ -506,8 +517,12 @@ class UnitPiece extends Piece {
 
 			var newSkill = skill.aiGetBestTarget(square);
 			newSkill.skill = skill;
-			if (newSkill.target && newSkill.score > best.score) return newSkill;
+			if (!newSkill.target) return best;
 			
+			if (newSkill.score > best.score) return newSkill;
+			if (newSkill.score < best.score) return best;
+
+			if( Math.random() > 0.5) return newSkill;
 			return best;
 		},
 		{
@@ -530,9 +545,12 @@ class UnitPiece extends Piece {
 			if (newPlan.move.inRange && !best.move?.inRange) return newPlan;
 			// better score wins
 			if (newPlan.score > best.score) return newPlan;
+			if (newPlan.score < best.score) return best;
 			// equal score, fewer moves wins
-			if (newPlan.score == best.score && newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
-			
+			if (newPlan.move.movesLeft > best.move.movesLeft) return newPlan;
+			if (newPlan.move.movesLeft < best.move.movesLeft) return best;
+			// equal moves, toss a coin
+			if (Math.random() > 0.5) return newPlan;
 			return best;
 		},
 		{
@@ -595,7 +613,10 @@ class SkillPiece extends Piece {
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
 
-		this._tooltip = new SkillDescription(this.fullDescription);
+		this._quantityLabel = new QuantityLabel("");
+		this.el.appendChild(this._quantityLabel.el);
+
+		this._tooltip = new HoverDescription(this.fullDescription);
 		this.el.appendChild(this._tooltip.el);
 
 		this.refresh();
@@ -772,7 +793,7 @@ class SkillPiece extends Piece {
 	}
 	//#endregion use skill
 
-	//#region animation
+	//#region animate
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
 		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
@@ -780,7 +801,7 @@ class SkillPiece extends Piece {
 		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
-	//#endregion animation
+	//#endregion animate
 
 	//#region refresh
 	refresh() {
@@ -790,14 +811,8 @@ class SkillPiece extends Piece {
 		this._refreshLabels();
 	}
 	_refreshLabels() {
-		// TEMP - two separate labels?
-		if (this.cooldown > 0) {
-			this._cooldownLabel.value = this.cooldown;
-		} else if (this.hasLimitedUses) {
-			this._cooldownLabel.value = "x"+this.usesLeft;
-		} else {
-			this._cooldownLabel.value = "";
-		}
+		this._cooldownLabel.value = this.cooldown > 0 ? this.cooldown : "";
+		this._quantityLabel.value = this.hasLimitedUses ? this.usesLeft : "";
 		this._tooltip.value = this.fullDescription;
 	}
 	//#endregion refresh
@@ -834,13 +849,14 @@ class SkillPiece extends Piece {
 		var best = origin.parent.squares.reduce((best, target) => {
 			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
 
-			var score = this._aiTargetScore(target);
-			if (score >= best.score){
-				 return {
-					target: target,
-					score: score
-				};
+			var newTarget = {
+				score: this._aiTargetScore(target),
+				target: target
 			}
+			if (newTarget.score > best.score) return newTarget;
+			if (newTarget.score < best.score) return best;
+
+			if (Math.random() > 0.5) return newTarget;
 			return best;
 		},
 		{
@@ -930,3 +946,73 @@ class SkillPiece extends Piece {
 	}
 	//#endregion directional areas
 };
+
+/***************************************************
+ Map Piece
+***************************************************/
+class MapPiece extends Piece {
+
+	constructor() {
+		super();
+		this.node = null;
+
+		this.el.draggable = true;
+		this.el.classList.add('selectable');
+
+		this.refresh();
+	}
+
+	get type() { return Piece.Map; }
+
+	get elClass() {
+		return 'map-piece';
+	}
+
+	//#region movement
+	async move(node) {
+		if (!node || this.node == node) return false;
+		
+		this.setParent(node.parent);
+		if (!this.parent.el.contains(this.el)) this.parent.el.appendChild(this.el);
+
+		var startNode = this.node;
+		this.node = node;
+		this.el.style.transform = this.node.screenPosition;
+		this.el.style.zIndex = this.node.screenZ;
+
+		var time = 0;
+		if (node.path) {
+			time = this.animateMovement(node.path);
+		} else if (startNode) {
+			time = this.animateMovement([startNode]);
+		}
+		await Game.asyncPause(time);
+
+		return true;
+	}
+	//#endregion movement
+
+	//#region animate
+	animateMovement(path) {
+		var keyframes = [{}];
+		path.forEach(node => {
+			keyframes.unshift({
+				transform: node.screenPosition,
+				zIndex: node.screenZ
+			});
+		});
+		var time = 750*(keyframes.length-1);
+		this.el.animate(keyframes, {duration: time, easing: "linear"});
+		return time;
+	}
+	//#endregion movement
+
+	//#region refresh
+	refresh() {
+		if (this.node) {
+			this.el.style.transform = this.node.screenPosition;
+			this.el.style.zIndex = this.node.screenZ;
+		}
+	}
+	//#endregion refresh
+}

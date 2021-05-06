@@ -135,9 +135,58 @@ class CooldownLabel extends Detail {
 }
 
 /***************************************************
+ Limited quantity label
+***************************************************/
+class QuantityLabel extends Detail {
+	set value(value) {
+		value += "";
+		if (value.length) value = "x"+value;
+		this._value = value;
+		this.el.innerHTML = value;
+	}
+	get elClass() {
+		return 'quantity-label';
+	}
+}
+
+/***************************************************
+ Label showing a current / max value
+***************************************************/
+class CurrentMaxLabel extends Detail {
+	constructor(startValue, startMaxValue) {
+		super();
+
+		this.maxValue = startMaxValue;
+		this.value = startValue;
+	}
+
+	get elClass() {
+		return 'capacity-label';
+	}
+
+	set value(value) {
+		this._value = value;
+		this._updateText();	
+	}
+
+	get maxValue() {
+		return this._maxValue;
+	}
+	set maxValue(value) {
+		this._maxValue = value;
+		this._updateText();
+	}
+
+	// TODO: Also, text describing what it's counting?
+	_updateText() {
+		this.el.innerHTML = `${this._value}/${this._maxValue}`;
+	}
+}
+
+/***************************************************
  Skill description
 ***************************************************/
-class SkillDescription extends Detail {
+class HoverDescription extends Detail {
 	get elType() {
 		return 'div';
 	}
@@ -221,4 +270,48 @@ class SpriteEffect extends SpriteElObj {
 		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});
 	}
 	//#endregion animate
+}
+
+/***************************************************
+ Edge connecting map nodes
+***************************************************/
+class Edge extends ElObj {
+	constructor(startPosition, endPosition, oneWay) {
+		super();
+		this._start = startPosition;
+		this._end = endPosition;
+		this._oneWay = !!oneWay;
+		this.refresh();
+	}
+
+	get elClass() { return 'line'; }
+
+	get start() { return this._start; }
+	get end() { return this._end; }
+	get oneWay() { return this._oneWay; }
+
+	get hidden() {
+		return (this._end.hidden || this._start.hidden);
+	}
+
+	otherNode(node) {
+		if (node == this.start) return this.end;
+		else if (node == this.end && !this._oneWay) return this.start;
+		else return null;
+	}
+
+	refresh() {
+		var dx = (this._end.screenX - this._start.screenX);
+		var dy = (this._end.screenY - this._start.screenY);
+		var width = Math.sqrt(dx*dx + dy*dy);
+		var angle = Math.atan2(dy, dx)*180/Math.PI;
+		var screenX = this._start.screenX;
+		var screenY = this._start.screenY;
+
+		this.el.style.transform = `translate(${screenX}px, ${screenY}px) rotate(${angle}deg)`;
+		this.el.style.width = `${width}px`;
+
+		if (this._end.hidden || this._start.hidden) this._hide();
+		else this._show();
+	}
 }
