@@ -110,6 +110,66 @@ class Lifebar extends Detail {
 }
 
 /***************************************************
+ Status icon list
+***************************************************/
+class StatusList extends Detail {
+	constructor(statusObject) {
+		super(statusObject);
+	}
+
+	get elClass() {
+		return 'status-list';
+	}
+
+	set value(statusObject) {
+		this._clearIcons();
+		if (!statusObject) return;
+		
+		if (statusObject[UnitPiece.Power] > 0) {
+			this._addIcon('power-up', statusObject[UnitPiece.Power]);
+		} else if (statusObject[UnitPiece.Power] < 0) {
+			this._addIcon('power-down', statusObject[UnitPiece.Power]);
+		}
+
+		if (statusObject[UnitPiece.Defense] > 0) {
+			this._addIcon('defense-up', statusObject[UnitPiece.Defense]);
+		} else if (statusObject[UnitPiece.Defense] < 0) {
+			this._addIcon('defense-down', statusObject[UnitPiece.Defense]);
+		}
+
+		if (statusObject[UnitPiece.Speed] > 0) {
+			this._addIcon('speed-up', statusObject[UnitPiece.Speed]);
+		} else if (statusObject[UnitPiece.Speed] < 0) {
+			this._addIcon('speed-down', statusObject[UnitPiece.Speed]);
+		}
+
+		if (statusObject[UnitPiece.Regenerate] > 0) {
+			this._addIcon('regenerate', statusObject[UnitPiece.Regenerate]);
+		}
+
+		if (statusObject[UnitPiece.Poison] > 0) {
+			this._addIcon('poison', statusObject[UnitPiece.Poison]);
+		}
+		// TODO: Icons for other poison flavors
+	}
+
+	_addIcon(style, value) {
+		var newIconEl = document.createElement('div');
+		newIconEl.classList.add('icon', style);
+		newIconEl.innerText = value;
+		this._icons.push(newIconEl);
+		this.el.appendChild(newIconEl);
+	}
+	_clearIcons() {
+		if (this._icons) this._icons.forEach(el => this.el.removeChild(el));
+		this._icons = [];
+	}
+
+	// TODO: Accepts a status object for the value
+	// TODO: Adds child element icons for each status it has
+}
+
+/***************************************************
  Popup text
 ***************************************************/
 class PopupText extends Detail {

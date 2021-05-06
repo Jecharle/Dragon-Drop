@@ -108,6 +108,10 @@ class UnitPiece extends Piece {
 		this.hp = this.maxHp;
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
+		
+		this._status = {};
+		this._statusList = new StatusList(this._status);
+		this.el.appendChild(this._statusList.el);
 
 		this._initialize();
 	}
@@ -280,6 +284,7 @@ class UnitPiece extends Piece {
 	refresh() {
 		this._lifebar.maxValue = this.maxHp;
 		this._lifebar.value = this.hp;
+		this._statusList.value = this._status;
 
 		this._refreshSkills();
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
