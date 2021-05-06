@@ -256,6 +256,12 @@ class UnitPiece extends Piece {
 			// TODO: show regen visual
 		}
 	}
+	_applyCharge() {
+		if (this.getStatus('charge') != 0) {
+			this.addStatus('power', this.getStatus('charge'));
+			// TODO: show buff visual...?
+		}
+	}
 	//#endregion status effects
 
 	//#region refresh
@@ -405,7 +411,9 @@ class UnitPiece extends Piece {
 	}
 
 	_startTurnStatuses() {
+		this._applyCharge();
 		this._applyRegenerate();
+		this._status.charge = 0;
 		this._status.regenerate = 0;
 		this._status.defense = 0;
 		this._status.evade = 0;
