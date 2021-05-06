@@ -36,7 +36,7 @@
 			"node": "start",
 			"type": "battle",
 			"filename": "testBattle",
-			"saveid": "testMapTestBattle",
+			"saveId": "testMapTestBattle",
 			"gems": 1,
 			"unlocks": [
 				"second"

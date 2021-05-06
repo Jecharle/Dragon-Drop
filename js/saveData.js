@@ -18,22 +18,24 @@ class SaveData {
 	//#endregion mapEvent
 
 	//#region save / load
+	static get storage() { return sessionStorage; } // TEMP: Don't keep saves while I'm testing things
+
 	static _saveAttribute(attribute) {
 		var textData = JSON.stringify(this[attribute]);
 		if (textData) {
-			localStorage.setItem(attribute, textData);
+			this.storage.setItem(attribute, textData);
 		} else {
 			this._clearAttribute(attribute);
 		}
 	}
 	static _loadAttribute(attribute) {
-		var textData = localStorage.getItem(attribute);
+		var textData = this.storage.getItem(attribute);
 		if (textData) {
 			this[attribute] = JSON.parse(textData);
 		}
 	}
 	static _clearAttribute(attribute) {
-		localStorage.removeItem(attribute);
+		this.storage.removeItem(attribute);
 	}
 
 	static loadAll() {
@@ -48,7 +50,7 @@ class SaveData {
 	 * WARNING: THIS WILL IN FACT ERASE *ALL* SAVED PROGRESS AND SETTINGS
 	 */
 	static clearAll() {
-		localStorage.clear();
+		this.storage.clear();
 	}
 
 	// TODO: Specific load/save functions for different groupings of data?

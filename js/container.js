@@ -705,8 +705,6 @@ class DeployUnitList extends Container {
 	show() {
 		this._show();
 	}
-
-	// TODO: Show unit count + max deploy count
 	
 	//#region input events
 	_drop(ev) {
