@@ -946,7 +946,6 @@ class MapScene extends Scene {
 			case MapEvent.Move:
 				if (event.filename) {
 					var model = await MapSceneModel.load(event.filename);
-					this._pause();
 					Game.setScene( new MapScene(this._lastScene, model, event.param));
 				} else {
 					var destination = this._map.getNode(event.param);

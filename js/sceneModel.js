@@ -6,14 +6,18 @@ class SceneModel {
 	// TODO: Generically applicable file-loading routine
 	static async load(folder, filename) {
 		var fullpath = `data/${folder}/${filename}.json`;
+		Game.showLoading();
+
 		return new Promise(function (resolve, reject) {
 			var request = new XMLHttpRequest();
 			request.open("GET", fullpath);
 			request.responseType = 'json';
 			request.onload = () => {
+				Game.hideLoading();
 				resolve(request.response);
 			};
 			request.onerror = () => {
+				Game.hideLoading();
 				reject(request.status);
 			};
 			request.send();

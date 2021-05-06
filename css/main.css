@@ -9,7 +9,18 @@
 	height: var(--game-h);
 	overflow: hidden;
 	border: 1px solid black; /*TEMP?*/
+	position: relative;
 }
+	.loading.game-window::before {
+		content: "Loading...";
+		position: absolute;
+		z-index: 99;
+		right: 8px;
+		bottom: 8px;
+		color: black;
+		font-size: 18px;
+		font-weight: bold;
+	}
 
 .scene {
 	width: 100%;

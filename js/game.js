@@ -46,6 +46,12 @@ class Game {
 		});
 		return await timeout;
 	}
+	static showLoading() {
+		this.el.classList.add('loading');
+	}
+	static hideLoading() {
+		this.el.classList.remove('loading');
+	}
 
 	static begin() {
 		document.addEventListener('keydown', this.globalKeydown);
