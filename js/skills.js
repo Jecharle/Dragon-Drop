@@ -220,6 +220,47 @@ class TestDebuffSkill extends SkillPiece {
 };
 
 /***************************************************
+ Test debuff skill
+***************************************************/
+class TestTrapSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'debuff-skill';
+	}
+
+	get name() {
+		return "Lock";
+	}
+	get _description() {
+		return `Apply Trap, Anchor, and Evade to the target.`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._baseCooldown = 2;
+		this._range = 2;
+		this._minRange = 0;
+	}
+
+	validTarget(target) {
+		if (target.piece && target.piece.targetable) {
+			return true;
+		}
+		return false;
+	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
+	_unitEffects(unit, _target) {
+		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		unit.addStatus(UnitPiece.Anchor);
+		unit.addStatus(UnitPiece.Trap);
+		unit.addStatus(UnitPiece.Evade);
+		return 200;
+	}
+};
+
+/***************************************************
  Test build skill
 ***************************************************/
 class TestBuildSkill extends SkillPiece {

@@ -151,6 +151,18 @@ class StatusList extends Detail {
 			this._addIcon('poison', statusObject[UnitPiece.Poison]);
 		}
 		// TODO: Icons for other poison flavors
+
+		if (statusObject[UnitPiece.Trap]) {
+			this._addIcon('trap', "X");
+		}
+
+		if (statusObject[UnitPiece.Evade]) {
+			this._addIcon('evade', "E");
+		}
+
+		if (statusObject[UnitPiece.Anchor]) {
+			this._addIcon('anchor', "A");
+		}
 	}
 
 	_addIcon(style, value) {

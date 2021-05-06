@@ -101,6 +101,7 @@ class TestPositionUnit extends UnitPiece {
 			new TestPullSkill(this),
 			new TestAreaSkill(this),
 			new TestPositionSkill(this),
+			new TestTrapSkill(this)
 		]
 	}
 };
