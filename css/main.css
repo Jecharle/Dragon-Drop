@@ -226,6 +226,14 @@
 		background-color: cornflowerblue;
 		border-radius: 25%;
 	}
+	.buff-skill>.sprite {
+		background-color: aquamarine;
+		border-radius: 25%;
+	}
+	.debuff-skill>.sprite {
+		background-color: violet;
+		border-radius: 25%;
+	}
 	/*#endregion skill icons*/
 /*#endregion skill piece*/
 

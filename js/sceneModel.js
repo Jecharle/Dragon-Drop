@@ -40,7 +40,7 @@ class MapSceneModel extends SceneModel {
 
 		this.connections = data?.connections || []; // node id 1, node id 2, one-way
 
-		this.events = data?.events.map(event => { // node id, type*, filename, params, oneTime, name, description
+		this.events = data?.events.map(event => { // node id, type*, filename, oneTime, name, description, rewards, nodes to unlock
 			event.type = MapEvent.parseEventType(event.type);
 			return event;
 		}) || [];

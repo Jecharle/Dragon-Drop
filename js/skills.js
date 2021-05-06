@@ -136,6 +136,88 @@ class TestHealSkill extends SkillPiece {
 };
 
 /***************************************************
+ Test buff skill
+***************************************************/
+class TestBuffSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'buff-skill';
+	}
+
+	get name() {
+		return "Buff";
+	}
+	get _description() {
+		return `Increase attack, defense, and speed by 1`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._baseCooldown = 2;
+		this._range = 2;
+		this._minRange = 0;
+	}
+
+	validTarget(target) {
+		if (target.piece && target.piece.targetable) {
+			return true;
+		}
+		return false;
+	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
+	_unitEffects(unit, _target) {
+		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		unit.buffPower(1);
+		unit.buffDefense(1);
+		unit.buffSpeed(1);
+		return 200;
+	}
+};
+
+/***************************************************
+ Test debuff skill
+***************************************************/
+class TestDebuffSkill extends SkillPiece {
+	constructor(user) {
+		super(user);
+		this.style = 'debuff-skill';
+	}
+
+	get name() {
+		return "Debuff";
+	}
+	get _description() {
+		return `Decrease attack, defense, and speed by 1`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._baseCooldown = 2;
+		this._range = 2;
+		this._minRange = 0;
+	}
+
+	validTarget(target) {
+		if (target.piece && target.piece.targetable) {
+			return true;
+		}
+		return false;
+	}
+	_startEffects(_target, _squares, _units) {
+		return 0;
+	}
+	_unitEffects(unit, _target) {
+		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		unit.debuffPower(1);
+		unit.debuffDefense(1);
+		unit.debuffSpeed(1);
+		return 200;
+	}
+};
+
+/***************************************************
  Test build skill
 ***************************************************/
 class TestBuildSkill extends SkillPiece {

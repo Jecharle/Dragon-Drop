@@ -153,6 +153,11 @@ class UnitPiece extends Piece {
 		this.actionUsed = false;
 		this.homeSquare = null;
 		this._facing = 1;
+		
+		this.resetPowerModifier();
+		this.resetDefenseModifier();
+		this.resetSpeedModifier();
+
 		this.refresh();
 	}
 	//#endregion setup
@@ -219,13 +224,70 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		return this._moveRange;
+		return this._moveRange + this.speedModifier;
 	}
 
 	get skills() {
 		return this._skills;
 	}
 	//#endregion attributes
+
+	//#region status modifiers
+
+	// Power up / weaken
+	get powerModifier() {
+		return this._powerModifier;
+	}
+	buffPower(value) {
+		if (this._powerModifier < 0) this.resetPowerModifier();
+		else this._powerModifier = Math.max(this._powerModifier, value);
+	}
+	debuffPower(value) {
+		if (this._powerModifier > 0) this.resetPowerModifier();
+		else this._powerModifier = Math.min(this._powerModifier, -value);
+	}
+	resetPowerModifier() {
+		this._powerModifier = 0;
+	}
+
+	// Speed up / slow
+	get speedModifier() {
+		return this._speedModifier;
+	}
+	buffSpeed(value) {
+		if (this._speedModifier < 0) this.resetSpeedModifier();
+		else this._speedModifier = Math.max(this._speedModifier, value);
+	}
+	debuffSpeed(value) {
+		if (this._speedModifier > 0) this.resetSpeedModifier();
+		else this._speedModifier = Math.min(this._speedModifier, -value);
+	}
+	resetSpeedModifier() {
+		this._speedModifier = 0;
+	}
+	
+	// Defense up / break
+	get defenseModifier() {
+		return this._defenseModifier;
+	}
+	buffDefense(value) {
+		if (this._defenseModifier < 0) this.resetDefenseModifier();
+		else this._defenseModifier = Math.max(this._defenseModifier, value);
+	}
+	debuffDefense(value) {
+		if (this._defenseModifier > 0) this.resetDefenseModifier();
+		else this._defenseModifier = Math.min(this._defenseModifier, -value);
+	}
+	resetDefenseModifier() {
+		this._defenseModifier = 0;
+	}
+
+	// TODO: Poison
+	// TODO: Regenerate
+	// TODO: Evade
+	// TODO: Trap
+
+	//#endregion status modifiers
 
 	//#region refresh
 	refresh() {
@@ -250,10 +312,13 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, _props) {
-		this.hp -= power;
+	takeDamage(power, props) {
+		if (!props?.ignoreDefense) {
+			power -= this.defenseModifier;
+		}
 
 		if (power > 0) {
+			this.hp -= power;
 			this.addTimedClass(450, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
 		}
@@ -309,6 +374,9 @@ class UnitPiece extends Piece {
 
 	startTurn() {
 		this.myTurn = true;
+		
+		this.resetDefenseModifier();
+
 		this.refresh();
 	}
 	endTurn() {
@@ -316,6 +384,10 @@ class UnitPiece extends Piece {
 		this.actionUsed = false;
 		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
+
+		this.resetPowerModifier();
+		this.resetSpeedModifier();
+
 		this.refresh();
 	}
 	//#endregion turn state
@@ -680,7 +752,7 @@ class SkillPiece extends Piece {
 	}
 
 	get power() {
-		return this._basePower;
+		return Math.max(this._basePower + this.user.powerModifier, 1);
 	}
 
 	_setStats() {
@@ -758,6 +830,7 @@ class SkillPiece extends Piece {
 		for (var i = 0; i < this._units.length; i++) {
 			waitTime = this._unitEffects(this._units[i], this._target);
 			await Game.asyncPause(waitTime);
+			this._units[i].refresh();
 		}
 		
 		waitTime = this._endEffects(this._target, this._squares, this._units);
