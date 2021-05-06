@@ -222,7 +222,8 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		return this._moveRange + this.getStatus('speed');
+		if (this.getStatus('trap')) return 0;
+		return Math.max(this._moveRange + this.getStatus('speed'), 0);
 	}
 
 	get powerBonus() {
@@ -234,7 +235,7 @@ class UnitPiece extends Piece {
 	}
 	//#endregion attributes
 
-	//#region status modifiers
+	//#region status effects
 	getStatus(effect) {
 		if (!this._status) return 0;
 		else return this._status[effect] || 0;
@@ -245,19 +246,17 @@ class UnitPiece extends Piece {
 			this.hp -= this.getStatus('_delayedDamage');
 			this.addTimedClass(1200, 'hp-change');
 			this.addTimedClass(450, 'damaged');
+			// TODO: show flavored DoT visual
 		}
 	}
 	_applyRegenerate() {
 		if (this.getStatus('regenerate') > 0) {
 			this.hp += this.getStatus('regenerate');
 			this.addTimedClass(1200, 'hp-change');
+			// TODO: show regen visual
 		}
 	}
-
-	// TODO: Evade
-	// TODO: Trap
-
-	//#endregion status modifiers
+	//#endregion status effects
 
 	//#region refresh
 	refresh() {
@@ -284,7 +283,13 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, props) {
 		if (!props?.ignoreDefense) {
-			power -= this.getStatus('defense');
+			power = Math.max(power - this.getStatus('defense'), 0);
+		}
+
+		if (power > 0 && this.getStatus('evade') && !props?.ignoreEvade) {
+			this.removeStatus('evade');
+			// TODO: Evade effect
+			power = 0;
 		}
 
 		if (power > 0) {
@@ -304,7 +309,7 @@ class UnitPiece extends Piece {
 		}
 
 		if (!props?.noCure) {
-			this._status.delayedDamage = 0;
+			this._status._delayedDamage = 0;
 		}
 
 		this.refresh();
@@ -313,11 +318,15 @@ class UnitPiece extends Piece {
 
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
+		
+		if (this.getStatus('anchor')) return 0;
+
 		var previousSquare = this.square;
 		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
 		}
+		if (distanceMoved > 0) this.removeStatus('trap');
 		return distanceMoved;
 	}
 	pull(origin, distance, props) {
@@ -325,6 +334,9 @@ class UnitPiece extends Piece {
 	}
 	swap(piece, props) {
 		if (!this.parent) return false;
+		
+		if (this.getStatus('anchor') || piece.getStatus('anchor')) return false;
+
 		if (this.parent.swapPieces(this, piece)) {
 			if (props?.animation) {
 				this.animateMove([piece.square], props.animation);
@@ -332,6 +344,8 @@ class UnitPiece extends Piece {
 			if (props?.animation2) {
 				piece.animateMove([this.square], props.animation2);
 			}
+			this.removeStatus('trap');
+			piece.removeStatus('trap');
 			return true;
 		}
 		return false;
@@ -339,13 +353,13 @@ class UnitPiece extends Piece {
 
 	addStatus(effect, value) {
 		switch(effect) {
-			case 'regenerate':
+			case 'regenerate': // regeneration (positive-only)
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
 				}
 				break;
 
-			case 'poison': case 'burn': case 'bleed':
+			case 'poison': case 'burn': case 'bleed': // delayed damage flavors
 				value = Math.abs(value);
 				if (value >= this.getStatus('_delayedDamage')) {
 					this._status._delayedDamage = value;
@@ -353,6 +367,10 @@ class UnitPiece extends Piece {
 				}
 				break;
 			
+			case 'evade': case 'trap': case 'anchor': // non-value effects
+				this._status[effect] = 1;
+				break;
+
 			default: // standardized buffs and debuffs
 				if (value > 0) {
 					if (this.getStatus(effect) < 0) this._status[effect] = 0;
@@ -390,13 +408,16 @@ class UnitPiece extends Piece {
 		this._applyRegenerate();
 		this._status.regenerate = 0;
 		this._status.defense = 0;
+		this._status.evade = 0;
+		this._status.anchor = 0;
 	}
 	_endTurnStatuses() {
 		this._applyDelayedDamage();
-		this._status.delayedDamage = 0;
-		this._status.delayedDamageType = "";
+		this._status._delayedDamage = 0;
+		this._status._delayedDamageType = "";
 		this._status.power = 0;
 		this._status.speed = 0;
+		this._status.trap = 0;
 	}
 
 	startTurn() {
@@ -636,7 +657,7 @@ class UnitPiece extends Piece {
 			newPlan.move = square;
 			if (!newPlan.target || newPlan.score <= 0) return best;
 
-			// in range trumps out of range
+			// in range trumps out of range (not yet in range)
 			if (newPlan.move.inRange && !best.move?.inRange) return newPlan;
 			// better score wins
 			if (newPlan.score > best.score) return newPlan;

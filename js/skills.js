@@ -148,7 +148,7 @@ class TestBuffSkill extends SkillPiece {
 		return "Buff";
 	}
 	get _description() {
-		return `Increase attack, defense, and speed by 1`;
+		return `Increase all stats by 1 and restore 1 HP at the start of their next turn`;
 	}
 
 	_setStats() {
@@ -190,7 +190,7 @@ class TestDebuffSkill extends SkillPiece {
 		return "Debuff";
 	}
 	get _description() {
-		return `Decrease attack, defense, and speed by 1`;
+		return `Lower all stats by 1 and deal 1 damage at the end of their next turn.`;
 	}
 
 	_setStats() {
