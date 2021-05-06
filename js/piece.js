@@ -222,12 +222,12 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		if (this.getStatus(Unit.Trap)) return 0;
-		return Math.max(this._moveRange + this.getStatus(Unit.Speed), 0);
+		if (this.getStatus(UnitPiece.Trap)) return 0;
+		return Math.max(this._moveRange + this.getStatus(UnitPiece.Speed), 0);
 	}
 
 	get powerBonus() {
-		return this.getStatus(Unit.Power);
+		return this.getStatus(UnitPiece.Power);
 	}
 
 	get skills() {
@@ -254,23 +254,23 @@ class UnitPiece extends Piece {
 	}
 
 	_applyPoison() {
-		if (this.getStatus(Unit.Poison) > 0) {
-			this.hp -= this.getStatus(Unit.Poison);
+		if (this.getStatus(UnitPiece.Poison) > 0) {
+			this.hp -= this.getStatus(UnitPiece.Poison);
 			this.addTimedClass(1200, 'hp-change');
 			this.addTimedClass(450, 'damaged');
 			// TODO: show flavored DoT visual
 		}
 	}
 	_applyRegenerate() {
-		if (this.getStatus(Unit.Regenerate) > 0) {
-			this.hp += this.getStatus(Unit.Regenerate);
+		if (this.getStatus(UnitPiece.Regenerate) > 0) {
+			this.hp += this.getStatus(UnitPiece.Regenerate);
 			this.addTimedClass(1200, 'hp-change');
 			// TODO: show regen visual
 		}
 	}
 	_applyCharge() {
-		if (this.getStatus(Unit.Charge) != 0) {
-			this.addStatus(Unit.Power, this.getStatus(Unit.Charge));
+		if (this.getStatus(UnitPiece.Charge) != 0) {
+			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
 			// TODO: show buff visual...?
 		}
 	}
@@ -301,12 +301,12 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, props) {
 		if (!props?.ignoreDefense) {
-			power = Math.max(power - this.getStatus(Unit.Defense), 0);
+			power = Math.max(power - this.getStatus(UnitPiece.Defense), 0);
 		}
 
-		if (power > 0 && this.getStatus(Unit.Evade) && !props?.ignoreEvade) {
-			this.removeStatus(Unit.Evade);
-			// TODO: Evade effect
+		if (power > 0 && this.getStatus(UnitPiece.Evade) && !props?.ignoreEvade) {
+			this.removeStatus(UnitPiece.Evade);
+			// TODO: Evade visual effect
 			power = 0;
 		}
 
@@ -327,7 +327,7 @@ class UnitPiece extends Piece {
 		}
 
 		if (!props?.noCure) {
-			this._status[Unit.Poison] = 0;
+			this._status[UnitPiece.Poison] = 0;
 		}
 
 		this.refresh();
@@ -337,14 +337,14 @@ class UnitPiece extends Piece {
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
 		
-		if (this.getStatus(Unit.Anchor)) return 0;
+		if (this.getStatus(UnitPiece.Anchor)) return 0;
 
 		var previousSquare = this.square;
 		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
 		}
-		if (distanceMoved > 0) this.removeStatus(Unit.Trap);
+		if (distanceMoved > 0) this.removeStatus(UnitPiece.Trap);
 		return distanceMoved;
 	}
 	pull(origin, distance, props) {
@@ -353,7 +353,7 @@ class UnitPiece extends Piece {
 	swap(piece, props) {
 		if (!this.parent) return false;
 		
-		if (this.getStatus(Unit.Anchor) || piece.getStatus(Unit.Anchor)) return false;
+		if (this.getStatus(UnitPiece.Anchor) || piece.getStatus(UnitPiece.Anchor)) return false;
 
 		if (this.parent.swapPieces(this, piece)) {
 			if (props?.animation) {
@@ -362,8 +362,8 @@ class UnitPiece extends Piece {
 			if (props?.animation2) {
 				piece.animateMove([this.square], props.animation2);
 			}
-			this.removeStatus(Unit.Trap);
-			piece.removeStatus(Unit.Trap);
+			this.removeStatus(UnitPiece.Trap);
+			piece.removeStatus(UnitPiece.Trap);
 			return true;
 		}
 		return false;
@@ -371,21 +371,21 @@ class UnitPiece extends Piece {
 
 	addStatus(effect, value) {
 		switch(effect) {
-			case Unit.Regenerate: // regeneration (positive-only)
+			case UnitPiece.Regenerate: // regeneration (positive-only)
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
 				}
 				break;
 
-			case Unit.Poison: case Unit.Burn: case Unit.Bleed: // poison flavors
+			case UnitPiece.Poison: case UnitPiece.Burn: case UnitPiece.Bleed: // poison flavors
 				value = Math.abs(value);
-				if (value >= this.getStatus(Unit.Poison)) {
-					this._status[Unit.Poison] = value;
+				if (value >= this.getStatus(UnitPiece.Poison)) {
+					this._status[UnitPiece.Poison] = value;
 					this._status['_poisonType'] = effect;
 				}
 				break;
 			
-			case Unit.Evade: case Unit.Trap: case Unit.Anchor: // non-scaling effects
+			case UnitPiece.Evade: case UnitPiece.Trap: case UnitPiece.Anchor: // non-scaling effects
 				this._status[effect] = 1;
 				break;
 
@@ -402,8 +402,8 @@ class UnitPiece extends Piece {
 	}
 	removeStatus(effect) {
 		switch(effect) {
-			case Unit.Poison: case Unit.Burn: case Unit.Bleed:
-				this._status[Unit.Poison] = 0;
+			case UnitPiece.Poison: case UnitPiece.Burn: case UnitPiece.Bleed:
+				this._status[UnitPiece.Poison] = 0;
 				break;
 
 			default:
@@ -425,19 +425,19 @@ class UnitPiece extends Piece {
 	_startTurnStatuses() {
 		this._applyCharge();
 		this._applyRegenerate();
-		this._status[Unit.Charge] = 0;
-		this._status[Unit.Regenerate] = 0;
-		this._status[Unit.Defense] = 0;
-		this._status[Unit.Evade] = 0;
-		this._status[Unit.Anchor] = 0;
+		this._status[UnitPiece.Charge] = 0;
+		this._status[UnitPiece.Regenerate] = 0;
+		this._status[UnitPiece.Defense] = 0;
+		this._status[UnitPiece.Evade] = 0;
+		this._status[UnitPiece.Anchor] = 0;
 	}
 	_endTurnStatuses() {
 		this._applyPoison();
-		this._status[Unit.Poison] = 0;
+		this._status[UnitPiece.Poison] = 0;
 		this._status['_poisonType'] = "";
-		this._status[Unit.Power] = 0;
-		this._status[Unit.Speed] = 0;
-		this._status[Unit.Trap] = 0;
+		this._status[UnitPiece.Power] = 0;
+		this._status[UnitPiece.Speed] = 0;
+		this._status[UnitPiece.Trap] = 0;
 	}
 
 	startTurn() {

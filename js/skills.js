@@ -169,10 +169,10 @@ class TestBuffSkill extends SkillPiece {
 	}
 	_unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
-		unit.addStatus(Unit.Power, 1);
-		unit.addStatus(Unit.Defense, 1);
-		unit.addStatus(Unit.Speed, 1);
-		unit.addStatus(Unit.Regenerate, 1);
+		unit.addStatus(UnitPiece.Power, 1);
+		unit.addStatus(UnitPiece.Defense, 1);
+		unit.addStatus(UnitPiece.Speed, 1);
+		unit.addStatus(UnitPiece.Regenerate, 1);
 		return 200;
 	}
 };
@@ -211,10 +211,10 @@ class TestDebuffSkill extends SkillPiece {
 	}
 	_unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
-		unit.addStatus(Unit.Power, -1);
-		unit.addStatus(Unit.Defense, -1);
-		unit.addStatus(Unit.Speed, -1);
-		unit.addStatus(Unit.Poison, 1);
+		unit.addStatus(UnitPiece.Power, -1);
+		unit.addStatus(UnitPiece.Defense, -1);
+		unit.addStatus(UnitPiece.Speed, -1);
+		unit.addStatus(UnitPiece.Poison, 1);
 		return 200;
 	}
 };
