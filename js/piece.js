@@ -253,9 +253,9 @@ class UnitPiece extends Piece {
 		else return this._status[effect] || 0;
 	}
 
-	_applyDelayedDamage() {
-		if (this.getStatus('_delayedDamage') > 0) {
-			this.hp -= this.getStatus('_delayedDamage');
+	_applyPoison() {
+		if (this.getStatus(Unit.Poison) > 0) {
+			this.hp -= this.getStatus(Unit.Poison);
 			this.addTimedClass(1200, 'hp-change');
 			this.addTimedClass(450, 'damaged');
 			// TODO: show flavored DoT visual
@@ -327,7 +327,7 @@ class UnitPiece extends Piece {
 		}
 
 		if (!props?.noCure) {
-			this._status._delayedDamage = 0;
+			this._status[Unit.Poison] = 0;
 		}
 
 		this.refresh();
@@ -377,19 +377,19 @@ class UnitPiece extends Piece {
 				}
 				break;
 
-			case Unit.Poison: case Unit.Burn: case Unit.Bleed: // delayed damage flavors
+			case Unit.Poison: case Unit.Burn: case Unit.Bleed: // poison flavors
 				value = Math.abs(value);
-				if (value >= this.getStatus('_delayedDamage')) {
-					this._status._delayedDamage = value;
-					this._status._delayedDamageType = effect;
+				if (value >= this.getStatus(Unit.Poison)) {
+					this._status[Unit.Poison] = value;
+					this._status['_poisonType'] = effect;
 				}
 				break;
 			
-			case Unit.Evade: case Unit.Trap: case Unit.Anchor: // non-value effects
+			case Unit.Evade: case Unit.Trap: case Unit.Anchor: // non-scaling effects
 				this._status[effect] = 1;
 				break;
 
-			default: // standardized buffs and debuffs
+			default: // standard buffs and debuffs
 				if (value > 0) {
 					if (this.getStatus(effect) < 0) this._status[effect] = 0;
 					else if (value > this.getStatus(effect)) this._status[effect] = value;
@@ -403,7 +403,7 @@ class UnitPiece extends Piece {
 	removeStatus(effect) {
 		switch(effect) {
 			case Unit.Poison: case Unit.Burn: case Unit.Bleed:
-				this._status._delayedDamage = 0;
+				this._status[Unit.Poison] = 0;
 				break;
 
 			default:
@@ -432,9 +432,9 @@ class UnitPiece extends Piece {
 		this._status[Unit.Anchor] = 0;
 	}
 	_endTurnStatuses() {
-		this._applyDelayedDamage();
-		this._status._delayedDamage = 0;
-		this._status._delayedDamageType = "";
+		this._applyPoison();
+		this._status[Unit.Poison] = 0;
+		this._status['_poisonType'] = "";
 		this._status[Unit.Power] = 0;
 		this._status[Unit.Speed] = 0;
 		this._status[Unit.Trap] = 0;
