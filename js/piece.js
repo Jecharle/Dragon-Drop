@@ -154,9 +154,7 @@ class UnitPiece extends Piece {
 		this.homeSquare = null;
 		this._facing = 1;
 		
-		this.resetPowerModifier();
-		this.resetDefenseModifier();
-		this.resetSpeedModifier();
+		this._status = {};
 
 		this.refresh();
 	}
@@ -224,7 +222,11 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		return this._moveRange + this.speedModifier;
+		return this._moveRange + this.getStatus('speed');
+	}
+
+	get powerBonus() {
+		return this.getStatus('power');
 	}
 
 	get skills() {
@@ -233,57 +235,25 @@ class UnitPiece extends Piece {
 	//#endregion attributes
 
 	//#region status modifiers
-
-	// Power up / weaken
-	get powerModifier() {
-		return this._powerModifier;
-	}
-	buffPower(value) {
-		if (this._powerModifier < 0) this.resetPowerModifier();
-		else this._powerModifier = Math.max(this._powerModifier, value);
-	}
-	debuffPower(value) {
-		if (this._powerModifier > 0) this.resetPowerModifier();
-		else this._powerModifier = Math.min(this._powerModifier, -value);
-	}
-	resetPowerModifier() {
-		this._powerModifier = 0;
+	getStatus(effect) {
+		if (!this._status) return 0;
+		else return this._status[effect] || 0;
 	}
 
-	// Speed up / slow
-	get speedModifier() {
-		return this._speedModifier;
+	_applyDelayedDamage() {
+		if (this.getStatus('_delayedDamage') > 0) {
+			this.hp -= this.getStatus('_delayedDamage');
+			this.addTimedClass(1200, 'hp-change');
+			this.addTimedClass(450, 'damaged');
+		}
 	}
-	buffSpeed(value) {
-		if (this._speedModifier < 0) this.resetSpeedModifier();
-		else this._speedModifier = Math.max(this._speedModifier, value);
-	}
-	debuffSpeed(value) {
-		if (this._speedModifier > 0) this.resetSpeedModifier();
-		else this._speedModifier = Math.min(this._speedModifier, -value);
-	}
-	resetSpeedModifier() {
-		this._speedModifier = 0;
-	}
-	
-	// Defense up / break
-	get defenseModifier() {
-		return this._defenseModifier;
-	}
-	buffDefense(value) {
-		if (this._defenseModifier < 0) this.resetDefenseModifier();
-		else this._defenseModifier = Math.max(this._defenseModifier, value);
-	}
-	debuffDefense(value) {
-		if (this._defenseModifier > 0) this.resetDefenseModifier();
-		else this._defenseModifier = Math.min(this._defenseModifier, -value);
-	}
-	resetDefenseModifier() {
-		this._defenseModifier = 0;
+	_applyRegenerate() {
+		if (this.getStatus('regenerate') > 0) {
+			this.hp += this.getStatus('regenerate');
+			this.addTimedClass(1200, 'hp-change');
+		}
 	}
 
-	// TODO: Poison
-	// TODO: Regenerate
 	// TODO: Evade
 	// TODO: Trap
 
@@ -314,7 +284,7 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, props) {
 		if (!props?.ignoreDefense) {
-			power -= this.defenseModifier;
+			power -= this.getStatus('defense');
 		}
 
 		if (power > 0) {
@@ -326,11 +296,15 @@ class UnitPiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	heal(power, _props) {
+	heal(power, props) {
 		this.hp += power;
 
 		if (power > 0) {
 			this.addTimedClass(1200, 'hp-change');
+		}
+
+		if (!props?.noCure) {
+			this._status.delayedDamage = 0;
 		}
 
 		this.refresh();
@@ -362,6 +336,46 @@ class UnitPiece extends Piece {
 		}
 		return false;
 	}
+
+	addStatus(effect, value) {
+		switch(effect) {
+			case 'regenerate':
+				if (value > this.getStatus(effect)) {
+					this._status[effect] = value;
+				}
+				break;
+
+			case 'poison': case 'burn': case 'bleed':
+				value = Math.abs(value);
+				if (value >= this.getStatus('_delayedDamage')) {
+					this._status._delayedDamage = value;
+					this._status._delayedDamageType = effect;
+				}
+				break;
+			
+			default: // standardized buffs and debuffs
+				if (value > 0) {
+					if (this.getStatus(effect) < 0) this._status[effect] = 0;
+					else if (value > this.getStatus(effect)) this._status[effect] = value;
+				} else if (value < 0) {
+					if (this.getStatus(effect) > 0) this._status[effect] = 0;
+					else if (value < this.getStatus(effect)) this._status[effect] = value;
+				}
+				break;
+		}
+	}
+	removeStatus(effect) {
+		switch(effect) {
+			case 'poison': case 'burn': case 'bleed':
+				this._status._delayedDamage = 0;
+				break;
+
+			default:
+				this._status[effect] = 0;
+				break;
+		}
+	}
+	
 	//#endregion effects
 
 	//#region turn state
@@ -372,23 +386,32 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 
+	_startTurnStatuses() {
+		this._applyRegenerate();
+		this._status.regenerate = 0;
+		this._status.defense = 0;
+	}
+	_endTurnStatuses() {
+		this._applyDelayedDamage();
+		this._status.delayedDamage = 0;
+		this._status.delayedDamageType = "";
+		this._status.power = 0;
+		this._status.speed = 0;
+	}
+
 	startTurn() {
 		this.myTurn = true;
-		
-		this.resetDefenseModifier();
-
+		this._startTurnStatuses();
 		this.refresh();
 	}
 	endTurn() {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this._endTurnStatuses();
 		this._skills.forEach(skill => skill.endTurn());
-
-		this.resetPowerModifier();
-		this.resetSpeedModifier();
-
 		this.refresh();
+		this.dieIfDead();
 	}
 	//#endregion turn state
 
@@ -752,7 +775,7 @@ class SkillPiece extends Piece {
 	}
 
 	get power() {
-		return Math.max(this._basePower + this.user.powerModifier, 1);
+		return Math.max(this._basePower + this.user.powerBonus, 1);
 	}
 
 	_setStats() {
