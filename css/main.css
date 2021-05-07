@@ -554,7 +554,7 @@
 			background-image: url(../img/statusIcons.png);
 			background-position: 0 0;
 		}
-		.status-list>.icon.double::after {
+		.status-list>.icon.double::before {
 			content: " ";
 			height: 16px;
 			width: 16px;

@@ -790,6 +790,9 @@ class UnitInfo extends ElObj {
 		this._lifebar = new Lifebar(0, 0);
 		this.el.appendChild(this._lifebar.el);
 
+		this._statusList = new StatusList(null);
+		this.el.appendChild(this._statusList.el);
+
 		this._nameSpan = document.createElement("span");
 		this._nameSpan.classList.add('name');
 		this.el.appendChild(this._nameSpan);
@@ -814,6 +817,7 @@ class UnitInfo extends ElObj {
 			this.style = unit.style;
 			this._lifebar.maxValue = unit.maxHp;
 			this._lifebar.value = unit.hp;
+			this._statusList.value = unit._status;
 			this._nameSpan.innerText = unit.characterName;
 			this._tooltip.value = unit.fullDescription;
 		} else {
@@ -821,6 +825,7 @@ class UnitInfo extends ElObj {
 			this._unit = null;
 			this._lifebar.maxValue = 0;
 			this._lifebar.value = 0;
+			this._statusList.value = null;
 			this._nameSpan.innerText = "";
 			this._tooltip.value = "";
 		}
