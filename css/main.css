@@ -100,7 +100,7 @@
 	justify-content: flex-start;
 	align-items: flex-end;
 	position: absolute;
-	bottom: 0px;
+	bottom: 0;
 	width: 40%;
 }
 	/*#region selected unit info*/
@@ -117,7 +117,7 @@
 			width: var(--face-w);
 			box-sizing: border-box;
 			position: absolute;
-			bottom: 0px;
+			bottom: 0;
 			background-repeat: no-repeat;
 			background-position: bottom left;
 		}
@@ -129,7 +129,7 @@
 			z-index: 2;
 			height: max-content;
 			width: max-content;
-			left: 0px;
+			left: 0;
 			bottom: 100%;
 			font-size: 16px;
 			font-weight: bold;
@@ -334,7 +334,7 @@
 		z-index: -2;
 		width: var(--square-w);
 		height: var(--square-total-h);
-		top: 0px;
+		top: 0;
 		
 		background-image: url(../img/testTileset.png);
 		background-repeat: no-repeat;
@@ -365,8 +365,8 @@
 		content: "";
 		position: absolute;
 		z-index: -1;
-		top: 0px;
-		left: 0px;
+		top: 0;
+		left: 0;
 		opacity: 65%;
 		width: var(--square-w);
 		height: var(--square-h);
@@ -401,8 +401,8 @@
 		content: "";
 		position: absolute;
 		z-index: -0.5;
-		top: 0px;
-		left: 0px;
+		top: 0;
+		left: 0;
 		width: var(--square-w);
 		height: var(--square-h);
 		background-image: url(../img/path.png);
@@ -477,16 +477,16 @@
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
-		background-position: 0px 0px;
+		background-position: 0 0;
 		transition: transform 0.2s;
 	}
 	.unit::after {
 		content: "";
 		position: absolute;
 		z-index: -1;
-		bottom: 0px;
+		bottom: 0;
 		width: 100%;
 		height: 100%;
 		background-repeat: no-repeat;
@@ -501,7 +501,7 @@
 		height: var(--lifebar-h);
 		top: -2px;
 		background-image: url(../img/lifebar.png);
-		background-position: 0px 0px;
+		background-position: 0 0;
 		background-repeat: repeat-x;
 		visibility: hidden;
 		pointer-events: none;
@@ -509,10 +509,10 @@
 		.lifebar>.inner {
 			position: absolute;
 			z-index: 0;
-			left: 0px;
+			left: 0;
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
-			background-position: 0px calc(-1*var(--lifebar-h));
+			background-position: 0 calc(-1*var(--lifebar-h));
 			background-repeat: repeat-x;
 		}
 		.lifebar>.change {
@@ -520,7 +520,7 @@
 			z-index: 1;
 			height: var(--lifebar-h);
 			background-image: url(../img/lifebar.png);
-			background-position: 0px calc(-2*var(--lifebar-h));
+			background-position: 0 calc(-2*var(--lifebar-h));
 			background-repeat: repeat-x;
 			visibility: hidden;
 		}
@@ -537,7 +537,7 @@
 		z-index: 2;
 		height: 16px;
 		width: 100%;
-		bottom: 0px;
+		bottom: 0;
 		display: flex;
 		justify-content: flex-end;
 		flex-wrap: wrap-reverse;
@@ -555,50 +555,54 @@
 			justify-content: center;
 			align-items: center;
 			background-image: url(../img/statusIcons.png);
-			background-position: 0px 0px;
+			background-position: 0 0;
 		}
 
 		/*#region status icons*/
 		.status-list>.power-up {
-			background-position: 0px 0px;
+			background-position: 0 0;
 		}
 		.status-list>.power-down {
-			background-position: 0px -16px;
+			background-position: 0 -16px;
 		}
 
 		.status-list>.defense-up {
-			background-position: -16px 0px;
+			background-position: -16px 0;
 		}
 		.status-list>.defense-down {
 			background-position: -16px -16px;
 		}
 
 		.status-list>.speed-up {
-			background-position: -32px 0px;
+			background-position: -32px 0;
 		}
 		.status-list>.speed-down {
 			background-position: -32px -16px;
 		}
 		
+		.status-list>.charge-up {
+			background-position: -48px 0;
+		}
+		.status-list>.charge-down {
+			background-position: -48px -16px;
+		}
+
 		.status-list>.regenerate {
-			background-position: 0px -32px;
+			background-position: 0 -32px;
 		}
 		.status-list>.poison {
 			background-position: -16px -32px;
 		}
 
 		/*TODO: Get icons for these, too*/
-		.status-list>.evade {
-			background-color: black;
-			color: silver;
-		}
 		.status-list>.trap {
-			border: 1px solid black;
-			background-color: whitesmoke;
+			background-position: 0 -48px;
+		}
+		.status-list>.evade {
+			background-position: -16px -48px;
 		}
 		.status-list>.anchor {
-			background-color: brown;
-			color: lightgray;
+			background-position: -32px -48px;
 		}
 		/*#endregion status icons*/
 	/*#endregion unit details*/
@@ -612,8 +616,8 @@
 		transform: scaleX(-1);
 	}
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
-		filter: drop-shadow(2px 0px yellow)
-		drop-shadow(-2px 0px yellow)
+		filter: drop-shadow(2px 0 yellow)
+		drop-shadow(-2px 0 yellow)
 		drop-shadow(0px -2px yellow);
 	}
 	.moving>.sprite {
@@ -694,19 +698,19 @@
 		content: "Party";
 		position: absolute;
 		top: -1.5em;
-		left: 0px;
+		left: 0;
 		font-weight: bold;
 	}
 	.deploy-list .unit {
 		position: relative;
-		bottom: 0px;
+		bottom: 0;
 		margin-top: 2px;
 	}
 
 	.deploy-list .capacity-label {
 		position: absolute;
 		top: -1.5em;
-		right: 0px;
+		right: 0;
 		font-weight: bold;
 	}
 /*#endregion deploy list*/
@@ -785,7 +789,7 @@
 	background-color: black;
 	pointer-events: none;
 	bottom: 16px;
-	left: 0px;
+	left: 0;
 }
 	.overworld-map .line.unlock {
 		animation: draw-line 1s 0.5s backwards;
@@ -807,9 +811,9 @@
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
-		background-position: 0px 0px;
+		background-position: 0 0;
 		background-image: url(../img/testMeleeUnit.png);
 	}
 /*#endregion map scene*/
@@ -830,7 +834,7 @@
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
 	}
 
@@ -876,13 +880,13 @@
 /*#region holding area for keyframes*/
 @keyframes sprite-animation {
 	from {
-		background-position-x: 0px;
+		background-position-x: 0;
 	}
 }
 @keyframes shake {
 	from {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin-left: 0;
+		margin-right: 0;
 	}
 	25% {
 		margin-left: -8px;
@@ -893,8 +897,8 @@
 		margin-right: -8px;
 	}
 	to {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 @keyframes rise-up {
@@ -935,7 +939,7 @@
 }
 @keyframes banner-display {
 	from {
-		height: 0px;
+		height: 0;
 		color: transparent;
 	}
 	50% {
