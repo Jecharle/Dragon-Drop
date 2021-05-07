@@ -174,7 +174,7 @@ class StatusList extends Detail {
 	_addIcon(style, value) {
 		var newIconEl = document.createElement('div');
 		newIconEl.classList.add('icon', style);
-		newIconEl.innerText = value;
+		if (value > 1 || value < -1) newIconEl.classList.add('double');
 		this._icons.push(newIconEl);
 		this.el.appendChild(newIconEl);
 	}
@@ -182,9 +182,6 @@ class StatusList extends Detail {
 		if (this._icons) this._icons.forEach(el => this.el.removeChild(el));
 		this._icons = [];
 	}
-
-	// TODO: Accepts a status object for the value
-	// TODO: Adds child element icons for each status it has
 }
 
 /***************************************************
