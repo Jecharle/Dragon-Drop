@@ -336,7 +336,7 @@
 		height: var(--square-total-h);
 		top: 0;
 		
-		background-image: url(../img/testTileset.png);
+		background-image: url(../img/tilesets/testTileset.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
@@ -370,7 +370,7 @@
 		opacity: 65%;
 		width: var(--square-w);
 		height: var(--square-h);
-		background-image: url(../img/tileHighlights.png);
+		background-image: url(../img/system/tileHighlights.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
@@ -405,7 +405,7 @@
 		left: 0;
 		width: var(--square-w);
 		height: var(--square-h);
-		background-image: url(../img/path.png);
+		background-image: url(../img/system/path.png);
 		background-repeat: no-repeat;
 	}
 		/*#region single direction*/
@@ -490,7 +490,7 @@
 		width: 100%;
 		height: 100%;
 		background-repeat: no-repeat;
-		background-image: url(../img/shadow.png);
+		background-image: url(../img/system/shadow.png);
 		opacity: 40%;
 	}
 
@@ -500,7 +500,7 @@
 		z-index: 2;
 		height: var(--lifebar-h);
 		top: -2px;
-		background-image: url(../img/lifebar.png);
+		background-image: url(../img/system/lifebar.png);
 		background-position: 0 0;
 		background-repeat: repeat-x;
 		visibility: hidden;
@@ -550,7 +550,7 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background-image: url(../img/statusIcons.png);
+			background-image: url(../img/system/statusIcons.png);
 			background-position: 0 0;
 		}
 		.status-list>.icon.double::before {
