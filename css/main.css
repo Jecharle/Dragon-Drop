@@ -855,22 +855,22 @@
 
 	/*#region sprite effect skins*/
 	.test-attack-effect>.sprite {
-		background-image: url("../img/testAttack.png");
+		background-image: url("../img/vfx/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) both;
 	}
 	.test-heal-effect>.sprite {
-		background-image: url("../img/testHeal.png");
+		background-image: url("../img/vfx/testHeal.png");
 		background-position-x: calc(-5*var(--unit-w));
 		animation: sprite-animation 0.3s steps(5) both;
 	}
 	.test-shot-effect>.sprite {
-		background-image: url("../img/testBullet.png");
+		background-image: url("../img/vfx/testBullet.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.2s both;
 	}
 	.test-arc-effect>.sprite {
-		background-image: url("../img/testBullet.png");
+		background-image: url("../img/vfx/testBullet.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.4s both;
 	}
