@@ -93,3 +93,11 @@ class TestPositionPartyMember extends PartyMember {
 		return new TestPositionUnit(this);
 	}
 }
+
+class TestStatusPartyMember extends PartyMember {
+	get name() { return "Dan"; }
+
+	getUnit() {
+		return new TestStatusUnit(this);
+	}
+}

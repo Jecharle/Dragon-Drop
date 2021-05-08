@@ -29,7 +29,7 @@ UnitPiece.parseUnitType = function(string) {
 };
 
 /***************************************************
- Subtypes of UnitPiece
+ "Unit" subtypes for player use
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {
 	
@@ -75,7 +75,6 @@ class TestSupportUnit extends UnitPiece {
 		this._skills = [
 			new TestRangedSkill(this),
 			new TestBuffSkill(this),
-			new TestDebuffSkill(this),
 			new TestHealSkill(this)
 		]
 	}
@@ -101,10 +100,38 @@ class TestPositionUnit extends UnitPiece {
 			new TestPullSkill(this),
 			new TestAreaSkill(this),
 			new TestPositionSkill(this),
+		]
+	}
+};
+
+class TestStatusUnit extends UnitPiece {
+
+	get name() {
+		return "Status User";
+	}
+	get _description() {
+		return "Low damage, but can use buffs, debuffs, and statuses";
+	}
+
+	_setStats() {
+		this.style = 'status-unit';
+		this._maxHp = 4;
+		this._moveRange = 2;
+	}
+
+	_setSkills() {
+		this._skills = [
+			new TestAttackSkill(this),
+			new TestBuffSkill(this),
+			new TestDebuffSkill(this),
 			new TestTrapSkill(this)
 		]
 	}
 };
+
+/***************************************************
+ "Unit" subtypes meant for enemies
+***************************************************/
 
 class TestEnemyUnit extends UnitPiece {
 	

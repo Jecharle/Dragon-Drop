@@ -67,6 +67,7 @@ class Game {
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
+		Party.add(new TestStatusPartyMember() );
 
 		MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
