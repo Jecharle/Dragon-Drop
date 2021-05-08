@@ -1,5 +1,5 @@
-.vscode/launch.json
-
 *.aseprite
 
 img/pico-8-1x.png
+
+.vscode/
