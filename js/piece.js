@@ -269,14 +269,17 @@ class UnitPiece extends Piece {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
 			this.hp += this.getStatus(UnitPiece.Regenerate);
 			this.addTimedClass(1200, 'hp-change');
-			// TODO: show regen visual
+
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-heal-effect');
+			this.parent.el.appendChild(vfx.el);
 		}
 	}
 	_applyCharge() {
 		if (this.getStatus(UnitPiece.Charge) != 0) {
 			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
-			this.removeStatus(UnitPiece.Charge)
-			// TODO: show buff visual...?
+			
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-buff-effect');
+			this.parent.el.appendChild(vfx.el);
 		}
 	}
 	//#endregion status effects
@@ -429,33 +432,34 @@ class UnitPiece extends Piece {
 	}
 
 	async updateStatusTurnStart() {
-		if (this.getStatus(UnitPiece.Charge)) {
-			this._applyCharge();
-			this.refresh();
-			await Game.asyncPause(1000);
-		}
+		this.removeStatus(UnitPiece.Defense);
+		this.removeStatus(UnitPiece.Evade);
+		this.removeStatus(UnitPiece.Anchor);
+		this.refresh();
 		if (this.getStatus(UnitPiece.Regenerate)) {
 			this._applyRegenerate();
+			this.removeStatus(UnitPiece.Regenerate);
 			this.refresh();
-			await Game.asyncPause(1000);
+			await Game.asyncPause(500);
 		}
-		this._status[UnitPiece.Regenerate] = 0;
-		this._status[UnitPiece.Defense] = 0;
-		this._status[UnitPiece.Evade] = 0;
-		this._status[UnitPiece.Anchor] = 0;
-		this.refresh();
+		if (this.getStatus(UnitPiece.Charge)) {
+			this._applyCharge();
+			this.removeStatus(UnitPiece.Charge);
+			this.refresh();
+			await Game.asyncPause(500);
+		}
 	}
 	async updateStatusTurnEnd() {
+		this.removeStatus(UnitPiece.Power);
+		this.removeStatus(UnitPiece.Speed);
+		this.removeStatus(UnitPiece.Trap);
+		this.refresh();
 		if (this.getStatus(UnitPiece.Poison)) {
 			this._applyPoison();
+			this.removeStatus(UnitPiece.Poison);
 			this.refresh();
-			await Game.asyncPause(1000);
+			await Game.asyncPause(500);
 		}
-		this._status[UnitPiece.Poison] = 0;
-		this._status[UnitPiece.Power] = 0;
-		this._status[UnitPiece.Speed] = 0;
-		this._status[UnitPiece.Trap] = 0;
-		this.refresh();
 		this.dieIfDead();
 	}
 

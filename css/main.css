@@ -887,6 +887,11 @@
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.4s both;
 	}
+	.test-buff-effect>.sprite {
+		background-image: url("../img/vfx/testBuff.png");
+		background-position-x: calc(-6*var(--unit-w));
+		animation: sprite-animation 0.4s steps(6) both;
+	}
 	/*#endregion sprite effect skins*/
 /*#endregion sprite effects*/
 
