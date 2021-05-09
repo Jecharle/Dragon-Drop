@@ -275,6 +275,7 @@ class UnitPiece extends Piece {
 	_applyCharge() {
 		if (this.getStatus(UnitPiece.Charge) != 0) {
 			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
+			this.removeStatus(UnitPiece.Charge)
 			// TODO: show buff visual...?
 		}
 	}
@@ -376,7 +377,7 @@ class UnitPiece extends Piece {
 
 	addStatus(effect, value) {
 		switch(effect) {
-			case UnitPiece.Regenerate: // regeneration (positive-only)
+			case UnitPiece.Regenerate: case UnitPiece.Charge: // positive-only statuses
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
 				}
@@ -427,37 +428,47 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 
-	_startTurnStatuses() {
-		this._applyCharge();
-		this._applyRegenerate();
-		this._status[UnitPiece.Charge] = 0;
+	async updateStatusTurnStart() {
+		if (this.getStatus(UnitPiece.Charge)) {
+			this._applyCharge();
+			this.refresh();
+			await Game.asyncPause(1000);
+		}
+		if (this.getStatus(UnitPiece.Regenerate)) {
+			this._applyRegenerate();
+			this.refresh();
+			await Game.asyncPause(1000);
+		}
 		this._status[UnitPiece.Regenerate] = 0;
 		this._status[UnitPiece.Defense] = 0;
 		this._status[UnitPiece.Evade] = 0;
 		this._status[UnitPiece.Anchor] = 0;
+		this.refresh();
 	}
-	_endTurnStatuses() {
-		this._applyPoison();
+	async updateStatusTurnEnd() {
+		if (this.getStatus(UnitPiece.Poison)) {
+			this._applyPoison();
+			this.refresh();
+			await Game.asyncPause(1000);
+		}
 		this._status[UnitPiece.Poison] = 0;
-		this._status['_poisonType'] = "";
 		this._status[UnitPiece.Power] = 0;
 		this._status[UnitPiece.Speed] = 0;
 		this._status[UnitPiece.Trap] = 0;
+		this.refresh();
+		this.dieIfDead();
 	}
 
 	startTurn() {
 		this.myTurn = true;
-		this._startTurnStatuses();
 		this.refresh();
 	}
 	endTurn() {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._endTurnStatuses();
 		this._skills.forEach(skill => skill.endTurn());
 		this.refresh();
-		this.dieIfDead();
 	}
 	//#endregion turn state
 

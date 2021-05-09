@@ -145,8 +145,6 @@ class StatusList extends Detail {
 
 		if (statusObject[UnitPiece.Charge] > 0) {
 			this._addIcon('charge-up', statusObject[UnitPiece.Charge]);
-		} else if (statusObject[UnitPiece.Charge] < 0) {
-			this._addIcon('charge-down', statusObject[UnitPiece.Charge]);
 		}
 
 		if (statusObject[UnitPiece.Regenerate] > 0) {
@@ -154,9 +152,8 @@ class StatusList extends Detail {
 		}
 
 		if (statusObject[UnitPiece.Poison] > 0) {
-			this._addIcon('poison', statusObject[UnitPiece.Poison]);
+			this._addIcon(statusObject['_poisonType'], statusObject[UnitPiece.Poison]);
 		}
-		// TODO: Icons for other poison flavors
 
 		if (statusObject[UnitPiece.Trap]) {
 			this._addIcon('trap');

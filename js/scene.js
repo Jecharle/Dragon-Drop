@@ -135,7 +135,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._nextTurn();
+			this._endTurn();
 		};
 		return button;
 	}
@@ -285,16 +285,27 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		this.refresh();
 	}
-	_nextTurn() {
+	async _endTurn() {
 		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
 		&& this._activeTeam && this._activeTeam.untouched
 		&& !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
 		}
-
+	
+		this.setBusy();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
+
+		if (this._activeTeam && this._phase != BattleScene.DeployPhase) {
+			await this._activeTeam.turnEndEffects();
+			this._setActiveTeam(null);
+		}
+
+		if (this._phase == BattleScene.EnemyPhase) {
+			await this._addReinforcements();
+		}
+
 		switch (this._phase) {
 			case BattleScene.DeployPhase:
 				this._deployList.hide();
@@ -320,9 +331,16 @@ class BattleScene extends Scene {
 				break;
 		}
 		this.refresh();
-	
+
+		await Game.asyncPause(1000);
+		if (this._activeTeam) {
+			await this._activeTeam.turnStartEffects();
+		}
+
+		this.setDone();
+
 		if (this._autoPhase) {
-			Game.asyncPause(1000).then(() => this._aiProcessTurn());
+			this._aiProcessTurn();
 		}
 	}
 
@@ -661,7 +679,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Enter") {
-			this._nextTurn();
+			this._endTurn();
 		}
 
 		if (isFinite(key)) {
@@ -724,11 +742,7 @@ class BattleScene extends Scene {
 		}
 		await Game.asyncPause(waitTime);
 
-		if (this._phase == BattleScene.EnemyPhase) {
-			await this._addReinforcements();
-		}
-
-		this._nextTurn();
+		this._endTurn();
 		return;
 	}
 	//#endregion ai
@@ -774,6 +788,19 @@ class Team {
 	}
 	get isAuto() {
 		return this._auto;
+	}
+
+	async turnStartEffects() {
+		var members = [...this.members];
+		for (var i = 0; i < members.length; i++) {
+			await members[i].updateStatusTurnStart();
+		}
+	}
+	async turnEndEffects() {
+		var members = [...this.members];
+		for (var i = 0; i < members.length; i++) {
+			await members[i].updateStatusTurnEnd();
+		}
 	}
 
 	startTurn() {
