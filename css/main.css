@@ -493,6 +493,9 @@
 		background-image: url(../img/system/shadow.png);
 		opacity: 40%;
 	}
+	.unit.in-range, .unit.in-area{
+		pointer-events: none;
+	}
 
 	/*#region unit details*/
 	.lifebar {
