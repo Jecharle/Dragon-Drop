@@ -736,6 +736,7 @@ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
+		this._team = null;
 		this._hide();
 
 		this._userInfo = new UnitInfo();
@@ -752,9 +753,11 @@ class SkillList extends Container {
 		this._user = user;
 		this._userInfo.unit = user;
 		if (!user) {
+			this._setTeam(null);
 			this._hide();
 			return false;
 		} else {
+			this._setTeam(user.team);
 			user.skills.forEach(skill => this._addSkill(skill));
 			this._show();
 			return true;
@@ -772,6 +775,19 @@ class SkillList extends Container {
 	}
 	_clearSkills() {
 		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
+	}
+
+	get team() {
+		return this._team;
+	}
+	_setTeam(team) {
+		if (this._team && this._team.style) {
+			this.el.classList.remove(this._team.style);
+		}
+		this._team = team;
+		if (this._team && this._team.style) {
+			this.el.classList.add(this._team.style);
+		}
 	}
 	//#endregion list management
 }
