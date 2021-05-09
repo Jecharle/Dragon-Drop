@@ -511,7 +511,7 @@
 			z-index: 0;
 			left: 0;
 			height: var(--lifebar-h);
-			background-image: url(../img/lifebar.png);
+			background-image: inherit;
 			background-position: 0 calc(-1*var(--lifebar-h));
 			background-repeat: repeat-x;
 		}
@@ -519,7 +519,7 @@
 			position: absolute;
 			z-index: 1;
 			height: var(--lifebar-h);
-			background-image: url(../img/lifebar.png);
+			background-image: inherit;
 			background-position: 0 calc(-2*var(--lifebar-h));
 			background-repeat: repeat-x;
 			visibility: hidden;

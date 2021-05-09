@@ -777,10 +777,10 @@ class Team {
 	}
 
 	startTurn() {
-		this.members.forEach(piece => piece.startTurn());
+		[...this.members].forEach(piece => piece.startTurn());
 	}
 	endTurn() {
-		this.members.forEach(piece => piece.endTurn());
+		[...this.members].forEach(piece => piece.endTurn());
 	}
 	//#endregion turn
 
