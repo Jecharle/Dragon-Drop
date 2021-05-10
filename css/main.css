@@ -505,12 +505,12 @@
 		pointer-events: none;
 	}
 
-	/*#region unit details*/
+	/*#region unit status*/
 	.lifebar {
 		position: absolute;
 		z-index: 2;
 		height: var(--lifebar-h);
-		top: -2px;
+		top: 0;
 		background-image: url(../img/system/lifebar.png);
 		background-position: 0 0;
 		background-repeat: repeat-x;
@@ -577,7 +577,7 @@
 			z-index: -1;
 		}
 
-		/*#region status icons*/
+		/*#region state icons*/
 		.status-list>.power-up, .status-list>.charge-up {
 			background-position: 0 0;
 		}
@@ -633,8 +633,8 @@
 		.status-list>.anchor {
 			background-position: -32px -48px;
 		}
-		/*#endregion status icons*/
-	/*#endregion unit details*/
+		/*#endregion state icons*/
+	/*#endregion unit status*/
 
 	/*#region unit states and motions*/
 	.unit.x2 {
