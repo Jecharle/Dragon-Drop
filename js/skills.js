@@ -110,6 +110,9 @@ class TestHealSkill extends SkillPiece {
 	get _description() {
 		return `Restore ${this.power} HP`;
 	}
+	get _powerText() {
+		return ` | ${this.icon('life')} <strong>${this.power}</strong>`;
+	}
 
 	_setStats() {
 		super._setStats();
@@ -220,7 +223,7 @@ class TestDebuffSkill extends SkillPiece {
 };
 
 /***************************************************
- Test debuff skill
+ Test defensive skill
 ***************************************************/
 class TestGuardSkill extends SkillPiece {
 	constructor(user) {

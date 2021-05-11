@@ -124,7 +124,7 @@ class TestStatusUnit extends UnitPiece {
 			new TestAttackSkill(this),
 			new TestBuffSkill(this),
 			new TestDebuffSkill(this),
-			new TestTrapSkill(this)
+			new TestGuardSkill(this)
 		]
 	}
 };

@@ -184,16 +184,6 @@
 		border-radius: 4px;
 		padding: 5px;
 	}
-		.skill-description::after {
-			content: "";
-			position: absolute;
-			top: 100%;
-			left: 25px;
-			border-width: 5px;
-			border-style: solid;
-			border-color: black transparent transparent transparent;
-			pointer-events: none;
-		}
 	.cooldown-label {
 		font-size: 24px;
 		font-weight: bold;
@@ -613,36 +603,44 @@
 		}
 
 		/*#region state icons*/
-		.status-list .power {
+		.icon.life {
+			background-position-x: 0;
+			background-position-y: calc(-2*var(--state-h));
+		}
+		.icon.power {
 			background-position-x: calc(-1*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
-		.status-list .defense {
+		.icon.defense {
 			background-position-x: calc(-2*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
-		.status-list .speed {
+		.icon.speed {
 			background-position-x: calc(-3*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
-		.status-list .charge {
-			background-position-x: calc(-1*var(--state-w));
+		.icon.range {
+			background-position-x: calc(-4*var(--state-w));
+			background-position-y: calc(-2*var(--state-h));
+		}
+		.icon.cooldown {
+			background-position-x: calc(-5*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
 
-		.status-list .regenerate {
+		.icon.regenerate {
 			background-position-x: 0;
 			background-position-y: calc(-3*var(--state-h));
 		}
-		.status-list .poison {
+		.icon.poison {
 			background-position-x: calc(-1*var(--state-w));
 			background-position-y: calc(-3*var(--state-h));
 		}
-		.status-list .burn {
+		.icon.burn {
 			background-position-x: calc(-2*var(--state-w));
 			background-position-y: calc(-3*var(--state-h));
 		}
-		.status-list .bleed {
+		.icon.bleed {
 			background-position-x: calc(-3*var(--state-w));
 			background-position-y: calc(-3*var(--state-h));
 		}

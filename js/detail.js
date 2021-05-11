@@ -140,7 +140,7 @@ class StatusList extends Detail {
 		}
 
 		if (statusObject[UnitPiece.Charge]) {
-			this._addIcon('charge', statusObject[UnitPiece.Charge]);
+			this._addIcon('power', statusObject[UnitPiece.Charge]);
 		}
 
 		if (statusObject[UnitPiece.Regenerate]) {
