@@ -114,7 +114,11 @@ class Lifebar extends Detail {
 ***************************************************/
 class StatusList extends Detail {
 	constructor(statusObject) {
-		super(statusObject);
+		super();
+		this._subEl = document.createElement(this.elType);
+		this._subEl.classList.add('inner');
+		this.el.appendChild(this._subEl);
+		this.value = statusObject;
 	}
 
 	get elClass() {
@@ -166,17 +170,31 @@ class StatusList extends Detail {
 		if (statusObject[UnitPiece.Anchor]) {
 			this._addIcon('anchor');
 		}
+
+		if (this._icons.length > 1) {
+			this._subEl.style.animationDuration = `${this._icons.length}s`;
+			this._subEl.style.animationTimingFunction = `steps(${this._icons.length})`;
+		} else {
+			this._subEl.style.animationDuration = null;
+			this._subEl.style.animationTimingFunction = null;
+		}
 	}
 
 	_addIcon(style, value) {
 		var newIconEl = document.createElement('div');
 		newIconEl.classList.add('icon', style);
-		if (value > 1 || value < -1) newIconEl.classList.add('double');
+		if (value) {
+			var newNumberEl = document.createElement('div');
+			newNumberEl.classList.add('number');
+			newNumberEl.style.backgroundPositionX = `${-24*(8+Math.abs(value))}px`;
+			newIconEl.appendChild(newNumberEl);
+		}
+		this._subEl.appendChild(newIconEl);
+
 		this._icons.push(newIconEl);
-		this.el.appendChild(newIconEl);
 	}
 	_clearIcons() {
-		if (this._icons) this._icons.forEach(el => this.el.removeChild(el));
+		if (this._icons) this._icons.forEach(el => this._subEl.removeChild(el));
 		this._icons = [];
 	}
 }
