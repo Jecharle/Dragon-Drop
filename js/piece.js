@@ -226,7 +226,6 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		if (this.getStatus(UnitPiece.Trap)) return 0;
 		return Math.max(this._moveRange + this.getStatus(UnitPiece.Speed), 0);
 	}
 
@@ -248,7 +247,6 @@ class UnitPiece extends Piece {
 	static get Burn() { return 'burn'; }
 	static get Bleed() { return 'bleed'; }
 	static get Evade() { return 'evade'; }
-	static get Trap() { return 'trap'; }
 	static get Anchor() { return 'anchor'; }
 	static get Charge() { return 'charge'; }
 
@@ -353,7 +351,6 @@ class UnitPiece extends Piece {
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
 		}
-		if (distanceMoved > 0) this.removeStatus(UnitPiece.Trap);
 		return distanceMoved;
 	}
 	pull(origin, distance, props) {
@@ -371,8 +368,6 @@ class UnitPiece extends Piece {
 			if (props?.animation2) {
 				piece.animateMove([this.square], props.animation2);
 			}
-			this.removeStatus(UnitPiece.Trap);
-			piece.removeStatus(UnitPiece.Trap);
 			return true;
 		}
 		return false;
@@ -394,7 +389,7 @@ class UnitPiece extends Piece {
 				}
 				break;
 			
-			case UnitPiece.Evade: case UnitPiece.Trap: case UnitPiece.Anchor: // non-scaling effects
+			case UnitPiece.Evade: case UnitPiece.Anchor: // non-scaling effects
 				this._status[effect] = 1;
 				break;
 
@@ -455,7 +450,6 @@ class UnitPiece extends Piece {
 	async updateStatusTurnEnd() {
 		this.removeStatus(UnitPiece.Power);
 		this.removeStatus(UnitPiece.Speed);
-		this.removeStatus(UnitPiece.Trap);
 		this.refresh();
 		if (this.getStatus(UnitPiece.Poison)) {
 			this._applyPoison();

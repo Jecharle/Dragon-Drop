@@ -159,10 +159,6 @@ class StatusList extends Detail {
 			this._addIcon(statusObject['_poisonType'], statusObject[UnitPiece.Poison]);
 		}
 
-		if (statusObject[UnitPiece.Trap]) {
-			this._addIcon('trap');
-		}
-
 		if (statusObject[UnitPiece.Evade]) {
 			this._addIcon('evade');
 		}

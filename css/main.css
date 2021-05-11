@@ -618,10 +618,7 @@
 			background-position-x: calc(-8*var(--state-w));
 		}
 
-		/*.status-list>.trap {
-			background-position: 0 -48px;
-		}
-		.status-list>.evade {
+		/*.status-list>.evade {
 			background-position: -16px -48px;
 		}
 		.status-list>.anchor {
