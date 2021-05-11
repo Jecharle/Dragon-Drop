@@ -790,18 +790,21 @@ class SkillPiece extends Piece {
 	get _description() {
 		return "[Skill description]";
 	}
+	get _rangeText() {
+		if (this.range == this.minRange) return `Range <strong>${this.range}</strong>`;
+		else return `Range <strong>${this.minRange}-${this.range}</strong>`;
+	}
 	get fullDescription() {
 		var description = `<strong>${this.name}</strong><br>${this._description}`;
+		description += "<br>";
+		description += this._rangeText;
 		if (this.hasLimitedUses) {
-			description += `<br><em><strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}</em>`;
+			description += ` | <strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}`;
 		}
 		if (this.hasCooldown) {
-			if (this.cooldown > 0) {
-				description += `<br><em>Ready in ${this.cooldown} turn${this.cooldown == 1 ? "" : "s"}</em>`;
-			} else {
-				description += `<br><em>${this.cooldownCost} turn cooldown</em>`;
-			}
+			description += ` | <strong>${this.cooldownCost}</strong>-turn cooldown`;
 		}
+		//description += "</em>";
 		return description;
 	}
 	//#endregion text

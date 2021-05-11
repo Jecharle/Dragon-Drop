@@ -222,23 +222,23 @@ class TestDebuffSkill extends SkillPiece {
 /***************************************************
  Test debuff skill
 ***************************************************/
-class TestTrapSkill extends SkillPiece {
+class TestGuardSkill extends SkillPiece {
 	constructor(user) {
 		super(user);
-		this.style = 'debuff-skill';
+		this.style = 'buff-skill';
 	}
 
 	get name() {
-		return "Lock";
+		return "Guard";
 	}
 	get _description() {
-		return `Apply Trap, Anchor, and Evade to the target.`;
+		return `Apply Evade and Anchor to the target.`;
 	}
 
 	_setStats() {
 		super._setStats();
 		this._baseCooldown = 2;
-		this._range = 2;
+		this._range = 1;
 		this._minRange = 0;
 	}
 
@@ -254,7 +254,6 @@ class TestTrapSkill extends SkillPiece {
 	_unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.addStatus(UnitPiece.Anchor);
-		unit.addStatus(UnitPiece.Trap);
 		unit.addStatus(UnitPiece.Evade);
 		return 200;
 	}
