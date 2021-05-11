@@ -556,7 +556,7 @@
 	.status-list {
 		position: absolute;
 		z-index: 2;
-		height: var(--state-h);
+		height: calc(var(--state-h) + 2px);
 		width: calc(var(--state-w) + 2px);
 		bottom: 0;
 		right: 0;
@@ -565,7 +565,7 @@
 	}
 		.status-list .inner {
 			position: absolute;
-			height: var(--state-h);
+			height: calc(var(--state-h) + 2px);
 			width: max-content;
 			display: flex;
 			justify-content: flex-end;
@@ -582,6 +582,7 @@
 		}
 		.status-list .icon {
 			margin-right: 2px;
+			margin-bottom: 2px;
 		}
 		.icon, .number {
 			height: var(--state-h);
