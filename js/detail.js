@@ -129,33 +129,24 @@ class StatusList extends Detail {
 		this._clearIcons();
 		if (!statusObject) return;
 		
-		if (statusObject[UnitPiece.Power] > 0) {
-			this._addIcon('power-up', statusObject[UnitPiece.Power]);
-		} else if (statusObject[UnitPiece.Power] < 0) {
-			this._addIcon('power-down', statusObject[UnitPiece.Power]);
+		if (statusObject[UnitPiece.Power]) {
+			this._addIcon('power', statusObject[UnitPiece.Power]);
+		}
+		if (statusObject[UnitPiece.Defense]) {
+			this._addIcon('defense', statusObject[UnitPiece.Defense]);
+		}
+		if (statusObject[UnitPiece.Speed]) {
+			this._addIcon('speed', statusObject[UnitPiece.Speed]);
 		}
 
-		if (statusObject[UnitPiece.Defense] > 0) {
-			this._addIcon('defense-up', statusObject[UnitPiece.Defense]);
-		} else if (statusObject[UnitPiece.Defense] < 0) {
-			this._addIcon('defense-down', statusObject[UnitPiece.Defense]);
+		if (statusObject[UnitPiece.Charge]) {
+			this._addIcon('charge', statusObject[UnitPiece.Charge]);
 		}
 
-		if (statusObject[UnitPiece.Speed] > 0) {
-			this._addIcon('speed-up', statusObject[UnitPiece.Speed]);
-		} else if (statusObject[UnitPiece.Speed] < 0) {
-			this._addIcon('speed-down', statusObject[UnitPiece.Speed]);
-		}
-
-		if (statusObject[UnitPiece.Charge] > 0) {
-			this._addIcon('charge-up', statusObject[UnitPiece.Charge]);
-		}
-
-		if (statusObject[UnitPiece.Regenerate] > 0) {
+		if (statusObject[UnitPiece.Regenerate]) {
 			this._addIcon('regenerate', statusObject[UnitPiece.Regenerate]);
 		}
-
-		if (statusObject[UnitPiece.Poison] > 0) {
+		if (statusObject[UnitPiece.Poison]) {
 			this._addIcon(statusObject['_poisonType'], statusObject[UnitPiece.Poison]);
 		}
 
@@ -176,14 +167,20 @@ class StatusList extends Detail {
 		}
 	}
 
-	_addIcon(style, value) {
+	_addIcon(style, value, signed) {
 		var newIconEl = document.createElement('div');
 		newIconEl.classList.add('icon', style);
-		if (value) {
-			var newNumberEl = document.createElement('div');
-			newNumberEl.classList.add('number');
-			newNumberEl.style.backgroundPositionX = `${-24*(8+Math.abs(value))}px`;
-			newIconEl.appendChild(newNumberEl);
+		if (value > 1 || value < 0) {
+			var numberEl = document.createElement('div');
+			numberEl.classList.add('number');
+			numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
+			if (signed || value < 0) {
+				var signEl = document.createElement('div');
+				if (value < 0) signEl.classList.add('minus');
+				else signEl.classList.add('plus');
+				numberEl.appendChild(signEl);
+			}
+			newIconEl.appendChild(numberEl);
 		}
 		this._subEl.appendChild(newIconEl);
 
