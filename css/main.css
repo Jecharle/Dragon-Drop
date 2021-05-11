@@ -520,7 +520,6 @@
 		.lifebar>.inner {
 			position: absolute;
 			z-index: 0;
-			left: 0;
 			height: var(--lifebar-h);
 			background-image: inherit;
 			background-position: 0 calc(-1*var(--lifebar-h));

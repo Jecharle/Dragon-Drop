@@ -420,6 +420,9 @@ class UnitPiece extends Piece {
 				break;
 		}
 	}
+	removeAllStatus() {
+		this._status = {};
+	}
 	
 	//#endregion effects
 
@@ -1025,7 +1028,6 @@ class SkillPiece extends Piece {
 	//#endregion ai
 
 	//#region range / area shapes
-
 	_inSquare(origin, target, size) {
 		if (!origin || !target) return false;
 		var dx = Math.abs(origin.x - target.x);
