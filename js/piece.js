@@ -924,22 +924,15 @@ class SkillPiece extends Piece {
 		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
 		this._units = this._affectedUnits(this._squares);
 		
-		var waitTime = this._startEffects(this._target, this._squares, this._units);
-		await Game.asyncPause(waitTime);
-		
+		await this._startEffects(this._target, this._squares, this._units);
 		for (var i = 0; i < this._squares.length; i++) {
-			waitTime = this._squareEffects(this._squares[i], this._target);
-			await Game.asyncPause(waitTime);
+			await this._squareEffects(this._squares[i], this._target);
 		}
-
 		for (var i = 0; i < this._units.length; i++) {
-			waitTime = this._unitEffects(this._units[i], this._target);
-			await Game.asyncPause(waitTime);
+			await this._unitEffects(this._units[i], this._target);
 			this._units[i].refresh();
 		}
-		
-		waitTime = this._endEffects(this._target, this._squares, this._units);
-		await Game.asyncPause(waitTime);
+		await this._endEffects(this._target, this._squares, this._units);
 
 		this._payCost();
 		this._units.forEach(piece => piece.dieIfDead());
@@ -952,17 +945,17 @@ class SkillPiece extends Piece {
 		return true;
 	}
 
-	_startEffects(target, _squares, _units) {
+	async _startEffects(target, _squares, _units) {
 		this.user.animateBump(target);
 		this.user.addTimedClass(200, 'attack');
 
 		this._showEffect(target, this.user.square, "test-attack-effect");
 		
-		return 100;
+		await Game.asyncPause(100);
 	}
-	_squareEffects(_square, _target) { return 0; }
-	_unitEffects(_unit, _target) { return 0; }
-	_endEffects(_target, _squares, _units) { return 0; }
+	async _squareEffects(_square, _target) { return 0; }
+	async _unitEffects(_unit, _target) { return 0; }
+	async _endEffects(_target, _squares, _units) { return 0; }
 
 	_payCost() {
 		this.user.actionUsed = true;

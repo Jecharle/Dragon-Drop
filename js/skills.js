@@ -21,10 +21,10 @@ class TestAttackSkill extends SkillPiece {
 		return false;
 	}
 
-	_unitEffects(unit, _target) {
+	async _unitEffects(unit, _target) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1, {animation: UnitPiece.Path});
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -47,10 +47,10 @@ class TestRangedSkill extends TestAttackSkill {
 		this._minRange = 2;
 	}
 
-	_startEffects(target, _squares, _units) {
+	async _startEffects(target, _squares, _units) {
 		this.user.addTimedClass(200, 'attack');
 		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square);
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -76,16 +76,16 @@ class TestPullSkill extends TestAttackSkill {
 		this._minRange = 1;
 	}
 
-	_startEffects(target, _squares, _units) {
+	async _startEffects(target, _squares, _units) {
 		this.user.addTimedClass(200, 'attack');
 		this._showEffect(target, this.user.square, "test-shot-effect").animateMove(this.user.square, SpriteEffect.Return);
-		return 200;
+		await Game.asyncPause(200);
 	}
 
-	_unitEffects(unit, _target) {
+	async _unitEffects(unit, _target) {
 		if (!this.user.isAlly(unit)) unit.takeDamage(this.power);
 		unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -122,13 +122,11 @@ class TestHealSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(_target, _squares, _units) {
-		return 0;
-	}
-	_unitEffects(unit, _target) {
+	async _startEffects(_target, _squares, _units) { }
+	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.heal(this.power);
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -162,16 +160,14 @@ class TestBuffSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(_target, _squares, _units) {
-		return 0;
-	}
-	_unitEffects(unit, _target) {
+	async _startEffects(_target, _squares, _units) { }
+	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-buff-effect");
 		unit.addStatus(UnitPiece.Charge, 2);
 		unit.addStatus(UnitPiece.Defense, 1);
 		unit.addStatus(UnitPiece.Speed, 1);
 		unit.addStatus(UnitPiece.Regenerate, 2);
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -205,16 +201,14 @@ class TestDebuffSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(_target, _squares, _units) {
-		return 0;
-	}
-	_unitEffects(unit, _target) {
+	async _startEffects(_target, _squares, _units) { }
+	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.addStatus(UnitPiece.Power, -1);
 		unit.addStatus(UnitPiece.Defense, -1);
 		unit.addStatus(UnitPiece.Speed, -1);
 		unit.addStatus(UnitPiece.Bleed, 1);
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -248,14 +242,12 @@ class TestGuardSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(_target, _squares, _units) {
-		return 0;
-	}
-	_unitEffects(unit, _target) {
+	async _startEffects(_target, _squares, _units) { }
+	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.addStatus(UnitPiece.Anchor);
 		unit.addStatus(UnitPiece.Evade);
-		return 200;
+		await Game.asyncPause(200);
 	}
 };
 
@@ -291,14 +283,12 @@ class TestBuildSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(_target, _squares, _units) {
-		return 0;
-	}
-	_squareEffects(square, _target) {
+	async _startEffects(_target, _squares, _units) { }
+	async _squareEffects(square, _target) {
 		var wall = new TestRockObject();
 		square.parent.movePiece(wall, square);
 		wall.addTimedClass(500, 'spawn');
-		return 500;
+		await Game.asyncPause(500);
 	}
 };
 
@@ -337,11 +327,11 @@ class TestMoveSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(target, _squares, _units) {
+	async _startEffects(target, _squares, _units) {
 		var startSquare = this.user.square;
 		target.parent.movePiece(this.user, target);
 		var time = this.user.animateMove([startSquare], UnitPiece.Jump);
-		return time;
+		await Game.asyncPause(time);
 	}
 };
 
@@ -370,20 +360,20 @@ class TestAreaSkill extends SkillPiece {
 		this._basePower = 1;
 	}
 
-	_startEffects(target, _squares, _units) {
+	async _startEffects(target, _squares, _units) {
 		this.user.addTimedClass(200, 'attack');
 		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, SpriteEffect.Arc);
-		return 400;
+		await Game.asyncPause(400);
 	}
 
-	_unitEffects(unit, target) {
+	async _unitEffects(unit, target) {
 		unit.takeDamage(this.power);
 		unit.push(target, 1, {animation: UnitPiece.Path});
-		return 150;
+		await Game.asyncPause(150);
 	}
 
-	_endEffects(_target, _squares, _units) {
-		return 200;
+	async _endEffects(_target, _squares, _units) {
+		await Game.asyncPause(200);
 	}
 
 	_aiBaseTargetScore(_target) {
@@ -426,19 +416,19 @@ class TestRushSkill extends SkillPiece {
 		return false;
 	}
 
-	_startEffects(target) {
+	async _startEffects(target) {
 		var time = this.user.animateBump(target, this.user.square);
 		this.user.addTimedClass(time, 'attack');
 		this.user.pull(target, 2);
 
 		this._showEffect(target, this.user.square, "test-attack-effect");
 
-		return time;
+		await Game.asyncPause(time);
 	}
-	_unitEffects(unit) {
+	async _unitEffects(unit) {
 		unit.takeDamage(this.power);
 		unit.push(this.user.square, 1, { animation: UnitPiece.Path });
-		return 200;
+		await Game.asyncPause(200);
 	}
 
 	/*_aiBaseTargetScore(target) {
@@ -491,17 +481,17 @@ class TestPositionSkill extends SkillPiece {
 		}
 		return false;
 	}
-	_startEffects(target) {
+	async _startEffects(target) {
 		var time = this.user.animateBump(target);
 		this.user.addTimedClass(time, 'attack');
-		return time/2;
+		await Game.asyncPause(time/2);
 	}
-	_unitEffects(unit, target) {
+	async _unitEffects(unit, target) {
 		var startSquare = unit.square;
 		target.parent.movePiece(unit, target);
 
 		var time = unit.animateMove([startSquare], UnitPiece.Jump);
 		unit.addTimedClass(time+100, 'damaged');
-		return time+100;
+		await Game.asyncPause(time+100);
 	}
 };
