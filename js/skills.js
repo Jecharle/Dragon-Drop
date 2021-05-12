@@ -11,7 +11,7 @@ class TestAttackSkill extends SkillPiece {
 		return "Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage and push the target 1 space`;
+		return `Damage the target and push them 1 space`;
 	}
 
 	validTarget(target) {
@@ -67,7 +67,7 @@ class TestPullSkill extends TestAttackSkill {
 		return "Pull Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage and pull the target 1 space<br/>Does not damage allies`;
+		return `Damage the enemy and pull them 1 space<br/>Does not damage allies`;
 	}
 
 	_setStats() {
@@ -102,10 +102,10 @@ class TestHealSkill extends SkillPiece {
 		return "Heal";
 	}
 	get _description() {
-		return `Restore ${this.power} HP`;
+		return `Heal the target`;
 	}
 	get _powerText() {
-		return `${this.icon('life')} <strong>${this.power}</strong>`;
+		return `${this.icon('life')} ${this.power}`;
 	}
 
 	_setStats() {
@@ -143,12 +143,15 @@ class TestBuffSkill extends SkillPiece {
 		return "Buff";
 	}
 	get _description() {
-		return `Increase all stats by 1 and restore 1 HP at the start of their next turn`;
+		return `Increase the target's Defense and Speed<br>Next turn, heal the target and increase their Power`;
 	}
-	get _showPower() { return false; }
+	get _powerText() {
+		return `${this.icon('life')} ${this.power}`;
+	}
 
 	_setStats() {
 		super._setStats();
+		this._basePower = 2;
 		this._baseCooldown = 2;
 		this._range = 2;
 		this._minRange = 0;
@@ -166,7 +169,7 @@ class TestBuffSkill extends SkillPiece {
 		unit.addStatus(UnitPiece.Charge, 2);
 		unit.addStatus(UnitPiece.Defense, 1);
 		unit.addStatus(UnitPiece.Speed, 1);
-		unit.addStatus(UnitPiece.Regenerate, 2);
+		unit.addStatus(UnitPiece.Regenerate, this.power);
 		await Game.asyncPause(200);
 	}
 };
@@ -184,12 +187,12 @@ class TestDebuffSkill extends SkillPiece {
 		return "Debuff";
 	}
 	get _description() {
-		return `Lower all stats by 1 and deal 1 damage at the end of their next turn.`;
+		return `Poison the target and decrease their Power, Defense, and Speed`;
 	}
-	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
+		this._basePower = 1;
 		this._baseCooldown = 2;
 		this._range = 2;
 		this._minRange = 0;
@@ -207,7 +210,7 @@ class TestDebuffSkill extends SkillPiece {
 		unit.addStatus(UnitPiece.Power, -1);
 		unit.addStatus(UnitPiece.Defense, -1);
 		unit.addStatus(UnitPiece.Speed, -1);
-		unit.addStatus(UnitPiece.Poison, 1);
+		unit.addStatus(UnitPiece.Poison, this.power);
 		await Game.asyncPause(200);
 	}
 };
@@ -225,9 +228,9 @@ class TestGuardSkill extends SkillPiece {
 		return "Guard";
 	}
 	get _description() {
-		return `Apply Evade and Anchor to the target.`;
+		return `Anchor the target and allow them to evade one attack`;
 	}
-	get _showPower() { return false; }
+	get hasPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -266,7 +269,7 @@ class TestBuildSkill extends SkillPiece {
 	get _description() {
 		return "Create a wall with 2 HP";
 	}
-	get _showPower() { return false; }
+	get hasPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -308,9 +311,9 @@ class TestMoveSkill extends SkillPiece {
 		return "Jump to a square adjacent to an ally";
 	}
 	get _rangeText() {
-		return '<br>';
+		return "";
 	}
-	get _showPower() { return false; }
+	get hasPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -350,7 +353,7 @@ class TestAreaSkill extends SkillPiece {
 		return "Area Attack";
 	}
 	get _description() {
-		return `Deal ${this.power} damage in a small area and push targets away from the center`;
+		return `Damage targets in a small area and push them away from the center`;
 	}
 
 	_setStats() {
@@ -396,7 +399,7 @@ class TestRushSkill extends SkillPiece {
 		return "Charge Attack";
 	}
 	get _description() {
-		return `Charge two spaces forward and deal ${this.power} damage to the target, pushing it back`;
+		return `Approach the target and attack, pushing them back`;
 	}
 
 	_setStats() {
@@ -453,7 +456,7 @@ class TestPositionSkill extends SkillPiece {
 	get _description() {
 		return "Toss the unit in front of you to the target square";
 	}
-	get _showPower() { return false; }
+	get hasPower() { return false; }
 
 	_setStats() {
 		super._setStats();

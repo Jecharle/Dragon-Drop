@@ -796,33 +796,34 @@ class SkillPiece extends Piece {
 	}
 	get _rangeText() {
 		var icon = this.icon(this.los ? 'range' : 'non-los');
-		if (this.range == this.minRange) return `${icon} <strong>${this.range}</strong>`;
-		else return `${icon} <strong>${this.minRange}-${this.range}</strong>`;
+		if (this.range == this.minRange) return `${icon} ${this.range}`;
+		else return `${icon} ${this.minRange}-${this.range}`;
 	}
 	get _powerText() {
-		return `${this.icon('power')} <strong>${this.power}</strong>`;
+		return `${this.icon('power')} ${this.power}`;
 	}
 	get _cooldownText() {
-		return `${this.icon('cooldown')} <strong>${this.cooldown || this.cooldownCost}</strong>`;
+		return `${this.icon('cooldown')} ${this.cooldown || this.cooldownCost}`;
 	}
 	get _limitedUseText() {
-		return `<strong>x${this.usesLeft}/${this.maxUses}</strong>`;
+		return `x ${this.usesLeft}`;
 	}
 
-	get _showPower() { return true; }
+	get hasPower() { return true; }
 
 	get fullDescription() {
-		var description = `<strong>${this.name}</strong>`;
-		//description += `<br>${this._description}`;
-		description += ` <br> ${this._rangeText}`;
-		if (this._showPower) description += ` | ${this._powerText}`;
+		var description = `<strong>${this.name}</strong><p>${this._description}</p>`;
+		description += `<strong>${this._rangeText}`;
+		if (this.hasPower) {
+			description += ` | ${this._powerText}`;
+		}
 		if (this.hasCooldown) {
 			description +=  ` | ${this._cooldownText}`;
 		}
 		if (this.hasLimitedUses) {
 			description += ` | ${this._limitedUseText}`;
 		}
-		description += `<br>${this._description}`;
+		description += '</strong>';
 		return description;
 	}
 	//#endregion text
