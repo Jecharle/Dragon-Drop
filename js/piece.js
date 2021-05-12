@@ -785,7 +785,7 @@ class SkillPiece extends Piece {
 
 	//#region text
 	icon(style) {
-		return `<div class="icon ${style}" style="display: inline-block"></div>`;
+		return `<div class="icon ${style}"></div>`;
 	}
 
 	get name() {

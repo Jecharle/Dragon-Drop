@@ -143,8 +143,9 @@ class StatusList extends Detail {
 			this._addIcon('power', 'time');
 		}
 
+		// TODO: Better way to indicate amount
 		if (statusObject[UnitPiece.Regenerate]) {
-			this._addIcon('regenerate', statusObject[UnitPiece.Regenerate]);
+			this._addIcon('regenerate');
 		}
 		if (statusObject[UnitPiece.Poison]) {
 			this._addIcon(statusObject['_poisonType'], statusObject[UnitPiece.Poison]);

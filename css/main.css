@@ -557,8 +557,6 @@
 			position: absolute;
 			height: calc(var(--state-h) + 2px);
 			width: max-content;
-			display: flex;
-			justify-content: flex-end;
 			animation-name: marquee;
 			animation-iteration-count: infinite;
 		}
@@ -575,6 +573,7 @@
 			margin-bottom: 2px;
 		}
 		.icon, .number {
+			display: inline-block;
 			height: var(--state-h);
 			width: var(--state-w);
 			background-image: url(../img/system/icons.png);
@@ -589,6 +588,16 @@
 			left: 2px;
 			top: 2px;
 		}
+		.icon .double {
+			background-image: inherit;
+			background-position: inherit;
+			position: relative;
+			left: -2px;
+			top: -4px;
+			z-index: -1;
+			filter: brightness(75%);
+		}
+
 		.number .minus, .number .plus, .number .times {
 			height: inherit;
 			width: inherit;
