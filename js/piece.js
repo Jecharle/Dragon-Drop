@@ -810,7 +810,7 @@ class SkillPiece extends Piece {
 
 	get fullDescription() {
 		var description = `<strong>${this.name}</strong>`;
-		if (this._showRange) description += ` | ${this._rangeText}`;
+		if (this._showRange) description += ` <br> ${this._rangeText}`;
 		if (this._showPower) description += ` | ${this._powerText}`;
 		if (this.hasCooldown) {
 			description +=  ` | ${this._cooldownText}`;

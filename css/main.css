@@ -628,8 +628,12 @@
 			background-position-x: calc(-4*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
-		.icon.cooldown {
+		.icon.nonlinear {
 			background-position-x: calc(-5*var(--state-w));
+			background-position-y: calc(-2*var(--state-h));
+		}
+		.icon.cooldown {
+			background-position-x: calc(-6*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
 
