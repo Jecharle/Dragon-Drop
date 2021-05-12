@@ -580,9 +580,14 @@
 			background-image: url(../img/system/icons.png);
 			background-position: 0 0;
 		}
-		.icon .number{
+		.icon .number {
 			position: relative;
 			left: 2px;
+		}
+		.icon .icon {
+			position: relative;
+			left: 2px;
+			top: 2px;
 		}
 		.number .minus, .number .plus, .number .times {
 			height: inherit;
@@ -644,9 +649,23 @@
 			background-position-x: calc(-3*var(--state-w));
 			background-position-y: calc(-3*var(--state-h));
 		}
-
 		/*TODO: Anchor and evade statuses*/
 		/*#endregion state icons*/
+		
+		/*#region modifier icons*/
+		.icon.time {
+			background-position-x: calc(-3*var(--state-w));
+			background-position-y: calc(-1*var(--state-h));
+		}
+		.icon.up {
+			background-position-x: calc(-4*var(--state-w));
+			background-position-y: calc(-1*var(--state-h));
+		}
+		.icon.down {
+			background-position-x: calc(-5*var(--state-w));
+			background-position-y: calc(-1*var(--state-h));
+		}
+		/*#endregion modifier icons*/
 	/*#endregion unit status*/
 
 	/*#region unit states and motions*/

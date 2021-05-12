@@ -111,7 +111,7 @@ class TestHealSkill extends SkillPiece {
 		return `Restore ${this.power} HP`;
 	}
 	get _powerText() {
-		return ` | ${this.icon('life')} <strong>${this.power}</strong>`;
+		return `${this.icon('life')} <strong>${this.power}</strong>`;
 	}
 
 	_setStats() {

@@ -795,21 +795,25 @@ class SkillPiece extends Piece {
 		return "[Skill description]";
 	}
 	get _rangeText() {
-		if (this.range == this.minRange) return ` | ${this.icon('range')} <strong>${this.range}</strong>`;
-		else return ` | ${this.icon('range')} <strong>${this.minRange}-${this.range}</strong>`;
+		if (this.range == this.minRange) return `${this.icon('range')} <strong>${this.range}</strong>`;
+		else return `${this.icon('range')} <strong>${this.minRange}-${this.range}</strong>`;
 	}
 	get _powerText() {
-		return ` | ${this.icon('power')} <strong>${this.power}</strong>`
+		return `${this.icon('power')} <strong>${this.power}</strong>`
 	}
 	get _cooldownText() {
-		return ` | ${this.icon('cooldown')} <strong>${this.cooldown || this.cooldownCost}</strong>`
+		return `${this.icon('cooldown')} <strong>${this.cooldown || this.cooldownCost}</strong>`
 	}
+
+	get _showRange() { return true; }
+	get _showPower() { return true; }
+
 	get fullDescription() {
 		var description = `<strong>${this.name}</strong>`;
-		description += this._rangeText;
-		description += this._powerText; // TODO: Setting to skip this
+		if (this._showRange) description += ` | ${this._rangeText}`;
+		if (this._showPower) description += ` | ${this._powerText}`;
 		if (this.hasCooldown) {
-			description += this._cooldownText;
+			description +=  ` | ${this._cooldownText}`;
 		}
 		if (this.hasLimitedUses) {
 			description += ` | <strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}`;

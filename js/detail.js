@@ -130,17 +130,17 @@ class StatusList extends Detail {
 		if (!statusObject) return;
 		
 		if (statusObject[UnitPiece.Power]) {
-			this._addIcon('power', statusObject[UnitPiece.Power]);
+			this._addIcon('power', statusObject[UnitPiece.Power] > 0 ? 'up' : 'down');
 		}
 		if (statusObject[UnitPiece.Defense]) {
-			this._addIcon('defense', statusObject[UnitPiece.Defense]);
+			this._addIcon('defense', statusObject[UnitPiece.Defense] > 0 ? 'up' : 'down');
 		}
 		if (statusObject[UnitPiece.Speed]) {
-			this._addIcon('speed', statusObject[UnitPiece.Speed]);
+			this._addIcon('speed', statusObject[UnitPiece.Speed] > 0 ? 'up' : 'down');
 		}
 
 		if (statusObject[UnitPiece.Charge]) {
-			this._addIcon('power', statusObject[UnitPiece.Charge]);
+			this._addIcon('power', 'time');
 		}
 
 		if (statusObject[UnitPiece.Regenerate]) {
@@ -167,24 +167,35 @@ class StatusList extends Detail {
 		}
 	}
 
-	_addIcon(style, value, signed) {
-		var newIconEl = document.createElement('div');
+	_addIcon(style, value) {
+		var newIconEl = this._newIcon(style);
 		newIconEl.classList.add('icon', style);
-		if (value > 1 || value < 0) {
-			var numberEl = document.createElement('div');
-			numberEl.classList.add('number');
-			numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
-			if (signed || value < 0) {
-				var signEl = document.createElement('div');
-				if (value < 0) signEl.classList.add('minus');
-				else signEl.classList.add('plus');
-				numberEl.appendChild(signEl);
-			}
-			newIconEl.appendChild(numberEl);
+		if (value) {
+			if (isNaN(value)) newIconEl.appendChild(this._newIcon(value));
+			else newIconEl.appendChild(this._newNumber(value));
 		}
 		this._subEl.appendChild(newIconEl);
-
 		this._icons.push(newIconEl);
+	}
+	_newIcon(...styles) {
+		var iconEl = document.createElement('div');
+		iconEl.classList.add('icon', ...styles);
+		return iconEl;
+	}
+	_newNumber(value, showPlus) {
+		var numberEl = document.createElement('div');
+		numberEl.classList.add('number');
+		numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
+		if (value < 0) {
+			var signEl = document.createElement('div');
+			signEl.classList.add('minus');
+			numberEl.appendChild(signEl);
+		} else if (showPlus) {
+			var signEl = document.createElement('div');
+			signEl.classList.add('plus');
+			numberEl.appendChild(signEl);
+		}
+		return numberEl;
 	}
 	_clearIcons() {
 		if (this._icons) this._icons.forEach(el => this._subEl.removeChild(el));
