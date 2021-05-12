@@ -207,7 +207,7 @@ class TestDebuffSkill extends SkillPiece {
 		unit.addStatus(UnitPiece.Power, -1);
 		unit.addStatus(UnitPiece.Defense, -1);
 		unit.addStatus(UnitPiece.Speed, -1);
-		unit.addStatus(UnitPiece.Bleed, 1);
+		unit.addStatus(UnitPiece.Poison, 1);
 		await Game.asyncPause(200);
 	}
 };
@@ -307,8 +307,10 @@ class TestMoveSkill extends SkillPiece {
 	get _description() {
 		return "Jump to a square adjacent to an ally";
 	}
+	get _rangeText() {
+		return '<br>';
+	}
 	get _showPower() { return false; }
-	get _showRange() { return false; }
 
 	_setStats() {
 		super._setStats();

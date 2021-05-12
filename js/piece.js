@@ -800,24 +800,27 @@ class SkillPiece extends Piece {
 		else return `${icon} <strong>${this.minRange}-${this.range}</strong>`;
 	}
 	get _powerText() {
-		return `${this.icon('power')} <strong>${this.power}</strong>`
+		return `${this.icon('power')} <strong>${this.power}</strong>`;
 	}
 	get _cooldownText() {
-		return `${this.icon('cooldown')} <strong>${this.cooldown || this.cooldownCost}</strong>`
+		return `${this.icon('cooldown')} <strong>${this.cooldown || this.cooldownCost}</strong>`;
+	}
+	get _limitedUseText() {
+		return `<strong>x${this.usesLeft}/${this.maxUses}</strong>`;
 	}
 
-	get _showRange() { return true; }
 	get _showPower() { return true; }
 
 	get fullDescription() {
 		var description = `<strong>${this.name}</strong>`;
-		if (this._showRange) description += ` <br> ${this._rangeText}`;
+		//description += `<br>${this._description}`;
+		description += ` <br> ${this._rangeText}`;
 		if (this._showPower) description += ` | ${this._powerText}`;
 		if (this.hasCooldown) {
 			description +=  ` | ${this._cooldownText}`;
 		}
 		if (this.hasLimitedUses) {
-			description += ` | <strong>${this.usesLeft}</strong> use${this.usesLeft == 1 ? "" : "s"}`;
+			description += ` | ${this._limitedUseText}`;
 		}
 		description += `<br>${this._description}`;
 		return description;
