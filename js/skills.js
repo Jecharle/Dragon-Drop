@@ -146,7 +146,7 @@ class TestBuffSkill extends SkillPiece {
 		return `Increase the target's Defense and Speed<br>Next turn, heal the target and increase their Power`;
 	}
 	get _powerText() {
-		return `${this.icon('life')} ${this.power}`;
+		return `${this.icon('regenerate')} ${this.power}`;
 	}
 
 	_setStats() {
@@ -188,6 +188,9 @@ class TestDebuffSkill extends SkillPiece {
 	}
 	get _description() {
 		return `Poison the target and decrease their Power, Defense, and Speed`;
+	}
+	get _powerText() {
+		return `${this.icon('poison')} ${this.power}`;
 	}
 
 	_setStats() {
