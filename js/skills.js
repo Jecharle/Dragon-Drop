@@ -14,12 +14,6 @@ class TestAttackSkill extends SkillPiece {
 		return `Deal ${this.power} damage and push the target 1 space`;
 	}
 
-	inRange(origin, target) {
-		return super.inRange(origin, target)
-			&& this._inLine(origin, target)
-			&& this._canSee(origin, target);
-	}
-
 	validTarget(target) {
 		if (target.piece?.targetable) {
 			return true;
@@ -153,6 +147,7 @@ class TestBuffSkill extends SkillPiece {
 	get _description() {
 		return `Increase all stats by 1 and restore 1 HP at the start of their next turn`;
 	}
+	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -195,6 +190,7 @@ class TestDebuffSkill extends SkillPiece {
 	get _description() {
 		return `Lower all stats by 1 and deal 1 damage at the end of their next turn.`;
 	}
+	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -237,6 +233,7 @@ class TestGuardSkill extends SkillPiece {
 	get _description() {
 		return `Apply Evade and Anchor to the target.`;
 	}
+	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -275,8 +272,9 @@ class TestBuildSkill extends SkillPiece {
 		return "Build";
 	}
 	get _description() {
-		return "Create a wall with 1 HP";
+		return "Create a wall with 2 HP";
 	}
+	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -319,6 +317,8 @@ class TestMoveSkill extends SkillPiece {
 	get _description() {
 		return "Jump to a square adjacent to an ally";
 	}
+	get _showPower() { return false; }
+	get _showRange() { return false; }
 
 	_setStats() {
 		super._setStats();
@@ -365,13 +365,9 @@ class TestAreaSkill extends SkillPiece {
 		super._setStats();
 		this._range = 3;
 		this._minRange = 2;
+		this._los = false;
 		this._area = 1;
 		this._basePower = 1;
-	}
-
-	inRange(origin, target) {
-		return super.inRange(origin, target)
-			&& this._inLine(origin, target);
 	}
 
 	_startEffects(target, _squares, _units) {
@@ -430,12 +426,6 @@ class TestRushSkill extends SkillPiece {
 		return false;
 	}
 
-	inRange(origin, target) {
-		return super.inRange(origin, target)
-			&& this._inLine(origin, target)
-			&& this._canSee(origin, target);
-	}
-
 	_startEffects(target) {
 		var time = this.user.animateBump(target, this.user.square);
 		this.user.addTimedClass(time, 'attack');
@@ -471,17 +461,14 @@ class TestPositionSkill extends SkillPiece {
 	get _description() {
 		return "Toss the unit in front of you to the target square";
 	}
+	get _showPower() { return false; }
 
 	_setStats() {
 		super._setStats();
 		this._range = 4;
 		this._minRange = 2;
+		this._los = false;
 		this._baseCooldown = 2;
-	}
-
-	inRange(origin, target) {
-		return super.inRange(origin, target)
-			&& this._inLine(origin, target);
 	}
 
 	inArea(origin, target) {

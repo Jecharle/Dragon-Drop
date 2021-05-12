@@ -637,7 +637,7 @@
 			background-position-x: calc(-4*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}
-		.icon.nonlinear {
+		.icon.non-los {
 			background-position-x: calc(-5*var(--state-w));
 			background-position-y: calc(-2*var(--state-h));
 		}

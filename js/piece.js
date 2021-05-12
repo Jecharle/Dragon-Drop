@@ -795,8 +795,9 @@ class SkillPiece extends Piece {
 		return "[Skill description]";
 	}
 	get _rangeText() {
-		if (this.range == this.minRange) return `${this.icon('range')} <strong>${this.range}</strong>`;
-		else return `${this.icon('range')} <strong>${this.minRange}-${this.range}</strong>`;
+		var icon = this.icon(this.los ? 'range' : 'non-los');
+		if (this.range == this.minRange) return `${icon} <strong>${this.range}</strong>`;
+		else return `${icon} <strong>${this.minRange}-${this.range}</strong>`;
 	}
 	get _powerText() {
 		return `${this.icon('power')} <strong>${this.power}</strong>`
@@ -830,6 +831,9 @@ class SkillPiece extends Piece {
 	get minRange() {
 		return this._minRange;
 	}
+	get los() {
+		return this._los;
+	}
 
 	get area() {
 		return this._area;
@@ -856,6 +860,7 @@ class SkillPiece extends Piece {
 	_setStats() {
 		this._range = 1;
 		this._minRange = 1;
+		this._los = true;
 		this._area = 0;
 		this._baseCooldown = 0;
 		this._maxUses = 0;
@@ -870,7 +875,9 @@ class SkillPiece extends Piece {
 	}
 	inRange(origin, target) {
 		var distance = origin.distance(target);
-		return distance <= this.range && distance >= this.minRange;
+		return distance <= this.range && distance >= this.minRange
+			&& this._inLine(origin, target)
+			&& (!this.los || this._canSee(origin, target));
 	}
 	validTarget(target) {
 		return !!target;
