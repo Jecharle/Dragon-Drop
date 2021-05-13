@@ -143,7 +143,7 @@ class TestBuffSkill extends SkillPiece {
 		return "Buff";
 	}
 	get _description() {
-		return `Increase the target's Defense and Speed<br>Next turn, heal the target and increase their Power`;
+		return `Regenerate target and increase their Defense and Speed<br>Next turn, and increase Power`;
 	}
 	get _powerText() {
 		return `${this.icon('regenerate')} ${this.power}`;

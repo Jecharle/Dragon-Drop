@@ -379,15 +379,21 @@ class UnitPiece extends Piece {
 
 	addStatus(effect, value) {
 		switch(effect) {
-			case UnitPiece.Regenerate: case UnitPiece.Charge: // positive-only statuses
+			case UnitPiece.Regenerate: // regenerate cancels out poison
+				if (this.getStatus(UnitPiece.Poison)) {
+					this._status[UnitPiece.Poison] = 0;
+					break;
+				}
+			case UnitPiece.Charge: // positive-only statuses (includes regenerate)
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
 				}
 				break;
 
 			case UnitPiece.Poison: case UnitPiece.Burn: case UnitPiece.Bleed: // poison flavors
-				value = Math.abs(value);
-				if (value >= this.getStatus(UnitPiece.Poison)) {
+				if (this.getStatus(UnitPiece.Regenerate)) {
+					this._status[UnitPiece.Regenerate] = 0;
+				} else if (value >= this.getStatus(UnitPiece.Poison)) {
 					this._status[UnitPiece.Poison] = value;
 					this._status['_poisonType'] = effect;
 				}
@@ -434,33 +440,32 @@ class UnitPiece extends Piece {
 	}
 
 	async updateStatusTurnStart() {
-		this.removeStatus(UnitPiece.Defense);
-		this.removeStatus(UnitPiece.Evade);
-		this.removeStatus(UnitPiece.Anchor);
-		this.refresh();
 		if (this.getStatus(UnitPiece.Regenerate)) {
 			this._applyRegenerate();
-			this.removeStatus(UnitPiece.Regenerate);
 			this.refresh();
 			await Game.asyncPause(500);
 		}
 		if (this.getStatus(UnitPiece.Charge)) {
 			this._applyCharge();
-			this.removeStatus(UnitPiece.Charge);
+			await Game.asyncPause(500);
+		}
+		this.removeStatus(UnitPiece.Regenerate);
+		this.removeStatus(UnitPiece.Defense);
+		this.removeStatus(UnitPiece.Evade);
+		this.removeStatus(UnitPiece.Anchor);
+		this.removeStatus(UnitPiece.Charge);
+		this.refresh();
+	}
+	async updateStatusTurnEnd() {
+		if (this.getStatus(UnitPiece.Poison)) {
+			this._applyPoison();
 			this.refresh();
 			await Game.asyncPause(500);
 		}
-	}
-	async updateStatusTurnEnd() {
+		this.removeStatus(UnitPiece.Poison);
 		this.removeStatus(UnitPiece.Power);
 		this.removeStatus(UnitPiece.Speed);
 		this.refresh();
-		if (this.getStatus(UnitPiece.Poison)) {
-			this._applyPoison();
-			this.removeStatus(UnitPiece.Poison);
-			this.refresh();
-			await Game.asyncPause(500);
-		}
 		this.dieIfDead();
 	}
 
@@ -788,8 +793,8 @@ class SkillPiece extends Piece {
 	}
 
 	//#region text
-	icon(style) {
-		return `<div class="icon ${style}"></div>`;
+	icon(style, content) {
+		return `<div class="icon ${style}">${content || ""}</div>`;
 	}
 
 	get name() {

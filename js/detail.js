@@ -130,25 +130,40 @@ class StatusList extends Detail {
 		if (!statusObject) return;
 		
 		if (statusObject[UnitPiece.Power]) {
-			this._addIcon('power', statusObject[UnitPiece.Power] > 0 ? 'up' : 'down');
+			this._addIcon('power', {
+				icon: statusObject[UnitPiece.Power] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Power]) > 1
+			});
 		}
 		if (statusObject[UnitPiece.Defense]) {
-			this._addIcon('defense', statusObject[UnitPiece.Defense] > 0 ? 'up' : 'down');
+			this._addIcon('defense', {
+				icon: statusObject[UnitPiece.Defense] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Defense]) > 1
+			});
 		}
 		if (statusObject[UnitPiece.Speed]) {
-			this._addIcon('speed', statusObject[UnitPiece.Speed] > 0 ? 'up' : 'down');
+			this._addIcon('speed', {
+				icon: statusObject[UnitPiece.Speed] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Speed]) > 1
+			});
 		}
 
 		if (statusObject[UnitPiece.Charge]) {
-			this._addIcon('power', 'time');
+			this._addIcon('power', {
+				icon: 'time',
+				double: Math.abs(statusObject[UnitPiece.Charge]) > 1
+			});
 		}
 
-		// TODO: Better way to indicate amount
 		if (statusObject[UnitPiece.Regenerate]) {
-			this._addIcon('regenerate');
+			this._addIcon('regenerate', {
+				number: statusObject[UnitPiece.Regenerate]
+			});
 		}
 		if (statusObject[UnitPiece.Poison]) {
-			this._addIcon(statusObject['_poisonType'], statusObject[UnitPiece.Poison]);
+			this._addIcon(statusObject['_poisonType'], {
+				number: -statusObject[UnitPiece.Poison]
+			});
 		}
 
 		if (statusObject[UnitPiece.Evade]) {
@@ -168,12 +183,13 @@ class StatusList extends Detail {
 		}
 	}
 
-	_addIcon(style, value) {
+	_addIcon(style, props) {
 		var newIconEl = this._newIcon(style);
 		newIconEl.classList.add('icon', style);
-		if (value) {
-			if (isNaN(value)) newIconEl.appendChild(this._newIcon(value));
-			else newIconEl.appendChild(this._newNumber(value));
+		if (props) {
+			if (props.icon) newIconEl.appendChild(this._newIcon(props.icon));
+			else if (props.number) newIconEl.appendChild(this._newNumber(props.number, props.plus));
+			if (props.double) newIconEl.appendChild(this._newIcon('double'));
 		}
 		this._subEl.appendChild(newIconEl);
 		this._icons.push(newIconEl);
@@ -185,7 +201,7 @@ class StatusList extends Detail {
 	}
 	_newNumber(value, showPlus) {
 		var numberEl = document.createElement('div');
-		numberEl.classList.add('number');
+		numberEl.classList.add('icon', 'number');
 		numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
 		if (value < 0) {
 			var signEl = document.createElement('div');

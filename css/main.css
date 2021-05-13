@@ -289,8 +289,8 @@
 
 	--lifebar-h: 14px;
 
-	--state-h: 16px;
-	--state-w: 16px;
+	--icon-h: 16px;
+	--icon-w: 16px;
 
 	--skill-w: 64px;
 	--skill-h: 64px;
@@ -546,8 +546,8 @@
 	.status-list {
 		position: absolute;
 		z-index: 2;
-		height: calc(var(--state-h) + 2px);
-		width: calc(var(--state-w) + 2px);
+		height: calc(var(--icon-h) + 6px);
+		width: calc(var(--icon-w) + 4px);
 		bottom: 0;
 		right: 0;
 		pointer-events: none;
@@ -555,7 +555,7 @@
 	}
 		.status-list .inner {
 			position: absolute;
-			height: calc(var(--state-h) + 2px);
+			height: calc(var(--icon-h) + 6px);
 			width: max-content;
 			animation-name: marquee;
 			animation-iteration-count: infinite;
@@ -569,29 +569,29 @@
 			}
 		}
 		.status-list .icon {
-			margin-right: 2px;
-			margin-bottom: 2px;
+			margin: 2px;
+			margin-top: 4px;
 		}
-		.icon, .number {
+		.status-list .icon .icon {
+			margin: unset;
+		}
+		.icon {
 			display: inline-block;
-			height: var(--state-h);
-			width: var(--state-w);
+			position: relative;
+			height: var(--icon-h);
+			width: var(--icon-w);
 			background-image: url(../img/system/icons.png);
 			background-position: 0 0;
 		}
-		.icon .number {
-			position: relative;
-			left: 2px;
-		}
 		.icon .icon {
-			position: relative;
+			position: absolute;
 			left: 2px;
 			top: 2px;
 		}
 		.icon .double {
 			background-image: inherit;
 			background-position: inherit;
-			position: relative;
+			position: absolute;
 			left: -2px;
 			top: -4px;
 			z-index: -1;
@@ -604,79 +604,79 @@
 			position: relative;
 			right: 2px;
 			background-image: inherit;
-			background-position-y: calc(-1*var(--state-h));
+			background-position-y: calc(-1*var(--icon-h));
 		}
 		.number .minus {
 			background-position-x: 0;
 		}
 		.number .plus {
-			background-position-x: calc(-1*var(--state-w));
+			background-position-x: calc(-1*var(--icon-w));
 		}
 		.number .times {
-			background-position-x: calc(-2*var(--state-w));
+			background-position-x: calc(-2*var(--icon-w));
 		}
 
 		/*#region state icons*/
 		.icon.life {
 			background-position-x: 0;
-			background-position-y: calc(-2*var(--state-h));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.power {
-			background-position-x: calc(-1*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-1*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.defense {
-			background-position-x: calc(-2*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-2*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.speed {
-			background-position-x: calc(-3*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-3*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.range {
-			background-position-x: calc(-4*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-4*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.non-los {
-			background-position-x: calc(-5*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-5*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 		.icon.cooldown {
-			background-position-x: calc(-6*var(--state-w));
-			background-position-y: calc(-2*var(--state-h));
+			background-position-x: calc(-6*var(--icon-w));
+			background-position-y: calc(-2*var(--icon-h));
 		}
 
 		.icon.regenerate {
 			background-position-x: 0;
-			background-position-y: calc(-3*var(--state-h));
+			background-position-y: calc(-3*var(--icon-h));
 		}
 		.icon.poison {
-			background-position-x: calc(-1*var(--state-w));
-			background-position-y: calc(-3*var(--state-h));
+			background-position-x: calc(-1*var(--icon-w));
+			background-position-y: calc(-3*var(--icon-h));
 		}
 		.icon.burn {
-			background-position-x: calc(-2*var(--state-w));
-			background-position-y: calc(-3*var(--state-h));
+			background-position-x: calc(-2*var(--icon-w));
+			background-position-y: calc(-3*var(--icon-h));
 		}
 		.icon.bleed {
-			background-position-x: calc(-3*var(--state-w));
-			background-position-y: calc(-3*var(--state-h));
+			background-position-x: calc(-3*var(--icon-w));
+			background-position-y: calc(-3*var(--icon-h));
 		}
 		/*TODO: Anchor and evade statuses*/
 		/*#endregion state icons*/
 		
 		/*#region modifier icons*/
 		.icon.time {
-			background-position-x: calc(-3*var(--state-w));
-			background-position-y: calc(-1*var(--state-h));
+			background-position-x: calc(-3*var(--icon-w));
+			background-position-y: calc(-1*var(--icon-h));
 		}
 		.icon.up {
-			background-position-x: calc(-4*var(--state-w));
-			background-position-y: calc(-1*var(--state-h));
+			background-position-x: calc(-4*var(--icon-w));
+			background-position-y: calc(-1*var(--icon-h));
 		}
 		.icon.down {
-			background-position-x: calc(-5*var(--state-w));
-			background-position-y: calc(-1*var(--state-h));
+			background-position-x: calc(-5*var(--icon-w));
+			background-position-y: calc(-1*var(--icon-h));
 		}
 		/*#endregion modifier icons*/
 	/*#endregion unit status*/

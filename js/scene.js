@@ -503,6 +503,7 @@ class BattleScene extends Scene {
 			this._clearMoves();
 			this._deselectSkill();
 			this._isBattleOver();
+			this._skillList.setUser(this._unit);
 		}
 		this.setDone();
 		return success;
