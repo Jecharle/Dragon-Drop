@@ -55,7 +55,7 @@ class EndScreen extends Detail {
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {
-	constructor(startValue, startMaxValue) {
+	constructor(startValue, startMaxValue, defenseValue) {
 		super();
 
 		this._subEl = document.createElement(this.elType);
@@ -66,8 +66,13 @@ class Lifebar extends Detail {
 		this._deltaEl.classList.add('change');
 		this.el.appendChild(this._deltaEl);
 
+		this._defEl = document.createElement(this.elType);
+		this._defEl.classList.add('defense');
+		this.el.appendChild(this._defEl);
+
 		this.maxValue = startMaxValue;
 		this.value = startValue;
+		this.defenseValue = defenseValue || 0;
 	}
 
 	get elType() {
@@ -99,6 +104,19 @@ class Lifebar extends Detail {
 		if (value >= 0) {
 			this._maxValue = value;
 			this.el.style.width = Lifebar.width(value);
+			this._defEl.style.left = Lifebar.width(value, true);
+		}
+	}
+
+	get defenseValue() {
+		return this._defense;
+	}
+	set defenseValue(value) {
+		this._defEl.classList.toggle('minus', value < 0);
+		value = Math.abs(value);
+		if (value >= 0) {
+			this._defense = value;
+			this._defEl.style.width = Lifebar.width(value*2, true);
 		}
 	}
 

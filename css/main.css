@@ -535,6 +535,19 @@
 			animation: fade-out 0.8s 0.2s both;
 			visibility: visible;
 		}
+
+		.lifebar>.defense {
+			position: absolute;
+			z-index: 0;
+			height: var(--lifebar-h);
+			background-image: inherit;
+			background-position: 0 calc(-3*var(--lifebar-h));
+			background-repeat: repeat-x;
+		}
+		.lifebar>.defense.minus {
+			background-position: 0 calc(-4*var(--lifebar-h));
+		}
+
 		.unit .lifebar {
 			visibility: hidden;
 			pointer-events: none;

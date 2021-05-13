@@ -290,6 +290,7 @@ class UnitPiece extends Piece {
 	refresh() {
 		this._lifebar.maxValue = this.maxHp;
 		this._lifebar.value = this.hp;
+		this._lifebar.defenseValue = this.getStatus(UnitPiece.Defense);
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
