@@ -113,6 +113,10 @@ class UnitPiece extends Piece {
 		this._statusList = new StatusList(this._status);
 		this.el.appendChild(this._statusList.el);
 
+		this._shadowEl = document.createElement('div');
+		this._shadowEl.classList.add('shadow');
+		this.el.appendChild(this._shadowEl);
+
 		this._initialize();
 	}
 
@@ -796,7 +800,7 @@ class SkillPiece extends Piece {
 	}
 	get _rangeText() {
 		var icon = this.icon(this.los ? 'range' : 'non-los');
-		if (this.range == this.minRange) return `${icon} ${this.range}`;
+		if (this.minRange == 1 || this.range == 0) return `${icon} ${this.range}`;
 		else return `${icon} ${this.minRange}-${this.range}`;
 	}
 	get _powerText() {
