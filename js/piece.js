@@ -263,7 +263,7 @@ class UnitPiece extends Piece {
 		if (this.getStatus(UnitPiece.Poison) > 0) {
 			this.hp -= this.getStatus(UnitPiece.Poison);
 			this.addTimedClass(1200, 'hp-change');
-			this.addTimedClass(450, 'damaged');
+			this.addTimedClass(200, 'damaged');
 			// TODO: show flavored DoT visual
 		}
 	}
@@ -318,13 +318,13 @@ class UnitPiece extends Piece {
 
 		if (power > 0 && this.getStatus(UnitPiece.Evade) && !props?.ignoreEvade) {
 			this.removeStatus(UnitPiece.Evade);
-			// TODO: Evade visual effect
+			this.addTimedClass(350, 'evade'); 
 			power = 0;
 		}
 
 		if (power > 0) {
 			this.hp -= power;
-			this.addTimedClass(450, 'damaged');
+			this.addTimedClass(200, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
 		}
 
