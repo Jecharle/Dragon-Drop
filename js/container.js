@@ -833,7 +833,7 @@ class UnitInfo extends ElObj {
 			this.style = unit.style;
 			this._lifebar.maxValue = unit.maxHp;
 			this._lifebar.value = unit.hp;
-			this._lifebar.defenseValue = unit.getStatus(UnitPiece.Defense);
+			this._lifebar.defenseValue = unit.defense;
 			this._statusList.value = unit._status;
 			this._nameSpan.innerText = unit.characterName;
 			this._tooltip.value = unit.fullDescription;

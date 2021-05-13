@@ -237,6 +237,10 @@ class UnitPiece extends Piece {
 		return this.getStatus(UnitPiece.Power);
 	}
 
+	get defense() {
+		return this.getStatus(UnitPiece.Defense);
+	}
+
 	get skills() {
 		return this._skills;
 	}
@@ -290,7 +294,7 @@ class UnitPiece extends Piece {
 	refresh() {
 		this._lifebar.maxValue = this.maxHp;
 		this._lifebar.value = this.hp;
-		this._lifebar.defenseValue = this.getStatus(UnitPiece.Defense);
+		this._lifebar.defenseValue = this.defense;
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
@@ -313,7 +317,7 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, props) {
 		if (!props?.ignoreDefense) {
-			power = Math.max(power - this.getStatus(UnitPiece.Defense), 0);
+			power = Math.max(power - this.defense, 0);
 		}
 
 		if (power > 0 && this.getStatus(UnitPiece.Evade) && !props?.ignoreEvade) {
