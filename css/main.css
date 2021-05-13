@@ -539,6 +539,7 @@
 		.lifebar>.defense {
 			position: absolute;
 			z-index: 0;
+			left: calc(100% - 2px);
 			height: var(--lifebar-h);
 			background-image: inherit;
 			background-position: 0 calc(-3*var(--lifebar-h));

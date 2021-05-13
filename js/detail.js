@@ -104,7 +104,6 @@ class Lifebar extends Detail {
 		if (value >= 0) {
 			this._maxValue = value;
 			this.el.style.width = Lifebar.width(value);
-			this._defEl.style.left = Lifebar.width(value, true);
 		}
 	}
 
@@ -112,12 +111,16 @@ class Lifebar extends Detail {
 		return this._defense;
 	}
 	set defenseValue(value) {
-		this._defEl.classList.toggle('minus', value < 0);
-		value = Math.abs(value);
+		this._defense = value;
 		if (value >= 0) {
-			this._defense = value;
 			this._defEl.style.width = Lifebar.width(value*2, true);
+			this._defEl.classList.remove('minus');
+		} else {
+			this._defense = value;
+			this._defEl.style.width = Lifebar.width(-value*2);
+			this._defEl.classList.add('minus');
 		}
+
 	}
 
 	static width(value, noPadding) {
