@@ -676,7 +676,15 @@
 			background-position-x: calc(-3*var(--icon-w));
 			background-position-y: calc(-3*var(--icon-h));
 		}
-		/*TODO: Anchor and evade statuses*/
+
+		.icon.evade {
+			background-position-x: calc(-4*var(--icon-w));
+			background-position-y: calc(-3*var(--icon-h));
+		}
+		.icon.anchor {
+			background-position-x: calc(-5*var(--icon-w));
+			background-position-y: calc(-3*var(--icon-h));
+		}
 		/*#endregion state icons*/
 		
 		/*#region modifier icons*/
@@ -720,7 +728,13 @@
 		background-position-y: calc(-2*var(--unit-h));
 		animation: shake 0.15s;
 	}
+	.damaged>.shadow {
+		animation: shake 0.15s;
+	}
 	.evade>.sprite {
+		animation: duck 0.15s 2 alternate;
+	}
+	.evade>.shadow {
 		animation: duck 0.15s 2 alternate;
 	}
 	.spawn>.sprite {
