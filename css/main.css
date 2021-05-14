@@ -71,8 +71,8 @@
 		cursor: default;
 	}
 	.undo-button {
-		top: 12px;
-		left: 12%;
+		bottom: 24px;
+		left: 24px;
 	}
 	.end-turn-button {
 		bottom: 12px;
