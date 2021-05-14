@@ -112,15 +112,21 @@ class Lifebar extends Detail {
 	}
 	set defenseValue(value) {
 		this._defense = value;
-		if (value >= 0) {
-			this._defEl.style.width = Lifebar.width(value*2, true);
-			this._defEl.classList.remove('minus');
-		} else {
-			this._defense = value;
-			this._defEl.style.width = Lifebar.width(-value*2);
-			this._defEl.classList.add('minus');
-		}
+		this._defEl.classList.toggle('icon', value != 0);
 
+		// TODO: Clean up and standardize number creation
+		if (this._defEl.firstChild) this._defEl.removeChild(this._defEl.firstChild);
+		if (value) {
+			var numberEl = document.createElement('div');
+			numberEl.classList.add('icon', 'number');
+			numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
+			if (value < 0) {
+				var signEl = document.createElement('div');
+				signEl.classList.add('minus');
+				numberEl.appendChild(signEl);
+			}
+			this._defEl.appendChild(numberEl);
+		}
 	}
 
 	static width(value, noPadding) {

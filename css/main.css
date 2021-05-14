@@ -536,17 +536,9 @@
 			visibility: visible;
 		}
 
-		.lifebar>.defense {
-			position: absolute;
-			z-index: 0;
-			left: calc(100% - 2px);
-			height: var(--lifebar-h);
-			background-image: inherit;
-			background-position: 0 calc(-3*var(--lifebar-h));
-			background-repeat: repeat-x;
-		}
-		.lifebar>.defense.minus {
-			background-position: 0 calc(-4*var(--lifebar-h));
+		.lifebar>.icon {
+			left: calc(100% + 2px);
+			top: -2px;
 		}
 
 		.unit .lifebar {
