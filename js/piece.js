@@ -320,9 +320,7 @@ class UnitPiece extends Piece {
 			power = Math.max(power - this.defense, 0);
 		}
 
-		if (power > 0 && this.getStatus(UnitPiece.Evade) && !props?.ignoreEvade) {
-			this.removeStatus(UnitPiece.Evade);
-			this.addTimedClass(350, 'evade'); 
+		if (!props?.ignoreEvade && !this.confirmHit()) {
 			power = 0;
 		}
 
@@ -348,6 +346,15 @@ class UnitPiece extends Piece {
 
 		this.refresh();
 		return power;
+	}
+	confirmHit(testOnly) {
+		if (!this.getStatus(UnitPiece.Evade)) return true;
+		
+		if (!testOnly) {
+			this.removeStatus(UnitPiece.Evade);
+			this.addTimedClass(350, 'evade'); 
+		}
+		return false;
 	}
 
 	push(origin, distance, props) {

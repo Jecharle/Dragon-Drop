@@ -535,7 +535,6 @@
 			animation: fade-out 0.8s 0.2s both;
 			visibility: visible;
 		}
-
 		.lifebar>.icon {
 			left: calc(100% + 2px);
 			top: -2px;
