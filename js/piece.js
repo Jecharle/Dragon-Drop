@@ -265,27 +265,25 @@ class UnitPiece extends Piece {
 
 	_applyPoison() {
 		if (this.getStatus(UnitPiece.Poison) > 0) {
-			this.hp -= this.getStatus(UnitPiece.Poison);
-			this.addTimedClass(1200, 'hp-change');
-			this.addTimedClass(200, 'damaged');
-			// TODO: show flavored DoT visual
+			/* TODO: show flavored DoT visual?
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-poison-effect');
+			this.parent.el.appendChild(vfx.el);
+			*/
+			this.takeDamage(this.getStatus(UnitPiece.Poison), { ignoreDefense: true });
 		}
 	}
 	_applyRegenerate() {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
-			this.hp += this.getStatus(UnitPiece.Regenerate);
-			this.addTimedClass(1200, 'hp-change');
-
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-heal-effect');
 			this.parent.el.appendChild(vfx.el);
+			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
 		}
 	}
 	_applyCharge() {
 		if (this.getStatus(UnitPiece.Charge) != 0) {
-			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
-			
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-buff-effect');
 			this.parent.el.appendChild(vfx.el);
+			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
 		}
 	}
 	//#endregion status effects
@@ -320,13 +318,9 @@ class UnitPiece extends Piece {
 			power = Math.max(power - this.defense, 0);
 		}
 
-		if (!props?.ignoreEvade && !this.confirmHit()) {
-			power = 0;
-		}
-
 		if (power > 0) {
 			this.hp -= power;
-			this.addTimedClass(200, 'damaged');
+			this.addTimedClass(500, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
 		}
 
@@ -347,14 +341,14 @@ class UnitPiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	confirmHit(testOnly) {
-		if (!this.getStatus(UnitPiece.Evade)) return true;
+	evade(testOnly) {
+		if (!this.getStatus(UnitPiece.Evade)) return false;
 		
 		if (!testOnly) {
 			this.removeStatus(UnitPiece.Evade);
 			this.addTimedClass(350, 'evade'); 
 		}
-		return false;
+		return true;
 	}
 
 	push(origin, distance, props) {

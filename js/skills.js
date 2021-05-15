@@ -22,8 +22,10 @@ class TestAttackSkill extends SkillPiece {
 	}
 
 	async _unitEffects(unit, _target) {
-		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1, {animation: UnitPiece.Path});
+		if (!unit.evade()) {
+			unit.takeDamage(this.power);
+			unit.push(this.user.square, 1, {animation: UnitPiece.Path});
+		}
 		await Game.asyncPause(200);
 	}
 };
@@ -55,7 +57,7 @@ class TestRangedSkill extends TestAttackSkill {
 };
 
 /***************************************************
- Test ranged attack skill
+ Test pull attack skill
 ***************************************************/
 class TestPullSkill extends TestAttackSkill {
 	constructor(user) {
@@ -83,9 +85,108 @@ class TestPullSkill extends TestAttackSkill {
 	}
 
 	async _unitEffects(unit, _target) {
-		if (!this.user.isAlly(unit)) unit.takeDamage(this.power);
-		unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+		if (this.user.isAlly(unit)) {
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+		} else if (!unit.evade()) {
+			unit.takeDamage(this.power);
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+		}
 		await Game.asyncPause(200);
+	}
+};
+
+/***************************************************
+ Test charge skill
+***************************************************/
+class TestRushSkill extends TestAttackSkill {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	get name() {
+		return "Charge Attack";
+	}
+	get _description() {
+		return `Approach the target and attack, pushing them back`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._basePower = 3;
+		this._range = 3;
+		this._minRange = 3;
+		this._baseCooldown = 3;
+	}
+
+	_canSeeSquare(square) {
+		return this.user.canStand(square);
+	}
+
+	async _startEffects(target) {
+		var time = this.user.animateBump(target, this.user.square);
+		this.user.addTimedClass(time, 'attack');
+		this.user.pull(target, 2);
+
+		this._showEffect(target, this.user.square, "test-attack-effect");
+
+		await Game.asyncPause(time);
+	}
+
+	/*_aiBaseTargetScore(target) {
+		return -this.power*0.5; // TODO: Use if the enemy is otherwise out of range
+	}*/
+};
+
+/***************************************************
+ Test area attack skill
+***************************************************/
+class TestAreaSkill extends TestAttackSkill {
+	constructor(user) {
+		super(user);
+		this.style = 'attack-skill';
+	}
+
+	get name() {
+		return "Area Attack";
+	}
+	get _description() {
+		return `Damage targets in a small area and push them away from the center`;
+	}
+
+	_setStats() {
+		super._setStats();
+		this._range = 3;
+		this._minRange = 2;
+		this._los = false;
+		this._area = 1;
+		this._basePower = 1;
+	}
+
+	validTarget(target) {
+		return !!target;
+	}
+
+	async _startEffects(target, _squares, _units) {
+		this.user.addTimedClass(200, 'attack');
+		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, SpriteEffect.Arc);
+		await Game.asyncPause(400);
+	}
+
+	async _unitEffects(unit, target) {
+		if (!unit.evade()) {
+			unit.takeDamage(this.power);
+			unit.push(target, 1, {animation: UnitPiece.Path});
+		}
+		await Game.asyncPause(150);
+	}
+
+	async _endEffects(_target, _squares, _units) {
+		await Game.asyncPause(200);
+	}
+
+	_aiBaseTargetScore(_target) {
+		return -0.5; // AoE are lower priority unless they hit multiple targets
 	}
 };
 
@@ -207,13 +308,16 @@ class TestDebuffSkill extends SkillPiece {
 		}
 		return false;
 	}
+
 	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
-		this._showEffect(unit.square, this.user.square, "test-heal-effect");
-		unit.addStatus(UnitPiece.Power, -1);
-		unit.addStatus(UnitPiece.Defense, -1);
-		unit.addStatus(UnitPiece.Speed, -1);
-		unit.addStatus(UnitPiece.Poison, this.power);
+		if (!unit.evade()) {
+			this._showEffect(unit.square, this.user.square, "test-heal-effect");
+			unit.addStatus(UnitPiece.Power, -1);
+			unit.addStatus(UnitPiece.Defense, -1);
+			unit.addStatus(UnitPiece.Speed, -1);
+			unit.addStatus(UnitPiece.Poison, this.power);
+		}
 		await Game.asyncPause(200);
 	}
 };
@@ -341,107 +445,6 @@ class TestMoveSkill extends SkillPiece {
 		var time = this.user.animateMove([startSquare], UnitPiece.Jump);
 		await Game.asyncPause(time);
 	}
-};
-
-/***************************************************
- Test area skill
-***************************************************/
-class TestAreaSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
-
-	get name() {
-		return "Area Attack";
-	}
-	get _description() {
-		return `Damage targets in a small area and push them away from the center`;
-	}
-
-	_setStats() {
-		super._setStats();
-		this._range = 3;
-		this._minRange = 2;
-		this._los = false;
-		this._area = 1;
-		this._basePower = 1;
-	}
-
-	async _startEffects(target, _squares, _units) {
-		this.user.addTimedClass(200, 'attack');
-		this._showEffect(target, this.user.square, "test-arc-effect").animateMove(this.user.square, SpriteEffect.Arc);
-		await Game.asyncPause(400);
-	}
-
-	async _unitEffects(unit, target) {
-		unit.takeDamage(this.power);
-		unit.push(target, 1, {animation: UnitPiece.Path});
-		await Game.asyncPause(150);
-	}
-
-	async _endEffects(_target, _squares, _units) {
-		await Game.asyncPause(200);
-	}
-
-	_aiBaseTargetScore(_target) {
-		return -0.5; // AoE are lower priority unless they hit multiple targets
-	}
-};
-
-/***************************************************
- Test charge skill
-***************************************************/
-class TestRushSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
-
-	get name() {
-		return "Charge Attack";
-	}
-	get _description() {
-		return `Approach the target and attack, pushing them back`;
-	}
-
-	_setStats() {
-		super._setStats();
-		this._basePower = 3;
-		this._range = 3;
-		this._minRange = 3;
-		this._baseCooldown = 3;
-	}
-
-	_canSeeSquare(square) {
-		return this.user.canStand(square);
-	}
-
-	validTarget(target) {
-		if (target.piece?.targetable) {
-			return true;
-		}
-		return false;
-	}
-
-	async _startEffects(target) {
-		var time = this.user.animateBump(target, this.user.square);
-		this.user.addTimedClass(time, 'attack');
-		this.user.pull(target, 2);
-
-		this._showEffect(target, this.user.square, "test-attack-effect");
-
-		await Game.asyncPause(time);
-	}
-	async _unitEffects(unit) {
-		unit.takeDamage(this.power);
-		unit.push(this.user.square, 1, { animation: UnitPiece.Path });
-		await Game.asyncPause(200);
-	}
-
-	/*_aiBaseTargetScore(target) {
-		return -this.power*0.5; // TODO: Use if the enemy is otherwise out of range
-	}*/
 };
 
 /***************************************************
