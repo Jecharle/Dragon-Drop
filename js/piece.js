@@ -257,6 +257,7 @@ class UnitPiece extends Piece {
 	static get Evade() { return 'evade'; }
 	static get Anchor() { return 'anchor'; }
 	static get Charge() { return 'charge'; }
+	static get Dash() { return 'dash'; }
 
 	getStatus(effect) {
 		if (!this._status) return 0;
@@ -265,10 +266,8 @@ class UnitPiece extends Piece {
 
 	_applyPoison() {
 		if (this.getStatus(UnitPiece.Poison) > 0) {
-			/* TODO: show flavored DoT visual?
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-poison-effect');
 			this.parent.el.appendChild(vfx.el);
-			*/
 			this.takeDamage(this.getStatus(UnitPiece.Poison), { ignoreDefense: true });
 		}
 	}
@@ -279,11 +278,12 @@ class UnitPiece extends Piece {
 			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
 		}
 	}
-	_applyCharge() {
-		if (this.getStatus(UnitPiece.Charge) != 0) {
+	_applyDelayedBuff() {
+		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Dash)) {
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-buff-effect');
 			this.parent.el.appendChild(vfx.el);
 			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
+			this.addStatus(UnitPiece.Speed, this.getStatus(UnitPiece.Dash));
 		}
 	}
 	//#endregion status effects
@@ -385,23 +385,17 @@ class UnitPiece extends Piece {
 
 	addStatus(effect, value) {
 		switch(effect) {
-			case UnitPiece.Regenerate: // regenerate cancels out poison
+			case UnitPiece.Regenerate: case UnitPiece.Poison: // regenerate cancels out poison
 				if (this.getStatus(UnitPiece.Poison)) {
 					this._status[UnitPiece.Poison] = 0;
 					break;
+				} else if (this.getStatus(UnitPiece.Regenerate)) {
+					this._status[UnitPiece.Regenerate] = 0;
+					break;
 				}
-			case UnitPiece.Charge: // positive-only statuses (includes regenerate)
+			case UnitPiece.Charge: case UnitPiece.Dash: // positive-only statuses (includes regenerate)
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
-				}
-				break;
-
-			case UnitPiece.Poison: case UnitPiece.Burn: case UnitPiece.Bleed: // poison flavors
-				if (this.getStatus(UnitPiece.Regenerate)) {
-					this._status[UnitPiece.Regenerate] = 0;
-				} else if (value >= this.getStatus(UnitPiece.Poison)) {
-					this._status[UnitPiece.Poison] = value;
-					this._status['_poisonType'] = effect;
 				}
 				break;
 			
@@ -451,8 +445,8 @@ class UnitPiece extends Piece {
 			this.refresh();
 			await Game.asyncPause(500);
 		}
-		if (this.getStatus(UnitPiece.Charge)) {
-			this._applyCharge();
+		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Dash)) {
+			this._applyDelayedBuff();
 			await Game.asyncPause(500);
 		}
 		this.removeStatus(UnitPiece.Regenerate);

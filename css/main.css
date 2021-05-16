@@ -638,6 +638,7 @@
 			background-position-x: calc(-3*var(--icon-w));
 			background-position-y: calc(-2*var(--icon-h));
 		}
+		
 		.icon.range {
 			background-position-x: calc(-4*var(--icon-w));
 			background-position-y: calc(-2*var(--icon-h));
@@ -659,21 +660,13 @@
 			background-position-x: calc(-1*var(--icon-w));
 			background-position-y: calc(-3*var(--icon-h));
 		}
-		.icon.burn {
+
+		.icon.evade {
 			background-position-x: calc(-2*var(--icon-w));
 			background-position-y: calc(-3*var(--icon-h));
 		}
-		.icon.bleed {
-			background-position-x: calc(-3*var(--icon-w));
-			background-position-y: calc(-3*var(--icon-h));
-		}
-
-		.icon.evade {
-			background-position-x: calc(-4*var(--icon-w));
-			background-position-y: calc(-3*var(--icon-h));
-		}
 		.icon.anchor {
-			background-position-x: calc(-5*var(--icon-w));
+			background-position-x: calc(-3*var(--icon-w));
 			background-position-y: calc(-3*var(--icon-h));
 		}
 		/*#endregion state icons*/

@@ -181,6 +181,13 @@ class StatusList extends Detail {
 				double: Math.abs(statusObject[UnitPiece.Charge]) > 1
 			});
 		}
+		if (statusObject[UnitPiece.Dash]) {
+			this._addIcon('speed', {
+				icon: 'time',
+				double: Math.abs(statusObject[UnitPiece.Dash]) > 1
+			});
+		}
+
 
 		if (statusObject[UnitPiece.Regenerate]) {
 			this._addIcon('regenerate', {
@@ -188,7 +195,7 @@ class StatusList extends Detail {
 			});
 		}
 		if (statusObject[UnitPiece.Poison]) {
-			this._addIcon(statusObject['_poisonType'], {
+			this._addIcon('poison', {
 				number: -statusObject[UnitPiece.Poison]
 			});
 		}
