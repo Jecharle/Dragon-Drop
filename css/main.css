@@ -208,7 +208,7 @@
 	.selectable.skill:hover>.sprite, .skill.selected>.sprite {
 		border: 2px solid yellow;
 	}
-	.skill:hover .skill-description {
+	.skill:not(.dragging):hover .skill-description {
 		display: block;
 	}
 	/*#endregion skill states*/

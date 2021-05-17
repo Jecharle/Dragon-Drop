@@ -81,9 +81,11 @@ class Piece extends SpriteElObj {
 		var piece = ev.currentTarget.obj;
 		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
 		if (Game.scene) Game.scene.pieceEvent(piece, true);
+		piece.el.classList.add('dragging');
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
+		ev.currentTarget.classList.remove('dragging');
 		// the drop target handles the rest
 	}
 	//#endregion input events
