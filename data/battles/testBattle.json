@@ -21,8 +21,8 @@
 	"units": [
 		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4, "enemy": true},
 
-		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
-		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
+		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4, "enemy": true},
+		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4, "enemy": true},
 		
 		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4, "enemy": true}
 	]

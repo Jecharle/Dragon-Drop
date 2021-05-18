@@ -775,6 +775,13 @@
 		background-image: url("../img/faces/testEnemyUnit.png");
 	}
 
+	.enemy-support-unit>.sprite {
+		background-image: url("../img/sprites/testEnemySupportUnit.png");
+	}
+	.enemy-support-unit>.face {
+		background-image: url("../img/faces/testEnemySupportUnit.png");
+	}
+
 	.rock>.sprite {
 		background-image: url("../img/sprites/testObject.png");
 	}

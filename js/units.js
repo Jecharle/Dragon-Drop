@@ -17,6 +17,9 @@ UnitPiece.parseUnitType = function(string) {
 		// enemies
 		case "testenemy":
 			return TestEnemyUnit;
+		
+		case "testenemysupport":
+			return TestEnemySupportUnit;
 
 		// inanimate object
 		case "rockobject":
@@ -156,6 +159,29 @@ class TestEnemyUnit extends UnitPiece {
 	}
 };
 
+class TestEnemySupportUnit extends UnitPiece {
+	
+	get name() {
+		return "Support Monster";
+	}
+	get _description() {
+		return "Low health, but can attack at range and use support skills";
+	}
+
+	_stats() {
+		this.style = 'enemy-support-unit';
+		this._maxHp = 2;
+		this._moveRange = 3;
+	}
+
+	_setSkills() {
+		this._skills = [
+			new TestRangedSkill(this),
+			// TODO: Support?
+		]
+	}
+};
+
 /***************************************************
  "Unit" subtypes that don't move or have actions
 ***************************************************/
@@ -168,13 +194,6 @@ class ObjectPiece extends UnitPiece {
 }
 
 class TestRockObject extends ObjectPiece {
-
-	get name() {
-		return "Barrier";
-	}
-	get _description() {
-		return "An obstacle used to control the battlefield";
-	}
 
 	get shiftable() {
 		return false;
