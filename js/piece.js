@@ -134,6 +134,10 @@ class UnitPiece extends Piece {
 		return true;
 	}
 
+	get shiftable() {
+		return !this.getStatus(UnitPiece.Anchor);
+	}
+
 	//#region text
 	get name() {
 		return "[Unit name]";
@@ -356,7 +360,7 @@ class UnitPiece extends Piece {
 	push(origin, distance, props) {
 		if (!this.parent) return 0;
 		
-		if (this.getStatus(UnitPiece.Anchor)) return 0;
+		if (!this.shiftable) return 0;
 
 		var previousSquare = this.square;
 		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
@@ -371,7 +375,7 @@ class UnitPiece extends Piece {
 	swap(piece, props) {
 		if (!this.parent) return false;
 		
-		if (this.getStatus(UnitPiece.Anchor) || piece.getStatus(UnitPiece.Anchor)) return false;
+		if (!this.shiftable || !piece.shiftable) return false;
 
 		if (this.parent.swapPieces(this, piece)) {
 			if (props?.animation) {

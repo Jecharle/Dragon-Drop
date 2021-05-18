@@ -176,6 +176,14 @@ class TestRockObject extends ObjectPiece {
 		return "An obstacle used to control the battlefield";
 	}
 
+	get shiftable() {
+		return false;
+	}
+
+	get defense() {
+		return super.defense + 1;
+	}
+
 	_setStats() {
 		this.style = 'rock';
 		this._maxHp = 2;

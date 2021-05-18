@@ -487,7 +487,7 @@ class TestPositionSkill extends SkillPiece {
 		var direction = userSquare.direction(target);
 		var board = target.parent;
 		var throwSquare = board.at(userSquare.x+direction[0], userSquare.y+direction[1]);
-		if (throwSquare?.piece?.targetable) {
+		if (throwSquare?.piece?.shiftable) {
 			return true;
 		}
 		return false;
