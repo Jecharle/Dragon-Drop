@@ -936,7 +936,8 @@ class OverworldMap extends Container {
 					this._allEdges(node).forEach(edge => {
 						if (edge.hidden) return;
 						edge.refresh();
-						edge.addTimedClass(1000, 'unlock');
+						if (edge.end == node) edge.addTimedClass(1500, 'unlock');
+						else edge.addTimedClass(2500, 'unlock', 'out');
 					});
 					await Game.asyncPause(1000);
 				}
@@ -957,10 +958,13 @@ class OverworldMap extends Container {
 
 			newEdge.adjacent.forEach(node => {
 				if (node.hidden || node.inRange) return;
+				if (newEdge.incomplete && node.incomplete) return;
 				this._paintReachableNode(node, movesLeft, path);
 				if (movesLeft > 0) edges.unshift(node);
 			});
 		}
+
+		this.edges.forEach(edge => edge.refresh());
 	}
 	_paintReachableNode(node, movesLeft, path) {
 		node.inRange = true;

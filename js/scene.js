@@ -833,6 +833,7 @@ class MapScene extends Scene {
 		this._camera = new ScrollingView(mapData.width, mapData.height);
 		this._map = new OverworldMap(mapData);
 		this._piece = new MapPiece();
+		this._node = null;
 
 		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
@@ -859,19 +860,13 @@ class MapScene extends Scene {
 
 		if (this._paused) {
 			var data = this._getData();
-			// TODO: Rather than the current node, store / read the event you were 'inside'
-			if (data.complete && this._currentNode.event) {
-				this._completeEvent(this._currentNode.event);
+			if (data.complete && this._node.event) {
+				this._completeEvent(this._node.event);
 			}
 			this._resume();
 		}
 
 		this.refresh();
-	}
-
-	// TODO: Allow selecting / deselecting the current node
-	get _currentNode() {
-		return this._piece.node;
 	}
 
 	//#region ui setup
@@ -880,7 +875,7 @@ class MapScene extends Scene {
 		button.classList.add('nav-button', 'explore-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._exploreNode(this._currentNode);
+			this._exploreNode(this._node);
 		};
 		return button;
 	}
@@ -915,45 +910,79 @@ class MapScene extends Scene {
 	}
 
 	_refreshUi() {
-		switch (this._currentNode.event?.type) {
-			case MapEvent.Battle:
-				this._exploreButtonEl.innerText = "Fight";
-				break;
-			case MapEvent.Story:
-				this._exploreButtonEl.innerText = "View"; // TEMP?
-				break;
-			case MapEvent.Move:
-				this._exploreButtonEl.innerText = "Go";
-				break;
-			default:
-				this._exploreButtonEl.innerText = "Start";
-				break;
-		}
+		if (this._node) {
+			switch (this._node.event?.type) {
+				case MapEvent.Battle:
+					this._exploreButtonEl.innerText = "Fight";
+					break;
+				case MapEvent.Story:
+					this._exploreButtonEl.innerText = "View"; // TEMP?
+					break;
+				case MapEvent.Move:
+					this._exploreButtonEl.innerText = "Go";
+					break;
+				default:
+					this._exploreButtonEl.innerText = "Start";
+					break;
+			}
 
-		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
-		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
+			this._eventDescriptionEl.innerHTML = this._node.event?.fullDescription;
+		}
+		this.el.classList.toggle('hide-description', !this._node?.canExplore);
 	}
 	//#endregion refresh
 
 	//#region actions
-	async _movePiece(node) {
-		this.setBusy();
-		this.el.classList.add('hide-description');
+	async _selectNode(node, instant) {
+		if (!node) return false;
 		
-		this._camera.focus(node);
-		if (node.path) {
-			this._camera.animateMove(node.path, 750, 150);
-		} else if (this._piece.node) {
-			this._camera.animateMove([this._piece.node], 750, 150);
-		}
-		await this._piece.move(node);
+		var oldNode = this._node;
+		this._node = node;
+		if (oldNode) oldNode.el.classList.remove('selected');
+		this._node.el.classList.add('selected');
+		this._camera.center(node.screenX, node.screenY);
 
+		if (!instant && node != oldNode) {
+			this.setBusy();
+			this.el.classList.add('hide-description');
+			await this._camera.animateMove([oldNode || this._piece.node], 600);
+			this.setDone();
+		}
+		return true;
+	}
+	async _deselectNode(instant) {
+		if (!this._node) return false;
+		
+		var oldNode = this._node;
+		this._node = null;
+		if (oldNode) oldNode.el.classList.remove('selected');
+		this._camera.center(this._piece.node.screenX, this._piece.node.screenY);
+
+		if (!instant && oldNode) {
+			this.setBusy();
+			this.el.classList.add('hide-description');
+			await this._camera.animateMove([oldNode], 300);
+			this.setDone();
+		}
+
+		return true;
+	}
+
+	async _movePiece(node) {
+		if (!node) return false;
+
+		this.setBusy();
+		await this._piece.move(node);
 		this.setDone();
+
+		return true;
 	}
 
 	async _exploreNode(node) {
 		if (!node || !node.canExplore) return false;
 		
+		await this._movePiece(node);
+
 		var event = node.event;
 
 		switch (event.type) {
@@ -977,6 +1006,7 @@ class MapScene extends Scene {
 				} else {
 					var destination = this._map.getNode(event.param);
 					if (destination) this._movePiece(destination);
+					this._deselectNode();
 				}
 				this._completeEvent(event);
 				this.refresh();
@@ -991,39 +1021,45 @@ class MapScene extends Scene {
 
 	_completeEvent(event) {
 		if (!event || event.complete) return;
-		// TODO: Hand out some currency
 		event.setComplete();
 		if (event.hasReward) {
-			alert(`Got ${event.gold} gold and ${event.gems} gems.`);
+			if (event.gold && event.gems) alert(`Got ${event.gold} gold and ${event.gems} gems`);
+			else if (event.gems) alert(`Got ${event.gems} gems`);
+			else if (event.gold) alert(`Got ${event.gold} gold`);
 		}
 		if (event.saved) {
 			SaveData.saveAll(); // TODO: Only save the part about the map
 		}
 		this._map.unlockNodes(event.unlocks).then(() => this.refresh());
-
+		this._deselectNode();
 	}
 	//#endregion actions
 
 	//#region input events
-	positionEvent(node, dragId) {
-		if (this.busy || !this._piece.idMatch(dragId)) return;
+	positionEvent(node, dragId, doubleClick) {
+		if (this.busy || dragId) return;
 
-		if (node.inRange) {
-			this._movePiece(node).then(result => this.refresh());
-			return;
+		if (this._node == node && doubleClick) {
+			this._exploreNode(this._node).then(result => this.refresh());
+		} else if (node.inRange) {
+			this._selectNode(node).then(result => this.refresh());
 		}
 	}
 	/*mouseOver(node, dragId) {
 		if (this.busy || !this._piece.idMatch(dragId)) return;
 	}*/
-	/*rightClick() {
+	rightClick() {
 		if (this.busy) return;
-	}*/
+
+		if (this._node) {
+			this._deselectNode().then(result => this.refresh());
+		}
+	}
 	keydown(key) {
 		if (this.busy) return;
 
 		if (key == "Enter") {
-			this._exploreNode(this._currentNode);
+			this._exploreNode(this._node);
 		}
 	}
 	//#endregion
@@ -1225,8 +1261,8 @@ class ScrollingView extends ElObj {
 	//#endregion scroll boundaries
 
 	//#region animate
-	animateMove(path, speed, delay) {
-		if (!path || !speed) return 0;
+	async animateMove(path, speed, delay) {
+		if (!path || !speed) return false;
 		var keyframes = [{}];
 		path.forEach(position => {
 			if (!position) return;
@@ -1240,7 +1276,8 @@ class ScrollingView extends ElObj {
 		var time = speed*(keyframes.length-1);
 		delay = delay || 0;
 		this.el.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
-		return time;
+		await Game.asyncPause(time+delay);
+		return true;
 	}
 	//#endregion animate
 }

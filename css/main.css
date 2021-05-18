@@ -883,8 +883,9 @@
 	.map-node.repeatable {
 		background-color: cornflowerblue;
 	}
-	.selectable.map-node:hover {
+	.selectable.map-node:hover, .selected.map-node {
 		border: 4px solid yellow;
+		animation: unset;
 	}
 	.map-node.unlock {
 		animation: fade-out 0.5s reverse backwards;
@@ -893,9 +894,9 @@
 .overworld-map .line {
 	position: absolute;
 	z-index: -1;
-	height: 2px;
+	height: 0;
 	transform-origin: left center;
-	background-color: black;
+	border: 2px dashed black;
 	pointer-events: none;
 	bottom: 16px;
 	left: 0;
@@ -903,7 +904,9 @@
 	.overworld-map .line.unlock {
 		animation: draw-line 1s 0.5s backwards;
 	}
-	/*TODO: Alternate settings if the line comes FROM the new node?*/
+	.overworld-map .line.unlock.out {
+		animation: draw-line 1s 1.5s backwards;
+	}
 
 .map-piece {
 	width: 64px;
@@ -913,6 +916,7 @@
 	bottom: 0;
 	display: flex;
 	justify-content: center;
+	pointer-events: none;
 }
 	.map-piece>.sprite {
 		width: 64px;

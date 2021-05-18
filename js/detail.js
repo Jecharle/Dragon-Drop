@@ -446,6 +446,11 @@ class Edge extends ElObj {
 	}
 
 	refresh() {
+		if (this._end.hidden || this._start.hidden) {
+			this._hide();
+			return;
+		}
+
 		var dx = (this._end.screenX - this._start.screenX);
 		var dy = (this._end.screenY - this._start.screenY);
 		var width = Math.sqrt(dx*dx + dy*dy);
@@ -455,8 +460,10 @@ class Edge extends ElObj {
 
 		this.el.style.transform = `translate(${screenX}px, ${screenY}px) rotate(${angle}deg)`;
 		this.el.style.width = `${width}px`;
+		
+		this._show();
 
-		if (this._end.hidden || this._start.hidden) this._hide();
-		else this._show();
+		this.inRange = (this._start.inRange && this._end.inRange)
+		this.el.classList.toggle('selectable', this.inRange);
 	}
 }
