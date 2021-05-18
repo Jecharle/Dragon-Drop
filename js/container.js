@@ -9,6 +9,7 @@ class Container extends ElObj {
 		this.pieces = [];
 
 		this.el.onclick = this._click;
+		this.el.ondblclick = this._click;
 		this.el.ondrop = this._drop;
 		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
@@ -476,7 +477,7 @@ class Board extends Container {
 		if (ev.target && ev.target?.obj) {
 			var square = ev.target.obj;
 			if (square && Game.scene) {
-				Game.scene.positionEvent(square);
+				Game.scene.positionEvent(square, null, ev.type == 'dblclick');
 			}
 		}
 	}
@@ -695,7 +696,7 @@ class DeployUnitList extends Container {
 		if (ev.target && ev.target?.obj) {
 			var container = ev.target.obj;
 			if (container && Game.scene) {
-				Game.scene.containerEvent(container);
+				Game.scene.containerEvent(container, null, ev.type == 'dblclick');
 			}
 		}
 	}
@@ -1000,7 +1001,7 @@ class OverworldMap extends Container {
 		if (ev.target && ev.target?.obj) {
 			var node = ev.target.obj;
 			if (node && Game.scene) {
-				Game.scene.positionEvent(node);
+				Game.scene.positionEvent(node, null, ev.type == 'dblclick');
 			}
 		}
 	}

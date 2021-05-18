@@ -12,6 +12,7 @@ class Piece extends SpriteElObj {
 		this.el.classList.add('piece');
 
 		this.el.onclick = this._click;
+		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
 	}
@@ -74,7 +75,7 @@ class Piece extends SpriteElObj {
 	_click(ev) {
 		ev.stopPropagation();
 		var piece = ev.currentTarget.obj;
-		if (Game.scene) Game.scene.pieceEvent(piece);
+		if (Game.scene) Game.scene.pieceEvent(piece, null, ev.type == 'dblclick');
 	}
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.currentTarget.id);

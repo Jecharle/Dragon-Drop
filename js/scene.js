@@ -56,9 +56,9 @@ class Scene extends ElObj {
 	//#endregion block during some async
 
 	//#region input events
-	pieceEvent(piece, dragging) { }
-	positionEvent(position, dragId) { }
-	containerEvent(container, dragId) { }
+	pieceEvent(piece, dragging, doubleClick) { }
+	positionEvent(position, dragId, doubleClick) { }
+	containerEvent(container, dragId, doubleClick) { }
 	mouseOver(position, dragId) { }
 	rightClick() { }
 
