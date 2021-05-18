@@ -133,10 +133,6 @@ class UnitPiece extends Piece {
 		return true;
 	}
 
-	get shiftable() {
-		return !this.getStatus(UnitPiece.Anchor);
-	}
-
 	//#region text
 	icon(style, content) {
 		return `<div class="icon ${style}">${content || ""}</div>`;
@@ -229,6 +225,7 @@ class UnitPiece extends Piece {
 		if (!this.team || !piece) return false;
 		return this.team.isEnemy(piece.team);
 	}
+
 	get guest() {
 		return this._guest;
 	}
@@ -268,6 +265,10 @@ class UnitPiece extends Piece {
 
 	get defense() {
 		return this.getStatus(UnitPiece.Defense);
+	}
+
+	get shiftable() {
+		return !this.getStatus(UnitPiece.Anchor);
 	}
 
 	get skills() {
@@ -793,7 +794,7 @@ class UnitPiece extends Piece {
 /***************************************************
  Skill piece
 ***************************************************/
-class SkillPiece extends Piece {
+class SkillCard extends Piece {
 	constructor(user) {
 		super();
 		this.user = user;

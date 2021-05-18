@@ -1,7 +1,7 @@
 /***************************************************
  Test attack skill
 ***************************************************/
-class TestAttackSkill extends SkillPiece {
+class TestAttackSkill extends SkillCard {
 
 	get name() {
 		return "Attack";
@@ -179,7 +179,7 @@ class TestAreaSkill extends TestAttackSkill {
 /***************************************************
  Test heal skill
 ***************************************************/
-class TestHealSkill extends SkillPiece {
+class TestHealSkill extends SkillCard {
 
 	get name() {
 		return "Heal";
@@ -195,7 +195,7 @@ class TestHealSkill extends SkillPiece {
 
 	_stats() {
 		this.style = 'heal-skill';
-		this._basePower = 4;
+		this._basePower = 2;
 		this._baseCooldown = 2;
 		this._range = 2;
 		this._minRange = 0;
@@ -308,7 +308,6 @@ class TestGuardSkill extends TestHealSkill {
 	_stats() {
 		super._stats();
 		this.style = 'buff-skill';
-		this._baseCooldown = 2;
 	}
 
 	async _unitEffects(unit, _target) {
@@ -322,7 +321,7 @@ class TestGuardSkill extends TestHealSkill {
 /***************************************************
  Test build skill
 ***************************************************/
-class TestBuildSkill extends SkillPiece {
+class TestBuildSkill extends SkillCard {
 
 	get name() {
 		return "Build";
@@ -361,7 +360,7 @@ class TestBuildSkill extends SkillPiece {
 /***************************************************
  Test move skill
 ***************************************************/
-class TestMoveSkill extends SkillPiece {
+class TestMoveSkill extends SkillCard {
 
 	get name() {
 		return "Regroup";
@@ -404,7 +403,7 @@ class TestMoveSkill extends SkillPiece {
 /***************************************************
  Test positioning skill
 ***************************************************/
-class TestPositionSkill extends SkillPiece {
+class TestPositionSkill extends SkillCard {
 	get name() {
 		return "Throw";
 	}

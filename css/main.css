@@ -315,7 +315,7 @@
 	/*#endregion selected unit info*/
 /*#endregion skill list*/
 
-/*#region skill piece*/
+/*#region skill card*/
 .skill {
 	width: var(--skill-w);
 	height: var(--skill-h);
@@ -400,7 +400,7 @@
 		border-radius: 25%;
 	}
 	/*#endregion skill icons*/
-/*#endregion skill piece*/
+/*#endregion skill card*/
 
 /*#region phase change & end screens*/
 .phase-banner {
