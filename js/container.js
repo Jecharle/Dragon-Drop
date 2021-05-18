@@ -612,39 +612,12 @@ class Square extends Position {
 		return this._terrain;
 	}
 	set terrain(value) {
-		switch (this._terrain) {
-			case Square.Wall:
-				this.el.classList.remove('wall');
-				break;
-			case Square.Pit:
-				this.el.classList.remove('pit');
-				break;
-			case Square.Cover:
-				this.el.classList.remove('cover');
-				break;
-			case Square.Rough:
-				this.el.classList.remove('rough');
-				break;
-		}
-
-		this.z = 0;
 		this._terrain = value;
-
-		switch (this._terrain) {
-			case Square.Wall:
-				this.el.classList.add('wall');
-				this.z = 1;
-				break;
-			case Square.Pit:
-				this.el.classList.add('pit');
-				break;
-			case Square.Cover:
-				this.el.classList.add('cover');
-				break;
-			case Square.Rough:
-				this.el.classList.add('rough');
-				break;
-		}
+		this.z = this._terrain == Square.Wall ? 1 : 0;
+		this.el.classList.toggle('wall', this._terrain == Square.Wall);
+		this.el.classList.toggle('pit', this._terrain == Square.Pit);
+		this.el.classList.toggle('cover', this._terrain == Square.Cover);
+		this.el.classList.toggle('rough', this._terrain == Square.Rough);
 	}
 	get blocksMove() {
 		return (this.terrain&Square._BlockMove) == Square._BlockMove;
