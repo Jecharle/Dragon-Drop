@@ -40,7 +40,7 @@ class TestMeleeUnit extends UnitPiece {
 		return "Specialize in close-range combat";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'melee-unit';
 		this._maxHp = 6;
 		this._moveRange = 3;
@@ -65,7 +65,7 @@ class TestSupportUnit extends UnitPiece {
 		return "Low health, but can attack at range and use support skills";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'support-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
@@ -89,7 +89,7 @@ class TestPositionUnit extends UnitPiece {
 		return "Low damage, but specialized in moving allies and enemies";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'position-unit';
 		this._maxHp = 4;
 		this._moveRange = 3;
@@ -113,7 +113,7 @@ class TestStatusUnit extends UnitPiece {
 		return "Low damage, but can use buffs, debuffs, and statuses";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'status-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
@@ -142,7 +142,7 @@ class TestEnemyUnit extends UnitPiece {
 		return "Specialize in close-range combat";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'enemy-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
@@ -184,7 +184,7 @@ class TestRockObject extends ObjectPiece {
 		return super.defense + 1;
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'rock';
 		this._maxHp = 2;
 	}

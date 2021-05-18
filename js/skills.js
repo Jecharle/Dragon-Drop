@@ -2,16 +2,17 @@
  Test attack skill
 ***************************************************/
 class TestAttackSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
 
 	get name() {
 		return "Attack";
 	}
 	get _description() {
 		return `Damage the target and push them 1 space`;
+	}
+
+	_stats() {
+		this.style = 'attack-skill';
+		this._basePower = 2;
 	}
 
 	validTarget(target) {
@@ -34,17 +35,13 @@ class TestAttackSkill extends SkillPiece {
  Test ranged attack skill
 ***************************************************/
 class TestRangedSkill extends TestAttackSkill {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
 
 	get name() {
 		return "Ranged Attack";
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
 		this._range = 9;
 		this._minRange = 2;
 	}
@@ -60,10 +57,6 @@ class TestRangedSkill extends TestAttackSkill {
  Test pull attack skill
 ***************************************************/
 class TestPullSkill extends TestAttackSkill {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
 
 	get name() {
 		return "Pull Attack";
@@ -72,8 +65,8 @@ class TestPullSkill extends TestAttackSkill {
 		return `Damage the enemy and pull them 1 space<br/>Does not damage allies`;
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
 		this._range = 2;
 		this._minRange = 1;
 	}
@@ -99,10 +92,7 @@ class TestPullSkill extends TestAttackSkill {
  Test charge skill
 ***************************************************/
 class TestRushSkill extends TestAttackSkill {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
+
 
 	get name() {
 		return "Charge Attack";
@@ -111,8 +101,8 @@ class TestRushSkill extends TestAttackSkill {
 		return `Approach the target and attack, pushing them back`;
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
 		this._basePower = 3;
 		this._range = 3;
 		this._minRange = 3;
@@ -142,10 +132,6 @@ class TestRushSkill extends TestAttackSkill {
  Test area attack skill
 ***************************************************/
 class TestAreaSkill extends TestAttackSkill {
-	constructor(user) {
-		super(user);
-		this.style = 'attack-skill';
-	}
 
 	get name() {
 		return "Area Attack";
@@ -154,8 +140,8 @@ class TestAreaSkill extends TestAttackSkill {
 		return `Damage targets in a small area and push them away from the center`;
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
 		this._range = 3;
 		this._minRange = 2;
 		this._los = false;
@@ -194,10 +180,6 @@ class TestAreaSkill extends TestAttackSkill {
  Test heal skill
 ***************************************************/
 class TestHealSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'heal-skill';
-	}
 
 	get name() {
 		return "Heal";
@@ -205,15 +187,17 @@ class TestHealSkill extends SkillPiece {
 	get _description() {
 		return `Heal the target`;
 	}
-	get _powerText() {
-		return `${this.icon('life')} ${this.power}`;
+	get _effectText() {
+		return [
+			`${this.icon('life')} +${this.power}`
+		];
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		this.style = 'heal-skill';
 		this._basePower = 4;
 		this._baseCooldown = 2;
-		this._range = 1;
+		this._range = 2;
 		this._minRange = 0;
 	}
 
@@ -234,37 +218,29 @@ class TestHealSkill extends SkillPiece {
 /***************************************************
  Test buff skill
 ***************************************************/
-class TestBuffSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'buff-skill';
-	}
+class TestBuffSkill extends TestHealSkill {
 
 	get name() {
 		return "Buff";
 	}
 	get _description() {
-		return `Regenerate target and increase their Defense and Speed<br>Next turn, and increase Power`;
+		return `Increase the target's Defense and Speed<br>Next turn, Regenerate and increase Power`;
 	}
-	get _powerText() {
-		return `${this.icon('regenerate')} ${this.power}`;
+	get _effectText() {
+		return [
+			`${this.icon('regenerate')} ${this.power}`,
+			`${this.icon('defense', this.icon('up'))} \
+			${this.icon('speed', this.icon('up'))} +1`,
+			`${this.icon('power', this.icon('time'))} +2`,
+		];
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
+		this.style = 'buff-skill';
 		this._basePower = 2;
-		this._baseCooldown = 2;
-		this._range = 2;
-		this._minRange = 0;
 	}
 
-	validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-buff-effect");
 		unit.addStatus(UnitPiece.Charge, 2);
@@ -278,11 +254,7 @@ class TestBuffSkill extends SkillPiece {
 /***************************************************
  Test debuff skill
 ***************************************************/
-class TestDebuffSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'debuff-skill';
-	}
+class TestDebuffSkill extends TestHealSkill {
 
 	get name() {
 		return "Debuff";
@@ -290,26 +262,21 @@ class TestDebuffSkill extends SkillPiece {
 	get _description() {
 		return `Poison the target and decrease their Power, Defense, and Speed`;
 	}
-	get _powerText() {
-		return `${this.icon('poison')} ${this.power}`;
+	get _effectText() {
+		return [
+			`${this.icon('poison')} ${this.power}`,
+			`${this.icon('power', this.icon('down'))} \
+			${this.icon('defense', this.icon('down'))} \
+			${this.icon('speed', this.icon('down'))} -1`
+		];
 	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
+		this.style = 'debuff-skill';
 		this._basePower = 1;
-		this._baseCooldown = 2;
-		this._range = 2;
-		this._minRange = 0;
 	}
 
-	validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-
-	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
 			this._showEffect(unit.square, this.user.square, "test-heal-effect");
@@ -325,34 +292,25 @@ class TestDebuffSkill extends SkillPiece {
 /***************************************************
  Test defensive skill
 ***************************************************/
-class TestGuardSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'buff-skill';
-	}
-
+class TestGuardSkill extends TestHealSkill {
 	get name() {
 		return "Guard";
 	}
 	get _description() {
 		return `Anchor the target and allow them to evade one attack`;
 	}
-	get hasPower() { return false; }
+	get _effectText() {
+		return [
+			`+ ${this.icon('evade')} ${this.icon('anchor')}`
+		];
+	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		super._stats();
+		this.style = 'buff-skill';
 		this._baseCooldown = 2;
-		this._range = 1;
-		this._minRange = 0;
 	}
 
-	validTarget(target) {
-		if (target.piece && target.piece.targetable) {
-			return true;
-		}
-		return false;
-	}
-	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "test-heal-effect");
 		unit.addStatus(UnitPiece.Anchor);
@@ -365,10 +323,6 @@ class TestGuardSkill extends SkillPiece {
  Test build skill
 ***************************************************/
 class TestBuildSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'build-skill';
-	}
 
 	get name() {
 		return "Build";
@@ -376,10 +330,12 @@ class TestBuildSkill extends SkillPiece {
 	get _description() {
 		return "Create a wall with 2 HP";
 	}
-	get hasPower() { return false; }
+	get _effectText() {
+		return [];
+	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		this.style = 'build-skill';
 		this._maxUses = 1;
 	}
 
@@ -406,10 +362,6 @@ class TestBuildSkill extends SkillPiece {
  Test move skill
 ***************************************************/
 class TestMoveSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'move-skill';
-	}
 
 	get name() {
 		return "Regroup";
@@ -418,12 +370,14 @@ class TestMoveSkill extends SkillPiece {
 		return "Jump to a square adjacent to an ally";
 	}
 	get _rangeText() {
-		return "";
+		return "Special";
 	}
-	get hasPower() { return false; }
+	get _effectText() {
+		return [];
+	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		this.style = 'move-skill';
 		this._baseCooldown = 2;
 	}
 
@@ -451,21 +405,18 @@ class TestMoveSkill extends SkillPiece {
  Test positioning skill
 ***************************************************/
 class TestPositionSkill extends SkillPiece {
-	constructor(user) {
-		super(user);
-		this.style = 'move-skill';
-	}
-
 	get name() {
 		return "Throw";
 	}
 	get _description() {
 		return "Toss the unit in front of you to the target square";
 	}
-	get hasPower() { return false; }
+	get _effectText() {
+		return [];
+	}
 
-	_setStats() {
-		super._setStats();
+	_stats() {
+		this.style = 'move-skill';
 		this._range = 4;
 		this._minRange = 2;
 		this._los = false;

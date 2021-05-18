@@ -98,13 +98,12 @@ class UnitPiece extends Piece {
 	constructor(partyMember) {
 		super();
 		this._team = null;
+		this._guest = false;
 		this._partyMember = partyMember;
 		this.square = null;
 
-		this.size = 1;
-		this._moveStyle = "path";
-		this._guest = false;
-		this._setStats();
+		this._defaultStats();
+		this._stats();
 		this._setSkills();
 
 		this.hp = this.maxHp;
@@ -139,6 +138,10 @@ class UnitPiece extends Piece {
 	}
 
 	//#region text
+	icon(style, content) {
+		return `<div class="icon ${style}">${content || ""}</div>`;
+	}
+
 	get name() {
 		return "[Unit name]";
 	}
@@ -148,15 +151,35 @@ class UnitPiece extends Piece {
 	get _description() {
 		return "[Unit description]";
 	}
+	get _values() {
+		var list = [ this._moveText, this._hpText ];
+		if (this.defense) list.push(this._defenseText);
+		return list.join(" | ");
+	}
+
+	get _hpText() {
+		return `${this.icon('life')} ${this.hp}/${this.maxHp}`;
+	}
+	get _moveText() {
+		return `${this.icon('speed')} ${this.moveRange}`;
+	}
+	get _defenseText() {
+		return `${this.icon('defense')} ${this.defense}`;
+	}
+
 	get fullDescription() {
-		var description = `<strong>${this.name}</strong><br>${this._description}`;
-		return description;
+		return `<strong>${this.name}</strong><p>${this._description}</p><strong>${this._values}</strong>`;
 	}
 	//#endregion text
 
 	//#region setup
-	_setStats() {
-		this._maxHp = 1;
+	_defaultStats() {
+		this.size = 1;
+		this._moveStyle = "path";
+		this._maxHp = 2;
+		this._moveRange = 0;
+	}
+	_stats() {
 		this._moveRange = 2;
 	}
 	_setSkills() {
@@ -774,9 +797,9 @@ class SkillPiece extends Piece {
 	constructor(user) {
 		super();
 		this.user = user;
-		this._setStats();
-		this.cooldown = 0;
-		this.usesLeft = this.maxUses;
+
+		this._defaultStats();
+		this._stats();
 
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
@@ -787,7 +810,7 @@ class SkillPiece extends Piece {
 		this._tooltip = new HoverDescription(this.fullDescription);
 		this.el.appendChild(this._tooltip.el);
 
-		this.refresh();
+		this._initialize();
 	}
 
 	get elClass() {
@@ -809,39 +832,54 @@ class SkillPiece extends Piece {
 	get _description() {
 		return "[Skill description]";
 	}
+	get _values() {
+		var list = [this._rangeText, ...this._effectText];
+		if (this.hasCooldown) list.push(this._cooldownText);
+		if (this.hasLimitedUses) list.push(this._limitedUseText);
+		return list.join(" | ");
+	}
+
 	get _rangeText() {
 		var icon = this.icon(this.los ? 'range' : 'non-los');
 		if (this.minRange == 1 || this.range == 0) return `${icon} ${this.range}`;
 		else return `${icon} ${this.minRange}-${this.range}`;
 	}
-	get _powerText() {
-		return `${this.icon('power')} ${this.power}`;
+	get _effectText() {
+		return [
+			`${this.icon('power')} ${this.power}`
+		];
 	}
 	get _cooldownText() {
 		return `${this.icon('cooldown')} ${this.cooldown || this.cooldownCost}`;
 	}
 	get _limitedUseText() {
-		return `x ${this.usesLeft}`;
+		return `${this.usesLeft} use${this.usesLeft != 1 ? "s" : ""}`;
 	}
-
-	get hasPower() { return true; }
 
 	get fullDescription() {
-		var description = `<strong>${this.name}</strong><p>${this._description}</p>`;
-		description += `<strong>${this._rangeText}`;
-		if (this.hasPower) {
-			description += ` | ${this._powerText}`;
-		}
-		if (this.hasCooldown) {
-			description +=  ` | ${this._cooldownText}`;
-		}
-		if (this.hasLimitedUses) {
-			description += ` | ${this._limitedUseText}`;
-		}
-		description += '</strong>';
-		return description;
+		return `<strong>${this.name}</strong><p>${this._description}</p><strong>${this._values}</strong>`;
 	}
 	//#endregion text
+
+	//#region setup
+	_defaultStats() {
+		this._range = 1;
+		this._minRange = 1;
+		this._los = true;
+		this._area = 0;
+		this._baseCooldown = 0;
+		this._maxUses = 0;
+		this._basePower = 0;
+	}
+	_stats() {
+		this._basePower = 2;
+	}
+	_initialize() {
+		this.cooldown = 0;
+		this.usesLeft = this.maxUses;
+		this.refresh();
+	}
+	//#endregion setup
 
 	//#region attributes
 	get range() {
@@ -874,16 +912,6 @@ class SkillPiece extends Piece {
 
 	get power() {
 		return Math.max(this._basePower + this.user.powerBonus, 1);
-	}
-
-	_setStats() {
-		this._range = 1;
-		this._minRange = 1;
-		this._los = true;
-		this._area = 0;
-		this._baseCooldown = 0;
-		this._maxUses = 0;
-		this._basePower = 2;
 	}
 	//#endregion attributes
 
