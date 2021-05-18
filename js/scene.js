@@ -106,7 +106,6 @@ class BattleScene extends Scene {
 	_createTurnTitle() {
 		var turnTitle = document.createElement("span");
 		turnTitle.classList.add('turn-title');
-		turnTitle.style.textAlign = "center";
 		return turnTitle;
 	}
 	_createMenuButton() {

@@ -90,8 +90,176 @@
 	position: absolute;
 	top: 32px;
 	right: 64px;
+	text-align: center;
 }
 /*#endregion battle scene UI*/
+
+/*#region lifebar*/
+.lifebar {
+	position: absolute;
+	z-index: 2;
+	height: var(--lifebar-h);
+	top: 0;
+	background-image: url(../img/system/lifebar.png);
+	background-position: 0 0;
+	background-repeat: repeat-x;
+}
+	.lifebar>.inner {
+		position: absolute;
+		z-index: 0;
+		height: var(--lifebar-h);
+		background-image: inherit;
+		background-position: 0 calc(-1*var(--lifebar-h));
+		background-repeat: repeat-x;
+	}
+	.lifebar>.change {
+		position: absolute;
+		z-index: 1;
+		height: var(--lifebar-h);
+		background-image: inherit;
+		background-position: 0 calc(-2*var(--lifebar-h));
+		background-repeat: repeat-x;
+		visibility: hidden;
+	}
+	.hp-change .lifebar>.change {
+		animation: fade-out 0.8s 0.2s both;
+		visibility: visible;
+	}
+	.lifebar>.icon {
+		left: calc(100% + 2px);
+		top: -2px;
+	}
+/*#endregion lifebar*/
+
+/*#region status list*/
+.status-list {
+	position: absolute;
+	z-index: 2;
+	height: calc(var(--icon-h) + 6px);
+	width: 100%;
+	bottom: 0;
+	right: 0;
+}
+	.status-list .inner {
+		position: absolute;
+		height: calc(var(--icon-h) + 6px);
+		width: max-content;
+	}
+	.status-list .icon {
+		margin: 2px;
+		margin-top: 4px;
+	}
+	.status-list .icon .icon {
+		margin: unset;
+	}
+/*#endregion status list*/
+
+/*#region icons*/
+.icon {
+	display: inline-block;
+	position: relative;
+	height: var(--icon-h);
+	width: var(--icon-w);
+	background-image: url(../img/system/icons.png);
+	background-position: 0 0;
+}
+.icon .icon {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+}
+.icon .double {
+	background-image: inherit;
+	background-position: inherit;
+	position: absolute;
+	left: -2px;
+	top: -4px;
+	z-index: -1;
+	filter: brightness(75%);
+}
+
+.number .minus, .number .plus, .number .times {
+	height: inherit;
+	width: inherit;
+	position: relative;
+	right: 2px;
+	background-image: inherit;
+	background-position-y: calc(-1*var(--icon-h));
+}
+.number .minus {
+	background-position-x: 0;
+}
+.number .plus {
+	background-position-x: calc(-1*var(--icon-w));
+}
+.number .times {
+	background-position-x: calc(-2*var(--icon-w));
+}
+	/*#region state icons*/
+	.icon.life {
+		background-position-x: 0;
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.power {
+		background-position-x: calc(-1*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.defense {
+		background-position-x: calc(-2*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.speed {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+
+	.icon.range {
+		background-position-x: calc(-4*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.non-los {
+		background-position-x: calc(-5*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.cooldown {
+		background-position-x: calc(-6*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+
+	.icon.regenerate {
+		background-position-x: 0;
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	.icon.poison {
+		background-position-x: calc(-1*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+
+	.icon.evade {
+		background-position-x: calc(-2*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	.icon.anchor {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	/*#endregion state icons*/
+
+	/*#region modifier icons*/
+	.icon.time {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	.icon.up {
+		background-position-x: calc(-4*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	.icon.down {
+		background-position-x: calc(-5*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	/*#endregion modifier icons*/
+/*#endregion icons*/
 
 /*#region skill list*/
 .skill-list {
@@ -127,16 +295,6 @@
 			background-repeat: no-repeat;
 			background-position: bottom left;
 		}
-		.unit-info .lifebar {
-			visibility: visible;
-		}
-		.unit-info .status-list {
-			width: 100%;
-		}
-		.unit-info .status-list .inner {
-			right: 0;
-			animation: unset;
-		}
 		.unit-info .name {
 			position: absolute;
 			z-index: 2;
@@ -150,6 +308,9 @@
 		.unit-info:hover .skill-description {
 			display: block;
 			bottom: 130%;
+		}
+		.unit-info .status-list .inner {
+			right: 0;
 		}
 	/*#endregion selected unit info*/
 /*#endregion skill list*/
@@ -505,63 +666,20 @@
 	}
 
 	/*#region unit status*/
-	.lifebar {
-		position: absolute;
-		z-index: 2;
-		height: var(--lifebar-h);
-		top: 0;
-		background-image: url(../img/system/lifebar.png);
-		background-position: 0 0;
-		background-repeat: repeat-x;
+	.unit .lifebar {
+		visibility: hidden;
+		pointer-events: none;
 	}
-		.lifebar>.inner {
-			position: absolute;
-			z-index: 0;
-			height: var(--lifebar-h);
-			background-image: inherit;
-			background-position: 0 calc(-1*var(--lifebar-h));
-			background-repeat: repeat-x;
-		}
-		.lifebar>.change {
-			position: absolute;
-			z-index: 1;
-			height: var(--lifebar-h);
-			background-image: inherit;
-			background-position: 0 calc(-2*var(--lifebar-h));
-			background-repeat: repeat-x;
-			visibility: hidden;
-		}
-		.hp-change .lifebar>.change {
-			animation: fade-out 0.8s 0.2s both;
-			visibility: visible;
-		}
-		.lifebar>.icon {
-			left: calc(100% + 2px);
-			top: -2px;
-		}
+	.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
+		visibility: visible;
+	}
 
-		.unit .lifebar {
-			visibility: hidden;
-			pointer-events: none;
-		}
-		.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
-			visibility: visible;
-		}
-	
-	.status-list {
-		position: absolute;
-		z-index: 2;
-		height: calc(var(--icon-h) + 6px);
+	.unit .status-list {
 		width: calc(var(--icon-w) + 4px);
-		bottom: 0;
-		right: 0;
 		pointer-events: none;
 		overflow: hidden;
 	}
-		.status-list .inner {
-			position: absolute;
-			height: calc(var(--icon-h) + 6px);
-			width: max-content;
+		.unit .status-list .inner {
 			animation-name: marquee;
 			animation-iteration-count: infinite;
 		}
@@ -573,118 +691,6 @@
 				transform: translateX(-100%);
 			}
 		}
-		.status-list .icon {
-			margin: 2px;
-			margin-top: 4px;
-		}
-		.status-list .icon .icon {
-			margin: unset;
-		}
-		.icon {
-			display: inline-block;
-			position: relative;
-			height: var(--icon-h);
-			width: var(--icon-w);
-			background-image: url(../img/system/icons.png);
-			background-position: 0 0;
-		}
-		.icon .icon {
-			position: absolute;
-			left: 2px;
-			top: 2px;
-		}
-		.icon .double {
-			background-image: inherit;
-			background-position: inherit;
-			position: absolute;
-			left: -2px;
-			top: -4px;
-			z-index: -1;
-			filter: brightness(75%);
-		}
-
-		.number .minus, .number .plus, .number .times {
-			height: inherit;
-			width: inherit;
-			position: relative;
-			right: 2px;
-			background-image: inherit;
-			background-position-y: calc(-1*var(--icon-h));
-		}
-		.number .minus {
-			background-position-x: 0;
-		}
-		.number .plus {
-			background-position-x: calc(-1*var(--icon-w));
-		}
-		.number .times {
-			background-position-x: calc(-2*var(--icon-w));
-		}
-
-		/*#region state icons*/
-		.icon.life {
-			background-position-x: 0;
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		.icon.power {
-			background-position-x: calc(-1*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		.icon.defense {
-			background-position-x: calc(-2*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		.icon.speed {
-			background-position-x: calc(-3*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		
-		.icon.range {
-			background-position-x: calc(-4*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		.icon.non-los {
-			background-position-x: calc(-5*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-		.icon.cooldown {
-			background-position-x: calc(-6*var(--icon-w));
-			background-position-y: calc(-2*var(--icon-h));
-		}
-
-		.icon.regenerate {
-			background-position-x: 0;
-			background-position-y: calc(-3*var(--icon-h));
-		}
-		.icon.poison {
-			background-position-x: calc(-1*var(--icon-w));
-			background-position-y: calc(-3*var(--icon-h));
-		}
-
-		.icon.evade {
-			background-position-x: calc(-2*var(--icon-w));
-			background-position-y: calc(-3*var(--icon-h));
-		}
-		.icon.anchor {
-			background-position-x: calc(-3*var(--icon-w));
-			background-position-y: calc(-3*var(--icon-h));
-		}
-		/*#endregion state icons*/
-		
-		/*#region modifier icons*/
-		.icon.time {
-			background-position-x: calc(-3*var(--icon-w));
-			background-position-y: calc(-1*var(--icon-h));
-		}
-		.icon.up {
-			background-position-x: calc(-4*var(--icon-w));
-			background-position-y: calc(-1*var(--icon-h));
-		}
-		.icon.down {
-			background-position-x: calc(-5*var(--icon-w));
-			background-position-y: calc(-1*var(--icon-h));
-		}
-		/*#endregion modifier icons*/
 	/*#endregion unit status*/
 
 	/*#region unit states and motions*/
