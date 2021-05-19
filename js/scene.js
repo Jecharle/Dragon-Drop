@@ -944,7 +944,6 @@ class MapScene extends Scene {
 
 		if (!instant && node != oldNode) {
 			this.setBusy();
-			this.el.classList.add('hide-description');
 			await this._camera.animateMove([oldNode || this._piece.node], 600);
 			this.setDone();
 		}
@@ -1043,6 +1042,7 @@ class MapScene extends Scene {
 			this._exploreNode(this._node).then(result => this.refresh());
 		} else if (node.inRange) {
 			this._selectNode(node).then(result => this.refresh());
+			this.refresh();
 		}
 	}
 	/*mouseOver(node, dragId) {
@@ -1263,15 +1263,21 @@ class ScrollingView extends ElObj {
 	//#region animate
 	async animateMove(path, speed, delay) {
 		if (!path || !speed) return false;
+		var moved = false;
 		var keyframes = [{}];
 		path.forEach(position => {
 			if (!position) return;
+
 			var x = this._clampX(position.screenX);
 			var y = this._clampY(position.screenY);
 			keyframes.unshift({
 				transform: this._scrollPosition(x, y)
 			});
+
+			if (x != this.x || y != this.y) moved = true;
 		});
+	
+		if (!moved) return true;
 
 		var time = speed*(keyframes.length-1);
 		delay = delay || 0;
