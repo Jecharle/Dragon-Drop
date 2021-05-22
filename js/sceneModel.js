@@ -70,8 +70,8 @@ class BattleSceneModel extends SceneModel {
 		this.defaultVictory = data?.defaultVictory || false;
 		this.maxDeploy = data?.maxDeploy || 4;
 
-		this.width = Math.max(Math.min(data?.width || 10, 10), 1);
-		this.height = Math.max(Math.min(data?.height || 10, 10), 1);
+		this.width = Math.max(Math.min(data?.width || 8, 10), 1);
+		this.height = Math.max(Math.min(data?.height || 8, 10), 1);
 
 		// x, y
 		this.deployment = data?.deployment || [];
