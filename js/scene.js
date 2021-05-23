@@ -1022,12 +1022,13 @@ class MapScene extends Scene {
 		if (!event || event.complete) return;
 		event.setComplete();
 		if (event.hasReward) {
-			if (event.gold && event.gems) alert(`Got ${event.gold} gold and ${event.gems} gems`);
-			else if (event.gems) alert(`Got ${event.gems} gems`);
+			if (event.gold && event.gems) alert(`Got ${event.gold} gold and ${event.gems} items`);
+			else if (event.gems) alert(`Got ${event.gems} items`);
 			else if (event.gold) alert(`Got ${event.gold} gold`);
 		}
+		SaveData.saveMap();
 		if (event.saved) {
-			SaveData.saveAll(); // TODO: Only save the part about the map
+			SaveData.saveFlags();
 		}
 		this._map.unlockNodes(event.unlocks).then(() => this.refresh());
 		this._deselectNode();
@@ -1070,7 +1071,8 @@ class MapScene extends Scene {
  Map Scene -> Map Event
 ***************************************************/
 class MapEvent {
-	constructor(eventData) {
+	constructor(eventData, node) {
+		this.parent = node;
 		this._type = eventData.type;
 		[this._filename, this._param] = eventData.filename?.split("/") || [];
 
@@ -1078,10 +1080,11 @@ class MapEvent {
 		this._description = eventData.description || "";
 		this._oneTime = eventData.oneTime;
 
-		this._saveId = eventData.saveId;
-		this._complete = (this.saved && SaveData.getEventClear(this._saveId));
+		this._flagId = eventData.flag;
+		this._nodeId = this.parent.fullId;
+		this._complete = SaveData.getEventClear(this._nodeId) || (this.saved && SaveData.getFlag(this._flagId));
 		this._goldReward = eventData.gold || 0;
-		this._gemReward = eventData.gems || 0;
+		this._itemReward = eventData.items || 0;
 		this._unlocks = eventData.unlocks || [];
 	}
 
@@ -1146,13 +1149,14 @@ class MapEvent {
 	}
 
 	get saved() {
-		return !!this._saveId;
+		return !!this._flagId;
 	}
 
 	setComplete() {
 		this._complete = true;
+		SaveData.setEventClear(this._nodeId);
 		if (this.saved) {
-			SaveData.setEventClear(this._saveId);
+			SaveData.setFlag(this._flagId, 1);
 		}
 	}
 	//#endregion completion state
@@ -1162,7 +1166,7 @@ class MapEvent {
 		return this._goldReward;
 	}
 	get gems() {
-		return this._gemReward;
+		return this._itemReward;
 	}
 	get hasReward() {
 		return !!(this.gold || this.gems);

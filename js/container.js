@@ -831,6 +831,7 @@ class UnitInfo extends ElObj {
 class OverworldMap extends Container {
 	constructor(mapData) {
 		super();
+		this._name = mapData.filename;
 		this.nodes = [];
 		this.edges = [];
 
@@ -843,6 +844,10 @@ class OverworldMap extends Container {
 
 	get elClass() {
 		return 'overworld-map';
+	}
+
+	get name() {
+		return this._name;
 	}
 
 	refresh() {
@@ -868,7 +873,7 @@ class OverworldMap extends Container {
 		eventData.forEach(data => {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
-				var newEvent = new MapEvent(data);
+				var newEvent = new MapEvent(data, node);
 				if (newEvent.complete) this.unlockNodes(newEvent.unlocks, true);
 				node.setEvent(newEvent);
 			}
@@ -1053,6 +1058,9 @@ class MapNode extends Position {
 		return this._id;
 	}
 
+	get fullId() {
+		return `${this.parent.name}/${this.id}`;
+	}
 
 	//#region map event
 	setEvent(event) {
