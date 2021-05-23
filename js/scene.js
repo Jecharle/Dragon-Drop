@@ -411,7 +411,7 @@ class BattleScene extends Scene {
 	}
 	_showEndScreen(text) {
 		var endScreen = new EndScreen(text);
-		endScreen.el.onclick = ev => this._endBattle(); // TEMP
+		endScreen.el.onclick = () => this._endBattle(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
 
@@ -1040,9 +1040,9 @@ class MapScene extends Scene {
 		if (this.busy || dragId) return;
 
 		if (this._node == node && doubleClick) {
-			this._exploreNode(this._node).then(result => this.refresh());
+			this._exploreNode(this._node).then(() => this.refresh());
 		} else if (node.inRange) {
-			this._selectNode(node).then(result => this.refresh());
+			this._selectNode(node).then(() => this.refresh());
 			this.refresh();
 		}
 	}
@@ -1053,7 +1053,7 @@ class MapScene extends Scene {
 		if (this.busy) return;
 
 		if (this._node) {
-			this._deselectNode().then(result => this.refresh());
+			this._deselectNode().then(() => this.refresh());
 		}
 	}
 	keydown(key) {

@@ -48,12 +48,7 @@
 			"node": "fork",
 			"type": "story",
 			"oneTime": true,
-			"gold": 5,
-			"unlocks": [
-				"tail",
-				"island",
-				"island2"
-			]
+			"gold": 5
 		},
 		{ 
 			"name": "Ferry",
@@ -62,7 +57,7 @@
 			"type": "move",
 			"filename": "/island"
 		},
-		{ 
+		{
 			"name": "Ferry",
 			"description": "This ferry will take you back to the mainland",
 			"node": "island",
