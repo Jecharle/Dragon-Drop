@@ -860,7 +860,7 @@
 	justify-content: center;
 	position: absolute;
 	bottom: 0;
-	background-color: lightgray;
+	background-color: silver;
 	width: 64px;
 	height: 32px;
 	box-sizing: border-box;
@@ -872,11 +872,8 @@
 	.map-node.repeatable {
 		background-color: cornflowerblue;
 	}
-	.selectable.map-node {
-		border: 2px solid black;
-	}
 	.path.map-node {
-		border: 2px solid goldenrod; /*TODO: Flash or something?*/
+		border: 2px solid goldenrod;
 	}
 	.selected.map-node {
 		border: 4px solid yellow;
@@ -890,7 +887,8 @@
 	z-index: -1;
 	height: 0;
 	transform-origin: left center;
-	border-top: 2px dashed darkgray;
+	border-top: 2px dashed silver;
+	transition: border-color 0.5s;
 	pointer-events: none;
 	bottom: 16px;
 	left: 0;
@@ -899,7 +897,7 @@
 		border-color: black;
 	}
 	.overworld-map .line.path {
-		border-color: goldenrod; /*TODO: Flash or something?*/
+		border-color: goldenrod;
 	}
 	.overworld-map .line.unlock {
 		animation: draw-line 1s 0.5s backwards;

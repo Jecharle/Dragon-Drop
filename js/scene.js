@@ -1040,9 +1040,13 @@ class MapScene extends Scene {
 			this._deselectNode().then(() => this.refresh());
 		}
 	}
-	/*keydown(key) {
+	keydown(key) {
 		if (this.busy) return;
-	}*/
+
+		if (key == 'Escape') {
+			this._deselectNode().then(() => this.refresh());
+		}
+	}
 	//#endregion
 }
 
