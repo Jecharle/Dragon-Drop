@@ -901,7 +901,7 @@ class OverworldMap extends Container {
 	connect(id1, id2, oneWay) {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
-		if (node1 && node2 && !this._isConnected(node1, node2)) {
+		if (node1 && node2 && !this._connection(node1, node2)) {
 			var newEdge = new Edge(node1, node2, oneWay);
 			this.edges.push(newEdge);
 			this.el.appendChild(newEdge.el);
@@ -923,7 +923,7 @@ class OverworldMap extends Container {
 		}
 		return false;
 	}
-	_isConnected(start, end) {
+	_connection(start, end) {
 		return this.edges.find(edge => edge.otherNode(start) == end);
 	}
 	_allEdges(node) {
@@ -953,28 +953,30 @@ class OverworldMap extends Container {
 	//#region move range
 	setReachableNodes(origin, range) {
 		if (!origin || origin.parent != this || range < 0) return;
-		this._paintReachableNode(origin, range, []);
-		var edges = [origin];
+		this._paintReachableNode(origin, range, [], []);
+		var frontier = [origin];
 
-		while (edges.length > 0) {
-			var newEdge = edges.pop();
-			var movesLeft = newEdge.movesLeft-1;
-			var path = [newEdge].concat(newEdge.path);
+		while (frontier.length > 0) {
+			var newNode = frontier.pop();
+			var movesLeft = newNode.movesLeft-1;
+			var path = [newNode].concat(newNode.path);
 
-			newEdge.adjacent.forEach(node => {
+			newNode.adjacent.forEach(node => {
 				if (node.hidden || node.inRange) return;
-				if (newEdge.incomplete && node.incomplete) return;
-				this._paintReachableNode(node, movesLeft, path);
-				if (movesLeft > 0) edges.unshift(node);
+				if (newNode.incomplete && node.incomplete) return;
+				var edgePath = [this._connection(newNode, node)].concat(newNode.edgePath);
+				this._paintReachableNode(node, movesLeft, path, edgePath);
+				if (movesLeft > 0) frontier.unshift(node);
 			});
 		}
 
 		this.edges.forEach(edge => edge.refresh());
 	}
-	_paintReachableNode(node, movesLeft, path) {
+	_paintReachableNode(node, movesLeft, nodePath, edgePath) {
 		node.inRange = true;
 		node.movesLeft = movesLeft;
-		node.path = path;
+		node.path = nodePath;
+		node.edgePath = edgePath
 		node.el.classList.add('selectable');
 		node.el.ondragover = this._allowDrop;
 	}
@@ -1125,6 +1127,15 @@ class MapNode extends Position {
 			if (otherNode) adjacent.push(otherNode);
 		})
 		return adjacent;
+	}
+	get edges() {
+		if (!this.parent?.edges) return [];
+		var edges = [];
+		this.parent.edges.forEach(edge => {
+			var otherNode = edge.otherNode(this);
+			if (otherNode) edges.push(edge);
+		})
+		return edges;
 	}
 	//#endregion connections
 }

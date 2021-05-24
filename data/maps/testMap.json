@@ -10,10 +10,11 @@
 		{"id": "start", "x": 200, "y": 250},
 		{"id": "second", "x": 200, "y": 400, "hidden": true},
 		{"id": "fork", "x": 350, "y": 350},
-		{"id": "tail", "x": 450, "y": 450},
+		{"id": "tail", "x": 400, "y": 400},
 		{"id": "last", "x": 400, "y": 200},
 		{"id": "dropoff", "x": 550, "y": 150},
 
+		{"id": "island0", "x": 550, "y": 550},
 		{"id": "island", "x": 600, "y": 600},
 		{"id": "island2", "x": 550, "y": 650}
 	],
@@ -26,6 +27,7 @@
 		{"a": "last", "b": "start"},
 		{"a": "last", "b": "dropoff"},
 
+		{"a": "island", "b": "island0"},
 		{"a": "island", "b": "island2"}
 	],
 
@@ -60,9 +62,9 @@
 		{
 			"name": "Ferry",
 			"description": "This ferry will take you back to the mainland",
-			"node": "island",
+			"node": "island0",
 			"type": "move",
-			"filename": "/tail"
+			"filename": "/fork"
 		},
 		{ 
 			"name": "Descent",

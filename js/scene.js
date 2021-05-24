@@ -835,14 +835,12 @@ class MapScene extends Scene {
 		this._piece = new MapPiece();
 		this._node = null;
 
-		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
 		// TODO: Pack this away into a method
 		this._camera.el.appendChild(this._map.el);
 		this.el.appendChild(this._camera.el);
-		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
 		this.el.appendChild(this._menuButtonEl);
 		
@@ -906,26 +904,11 @@ class MapScene extends Scene {
 	_refreshNodes() {
 		this._map.refresh();
 		this._map.resetReachableNodes();
-		this._map.setReachableNodes(this._piece.node, 10); // TEMP very high range
+		this._map.setReachableNodes(this._piece.node, 1);
 	}
 
 	_refreshUi() {
 		if (this._node) {
-			switch (this._node.event?.type) {
-				case MapEvent.Battle:
-					this._exploreButtonEl.innerText = "Fight";
-					break;
-				case MapEvent.Story:
-					this._exploreButtonEl.innerText = "View"; // TEMP?
-					break;
-				case MapEvent.Move:
-					this._exploreButtonEl.innerText = "Go";
-					break;
-				default:
-					this._exploreButtonEl.innerText = "Start";
-					break;
-			}
-
 			this._eventDescriptionEl.innerHTML = this._node.event?.fullDescription;
 		}
 		this.el.classList.toggle('hide-description', !this._node?.canExplore);
@@ -934,43 +917,34 @@ class MapScene extends Scene {
 
 	//#region actions
 	async _selectNode(node, instant) {
-		if (!node) return false;
-		
 		var oldNode = this._node;
 		this._node = node;
-		if (oldNode) oldNode.el.classList.remove('selected');
-		this._node.el.classList.add('selected');
-		this._camera.center(node.screenX, node.screenY);
 
-		if (!instant && node != oldNode) {
-			this.setBusy();
-			await this._camera.animateMove([oldNode || this._piece.node], 600);
-			this.setDone();
+		if (oldNode) {
+			oldNode.el.classList.remove('selected');
+			this._map.nodes.forEach(node => node.el.classList.remove('path'));
+			this._map.edges.forEach(edge => edge.el.classList.remove('path'));
+		}
+
+		if (this._node) {
+			this._node.el.classList.add('selected');
+			this._node.path.forEach(node => node.el.classList.add('path'));
+			this._node.edgePath.forEach(edge => edge.el.classList.add('path'));
+		} else {
+			this.el.classList.add('hide-description');
 		}
 		return true;
 	}
 	async _deselectNode(instant) {
-		if (!this._node) return false;
-		
-		var oldNode = this._node;
-		this._node = null;
-		if (oldNode) oldNode.el.classList.remove('selected');
-		this._camera.center(this._piece.node.screenX, this._piece.node.screenY);
-
-		if (!instant && oldNode) {
-			this.setBusy();
-			this.el.classList.add('hide-description');
-			await this._camera.animateMove([oldNode], 300);
-			this.setDone();
-		}
-
-		return true;
+		return this._selectNode(null, instant);
 	}
 
 	async _movePiece(node) {
 		if (!node) return false;
 
 		this.setBusy();
+		this._camera.center(node.screenX, node.screenY);
+		this._camera.animateMove([this._piece.node], 600);
 		await this._piece.move(node);
 		this.setDone();
 
@@ -978,9 +952,14 @@ class MapScene extends Scene {
 	}
 
 	async _exploreNode(node) {
-		if (!node || !node.canExplore) return false;
+		if (!node) return false;
 		
 		await this._movePiece(node);
+
+		if (!node.canExplore) {
+			this._deselectNode();
+			return true;
+		}
 
 		var event = node.event;
 
@@ -1004,7 +983,7 @@ class MapScene extends Scene {
 					Game.setScene( new MapScene(this._lastScene, model, event.param));
 				} else {
 					var destination = this._map.getNode(event.param);
-					if (destination) this._movePiece(destination);
+					if (destination) this._movePiece(destination); // TODO: This should just teleport
 					this._deselectNode();
 				}
 				this._completeEvent(event);
@@ -1036,19 +1015,24 @@ class MapScene extends Scene {
 	//#endregion actions
 
 	//#region input events
-	positionEvent(node, dragId, doubleClick) {
+	positionEvent(node, dragId) {
 		if (this.busy || dragId) return;
 
-		if (this._node == node && doubleClick) {
+		if (this._node == node) {
 			this._exploreNode(this._node).then(() => this.refresh());
-		} else if (node.inRange) {
-			this._selectNode(node).then(() => this.refresh());
+		}
+	}
+	mouseOver(node, dragId) {
+		if (this.busy || dragId) return;
+
+		if (!node) {
+			this._deselectNode();
+			this.refresh();
+		} else if (node.inRange && node != this._node) {
+			this._selectNode(node);
 			this.refresh();
 		}
 	}
-	/*mouseOver(node, dragId) {
-		if (this.busy || !this._piece.idMatch(dragId)) return;
-	}*/
 	rightClick() {
 		if (this.busy) return;
 
@@ -1056,13 +1040,9 @@ class MapScene extends Scene {
 			this._deselectNode().then(() => this.refresh());
 		}
 	}
-	keydown(key) {
+	/*keydown(key) {
 		if (this.busy) return;
-
-		if (key == "Enter") {
-			this._exploreNode(this._node);
-		}
-	}
+	}*/
 	//#endregion
 }
 

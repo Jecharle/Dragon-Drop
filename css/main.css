@@ -840,16 +840,6 @@
 	position: absolute;
 }
 
-.explore-button {
-	bottom: 12px;
-	right: 12px;
-	height: 96px;
-	border-radius: 16px;
-	transition: bottom 1s;
-}
-	.hide-description .explore-button {
-		bottom: -108px;
-	}
 .map-node-description {
 	position: absolute;
 	bottom: 12px;
@@ -862,9 +852,8 @@
 	transition: bottom 1s;
 }
 	.hide-description .map-node-description {
-		bottom: calc(-5em - 26px);
+		bottom: calc(-5em - 32px);
 	}
-
 
 .map-node {
 	display: flex;
@@ -883,7 +872,13 @@
 	.map-node.repeatable {
 		background-color: cornflowerblue;
 	}
-	.selectable.map-node:hover, .selected.map-node {
+	.selectable.map-node {
+		border: 2px solid black;
+	}
+	.path.map-node {
+		border: 2px solid goldenrod; /*TODO: Flash or something?*/
+	}
+	.selected.map-node {
 		border: 4px solid yellow;
 	}
 	.map-node.unlock {
@@ -900,14 +895,17 @@
 	bottom: 16px;
 	left: 0;
 }
+	.overworld-map .line.selectable {
+		border-color: black;
+	}
+	.overworld-map .line.path {
+		border-color: goldenrod; /*TODO: Flash or something?*/
+	}
 	.overworld-map .line.unlock {
 		animation: draw-line 1s 0.5s backwards;
 	}
 	.overworld-map .line.unlock.out {
 		animation: draw-line 1s 1.5s backwards;
-	}
-	.overworld-map .line.selectable {
-		border-color: black;
 	}
 
 .map-piece {
