@@ -288,7 +288,7 @@ class UnitPiece extends Piece {
 	static get Evade() { return 'evade'; }
 	static get Anchor() { return 'anchor'; }
 	static get Charge() { return 'charge'; }
-	static get Dash() { return 'dash'; }
+	static get Accelerate() { return 'accelerate'; }
 
 	getStatus(effect) {
 		if (!this._status) return 0;
@@ -310,11 +310,11 @@ class UnitPiece extends Piece {
 		}
 	}
 	_applyDelayedBuff() {
-		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Dash)) {
+		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Accelerate)) {
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-buff-effect');
 			this.parent.el.appendChild(vfx.el);
 			this.addStatus(UnitPiece.Power, this.getStatus(UnitPiece.Charge));
-			this.addStatus(UnitPiece.Speed, this.getStatus(UnitPiece.Dash));
+			this.addStatus(UnitPiece.Speed, this.getStatus(UnitPiece.Accelerate));
 		}
 	}
 	//#endregion status effects
@@ -424,7 +424,7 @@ class UnitPiece extends Piece {
 					this._status[UnitPiece.Regenerate] = 0;
 					break;
 				}
-			case UnitPiece.Charge: case UnitPiece.Dash: // positive-only statuses (includes regenerate)
+			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate)
 				if (value > this.getStatus(effect)) {
 					this._status[effect] = value;
 				}
@@ -476,7 +476,7 @@ class UnitPiece extends Piece {
 			this.refresh();
 			await Game.asyncPause(500);
 		}
-		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Dash)) {
+		if (this.getStatus(UnitPiece.Charge) || this.getStatus(UnitPiece.Accelerate)) {
 			this._applyDelayedBuff();
 			await Game.asyncPause(500);
 		}

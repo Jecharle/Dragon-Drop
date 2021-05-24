@@ -181,10 +181,10 @@ class StatusList extends Detail {
 				double: Math.abs(statusObject[UnitPiece.Charge]) > 1
 			});
 		}
-		if (statusObject[UnitPiece.Dash]) {
+		if (statusObject[UnitPiece.Accelerate]) {
 			this._addIcon('speed', {
 				icon: 'time',
-				double: Math.abs(statusObject[UnitPiece.Dash]) > 1
+				double: Math.abs(statusObject[UnitPiece.Accelerate]) > 1
 			});
 		}
 

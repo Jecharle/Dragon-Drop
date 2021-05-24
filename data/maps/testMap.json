@@ -14,9 +14,9 @@
 		{"id": "last", "x": 400, "y": 200},
 		{"id": "dropoff", "x": 550, "y": 150},
 
-		{"id": "island0", "x": 550, "y": 550},
-		{"id": "island", "x": 600, "y": 600},
-		{"id": "island2", "x": 550, "y": 650}
+		{"id": "island0", "x": 550, "y": 650},
+		{"id": "island", "x": 600, "y": 700},
+		{"id": "island2", "x": 550, "y": 750}
 	],
 	
 	"connections": [
