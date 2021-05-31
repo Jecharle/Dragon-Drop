@@ -82,6 +82,7 @@ class Board extends Container {
 		
 		this._w = sceneData.width;
 		this._h = sceneData.height;
+		this.center();
 
 		this.squares = [];
 		for (var y = 0; y < this.h; y++) {
@@ -105,6 +106,13 @@ class Board extends Container {
 
 	get w() { return this._w; }
 	get h() { return this._h; }
+	
+	center() {
+		var height = Square.screenY(this.w+1, this.h+1, 0);
+		var offset = Square.screenX(this.w+1, 0, 0) + Square.screenX(0, this.h+1, 0);
+		this.el.style.top = `${Math.floor((Game.height - height)/2)}px`;
+		this.el.style.left = `${Math.floor((Game.width - offset)/2)}px`;
+	}
 
 	//#region setup
 	_loadTerrain(terrainData) {

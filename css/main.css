@@ -75,8 +75,8 @@
 		left: 24px;
 	}
 	.end-turn-button {
-		bottom: 12px;
-		right: 12px;
+		bottom: 4px;
+		right: 4px;
 		height: 96px;
 		border-radius: 16px;
 	}
@@ -455,7 +455,6 @@
 	display: flex;
 	justify-content: center;
 	position: absolute;
-	top: 24px;
 	z-index: 0;
 }
 	.square {

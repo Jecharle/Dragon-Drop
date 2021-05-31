@@ -850,7 +850,7 @@ class MapScene extends Scene {
 		} else {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
-		this._camera.setViewSize(1024, 576); // TEMP, until I can pull the resolution in natively
+		this._camera.setViewSize(Game.width, Game.height);
 	}
 
 	start() {

@@ -38,6 +38,13 @@ class Game {
 		return null;//Game.scene.unsaved || null; // TEMP disabled for testing
 	}
 
+	static get width() {
+		return 1024;
+	}
+	static get height() {
+		return 576;
+	}
+
 	static async asyncPause(milliseconds) {
 		if (!milliseconds || milliseconds < 0) return;
 
@@ -71,7 +78,7 @@ class Game {
 
 		MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
-		})
+		});
 	}
 }
 Game.begin();
