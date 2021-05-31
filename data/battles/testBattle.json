@@ -1,6 +1,9 @@
 {
 	"type": "battle",
 
+	"width": 8,
+	"height": 8,
+
 	"minTurns": 3,
 
 	"deployment": [

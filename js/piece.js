@@ -1049,20 +1049,45 @@ class SkillCard extends Piece {
 	//#endregion input events
 
 	//#region ai
-	_aiBaseTargetScore(target) {
+	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
-	_aiAreaTargetScore(square) {
-		if (this.user.isEnemy(square.piece)) return this.power;
-		else if (this.user.isAlly(square.piece)) return -this.power*0.9;
-		else if (square.piece) return this.power*0.1;
-		else return 0;
+	_aiSquareTargetScore(square, origin) {
+		var score = 0;
+		if (square == origin) { // new square will include yourself
+			score = this._aiSelfTargetScore(square);
+		} else if (!square.piece || square.piece == this.user) { // starting square will be empty
+			score = this._aiEmptyTargetScore(square);
+		} else if (this.user.isEnemy(square.piece)) {
+			score = this._aiEnemyTargetScore(square);
+		} else if (this.user.isAlly(square.piece)) {
+			score = this._aiAllyTargetScore(square);
+		} else {
+			score = this._aiObjectTargetScore(square);
+		}
+		return score;
 	}
-	_aiTargetScore(target) {
+	_aiSelfTargetScore(square) {
+		return this._aiAllyTargetScore(square);
+	}
+	_aiEnemyTargetScore(square) {
+		return this.power;
+	}
+	_aiAllyTargetScore(square) {
+		return -this.power*0.9;
+	}
+	_aiObjectTargetScore(square) {
+		return this.power*0.1;
+	}
+	_aiEmptyTargetScore(square) {
+		return 0;
+	}
+
+	_aiTargetScore(target, origin) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
-			return totalScore + this._aiAreaTargetScore(square);
-		}, this._aiBaseTargetScore(target));
+			return totalScore + this._aiSquareTargetScore(square, origin);
+		}, this._aiBaseTargetScore(target, origin));
 	}
 
 	aiGetBestTarget(origin) {
@@ -1070,7 +1095,7 @@ class SkillCard extends Piece {
 			if (!this.validTarget(target) || !this.inRange(origin, target)) return best;
 
 			var newTarget = {
-				score: this._aiTargetScore(target),
+				score: this._aiTargetScore(target, origin),
 				target: target
 			}
 			if (newTarget.score > best.score) return newTarget;

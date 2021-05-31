@@ -123,9 +123,7 @@ class TestRushSkill extends TestAttackSkill {
 		await Game.asyncPause(time);
 	}
 
-	/*_aiBaseTargetScore(target) {
-		return -this.power*0.5; // TODO: Use if the enemy is otherwise out of range
-	}*/
+	// TODO: Use if the enemy is otherwise out of range
 };
 
 /***************************************************
@@ -171,7 +169,7 @@ class TestAreaSkill extends TestAttackSkill {
 		await Game.asyncPause(200);
 	}
 
-	_aiBaseTargetScore(_target) {
+	_aiBaseTargetScore(_target, _origin) {
 		return -0.5; // AoE are lower priority unless they hit multiple targets
 	}
 };
