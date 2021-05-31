@@ -319,7 +319,6 @@
 .skill {
 	width: var(--skill-w);
 	height: var(--skill-h);
-	margin-left: 2px;
 	position: relative;
 	display: flex;
 	justify-content: center;
@@ -328,9 +327,8 @@
 	.skill>.sprite {
 		width: 100%;
 		height: 100%;
-		box-sizing: border-box;
 		position: absolute;
-		border: 2px solid black;
+		background-image: url(../img/skills/skillcards.png);
 	}
 	.skill-description {
 		display: none;
@@ -367,7 +365,10 @@
 		bottom: 4px;
 	}
 	.selectable.skill:hover>.sprite, .skill.selected>.sprite {
-		border: 2px solid yellow;
+		filter: drop-shadow(2px 0 yellow)
+		drop-shadow(-2px 0 yellow)
+		drop-shadow(0 2px yellow)
+		drop-shadow(0px -2px yellow);
 	}
 	.skill:not(.dragging):hover .skill-description {
 		display: block;
@@ -376,28 +377,22 @@
 
 	/*#region skill icons*/
 	.attack-skill>.sprite {
-		background-color: red;
-		border-radius: 25%;
+		background-position: 0 0;
 	}
 	.heal-skill>.sprite {
-		background-color: green;
-		border-radius: 25%;
+		background-position: 0 calc(-3*var(--skill-h));
 	}
 	.build-skill>.sprite {
-		background-color: purple;
-		border-radius: 25%;
+		background-position: 0 calc(-5*var(--skill-h));
 	}
 	.move-skill>.sprite {
-		background-color: lightskyblue;
-		border-radius: 25%;
+		background-position: 0 calc(-4*var(--skill-h));
 	}
 	.buff-skill>.sprite {
-		background-color: yellowgreen;
-		border-radius: 25%;
+		background-position: 0 calc(-1*var(--skill-h));
 	}
 	.debuff-skill>.sprite {
-		background-color: magenta;
-		border-radius: 25%;
+		background-position: 0 calc(-6*var(--skill-h));
 	}
 	/*#endregion skill icons*/
 /*#endregion skill card*/
