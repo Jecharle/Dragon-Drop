@@ -42,7 +42,7 @@ class Game {
 		return 1024;
 	}
 	static get height() {
-		return 576;
+		return 768;
 	}
 
 	static async asyncPause(milliseconds) {

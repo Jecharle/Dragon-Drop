@@ -1,7 +1,7 @@
 /*#region game window*/
 :root {
 	--game-w: 1024px;
-	--game-h: 576px;
+	--game-h: 768px;
 }
 
 .game-window {
