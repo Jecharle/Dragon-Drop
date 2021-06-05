@@ -574,19 +574,12 @@ class UnitPiece extends Piece {
 		var turnframes = [{}];
 		var lastSquare = null, facing = this._facing;
 		path.forEach(square => {
-			keyframes.unshift({
-				transform: square.screenPosition,
-				zIndex: square.screenZ
-			});
+			keyframes.unshift({ transform: square.screenPosition });
 			if (lastSquare) {
 				if (square.screenX > lastSquare.screenX) facing = -1;
 				else if (square.screenX < lastSquare.screenX) facing = 1;
-				turnframes.unshift({
-					transform: `scaleX(${facing})`
-				});
-				turnframes.unshift({
-					transform: `scaleX(${facing})`
-				});
+				turnframes.unshift({ transform: `scaleX(${facing})` });
+				turnframes.unshift({ transform: `scaleX(${facing})` });
 			}
 			lastSquare = square;
 		});
@@ -601,10 +594,7 @@ class UnitPiece extends Piece {
 	_animateJump(path) {
 		var origin = path[path.length-1];
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{ }
 		];
 		var time = 400;
@@ -622,14 +612,8 @@ class UnitPiece extends Piece {
 
 		var time = 400;
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			}
+			{ transform: origin.screenPosition },
+			{ transform: origin.screenPosition }
 		];
 		this.el.animate(keyframes, time/2);
 
@@ -665,16 +649,12 @@ class UnitPiece extends Piece {
 
 		var keyframes = [
 			{ },
-			{
-				transform: `translate(${dx}px, ${dy}px)`,
-				zIndex: dz
-			},
+			{ transform: `translate3d(${dx}px, ${dy}px ${dz}px)` },
 			{ }
 		];
 		if (origin) {
 			keyframes[0] = { 
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
+				transform: origin.screenPosition
 			};
 		}
 		this.el.animate(keyframes, {duration: time, easing: "ease-out"});
@@ -1222,7 +1202,6 @@ class MapPiece extends Piece {
 		var startNode = this.node;
 		this.node = node;
 		this.el.style.transform = this.node.screenPosition;
-		this.el.style.zIndex = this.node.screenZ;
 
 		var time = 0;
 		if (node.path) {
@@ -1240,10 +1219,7 @@ class MapPiece extends Piece {
 	animateMovement(path) {
 		var keyframes = [{}];
 		path.forEach(node => {
-			keyframes.unshift({
-				transform: node.screenPosition,
-				zIndex: node.screenZ
-			});
+			keyframes.unshift({ transform: node.screenPosition });
 		});
 		var time = 750*(keyframes.length-1);
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
@@ -1255,7 +1231,6 @@ class MapPiece extends Piece {
 	refresh() {
 		if (this.node) {
 			this.el.style.transform = this.node.screenPosition;
-			this.el.style.zIndex = this.node.screenZ;
 		}
 	}
 	//#endregion refresh

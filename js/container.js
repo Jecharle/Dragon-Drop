@@ -64,11 +64,10 @@ class Position extends SpriteElObj {
 	get screenX() { return 0; }
 	get screenY() { return 0; }
 	get screenZ() { return 0; }
-	get screenPosition() { return `translate(${this.screenX}px, ${this.screenY}px)`; }
+	get screenPosition() { return `translate3d(${this.screenX}px, ${this.screenY}px, ${this.screenZ}px)`; }
 	
 	refresh() {
 		this.el.style.transform = this.screenPosition;
-		this.el.style.zIndex = this.screenZ;
 	}
 };
 
@@ -226,7 +225,6 @@ class Board extends Container {
 		}
 		if (!this.el.contains(piece.el)) this.el.appendChild(piece.el);
 		piece.el.style.transform = square.screenPosition;
-		piece.el.style.zIndex = square.screenZ;
 		piece.square = square;
 		this._fillPiece(piece, square);
 
@@ -237,7 +235,6 @@ class Board extends Container {
 			this._fillPiece(null, piece.square, piece.size);
 			piece.square = null;
 			piece.el.style.transform = "";
-			piece.el.style.zIndex = "";
 			return true;
 		}
 		return false;
@@ -558,8 +555,7 @@ class Square extends Position {
 	}
 
 	refresh() {
-		this.el.style.transform = this.screenPosition;
-		this.el.style.zIndex = this._selfScreenZ;
+		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
 	}
 	//#endregion isometric
 

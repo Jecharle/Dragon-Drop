@@ -351,8 +351,7 @@ class SpriteEffect extends SpriteElObj {
 			this.el.parentElement.removeChild(this.el);
 		}, duration);
 		this.square = square;
-		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
-		this.el.style.zIndex = square.screenZ;
+		this.el.style.transform = square.screenPosition;
 	}
 
 	get elClass() {
@@ -380,20 +379,14 @@ class SpriteEffect extends SpriteElObj {
 	}
 	_animateStraight(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 200;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
 	}
 	_animateArc(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 400;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
@@ -406,10 +399,7 @@ class SpriteEffect extends SpriteElObj {
 	}
 	_animateReturn(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 200;
 		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});

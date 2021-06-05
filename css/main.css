@@ -457,6 +457,7 @@
 	justify-content: center;
 	position: absolute;
 	z-index: 0;
+	transform-style: preserve-3d;
 }
 	.square {
 		display: flex;
@@ -633,6 +634,7 @@
 	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
+	transform-style: preserve-3d;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
@@ -664,6 +666,7 @@
 	.unit .lifebar {
 		visibility: hidden;
 		pointer-events: none;
+		transform: translateZ(99px);
 	}
 	.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
 		visibility: visible;
@@ -673,6 +676,7 @@
 		width: calc(var(--icon-w) + 4px);
 		pointer-events: none;
 		overflow: hidden;
+		transform: translateZ(99px);
 	}
 		.unit .status-list .inner {
 			animation-name: marquee;
@@ -699,6 +703,7 @@
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
 		filter: drop-shadow(2px 0 yellow)
 		drop-shadow(-2px 0 yellow)
+		drop-shadow(0px 2px yellow)
 		drop-shadow(0px -2px yellow);
 	}
 	.moving>.sprite {
