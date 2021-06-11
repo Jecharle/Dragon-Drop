@@ -383,8 +383,8 @@
 	.heal-skill>.sprite {
 		background-position: 0 calc(-3*var(--skill-h));
 	}
-	.build-skill>.sprite {
-		background-position: 0 calc(-5*var(--skill-h));
+	.defense-skill>.sprite {
+		background-position: 0 calc(-2*var(--skill-h));
 	}
 	.move-skill>.sprite {
 		background-position: 0 calc(-4*var(--skill-h));
@@ -394,6 +394,9 @@
 	}
 	.debuff-skill>.sprite {
 		background-position: 0 calc(-6*var(--skill-h));
+	}
+	.build-skill>.sprite {
+		background-position: 0 calc(-5*var(--skill-h));
 	}
 	/*#endregion skill icons*/
 /*#endregion skill card*/

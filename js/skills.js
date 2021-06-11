@@ -305,7 +305,7 @@ class TestGuardSkill extends TestHealSkill {
 
 	_stats() {
 		super._stats();
-		this.style = 'buff-skill';
+		this.style = 'defense-skill';
 	}
 
 	async _unitEffects(unit, _target) {
