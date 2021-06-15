@@ -55,7 +55,7 @@ class TestMeleeUnit extends UnitPiece {
 			new TestRushSkill(this),
 			new TestMoveSkill(this),
 			new TestBuildSkill(this)
-		]
+		];
 	}
 };
 
@@ -79,7 +79,7 @@ class TestSupportUnit extends UnitPiece {
 			new TestRangedSkill(this),
 			new TestBuffSkill(this),
 			new TestHealSkill(this)
-		]
+		];
 	}
 };
 
@@ -103,7 +103,7 @@ class TestPositionUnit extends UnitPiece {
 			new TestPullSkill(this),
 			new TestAreaSkill(this),
 			new TestPositionSkill(this),
-		]
+		];
 	}
 };
 
@@ -128,7 +128,7 @@ class TestStatusUnit extends UnitPiece {
 			new TestBuffSkill(this),
 			new TestDebuffSkill(this),
 			new TestGuardSkill(this)
-		]
+		];
 	}
 };
 
@@ -155,7 +155,13 @@ class TestEnemyUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestAreaSkill(this),
-		]
+		];
+	}
+
+	_setReactions() {
+		this._reactions = [
+			new TestCounterReaction(this)
+		];
 	}
 };
 
@@ -178,7 +184,7 @@ class TestEnemySupportUnit extends UnitPiece {
 		this._skills = [
 			new TestRangedSkill(this),
 			// TODO: Support?
-		]
+		];
 	}
 };
 

@@ -106,6 +106,7 @@ class UnitPiece extends Piece {
 		this._defaultStats();
 		this._stats();
 		this._setSkills();
+		this._setReactions();
 
 		this.hp = this.maxHp;
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
@@ -181,6 +182,9 @@ class UnitPiece extends Piece {
 	}
 	_setSkills() {
 		this._skills = [];
+	}
+	_setReactions() {
+		this._reactions = [];
 	}
 	_initialize() {
 		this.myTurn = false;
@@ -332,6 +336,7 @@ class UnitPiece extends Piece {
 	}
 	_refreshSkills() {
 		this._skills.forEach(skill => skill.refresh());
+		this._reactions.forEach(reactSkill => reactSkill.refresh());
 	}
 	dieIfDead() {
 		if (this.dead) {
@@ -462,6 +467,25 @@ class UnitPiece extends Piece {
 	
 	//#endregion effects
 
+	//#region use reactions
+	async reactTurnStart() {
+		for (var i = 0; i < this._reactions.length; i++) {
+			await this._reactions[i].turnStartTrigger();
+		}
+	}
+	async reactTurnEnd() {
+		for (var i = 0; i < this._reactions.length; i++) {
+			await this._reactions[i].turnEndTrigger();
+		}
+	}
+
+	async reactOnHit(sourceSkill, sourceUnit) {
+		for (var i = 0; i < this._reactions.length; i++) {
+			await this._reactions[i].onHitTrigger(sourceSkill, sourceUnit);
+		}
+	}
+	//#endregion use reactions
+
 	//#region turn state
 	get canMove() {
 		return this.alive && !this.homeSquare && !this.actionUsed;
@@ -509,6 +533,7 @@ class UnitPiece extends Piece {
 		this.actionUsed = false;
 		this.homeSquare = null;
 		this._skills.forEach(skill => skill.endTurn());
+		this._reactions.forEach(skill => skill.endTurn());
 		this.refresh();
 	}
 	//#endregion turn state
@@ -649,7 +674,7 @@ class UnitPiece extends Piece {
 
 		var keyframes = [
 			{ },
-			{ transform: `translate3d(${dx}px, ${dy}px ${dz}px)` },
+			{ transform: `translate3d(${dx}px, ${dy}px, ${dz}px)` },
 			{ }
 		];
 		if (origin) {
@@ -964,6 +989,13 @@ class SkillCard extends Piece {
 		await this._endEffects(this._target, this._squares, this._units);
 
 		this._payCost();
+		
+		if (!this.isReaction) {
+			for (var i = 0; i < this._units.length; i++) {
+				await this._units[i].reactOnHit(this, this.user);
+			}
+		}
+
 		this._units.forEach(piece => piece.dieIfDead());
 		this.user.refresh();
 		
@@ -982,9 +1014,9 @@ class SkillCard extends Piece {
 		
 		await Game.asyncPause(100);
 	}
-	async _squareEffects(_square, _target) { return 0; }
-	async _unitEffects(_unit, _target) { return 0; }
-	async _endEffects(_target, _squares, _units) { return 0; }
+	async _squareEffects(_square, _target) { return; }
+	async _unitEffects(_unit, _target) { return; }
+	async _endEffects(_target, _squares, _units) { return; }
 
 	_payCost() {
 		this.user.actionUsed = true;
@@ -1170,6 +1202,117 @@ class SkillCard extends Piece {
 	}
 	//#endregion directional areas
 };
+
+/***************************************************
+ Reaction Skill Piece
+***************************************************/
+
+class ReactionCard extends SkillCard {
+
+	get isReaction() {
+		return true;
+	}
+
+	//#region overrides
+	_defaultStats() {
+		super._defaultStats();
+		this._range = 0;
+		this._minRange = 0;
+		this._los = false;
+		this._baseCooldown = 1;
+	}
+
+	_payCost() {
+		if (this.hasCooldown) this.cooldown = this.cooldownCost;
+		if (this.hasLimitedUses) this.usesLeft--;
+	}
+	canUse() {
+		return this.cooldown <= 0 && (!this.hasLimitedUses || this.usesLeft);
+	}
+
+	async _startEffects(target, _squares, _units) { return; }
+	//#endregion overrides
+
+	canReact(target, skill) {
+		return false;
+	}
+
+	//#region triggers
+	async turnEndTrigger() {
+		return false;
+	}
+	async turnStartTrigger() {
+		return false;
+	}
+
+	async onHitTrigger(sourceSkill, sourceUnit) {
+		return false;
+	}
+	//#endregion triggers
+}
+
+class OnHitReaction extends ReactionCard {
+	canReact(target, _skill) {
+		return this.user.alive && this.validTarget(target.square) && this.inRange(this.user.square, target.square);
+	}
+
+	async onHitTrigger(sourceSkill, sourceUnit) {
+		if (!sourceSkill || !sourceUnit) return false;
+		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
+		if (!this.inRange(this.user.square, sourceUnit.square)) return false;
+		return await this.use(sourceUnit.square);
+	}
+}
+class OnHitSelfReaction extends ReactionCard {
+	canReact(_target, _skill) {
+		return this.user.alive;
+	}
+
+	async onHitTrigger(sourceSkill, sourceUnit) {
+		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
+		return await this.use(this.user.square);
+	}
+}
+class OnDeathReaction extends ReactionCard {
+	canReact(_target, _skill) {
+		return this.user.dead;
+	}
+
+	async turnEndTrigger() {
+		if (!this.canUse() || !this.canReact()) return false;
+		return await this.use(this.user.square);
+	}
+
+	async turnStartTrigger() {
+		if (!this.canUse() || !this.canReact()) return false;
+		return await this.use(this.user.square);
+	}
+
+	async onHitTrigger(sourceSkill, sourceUnit) {
+		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
+		return await this.use(this.user.square);
+	}
+}
+class OnTurnStartReaction extends ReactionCard {
+	canReact(_target, _skill) {
+		return true;
+	}
+
+	async turnStartTrigger() {
+		if (!this.canUse() || !this.canReact()) return false;
+		return await this.use(this.user.square);
+	}
+}
+class OnTurnEndReaction extends ReactionCard {
+	canReact(_target, _skill) {
+		return true;
+	}
+
+	async turnEndTrigger() {
+		if (!this.canUse() || !this.canReact()) return false;
+		return await this.use(this.user.square);
+	}
+}
 
 /***************************************************
  Map Piece
