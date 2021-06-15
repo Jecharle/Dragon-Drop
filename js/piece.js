@@ -990,10 +990,8 @@ class SkillCard extends Piece {
 
 		this._payCost();
 		
-		if (!this.isReaction) {
-			for (var i = 0; i < this._units.length; i++) {
-				await this._units[i].reactOnHit(this, this.user);
-			}
+		for (var i = 0; i < this._units.length; i++) {
+			await this._units[i].reactOnHit(this, this.user);
 		}
 
 		this._units.forEach(piece => piece.dieIfDead());
@@ -1257,7 +1255,7 @@ class OnHitReaction extends ReactionCard {
 	}
 
 	async onHitTrigger(sourceSkill, sourceUnit) {
-		if (!sourceSkill || !sourceUnit) return false;
+		if (!sourceSkill || !sourceUnit || sourceSkill.isReaction || !sourceUnit.square) return false;
 		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
 		if (!this.inRange(this.user.square, sourceUnit.square)) return false;
 		return await this.use(sourceUnit.square);
@@ -1269,11 +1267,17 @@ class OnHitSelfReaction extends ReactionCard {
 	}
 
 	async onHitTrigger(sourceSkill, sourceUnit) {
+		if (sourceSkill && sourceSkill.isReaction) return false;
 		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
 		return await this.use(this.user.square);
 	}
 }
 class OnDeathReaction extends ReactionCard {
+	_defaultStats() {
+		super._defaultStats();
+		this._maxUses = 1;
+	}
+
 	canReact(_target, _skill) {
 		return this.user.dead;
 	}
@@ -1282,12 +1286,10 @@ class OnDeathReaction extends ReactionCard {
 		if (!this.canUse() || !this.canReact()) return false;
 		return await this.use(this.user.square);
 	}
-
 	async turnStartTrigger() {
 		if (!this.canUse() || !this.canReact()) return false;
 		return await this.use(this.user.square);
 	}
-
 	async onHitTrigger(sourceSkill, sourceUnit) {
 		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
 		return await this.use(this.user.square);
