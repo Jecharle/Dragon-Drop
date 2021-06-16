@@ -510,6 +510,8 @@ class UnitPiece extends Piece {
 		this.removeStatus(UnitPiece.Anchor);
 		this.removeStatus(UnitPiece.Charge);
 		this.refresh();
+		
+		await this.reactTurnStart();
 	}
 	async updateStatusTurnEnd() {
 		if (this.getStatus(UnitPiece.Poison)) {
@@ -521,6 +523,9 @@ class UnitPiece extends Piece {
 		this.removeStatus(UnitPiece.Power);
 		this.removeStatus(UnitPiece.Speed);
 		this.refresh();
+
+		await this.reactTurnEnd();
+
 		this.dieIfDead();
 	}
 

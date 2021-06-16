@@ -39,3 +39,26 @@ class TestCounterReaction extends OnHitReaction {
 		await Game.asyncPause(200);
 	}
 };
+
+/***************************************************
+ Test low HP power buff
+***************************************************/
+class TestRageReaction extends OnTurnStartReaction {
+
+	get name() {
+		return "Rage";
+	}
+	get _description() {
+		return "Increase Power below 50% HP";
+	}
+
+	canReact() {
+		return super.canReact() && this.user.hpRate <= 0.5;
+	}
+
+	async _unitEffects(unit, _target) {
+		this._showEffect(unit.square, unit.square, "test-buff-effect");
+		unit.addStatus(UnitPiece.Power, 1);
+		await Game.asyncPause(200);
+	}
+};
