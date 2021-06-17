@@ -62,3 +62,37 @@ class TestRageReaction extends OnTurnStartReaction {
 		await Game.asyncPause(200);
 	}
 };
+
+/***************************************************
+ Test death blast
+***************************************************/
+class TestExplodeReaction extends OnDeathReaction {
+
+	get name() {
+		return "Explode";
+	}
+	get _description() {
+		return "Explode on death";
+	}
+
+	_stats() {
+		this._basePower = 1;
+		this._area = 1;
+	}
+
+	async _startEffects(_target, _squares, _units) {
+		await Game.asyncPause(300);
+	}
+
+	async _squareEffects(square, target) {
+		if (square == target) return;
+		this._showEffect(square, this.user.square, "test-shot-effect").animateMove(this.user.square);
+	}
+
+	async _unitEffects(unit, _target) {
+		if (!unit.evade()) {
+			unit.takeDamage(this.power);
+		}
+		await Game.asyncPause(200);
+	}
+};

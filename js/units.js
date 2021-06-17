@@ -160,8 +160,8 @@ class TestEnemyUnit extends UnitPiece {
 
 	_setReactions() {
 		this._reactions = [
-			new TestCounterReaction(this),
 			new TestRageReaction(this),
+			new TestExplodeReaction(this),
 		];
 	}
 };
