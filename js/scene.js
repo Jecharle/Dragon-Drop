@@ -795,11 +795,20 @@ class Team {
 		for (var i = 0; i < members.length; i++) {
 			await members[i].updateStatusTurnStart();
 		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].reactTurnStart();
+		}
 	}
 	async turnEndEffects() {
 		var members = [...this.members];
 		for (var i = 0; i < members.length; i++) {
 			await members[i].updateStatusTurnEnd();
+		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].reactTurnEnd();
+		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].dieIfDead();
 		}
 	}
 

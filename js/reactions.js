@@ -59,7 +59,7 @@ class TestRageReaction extends OnTurnStartReaction {
 	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, unit.square, "test-buff-effect");
 		unit.addStatus(UnitPiece.Power, 1);
-		await Game.asyncPause(200);
+		await Game.asyncPause(400);
 	}
 };
 

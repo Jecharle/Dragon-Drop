@@ -279,6 +279,9 @@ class UnitPiece extends Piece {
 	get skills() {
 		return this._skills;
 	}
+	get reactions() {
+		return this._reactions;
+	}
 	//#endregion attributes
 
 	//#region status effects
@@ -510,8 +513,6 @@ class UnitPiece extends Piece {
 		this.removeStatus(UnitPiece.Anchor);
 		this.removeStatus(UnitPiece.Charge);
 		this.refresh();
-		
-		await this.reactTurnStart();
 	}
 	async updateStatusTurnEnd() {
 		if (this.getStatus(UnitPiece.Poison)) {
@@ -523,10 +524,6 @@ class UnitPiece extends Piece {
 		this.removeStatus(UnitPiece.Power);
 		this.removeStatus(UnitPiece.Speed);
 		this.refresh();
-
-		await this.reactTurnEnd();
-
-		this.dieIfDead();
 	}
 
 	startTurn() {
