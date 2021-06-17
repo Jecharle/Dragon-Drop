@@ -238,6 +238,10 @@ class UnitPiece extends Piece {
 		this._guest = true;
 	}
 
+	get aiImportance() {
+		return 1.0;
+	}
+
 	get hp() {
 		return Math.max(Math.min(this._hp, this.maxHp), 0);
 	}
@@ -1064,41 +1068,39 @@ class SkillCard extends Piece {
 	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
-	_aiSquareTargetScore(square, origin) {
-		var score = 0;
-		if (square == origin) { // new square will include yourself
-			score = this._aiSelfTargetScore(square);
-		} else if (!square.piece || square.piece == this.user) { // starting square will be empty
-			score = this._aiEmptyTargetScore(square);
-		} else if (this.user.isEnemy(square.piece)) {
-			score = this._aiEnemyTargetScore(square);
-		} else if (this.user.isAlly(square.piece)) {
-			score = this._aiAllyTargetScore(square);
-		} else {
-			score = this._aiObjectTargetScore(square);
-		}
-		return score;
-	}
 	_aiSelfTargetScore(square) {
-		return this._aiAllyTargetScore(square);
+		return this._aiAllyTargetScore(this.user, square);
 	}
-	_aiEnemyTargetScore(square) {
+	_aiEnemyTargetScore(unit, square) {
 		return this.power;
 	}
-	_aiAllyTargetScore(square) {
+	_aiAllyTargetScore(unit, square) {
 		return -this.power*0.9;
 	}
-	_aiObjectTargetScore(square) {
+	_aiNeutralTargetScore(unit, square) {
 		return this.power*0.1;
 	}
-	_aiEmptyTargetScore(square) {
+	_aiUnitTargetScore(square, origin) {
+		if (square == origin) { // new square will include yourself
+			return this._aiSelfTargetScore(square);
+		} else if (!square.piece || square.piece == this.user) { // starting square will be empty
+			return 0;
+		} else if (this.user.isEnemy(square.piece)) {
+			return this._aiEnemyTargetScore(square.piece, square) * square.piece.aiImportance;
+		} else if (this.user.isAlly(square.piece)) {
+			return this._aiAllyTargetScore(square.piece, square) * square.piece.aiImportance;
+		} else {
+			return this._aiNeutralTargetScore(square.piece, square) * square.piece.aiImportance;
+		}
+	}
+	_aiSquareTargetScore(square) {
 		return 0;
 	}
 
 	_aiTargetScore(target, origin) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
-			return totalScore + this._aiSquareTargetScore(square, origin);
+			return totalScore + this._aiSquareTargetScore(square) + this._aiUnitTargetScore(square, origin);
 		}, this._aiBaseTargetScore(target, origin));
 	}
 

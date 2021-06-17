@@ -196,6 +196,7 @@ class ObjectPiece extends UnitPiece {
 	get canMove() { return false; }
 	get canAct() { return false; }
 	get moveRange() { return 0; }
+	get aiImportance() { return 0.1; }
 	select() { return false; }
 	_setSelectable() { }
 }
