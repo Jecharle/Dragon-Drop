@@ -571,7 +571,7 @@
 		top: 0;
 		left: 0;
 		width: var(--square-w);
-		height: var(--square-h);
+		height: var(--square-total-h);
 		background-image: url(../img/system/path.png);
 		background-repeat: no-repeat;
 	}
@@ -580,13 +580,13 @@
 			background-position: 0 0;
 		}
 		.up>.sprite::before {
-			background-position: 0 calc(-1*var(--square-h));
+			background-position: 0 calc(-1*var(--square-total-h));
 		}
 		.right>.sprite::before {
-			background-position: 0 calc(-2*var(--square-h));
+			background-position: 0 calc(-2*var(--square-total-h));
 		}
 		.down>.sprite::before {
-			background-position: 0 calc(-3*var(--square-h));
+			background-position: 0 calc(-3*var(--square-total-h));
 		}
 		/*#endregion single direction*/
 		/*#region straight*/
@@ -594,7 +594,7 @@
 			background-position: calc(-1*var(--square-w)) 0;
 		}
 		.up.down>.sprite::before {
-			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		/*#endregion straight*/
 		/*#region corners*/
@@ -602,13 +602,13 @@
 			background-position: calc(-2*var(--square-w)) 0;
 		}
 		.up.right>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		.right.down>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-total-h));
 		}
 		.down.left>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion corners*/
 		/*#region arrows*/
@@ -616,13 +616,13 @@
 			background-position: calc(-3*var(--square-w)) 0;
 		}
 		.up.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		.right.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-total-h));
 		}
 		.down.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion arrows*/
 	/*#endregion move path*/
