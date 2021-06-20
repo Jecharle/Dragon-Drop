@@ -787,6 +787,7 @@
 
 	.rock>.sprite {
 		background-image: url("../img/sprites/testObject.png");
+		background-repeat: repeat-y;
 	}
 	/*#endregion unit skins*/
 /*#endregion unit*/
