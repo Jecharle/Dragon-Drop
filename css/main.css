@@ -269,7 +269,7 @@
 	align-items: flex-end;
 	position: absolute;
 	bottom: 0;
-	width: calc(var(--face-w) + 4 * var(--skill-w) + 4px);
+	width: max-content;
 	padding-left: 4px;
 }
 	.skill-list.ally {
@@ -796,10 +796,10 @@
 .deploy-list {
 	position: absolute;
 	z-index: 0;
-	width: calc(var(--unit-w)*3);
-	height: calc(var(--unit-h)*2);
-	left: 12px;
-	bottom: 12px;
+	width: calc(var(--unit-w)*4);
+	height: calc(var(--unit-h));
+	bottom: var(--face-h);
+	margin-left: var(--face-w);
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: flex-start;
@@ -807,13 +807,6 @@
 	border: 2px solid black;
 	border-radius: 8px;
 }
-	.deploy-list::before {
-		content: "Party";
-		position: absolute;
-		top: -1.5em;
-		left: 0;
-		font-weight: bold;
-	}
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0;
@@ -822,8 +815,8 @@
 
 	.deploy-list .capacity-label {
 		position: absolute;
-		top: -1.5em;
-		right: 0;
+		top: 2px;
+		right: 4px;
 		font-weight: bold;
 	}
 /*#endregion deploy list*/
@@ -951,6 +944,10 @@
 		z-index: 0;
 		bottom: 0;
 		background-repeat: no-repeat;
+	}
+
+	.left.sprite-effect>.sprite {
+		transform: scaleX(-1);
 	}
 
 	/*#region sprite effect skins*/
