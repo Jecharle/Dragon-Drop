@@ -281,7 +281,9 @@ class Board extends Container {
 			y += dy;
 			var newSquare = this.at(x, y);
 
-			if (newSquare && this.canFit(piece, newSquare) && newSquare.z <= square.z+1) {
+			if (newSquare && this.canFit(piece, newSquare)
+				&& (props?.uphill || newSquare.z <= square.z+1)
+				&& (!props?.downhill || newSquare.z > square.z-1)) { // TODO: Test this!
 				square = newSquare;
 			} else {
 				break;

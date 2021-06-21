@@ -93,6 +93,9 @@ class TestExplodeReaction extends OnDeathReaction {
 		if (!unit.evade()) {
 			unit.takeDamage(this.power);
 		}
+	}
+
+	async _endEffects(_target, _squares, _units) {
 		await Game.asyncPause(200);
 	}
 };
