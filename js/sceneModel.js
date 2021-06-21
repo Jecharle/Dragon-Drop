@@ -77,6 +77,9 @@ class BattleSceneModel extends SceneModel {
 		this.width = Math.max(Math.min(data?.width || 8, 10), 1);
 		this.height = Math.max(Math.min(data?.height || 8, 10), 1);
 
+		// z-level map
+		this.z = data?.z || [];
+
 		// x, y
 		this.deployment = data?.deployment || [];
 

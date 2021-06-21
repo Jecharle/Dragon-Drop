@@ -91,6 +91,7 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
+		this._loadZ(sceneData.z);
 		this._loadTerrain(sceneData.terrain);
 
 		this.deployArea = [];
@@ -114,6 +115,17 @@ class Board extends Container {
 	}
 
 	//#region setup
+	_loadZ(zData) {
+		if (!zData) return;
+		for (var y = 0; y < this.h; y++) {
+			if (zData.length <= y) break;
+			for (var x = 0; x < this.w; x++) {
+				if (zData[y].length <= x) break;
+				this.at(x, y).z = zData[y][x];
+				this.at(x, y).refresh();
+			}
+		}
+	}
 	_loadTerrain(terrainData) {
 		if (!terrainData) return;
 		terrainData.forEach(data => {
@@ -269,7 +281,7 @@ class Board extends Container {
 			y += dy;
 			var newSquare = this.at(x, y);
 
-			if (newSquare && this.canFit(piece, newSquare)) {
+			if (newSquare && this.canFit(piece, newSquare) && newSquare.z <= square.z+1) {
 				square = newSquare;
 			} else {
 				break;
@@ -339,6 +351,9 @@ class Board extends Container {
 					continue;
 				}
 				if (!this.canFitThrough(unit, square)) {
+					continue;
+				}
+				if (square.z > newEdge.z+1) {
 					continue;
 				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), preview);
@@ -618,7 +633,6 @@ class Square extends Position {
 	}
 	set terrain(value) {
 		this._terrain = value;
-		this.z = this._terrain == Square.Wall ? 1 : 0;
 		this.el.classList.toggle('wall', this._terrain == Square.Wall);
 		this.el.classList.toggle('pit', this._terrain == Square.Pit);
 		this.el.classList.toggle('cover', this._terrain == Square.Cover);
