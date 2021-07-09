@@ -7,6 +7,22 @@ class Party {
 		console.log("Party object is static, do not instantiate");
 	}
 
+	static _stamina = 0;
+	static get stamina() {
+		return this._stamina;
+	}
+	static set stamina(value) {
+		this._stamina = Math.max(value, 0);
+	}
+
+	static _money = 0;
+	static get money() {
+		return this._money;
+	}
+	static set money(value) {
+		this._money = Math.max(value, 0);
+	}
+
 	static _members = []
 	static get members() {
 		return this._members;
@@ -27,7 +43,9 @@ class Party {
 		return false;
 	}
 
-	static _partySize = 6
+	// TODO: Party buffs, special items, etc?
+
+	static _partySize = 4
 	static get partySize() {
 		return this._partySize;
 	}
@@ -47,6 +65,9 @@ class Party {
 	}
 }
 
+/***************************************************
+Members of the party that generate units
+***************************************************/
 class PartyMember {
 	constructor() {
 		this.alive = true;
