@@ -572,13 +572,16 @@ class Square extends Position {
 	get screenZ() {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
+	get groundHeight() {
+		return Math.max(this.z*24, 0);
+	}
 	get _selfScreenZ() {
 		return Square.screenZ(this.x, this.y, this.z - 24);
 	}
 
 	refresh() {
 		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
-		this._sideEl.style.height = `${Math.max(this.z*48, 0)}px`;
+		this._sideEl.style.height = `${this.groundHeight}px`;
 	}
 	//#endregion isometric
 

@@ -523,7 +523,7 @@
 		z-index: -3;
 		width: var(--square-w);
 		height: var(--square-h);
-		bottom: calc(-1*var(--square-h));
+		top: 100%;
 		
 		background-image: url(../img/tilesets/testTileset.png);
 		background-repeat: no-repeat;
