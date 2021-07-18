@@ -500,27 +500,73 @@
 		position: absolute;
 		z-index: -2;
 		width: var(--square-w);
-		height: var(--square-total-h);
+		height: var(--square-h);
 		top: 0;
 		
 		background-image: url(../img/tilesets/testTileset.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
+	.square>.side-sprite {
+		position: absolute;
+		z-index: -3;
+		width: var(--square-w);
+		top: calc(0.5*var(--square-h));
+		
+		background-image: url(../img/tilesets/testTileset.png);
+		background-repeat: repeat-y;
+		background-position: calc(-1*var(--square-w)) 0;
+	}
+	.square>.side-sprite::after {
+		content: "";
+		position: absolute;
+		z-index: -3;
+		width: var(--square-w);
+		height: var(--square-h);
+		bottom: calc(-1*var(--square-h));
+		
+		background-image: url(../img/tilesets/testTileset.png);
+		background-repeat: no-repeat;
+		background-position: calc(-2*var(--square-w)) 0;
+	}
 		.pit>.sprite {
-			background-position-y: calc(-1*var(--square-total-h));
+			background-position-x: calc(-3*var(--square-w));
+		}
+		.pit>.side-sprite {
+			background-position-x: calc(-4*var(--square-w));
+		}
+		.pit>.side-sprite::after {
+			background-position-x: calc(-5*var(--square-w));
 		}
 		.cover>.sprite {
-			background-position-y: calc(-2*var(--square-total-h));
+			background-position-x: calc(-6*var(--square-w));
+		}
+		.cover>.side-sprite {
+			background-position-x: calc(-7*var(--square-w));
+		}
+		.cover>.side-sprite::after {
+			background-position-x: calc(-8*var(--square-w));
 		}
 			.cover:hover::before {
 				content: "Cover blocks line of sight, but allows movement";
 			}
 		.wall>.sprite {
-			background-position-y: calc(-3*var(--square-total-h));
+			background-position-x: calc(-9*var(--square-w));
+		}
+		.wall>.side-sprite {
+			background-position-x: calc(-10*var(--square-w));
+		}
+		.wall>.side-sprite::after {
+			background-position-x: calc(-11*var(--square-w));
 		}
 		.rough>.sprite {
-			background-position-y: calc(-4*var(--square-total-h));
+			background-position-x: calc(-12*var(--square-w));
+		}
+		.rough>.side-sprite {
+			background-position-x: calc(-13*var(--square-w));
+		}
+		.rough>.side-sprite::after {
+			background-position-x: calc(-14*var(--square-w));
 		}
 			.rough:hover::before {
 				content: "Rough terrain costs 2 squares of movement to enter";

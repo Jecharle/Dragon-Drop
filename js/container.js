@@ -530,6 +530,11 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
+
+		this._sideEl = document.createElement('div');
+		this._sideEl.classList.add('side-sprite');
+		this.el.appendChild(this._sideEl);
+
 		this.refresh();
 	}
 
@@ -545,7 +550,7 @@ class Square extends Position {
 		return Math.floor(24 * (x + y - z));
 	}
 	static screenZ(x, y, z) {
-		return Math.floor(24 * (x + y + z));
+		return Math.floor(24 * (x + y) + z);
 	}
 	//#endregion static position utility
 
@@ -568,11 +573,12 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get _selfScreenZ() {
-		return Square.screenZ(this.x, this.y, this.z - 1);
+		return Square.screenZ(this.x, this.y, this.z - 24);
 	}
 
 	refresh() {
 		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
+		this._sideEl.style.height = `${Math.max(this.z*48, 0)}px`;
 	}
 	//#endregion isometric
 
