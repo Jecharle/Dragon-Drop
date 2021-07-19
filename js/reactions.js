@@ -22,9 +22,8 @@ class TestCounterReaction extends OnHitReaction {
 		return false;
 	}
 
-	canReact(target, skill, result) {
-		return super.canReact(target, skill, result)
-			&& (result.damage > 0 || result.evade);
+	validResult(result) {
+		return result.damage > 0 || result.evade;
 	}
 
 	async _startEffects(target, _squares, _units) {

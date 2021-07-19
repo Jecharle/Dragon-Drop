@@ -1028,6 +1028,8 @@ class SkillCard extends Piece {
 		this._squares = this._affectedSquares(this._target);
 		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
 		this._units = this._affectedUnits(this._squares);
+		
+		this.user.openResult();
 		this._units.forEach(unit => unit.openResult());
 		
 		await this._startEffects(this._target, this._squares, this._units);
@@ -1040,7 +1042,6 @@ class SkillCard extends Piece {
 		}
 		await this._endEffects(this._target, this._squares, this._units);
 
-		this.user.openResult();
 		this._payCost();
 		this.user.closeResult();
 		
@@ -1288,6 +1289,10 @@ class ReactionCard extends SkillCard {
 		return false;
 	}
 
+	validResult(_result) {
+		return true;
+	}
+
 	//#region triggers
 	async turnEndTrigger() {
 		return false;
@@ -1303,8 +1308,11 @@ class ReactionCard extends SkillCard {
 }
 
 class OnHitReaction extends ReactionCard {
-	canReact(target, _skill, _result) {
-		return this.user.alive && this.validTarget(target.square) && this.inRange(this.user.square, target.square);
+	canReact(target, _skill, result) {
+		return this.user.alive
+			&& this.validTarget(target.square)
+			&& this.inRange(this.user.square, target.square)
+			&& this.validResult(result);
 	}
 
 	async onHitTrigger(sourceSkill, sourceUnit, skillResult) {
@@ -1315,8 +1323,9 @@ class OnHitReaction extends ReactionCard {
 	}
 }
 class OnHitSelfReaction extends ReactionCard {
-	canReact(_target, _skill, _result) {
-		return this.user.alive;
+	canReact(_target, _skill, result) {
+		return this.user.alive
+			&& this.validResult(result);
 	}
 
 	async onHitTrigger(sourceSkill, sourceUnit, skillResult) {
