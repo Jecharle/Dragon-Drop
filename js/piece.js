@@ -1042,6 +1042,7 @@ class SkillCard extends Piece {
 		}
 		await this._endEffects(this._target, this._squares, this._units);
 
+		this.user.openResult();
 		this._payCost();
 		this.user.closeResult();
 		
@@ -1051,6 +1052,7 @@ class SkillCard extends Piece {
 		}
 
 		this._units.forEach(piece => piece.dieIfDead());
+		this.user.closeResult();
 		this.user.refresh();
 		
 		this._target = null;
