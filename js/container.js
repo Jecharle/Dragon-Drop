@@ -91,6 +91,7 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
+		this._loadZ(sceneData.z);
 		this._loadTerrain(sceneData.terrain);
 
 		this.deployArea = [];
@@ -114,6 +115,17 @@ class Board extends Container {
 	}
 
 	//#region setup
+	_loadZ(zData) {
+		if (!zData) return;
+		for (var y = 0; y < this.h; y++) {
+			if (zData.length <= y) break;
+			for (var x = 0; x < this.w; x++) {
+				if (zData[y].length <= x) break;
+				this.at(x, y).z = zData[y][x];
+				this.at(x, y).refresh();
+			}
+		}
+	}
 	_loadTerrain(terrainData) {
 		if (!terrainData) return;
 		terrainData.forEach(data => {
@@ -269,7 +281,9 @@ class Board extends Container {
 			y += dy;
 			var newSquare = this.at(x, y);
 
-			if (newSquare && this.canFit(piece, newSquare)) {
+			if (newSquare && this.canFit(piece, newSquare)
+				&& (props?.uphill || newSquare.z <= square.z+1)
+				&& (!props?.downhill || newSquare.z > square.z-1)) { // TODO: Test this!
 				square = newSquare;
 			} else {
 				break;
@@ -339,6 +353,9 @@ class Board extends Container {
 					continue;
 				}
 				if (!this.canFitThrough(unit, square)) {
+					continue;
+				}
+				if (square.z > newEdge.z+1) {
 					continue;
 				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), preview);
@@ -513,6 +530,11 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
+
+		this._sideEl = document.createElement('div');
+		this._sideEl.classList.add('side-sprite');
+		this.el.appendChild(this._sideEl);
+
 		this.refresh();
 	}
 
@@ -528,7 +550,7 @@ class Square extends Position {
 		return Math.floor(24 * (x + y - z));
 	}
 	static screenZ(x, y, z) {
-		return Math.floor(24 * (x + y + z));
+		return Math.floor(24 * (x + y) + z);
 	}
 	//#endregion static position utility
 
@@ -550,12 +572,16 @@ class Square extends Position {
 	get screenZ() {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
+	get groundHeight() {
+		return Math.max(this.z*24, 0);
+	}
 	get _selfScreenZ() {
-		return Square.screenZ(this.x, this.y, this.z - 1);
+		return Square.screenZ(this.x, this.y, this.z - 24);
 	}
 
 	refresh() {
 		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
+		this._sideEl.style.height = `${this.groundHeight}px`;
 	}
 	//#endregion isometric
 
@@ -618,7 +644,6 @@ class Square extends Position {
 	}
 	set terrain(value) {
 		this._terrain = value;
-		this.z = this._terrain == Square.Wall ? 1 : 0;
 		this.el.classList.toggle('wall', this._terrain == Square.Wall);
 		this.el.classList.toggle('pit', this._terrain == Square.Pit);
 		this.el.classList.toggle('cover', this._terrain == Square.Cover);

@@ -936,6 +936,7 @@ class SkillCard extends Piece {
 	inRange(origin, target) {
 		var distance = origin.distance(target);
 		return distance <= this.range && distance >= this.minRange
+			&& (!this.los || Math.abs(target.z - origin.z) <= this.range)
 			&& this._inLine(origin, target)
 			&& (!this.los || this._canSee(origin, target));
 	}
@@ -943,7 +944,8 @@ class SkillCard extends Piece {
 		return !!target;
 	}
 	inArea(origin, target) {
-		return origin.distance(target) <= this.area;
+		return origin.distance(target) <= this.area
+			&& Math.abs(target.z - origin.z) <= 1;
 	}
 
 	_affectedSquares(target) {

@@ -79,10 +79,10 @@ class TestPullSkill extends TestAttackSkill {
 
 	async _unitEffects(unit, _target) {
 		if (this.user.isAlly(unit)) {
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
 		} else if (!unit.evade()) {
 			unit.takeDamage(this.power);
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path});
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
 		}
 		await Game.asyncPause(200);
 	}
@@ -401,12 +401,12 @@ class TestMoveSkill extends SkillCard {
 /***************************************************
  Test positioning skill
 ***************************************************/
-class TestPositionSkill extends SkillCard {
+class ThrowSkill extends SkillCard {
 	get name() {
 		return "Throw";
 	}
 	get _description() {
-		return "Toss the unit in front of you to the target square";
+		return "Toss and adjacent unit to the target square";
 	}
 	get _effectText() {
 		return [];
@@ -435,7 +435,8 @@ class TestPositionSkill extends SkillCard {
 		var direction = userSquare.direction(target);
 		var board = target.parent;
 		var throwSquare = board.at(userSquare.x+direction[0], userSquare.y+direction[1]);
-		if (throwSquare?.piece?.shiftable) {
+		if (throwSquare?.piece?.shiftable
+			&& Math.abs(throwSquare?.z - this.user.square.z) <= 1) {
 			return true;
 		}
 		return false;
