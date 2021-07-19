@@ -193,6 +193,7 @@ class UnitPiece extends Piece {
 		this._facing = 1;
 		
 		this._status = {};
+		this._results = [];
 
 		this.refresh();
 	}
@@ -365,6 +366,9 @@ class UnitPiece extends Piece {
 			this.hp -= power;
 			this.addTimedClass(500, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
+			if (this.results) {
+				this.results.damage += power;
+			}
 		}
 
 		this.refresh();
@@ -372,6 +376,10 @@ class UnitPiece extends Piece {
 	}
 	heal(power, props) {
 		this.hp += power;
+
+		if (this.results) {
+			this.results.heal += power;
+		}
 
 		if (power > 0) {
 			this.addTimedClass(1200, 'hp-change');
@@ -389,6 +397,9 @@ class UnitPiece extends Piece {
 		
 		if (!testOnly) {
 			this.removeStatus(UnitPiece.Evade);
+			if (this.results) {
+				this.results.evade = true;
+			}
 			this.addTimedClass(350, 'evade'); 
 		}
 		return true;
@@ -403,6 +414,9 @@ class UnitPiece extends Piece {
 		var distanceMoved = this.parent.shiftPiece(this, origin, distance, props);
 		if (props?.animation) {
 			this.animateMove([previousSquare], props.animation);
+		}
+		if (this.results) {
+			this.results.shift += distanceMoved;
 		}
 		return distanceMoved;
 	}
@@ -420,6 +434,9 @@ class UnitPiece extends Piece {
 			}
 			if (props?.animation2) {
 				piece.animateMove([this.square], props.animation2);
+			}
+			if (this.results) {
+				this.results.swap = true;
 			}
 			return true;
 		}
@@ -474,6 +491,19 @@ class UnitPiece extends Piece {
 	
 	//#endregion effects
 
+	//#region effect tracking
+	get results() {
+		if (this._results.length < 1) return null;
+		else return this._results[this._results.length-1];
+	}
+	openResult() {
+		this._results.push(new SkillResult());
+	}
+	closeResult() {
+		return this._results.pop();
+	}
+	//#endregion effect tracking
+
 	//#region use reactions
 	async reactTurnStart() {
 		for (var i = 0; i < this._reactions.length; i++) {
@@ -486,9 +516,9 @@ class UnitPiece extends Piece {
 		}
 	}
 
-	async reactOnHit(sourceSkill, sourceUnit) {
+	async reactOnHit(sourceSkill, sourceUnit, result) {
 		for (var i = 0; i < this._reactions.length; i++) {
-			await this._reactions[i].onHitTrigger(sourceSkill, sourceUnit);
+			await this._reactions[i].onHitTrigger(sourceSkill, sourceUnit, result);
 		}
 	}
 	//#endregion use reactions
@@ -804,6 +834,19 @@ class UnitPiece extends Piece {
 };
 
 /***************************************************
+ Results of a skill or reaction used on a unit
+***************************************************/
+class SkillResult {
+	constructor() {
+		this.damage = 0;
+		this.healing = 0;
+		this.shift = 0;
+		this.evade = false;
+		this.swap = false;
+	}
+}
+
+/***************************************************
  Skill piece
 ***************************************************/
 class SkillCard extends Piece {
@@ -985,6 +1028,7 @@ class SkillCard extends Piece {
 		this._squares = this._affectedSquares(this._target);
 		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
 		this._units = this._affectedUnits(this._squares);
+		this._units.forEach(unit => unit.openResult());
 		
 		await this._startEffects(this._target, this._squares, this._units);
 		for (var i = 0; i < this._squares.length; i++) {
@@ -996,10 +1040,13 @@ class SkillCard extends Piece {
 		}
 		await this._endEffects(this._target, this._squares, this._units);
 
+		this.user.openResult();
 		this._payCost();
+		this.user.closeResult();
 		
 		for (var i = 0; i < this._units.length; i++) {
-			await this._units[i].reactOnHit(this, this.user);
+			var result = this._units[i].closeResult();
+			await this._units[i].reactOnHit(this, this.user, result);
 		}
 
 		this._units.forEach(piece => piece.dieIfDead());
@@ -1237,7 +1284,7 @@ class ReactionCard extends SkillCard {
 	async _startEffects(target, _squares, _units) { return; }
 	//#endregion overrides
 
-	canReact(target, skill) {
+	canReact(target, skill, result) {
 		return false;
 	}
 
@@ -1249,32 +1296,32 @@ class ReactionCard extends SkillCard {
 		return false;
 	}
 
-	async onHitTrigger(sourceSkill, sourceUnit) {
+	async onHitTrigger(sourceSkill, sourceUnit, result) {
 		return false;
 	}
 	//#endregion triggers
 }
 
 class OnHitReaction extends ReactionCard {
-	canReact(target, _skill) {
+	canReact(target, _skill, _result) {
 		return this.user.alive && this.validTarget(target.square) && this.inRange(this.user.square, target.square);
 	}
 
-	async onHitTrigger(sourceSkill, sourceUnit) {
+	async onHitTrigger(sourceSkill, sourceUnit, skillResult) {
 		if (!sourceSkill || !sourceUnit || sourceSkill.isReaction || !sourceUnit.square) return false;
-		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
+		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill, skillResult)) return false;
 		if (!this.inRange(this.user.square, sourceUnit.square)) return false;
 		return await this.use(sourceUnit.square);
 	}
 }
 class OnHitSelfReaction extends ReactionCard {
-	canReact(_target, _skill) {
+	canReact(_target, _skill, _result) {
 		return this.user.alive;
 	}
 
-	async onHitTrigger(sourceSkill, sourceUnit) {
+	async onHitTrigger(sourceSkill, sourceUnit, skillResult) {
 		if (sourceSkill && sourceSkill.isReaction) return false;
-		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill)) return false;
+		if (!this.canUse() || !this.canReact(sourceUnit, sourceSkill, skillResult)) return false;
 		return await this.use(this.user.square);
 	}
 }

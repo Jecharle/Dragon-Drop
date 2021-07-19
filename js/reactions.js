@@ -22,13 +22,18 @@ class TestCounterReaction extends OnHitReaction {
 		return false;
 	}
 
+	canReact(target, skill, result) {
+		return super.canReact(target, skill, result)
+			&& (result.damage > 0 || result.evade);
+	}
+
 	async _startEffects(target, _squares, _units) {
 		await Game.asyncPause(300);
 		this.user.animateBump(target);
 		this.user.addTimedClass(200, 'attack');
 
 		this._showEffect(target, this.user.square, "test-attack-effect");
-		
+
 		await Game.asyncPause(100);
 	}
 

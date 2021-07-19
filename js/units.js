@@ -57,6 +57,12 @@ class TestMeleeUnit extends UnitPiece {
 			new TestBuildSkill(this)
 		];
 	}
+
+	_setReactions() {
+		this._reactions = [
+			new TestCounterReaction(this),
+		];
+	}
 };
 
 class TestSupportUnit extends UnitPiece {
