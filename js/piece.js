@@ -113,8 +113,11 @@ class UnitPiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 		
 		this._status = {};
+		this._setResistances();
 		this._statusList = new StatusList(this._status);
 		this.el.appendChild(this._statusList.el);
+
+		this._results = [];
 
 		this._shadowEl = document.createElement('div');
 		this._shadowEl.classList.add('shadow');
@@ -185,6 +188,10 @@ class UnitPiece extends Piece {
 	}
 	_setReactions() {
 		this._reactions = [];
+	}
+	_setResistances() {
+		this._resists = {};
+		this._resistsDebuff = {};
 	}
 	_initialize() {
 		this.myTurn = false;
@@ -295,8 +302,6 @@ class UnitPiece extends Piece {
 	static get Speed() { return 'speed'; }
 	static get Regenerate() { return 'regenerate'; }
 	static get Poison() { return 'poison'; }
-	static get Burn() { return 'burn'; }
-	static get Bleed() { return 'bleed'; }
 	static get Evade() { return 'evade'; }
 	static get Anchor() { return 'anchor'; }
 	static get Charge() { return 'charge'; }
@@ -444,12 +449,14 @@ class UnitPiece extends Piece {
 	}
 
 	addStatus(effect, value) {
+		if (this.resistsStatus(effect, value < 0)) return;
+
 		switch(effect) {
 			case UnitPiece.Regenerate: case UnitPiece.Poison: // regenerate cancels out poison
-				if (this.getStatus(UnitPiece.Poison)) {
+				if (effect == UnitPiece.Regenerate && this.getStatus(UnitPiece.Poison)) {
 					this._status[UnitPiece.Poison] = 0;
 					break;
-				} else if (this.getStatus(UnitPiece.Regenerate)) {
+				} if (effect == UnitPiece.Poison && this.getStatus(UnitPiece.Regenerate)) {
 					this._status[UnitPiece.Regenerate] = 0;
 					break;
 				}
@@ -474,16 +481,12 @@ class UnitPiece extends Piece {
 				break;
 		}
 	}
+	resistsStatus(effect, negative) {
+		if (negative) return this._resistsDebuff[effect];
+		else return this._resists[effect];
+	}
 	removeStatus(effect) {
-		switch(effect) {
-			case UnitPiece.Poison: case UnitPiece.Burn: case UnitPiece.Bleed:
-				this._status[UnitPiece.Poison] = 0;
-				break;
-
-			default:
-				this._status[effect] = 0;
-				break;
-		}
+		this._status[effect] = 0;
 	}
 	removeAllStatus() {
 		this._status = {};
