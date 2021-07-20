@@ -205,6 +205,21 @@ class ObjectPiece extends UnitPiece {
 	get aiImportance() { return 0.1; }
 	select() { return false; }
 	_setSelectable() { }
+	_setResistances() {
+		super._setResistances();
+		this._resists[UnitPiece.Power] = true;
+		this._resists[UnitPiece.Defense] = true;
+		this._resists[UnitPiece.Speed] = true;
+		this._resistsDebuff[UnitPiece.Power] = true;
+		this._resistsDebuff[UnitPiece.Defense] = true;
+		this._resistsDebuff[UnitPiece.Speed] = true;
+		this._resists[UnitPiece.Regenerate] = true;
+		this._resists[UnitPiece.Poison] = true;
+		this._resists[UnitPiece.Evade] = true;
+		this._resists[UnitPiece.Anchor] = true;
+		this._resists[UnitPiece.Charge] = true;
+		this._resists[UnitPiece.Accelerate] = true;
+	}
 }
 
 class TestRockObject extends ObjectPiece {
