@@ -211,6 +211,15 @@ class TestHealSkill extends SkillCard {
 		unit.heal(this.power);
 		await Game.asyncPause(200);
 	}
+
+	_aiEnemyTargetScore(unit, square) {
+		return -1.1*this._aiAllyTargetScore(unit, square);
+	}
+	_aiAllyTargetScore(unit, square) {
+		return Math.min(this.power, unit.maxHp-unit.hp)
+			+ unit.getStatus(UnitPiece.Poison)
+			- unit.hpRate;
+	}
 };
 
 /***************************************************
