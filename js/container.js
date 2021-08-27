@@ -544,13 +544,13 @@ class Square extends Position {
 
 	//#region static position utility
 	static screenX(x, y, _z) {
-		return Math.floor(48 * (x - y));
+		return Math.floor(24 * (x - y));
 	}
 	static screenY(x, y, z) {
-		return Math.floor(24 * (x + y - z));
+		return Math.floor(12 * (x + y - z));
 	}
 	static screenZ(x, y, z) {
-		return Math.floor(24 * (x + y) + z);
+		return Math.floor(12 * (x + y) + z);
 	}
 	//#endregion static position utility
 
@@ -573,10 +573,10 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get groundHeight() {
-		return Math.max(this.z*24, 0);
+		return Math.max(this.z*12, 0);
 	}
 	get _selfScreenZ() {
-		return Square.screenZ(this.x, this.y, this.z - 24);
+		return Square.screenZ(this.x, this.y, this.z - 12);
 	}
 
 	refresh() {

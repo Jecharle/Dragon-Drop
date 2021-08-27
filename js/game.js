@@ -39,10 +39,10 @@ class Game {
 	}
 
 	static get width() {
-		return 1024;
+		return 512;
 	}
 	static get height() {
-		return 768;
+		return 384;
 	}
 
 	static async asyncPause(milliseconds) {

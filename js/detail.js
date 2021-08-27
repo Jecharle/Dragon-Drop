@@ -119,7 +119,7 @@ class Lifebar extends Detail {
 		if (value) {
 			var numberEl = document.createElement('div');
 			numberEl.classList.add('icon', 'number');
-			numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
+			numberEl.style.backgroundPositionX = `${-8*Math.abs(value)}px`;
 			if (value < 0) {
 				var signEl = document.createElement('div');
 				signEl.classList.add('minus');
@@ -130,8 +130,8 @@ class Lifebar extends Detail {
 	}
 
 	static width(value, noPadding) {
-		var width = value*6;
-		if (width > 0 && !noPadding) width += 2;
+		var width = value*3;
+		if (width > 0 && !noPadding) width += 1;
 		return width+"px";
 	}
 }
