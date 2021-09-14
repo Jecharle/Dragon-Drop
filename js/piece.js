@@ -103,6 +103,10 @@ class UnitPiece extends Piece {
 		this._partyMember = partyMember;
 		this.square = null;
 
+		// TODO: Either initialize from a party member, or a parameter list
+		this._equipment = [];
+		this.equipment.forEach(equip => equip.setUser(this));
+
 		this._defaultStats();
 		this._stats();
 		this._setSkills();
@@ -113,7 +117,6 @@ class UnitPiece extends Piece {
 		this.el.appendChild(this._lifebar.el);
 		
 		this._status = {};
-		this._setResistances();
 		this._statusList = new StatusList(this._status);
 		this.el.appendChild(this._statusList.el);
 
@@ -189,10 +192,6 @@ class UnitPiece extends Piece {
 	_setReactions() {
 		this._reactions = [];
 	}
-	_setResistances() {
-		this._resists = {};
-		this._resistsDebuff = {};
-	}
 	_initialize() {
 		this.myTurn = false;
 		this.actionUsed = false;
@@ -205,6 +204,15 @@ class UnitPiece extends Piece {
 		this.refresh();
 	}
 	//#endregion setup
+
+	//#region equipment
+	get equipment() {
+		return this._equipment;
+	}
+
+	// TODO: Add equipment to a specific slot
+
+	//#endregion equipment
 
 	//#region attributes
 	get size() { return this._size; }
@@ -259,7 +267,10 @@ class UnitPiece extends Piece {
 		if (this._hp < 0) this._hp = 0;
 	}
 	get maxHp() {
-		return Math.max(this._maxHp, 0);
+		var equipBonus = this.equipment.reduce((bonus, equip) => {
+			bonus += equip.maxHpBonus;
+		}, 0);
+		return Math.max(this._maxHp+equipBonus, 0);
 	}
 	get hpRate() {
 		if (this.maxHp == 0) return 0;
@@ -273,26 +284,53 @@ class UnitPiece extends Piece {
 	}
 
 	get moveRange() {
-		return Math.max(this._moveRange + this.getStatus(UnitPiece.Speed), 0);
+		var equipBonus = this.equipment.reduce((bonus, equip) => {
+			bonus += equip.speedBonus;
+		}, 0);
+		return Math.max(this._moveRange + equipBonus + this.getStatus(UnitPiece.Speed), 0);
 	}
 
 	get powerBonus() {
-		return this.getStatus(UnitPiece.Power);
+		var equipBonus = this.equipment.reduce((bonus, equip) => {
+			bonus += equip.powerBonus;
+		}, 0);
+		return this.getStatus(UnitPiece.Power + equipBonus);
 	}
 
 	get defense() {
-		return this.getStatus(UnitPiece.Defense);
+		var equipBonus = this.equipment.reduce((bonus, equip) => {
+			bonus += equip.defenseBonus;
+		}, 0);
+		return this.getStatus(UnitPiece.Defense + equipBonus);
 	}
 
 	get shiftable() {
-		return !this.getStatus(UnitPiece.Anchor);
+		var equipUnshiftable = this.equipment.some(equip => equip.unshiftable);
+		return !this.getStatus(UnitPiece.Anchor) && !equipUnshiftable;
 	}
 
 	get skills() {
-		return this._skills;
+		var equipSkills = this.equipment.reduce((skills, equip) => {
+			skills.concat(equip.skills);
+		}, []);
+		return this._skills.concat(equipSkills);
 	}
 	get reactions() {
-		return this._reactions;
+		var equipReactions = this.equipment.reduce((reactions, equip) => {
+			reactions.concat(equip.reactions);
+		}, []);
+		return this._reactions.concat(equipReactions);
+	}
+
+	_naturalStatusResist(effect, value) {
+		return false;
+	}
+
+	resistsStatus(effect, value) {
+		var equipResist = this.equipment.some(equip => {
+			equip.resistsStatus(effect, value);
+		});
+		return equipResist || _naturalStatusResist(effect, value);
 	}
 	//#endregion attributes
 
@@ -348,8 +386,8 @@ class UnitPiece extends Piece {
 		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
 	}
 	_refreshSkills() {
-		this._skills.forEach(skill => skill.refresh());
-		this._reactions.forEach(reactSkill => reactSkill.refresh());
+		this.skills.forEach(skill => skill.refresh());
+		this.reactions.forEach(reactSkill => reactSkill.refresh());
 	}
 	dieIfDead() {
 		if (this.dead) {
@@ -449,7 +487,7 @@ class UnitPiece extends Piece {
 	}
 
 	addStatus(effect, value) {
-		if (this.resistsStatus(effect, value < 0)) return;
+		if (this.resistsStatus(effect, value)) return;
 
 		switch(effect) {
 			case UnitPiece.Regenerate: case UnitPiece.Poison: // regenerate cancels out poison
@@ -480,10 +518,6 @@ class UnitPiece extends Piece {
 				}
 				break;
 		}
-	}
-	resistsStatus(effect, negative) {
-		if (negative) return this._resistsDebuff[effect];
-		else return this._resists[effect];
 	}
 	removeStatus(effect) {
 		this._status[effect] = 0;
@@ -847,6 +881,99 @@ class SkillResult {
 		this.evade = false;
 		this.swap = false;
 	}
+}
+
+/***************************************************
+ Equipment that modifies a unit's traits
+***************************************************/
+class Equipment extends Piece {
+	constructor() {
+		super();
+		this.user = null;
+	}
+
+	setUser(user) {
+		this.user = user;
+		if (this.user) {
+			this._setSkills(this.user);
+			this._setReactions(this.user);
+		} else {
+			this._clearSkills();
+			this._clearReactions();
+		}
+	}
+
+	//#region text
+	icon(style, content) {
+		return `<div class="icon ${style}">${content || ""}</div>`;
+	}
+
+	get name() {
+		return "[Equip name]";
+	}
+	get characterName() {
+		return this._partyMember?.name || this.name;
+	}
+	get _description() {
+		return "[Equip description]";
+	}
+	get _values() {
+		var list = [ /* TODO: text for the various bonuses */];
+		return list.join(" | ");
+	}
+
+	get fullDescription() {
+		return `<strong>${this.name}</strong><p>${this._description}</p><strong>${this._values}</strong>`;
+	}
+	//#endregion text
+
+	//#region skills and reactions
+	_setSkills(user) {
+		this._skills = [];
+	}
+	_setReactions(user) {
+		this._reactions = [];
+	}
+
+	_clearSkills() {
+		this._skills = [];
+	}
+	_clearReactions() {
+		this._skills = [];
+	}
+
+	get skills() {
+		return this._skills;
+	}
+	get reactions() {
+		return this._reactions;
+	}
+	//#endregion skills
+
+	//#region status resists
+	resistsStatus(effect, value) {
+		return false;
+	}
+
+	get unshiftable() {
+		return false;
+	}
+	//#endregion status resists
+
+	//#region stat bonuses
+	get maxHpBonus() {
+		return 0;
+	}
+	get powerBonus() {
+		return 0;
+	}
+	get defenseBonus() {
+		return 0;
+	}
+	get speedBonus() {
+		return 0;
+	}
+	//#endregion stat bonuses
 }
 
 /***************************************************
