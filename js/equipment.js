@@ -9,5 +9,10 @@ class TestEquip extends Equipment {
 		return `Increases max HP by 2`;
 	}
 
-	// TODO: Add an assortment of bonuses to test!
+	get maxHpBonus() {
+		return 2;
+	}
+
+	// TODO: Also test status resistance, active skill, and reaction
+	// And then ensure equips correctly go between characters
 };

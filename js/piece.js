@@ -96,15 +96,14 @@ class Piece extends SpriteElObj {
  Unit piece
 ***************************************************/
 class UnitPiece extends Piece {
-	constructor(partyMember) {
+	constructor(equipment, partyMember) {
 		super();
 		this._team = null;
 		this._guest = false;
 		this._partyMember = partyMember;
 		this.square = null;
 
-		// TODO: Either initialize from a party member, or a parameter list
-		this._equipment = [];
+		this._equipment = equipment || [];
 		this.equipment.forEach(equip => equip.setUser(this));
 
 		this._defaultStats();
@@ -268,7 +267,8 @@ class UnitPiece extends Piece {
 	}
 	get maxHp() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			bonus += equip.maxHpBonus;
+			if (equip.maxHpBonus) bonus += equip.maxHpBonus;
+			return bonus;
 		}, 0);
 		return Math.max(this._maxHp+equipBonus, 0);
 	}
@@ -285,21 +285,24 @@ class UnitPiece extends Piece {
 
 	get moveRange() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			bonus += equip.speedBonus;
+			if (equip.speedBonus) bonus += equip.speedBonus;
+			return bonus;
 		}, 0);
 		return Math.max(this._moveRange + equipBonus + this.getStatus(UnitPiece.Speed), 0);
 	}
 
 	get powerBonus() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			bonus += equip.powerBonus;
+			if (equip.powerBonus) bonus += equip.powerBonus;
+			return bonus;
 		}, 0);
 		return this.getStatus(UnitPiece.Power + equipBonus);
 	}
 
 	get defense() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			bonus += equip.defenseBonus;
+			if (equip.defenseBonus) bonus += equip.defenseBonus;
+			return bonus;
 		}, 0);
 		return this.getStatus(UnitPiece.Defense + equipBonus);
 	}
@@ -311,13 +314,15 @@ class UnitPiece extends Piece {
 
 	get skills() {
 		var equipSkills = this.equipment.reduce((skills, equip) => {
-			skills.concat(equip.skills);
+			if (equip.skills) skills.concat(equip.skills);
+			return skills;
 		}, []);
 		return this._skills.concat(equipSkills);
 	}
 	get reactions() {
 		var equipReactions = this.equipment.reduce((reactions, equip) => {
-			reactions.concat(equip.reactions);
+			if (equip.reactions) reactions.concat(equip.reactions);
+			return reactions;
 		}, []);
 		return this._reactions.concat(equipReactions);
 	}

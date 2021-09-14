@@ -78,8 +78,11 @@ class PartyMember {
 		return "";
 	}
 
+	getEquipment() {
+		return [new TestEquip()];
+	}
+
 	getUnit() {
-		// TODO: also fill out the skill list?
 		return null;
 	}
 
@@ -95,7 +98,7 @@ class TestMeleePartyMember extends PartyMember {
 	get name() { return "Alice"; }
 
 	getUnit() {
-		return new TestMeleeUnit(this);
+		return new TestMeleeUnit(this.getEquipment(), this);
 	}
 }
 
@@ -103,7 +106,7 @@ class TestSupportPartyMember extends PartyMember {
 	get name() { return "Bob"; }
 
 	getUnit() {
-		return new TestSupportUnit(this);
+		return new TestSupportUnit(this.getEquipment(),this);
 	}
 }
 
@@ -111,7 +114,7 @@ class TestPositionPartyMember extends PartyMember {
 	get name() { return "Carol"; }
 
 	getUnit() {
-		return new TestPositionUnit(this);
+		return new TestPositionUnit(this.getEquipment(),this);
 	}
 }
 
@@ -119,6 +122,6 @@ class TestStatusPartyMember extends PartyMember {
 	get name() { return "Dan"; }
 
 	getUnit() {
-		return new TestStatusUnit(this);
+		return new TestStatusUnit(this.getEquipment(),this);
 	}
 }
