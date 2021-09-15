@@ -314,20 +314,20 @@ class UnitPiece extends Piece {
 
 	get skills() {
 		var equipSkills = this.equipment.reduce((skills, equip) => {
-			if (equip?.skills?.length) skills = skills.concat(equip.skills);
+			if (equip?.skills) skills = skills.concat(equip.skills);
 			return skills;
 		}, []);
 		return this._skills.concat(equipSkills);
 	}
 	get reactions() {
 		var equipReactions = this.equipment.reduce((reactions, equip) => {
-			if (equip?.reactions?.length) skills = reactions.concat(equip.reactions);
+			if (equip?.reactions) reactions = reactions.concat(equip.reactions);
 			return reactions;
 		}, []);
 		return this._reactions.concat(equipReactions);
 	}
 
-	_naturalStatusResist(effect, value) {
+	_baseStatusResist(effect, value) {
 		return false;
 	}
 
@@ -335,7 +335,7 @@ class UnitPiece extends Piece {
 		var equipResist = this.equipment.some(equip => {
 			equip.resistsStatus(effect, value);
 		});
-		return equipResist || _naturalStatusResist(effect, value);
+		return equipResist || this._baseStatusResist(effect, value);
 	}
 	//#endregion attributes
 

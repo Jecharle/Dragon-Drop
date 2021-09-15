@@ -206,7 +206,7 @@ class ObjectPiece extends UnitPiece {
 	select() { return false; }
 	_setSelectable() { }
 
-	_naturalStatusResist(_effect, _value) {
+	_baseStatusResist(_effect, _value) {
 		return true;
 	}
 }
