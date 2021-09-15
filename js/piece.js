@@ -285,7 +285,7 @@ class UnitPiece extends Piece {
 
 	get moveRange() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			if (equip.speedBonus) bonus += equip.speedBonus;
+			if (equip?.speedBonus) bonus += equip.speedBonus;
 			return bonus;
 		}, 0);
 		return Math.max(this._moveRange + equipBonus + this.getStatus(UnitPiece.Speed), 0);
@@ -293,7 +293,7 @@ class UnitPiece extends Piece {
 
 	get powerBonus() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			if (equip.powerBonus) bonus += equip.powerBonus;
+			if (equip?.powerBonus) bonus += equip.powerBonus;
 			return bonus;
 		}, 0);
 		return this.getStatus(UnitPiece.Power + equipBonus);
@@ -301,7 +301,7 @@ class UnitPiece extends Piece {
 
 	get defense() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
-			if (equip.defenseBonus) bonus += equip.defenseBonus;
+			if (equip?.defenseBonus) bonus += equip.defenseBonus;
 			return bonus;
 		}, 0);
 		return this.getStatus(UnitPiece.Defense + equipBonus);
@@ -314,14 +314,14 @@ class UnitPiece extends Piece {
 
 	get skills() {
 		var equipSkills = this.equipment.reduce((skills, equip) => {
-			if (equip.skills) skills.concat(equip.skills);
+			if (equip?.skills?.length) skills = skills.concat(equip.skills);
 			return skills;
 		}, []);
 		return this._skills.concat(equipSkills);
 	}
 	get reactions() {
 		var equipReactions = this.equipment.reduce((reactions, equip) => {
-			if (equip.reactions) reactions.concat(equip.reactions);
+			if (equip?.reactions?.length) skills = reactions.concat(equip.reactions);
 			return reactions;
 		}, []);
 		return this._reactions.concat(equipReactions);
