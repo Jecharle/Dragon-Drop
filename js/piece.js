@@ -333,7 +333,7 @@ class UnitPiece extends Piece {
 
 	resistsStatus(effect, value) {
 		var equipResist = this.equipment.some(equip => {
-			equip.resistsStatus(effect, value);
+			return equip?.resistsStatus(effect, value);
 		});
 		return equipResist || this._baseStatusResist(effect, value);
 	}

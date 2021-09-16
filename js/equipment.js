@@ -6,13 +6,44 @@ class TestEquip extends Equipment {
 		return "Lucky Charm";
 	}
 	get _description() {
-		return `Increases max HP by 2`;
+		return `Applies many bonuses`;
 	}
 
-	get maxHpBonus() {
+	// hp bonus
+	/*get maxHpBonus() {
 		return 2;
-	}
+	}*/
 
-	// TODO: Also test status resistance, active skill, and reaction
-	// And then ensure equips correctly go between characters
+	// speed bonus
+	/*get speedBonus() {
+		return 1;
+	}*/
+
+	// grant heal skill
+	/*_setSkills(user) {
+		this._skills = [
+			new TestHealSkill(user)
+		];
+	}*/
+
+	// grant a counter attack
+	/*_setReactions(user) {
+		this._reactions = [
+			new TestCounterReaction(user)
+		];
+	}*/
+
+	// resist defense up and attack down
+	/*resistsStatus(effect, value) {
+		if (effect == UnitPiece.Power && value < 0) return true;
+		if (effect == UnitPiece.Defense && value > 0) return true;
+		return false;
+	}*/
+
+	// prevent shifting
+	/*get unshiftable() {
+		return true;
+	}*/
 };
+
+// TODO: ensure equips can differ per character
