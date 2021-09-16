@@ -296,7 +296,7 @@ class UnitPiece extends Piece {
 			if (equip?.powerBonus) bonus += equip.powerBonus;
 			return bonus;
 		}, 0);
-		return this.getStatus(UnitPiece.Power + equipBonus);
+		return this.getStatus(UnitPiece.Power) + equipBonus;
 	}
 
 	get defense() {
@@ -304,7 +304,7 @@ class UnitPiece extends Piece {
 			if (equip?.defenseBonus) bonus += equip.defenseBonus;
 			return bonus;
 		}, 0);
-		return this.getStatus(UnitPiece.Defense + equipBonus);
+		return this.getStatus(UnitPiece.Defense) + equipBonus;
 	}
 
 	get shiftable() {
