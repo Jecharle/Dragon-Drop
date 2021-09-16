@@ -141,14 +141,14 @@
 .status-list {
 	position: absolute;
 	z-index: 2;
-	height: calc(var(--icon-h) + 3px);
+	height: calc(var(--icon-h) + 6px);
 	width: 100%;
 	bottom: 0;
 	right: 0;
 }
 	.status-list .inner {
 		position: absolute;
-		height: calc(var(--icon-h) + 3px);
+		height: inherit;
 		width: max-content;
 	}
 	.status-list .icon {
@@ -178,8 +178,8 @@
 	background-image: inherit;
 	background-position: inherit;
 	position: absolute;
-	left: -2px;
-	top: -4px;
+	left: -1px;
+	top: -2px;
 	z-index: -1;
 	filter: brightness(75%);
 }
@@ -989,9 +989,10 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	top: -12px;
+	top: -6px;
 	display: flex;
 	justify-content: center;
+	pointer-events: none;
 }
 	.sprite-effect>.sprite {
 		width: var(--unit-w);
