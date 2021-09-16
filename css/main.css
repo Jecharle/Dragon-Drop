@@ -133,7 +133,7 @@
 	}
 	.lifebar>.icon {
 		left: calc(100% + 1px);
-		top: -2px;
+		top: -7px;
 	}
 /*#endregion lifebar*/
 
