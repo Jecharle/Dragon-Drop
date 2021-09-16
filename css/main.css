@@ -500,7 +500,8 @@
 		left: 0;
 		bottom: 110%;
 		border-radius: 2px;
-		padding: 3px;
+		padding: 1px;
+		font-size: 8px;
 		animation: fade-out 0.1s 0.5s reverse both;
 	}
 
