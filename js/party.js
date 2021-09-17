@@ -73,7 +73,6 @@ class PartyMember {
 		this.alive = true;
 	}
 
-	// TODO: Also provide the unit's skill list
 	get name() {
 		return "";
 	}

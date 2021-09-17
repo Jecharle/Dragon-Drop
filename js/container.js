@@ -283,7 +283,7 @@ class Board extends Container {
 
 			if (newSquare && this.canFit(piece, newSquare)
 				&& (props?.uphill || newSquare.z <= square.z+1)
-				&& (!props?.downhill || newSquare.z > square.z-1)) { // TODO: Test this!
+				&& (!props?.downhill || newSquare.z > square.z-1)) {
 				square = newSquare;
 			} else {
 				break;

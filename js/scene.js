@@ -536,7 +536,7 @@ class BattleScene extends Scene {
 	async _addReinforcements() {
 		for (var i = 0; i < this._reinforcementData.length; i++) {
 			var data = this._reinforcementData[i];
-			if (data.turn == this._turn) { // TODO: Other requirements?
+			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
 				newPiece.addTimedClass(500, 'spawn');
 				await Game.asyncPause(500);
@@ -700,7 +700,7 @@ class BattleScene extends Scene {
 	async _aiProcessTurn() {
 		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
 
-		var waitTime = 300; // TODO: Adjustable via settings?
+		var waitTime = 300;
 
 		while (aiControlUnits.length > 0) {
 			aiControlUnits.sort((a, b) => (a.aiUnitScore - b.aiUnitScore) || (Math.random() - 0.5));

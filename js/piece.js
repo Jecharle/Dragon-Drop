@@ -204,14 +204,9 @@ class UnitPiece extends Piece {
 	}
 	//#endregion setup
 
-	//#region equipment
 	get equipment() {
 		return this._equipment;
 	}
-
-	// TODO: Add equipment to a specific slot
-
-	//#endregion equipment
 
 	//#region attributes
 	get size() { return this._size; }

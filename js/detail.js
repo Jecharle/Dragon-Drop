@@ -322,7 +322,6 @@ class CurrentMaxLabel extends Detail {
 		this._updateText();
 	}
 
-	// TODO: Also, text describing what it's counting?
 	_updateText() {
 		this.el.innerHTML = `${this._value}/${this._maxValue}`;
 	}
