@@ -153,7 +153,7 @@ strong {
 	}
 	.lifebar>.icon {
 		left: calc(100% + 1px);
-		top: -7px;
+		top: -1px;
 	}
 /*#endregion lifebar*/
 
@@ -161,7 +161,7 @@ strong {
 .status-list {
 	position: absolute;
 	z-index: 2;
-	height: calc(var(--icon-h) + 6px);
+	height: calc(var(--icon-h) + 3px);
 	width: 100%;
 	bottom: 0;
 	right: 0;
@@ -1009,7 +1009,6 @@ strong {
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	top: -6px;
 	display: flex;
 	justify-content: center;
 	pointer-events: none;

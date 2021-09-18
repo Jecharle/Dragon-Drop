@@ -20,6 +20,19 @@ class Detail extends ElObj {
 	get elType() {
 		return 'span';
 	}
+
+	static numberSprite(value, showPlus) {
+		var numberEl = document.createElement('div');
+		numberEl.classList.add('icon', 'number');
+		numberEl.style.backgroundPositionX = `${-8*Math.abs(value)}px`;
+		if (showPlus || value < 0) {
+			var signEl = document.createElement('div');
+			if (value < 0) signEl.classList.add('minus');
+			else signEl.classList.add('plus');
+			numberEl.appendChild(signEl);
+		}
+		return numberEl;
+	}
 };
 
 /***************************************************
@@ -114,19 +127,8 @@ class Lifebar extends Detail {
 		this._defense = value;
 		this._defEl.classList.toggle('icon', value != 0);
 
-		// TODO: Clean up and standardize number creation
 		if (this._defEl.firstChild) this._defEl.removeChild(this._defEl.firstChild);
-		if (value) {
-			var numberEl = document.createElement('div');
-			numberEl.classList.add('icon', 'number');
-			numberEl.style.backgroundPositionX = `${-8*Math.abs(value)}px`;
-			if (value < 0) {
-				var signEl = document.createElement('div');
-				signEl.classList.add('minus');
-				numberEl.appendChild(signEl);
-			}
-			this._defEl.appendChild(numberEl);
-		}
+		if (value) this._defEl.appendChild(Detail.numberSprite(value));
 	}
 
 	static width(value, noPadding) {
@@ -222,7 +224,7 @@ class StatusList extends Detail {
 		newIconEl.classList.add('icon', style);
 		if (props) {
 			if (props.icon) newIconEl.appendChild(this._newIcon(props.icon));
-			else if (props.number) newIconEl.appendChild(this._newNumber(props.number, props.plus));
+			else if (props.number) newIconEl.appendChild(Detail.numberSprite(props.number, props.plus));
 			if (props.double) newIconEl.appendChild(this._newIcon('double'));
 		}
 		this._subEl.appendChild(newIconEl);
@@ -232,21 +234,6 @@ class StatusList extends Detail {
 		var iconEl = document.createElement('div');
 		iconEl.classList.add('icon', ...styles);
 		return iconEl;
-	}
-	_newNumber(value, showPlus) {
-		var numberEl = document.createElement('div');
-		numberEl.classList.add('icon', 'number');
-		numberEl.style.backgroundPositionX = `${-16*Math.abs(value)}px`;
-		if (value < 0) {
-			var signEl = document.createElement('div');
-			signEl.classList.add('minus');
-			numberEl.appendChild(signEl);
-		} else if (showPlus) {
-			var signEl = document.createElement('div');
-			signEl.classList.add('plus');
-			numberEl.appendChild(signEl);
-		}
-		return numberEl;
 	}
 	_clearIcons() {
 		if (this._icons) this._icons.forEach(el => this._subEl.removeChild(el));
