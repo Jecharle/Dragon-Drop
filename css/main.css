@@ -6,24 +6,21 @@
 	font-family: boldPixelFont;
 	src: url(../font/slkscrb.ttf);
 }
-
-/*#region game window*/
 :root {
 	--game-w: 512px;
 	--game-h: 384px;
-	--normal-text: 8px;
-	font-family: pixelFont;
-	font-size: var(--normal-text);
+	font: 8px pixelFont;
 }
 button {
-	font-family: pixelFont;
-	font-size: var(--normal-text);
+	font: 8px pixelFont;
 }
 strong {
-	font-family: boldPixelFont;
+	font: 8px boldPixelFont;
 	font-weight: normal;
 }
+/* TODO: Instead of defining the font sizes arbitrarily, use h1/h2/h3 elements with styling */
 
+/*#region game window*/
 .game-window {
 	width: var(--game-w);
 	height: var(--game-h);
@@ -44,8 +41,7 @@ strong {
 		right: 4px;
 		bottom: 4px;
 		color: black;
-		font-size: var(--normal-text);
-		font-family: boldPixelFont;
+		font: boldPixelFont;
 	}
 
 .scene {
@@ -79,7 +75,6 @@ strong {
 /*#region battle scene UI*/
 .nav-button {
 	display: inline-block;
-	font-size: var(--normal-text);
 	color: white;
 	background-color: deepskyblue;
 	border: none;
@@ -331,8 +326,7 @@ strong {
 			width: max-content;
 			left: 0;
 			bottom: 100%;
-			font-size: var(--normal-text);
-			font-family: boldPixelFont;
+			font: boldPixelFont;
 		}
 		.unit-info:hover .skill-description {
 			display: block;
@@ -363,7 +357,6 @@ strong {
 		display: none;
 		background-color: white;
 		border: 1px solid black;
-		font-size: var(--normal-text);
 		position: absolute;
 		z-index: 3;
 		width: max-content;
@@ -374,15 +367,13 @@ strong {
 		padding: 3px;
 	}
 	.cooldown-label {
-		font-size: var(--normal-text);
-		font-family: boldPixelFont;
+		font: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
 	}
 	.quantity-label {
-		font-size: var(--normal-text);
-		font-family: boldPixelFont;
+		font: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
@@ -432,8 +423,7 @@ strong {
 
 /*#region phase change & end screens*/
 .phase-banner {
-	font-size: 20px;
-	font-family: boldPixelFont;
+	font: 20px boldPixelFont;
 	background-color: white;
 	border-top: 1px solid black;
 	border-bottom: 1px solid black;
@@ -446,8 +436,7 @@ strong {
 	pointer-events: none;
 }
 .battle-end {
-	font-size: 32px;
-	font-family: boldPixelFont;
+	font: 32px boldPixelFont;
 	color: white;
 	background-color: #000000cc;
 	width: 100%;
@@ -521,7 +510,6 @@ strong {
 		bottom: 110%;
 		border-radius: 2px;
 		padding: 1px;
-		font-size: var(--normal-text);
 		animation: fade-out 0.1s 0.5s reverse both;
 	}
 
@@ -875,7 +863,6 @@ strong {
 	width: calc(var(--unit-w)*4);
 	height: calc(var(--unit-h));
 	bottom: var(--face-h);
-	font-size: var(--normal-text);
 	margin-left: var(--face-w);
 	display: flex;
 	flex-flow: row wrap;
@@ -918,7 +905,6 @@ strong {
 	bottom: 6px;
 	width: 50%;
 	height: 5em;
-	font-size: var(--normal-text);
 	background-color: white;
 	border: 1px solid black;
 	padding: 6px;
@@ -1058,8 +1044,7 @@ strong {
 
 /*#region popup text*/
 .popup-text {
-	font-size: 12px;
-	font-family: boldPixelFont;
+	font: 12px boldPixelFont;
 	color: white;
 	text-shadow: 1px 1px black;
 	display: flex;
