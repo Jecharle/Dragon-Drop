@@ -1163,17 +1163,17 @@ class SkillCard extends Piece {
 		if (!target || !this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
 
-		if (this._showBanner) {
-			var banner = new SkillBanner(this.name);
-			Game.scene.el.appendChild(banner.el); // TODO: This doesn't quite seem right?
-			await Game.asyncPause(1000); // this might be too long of a pause, as well
-		}
-
 		this._target = target;
 		this._squares = this._affectedSquares(this._target);
 		this._squares.sort((squareA, squareB) => this._targetOrder(squareA, squareB));
 		this._units = this._affectedUnits(this._squares);
 		
+		if (this._showBanner) {
+			var banner = new SkillBanner(this.name);
+			this.user.el.appendChild(banner.el);
+			await Game.asyncPause(500);
+		}
+
 		this.user.openResult();
 		this._units.forEach(unit => unit.openResult());
 		

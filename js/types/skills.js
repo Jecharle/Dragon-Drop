@@ -10,6 +10,10 @@ class TestAttackSkill extends SkillCard {
 		return `Damage the target and push them 1 space`;
 	}
 
+	get _showBanner() {
+		return false;
+	}
+
 	_stats() {
 		this.style = 'attack-skill';
 		this._basePower = 2;
@@ -101,6 +105,10 @@ class TestRushSkill extends TestAttackSkill {
 		return `Approach the target and attack, pushing them back`;
 	}
 
+	get _showBanner() {
+		return true;
+	}
+
 	_stats() {
 		super._stats();
 		this._basePower = 3;
@@ -136,6 +144,10 @@ class TestAreaSkill extends TestAttackSkill {
 	}
 	get _description() {
 		return `Damage targets in a small area and push them away from the center`;
+	}
+
+	get _showBanner() {
+		return true;
 	}
 
 	_stats() {

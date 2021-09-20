@@ -424,15 +424,15 @@ strong {
 .skill-banner {
 	color: white;
 	background-color: #000000cc;
-	width: 100%;
+	width: 300%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	overflow: hidden;
 	position: absolute;
-	top: 20%;
+	bottom: 150%;
 	z-index: 5;
-	animation: banner-display 1s linear;
+	animation: banner-display 0.5s linear 2 alternate;
 	pointer-events: none;
 }
 .phase-banner {
@@ -447,7 +447,7 @@ strong {
 	overflow: hidden;
 	position: absolute;
 	z-index: 5;
-	animation: banner-display 1s linear;
+	animation: banner-display 0.7s linear 2 alternate;
 	pointer-events: none;
 }
 .battle-end {
@@ -1144,14 +1144,11 @@ strong {
 	from {
 		height: 0;
 	}
-	25% {
-		height: 1.5em;
-	}
-	75% {
+	50% {
 		height: 1.5em;
 	}
 	to {
-		height: 0;
+		height: 1.5em;
 	}
 }
 @keyframes end-screen {
