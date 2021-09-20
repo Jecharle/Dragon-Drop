@@ -705,7 +705,7 @@ class UnitPiece extends Piece {
 
 		var jumpframes = [
 			{ },
-			{ bottom: "128px" }
+			{ bottom: "64px" }
 		];
 		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return time;
