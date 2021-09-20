@@ -372,10 +372,9 @@ class Board extends Container {
 
 		square.inRange = true;
 		square.el.classList.add('move-range');
-		if (path.length == 0) square.el.classList.add('move-start');
 		if (preview) square.el.classList.add('enemy-preview');
 
-		if (valid && !preview) {
+		if (valid && !preview && path.length > 0) {
 			square.el.ondragover = this._allowDrop;
 			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
