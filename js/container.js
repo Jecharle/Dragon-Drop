@@ -321,7 +321,6 @@ class Board extends Container {
 		square.el.classList.add('deploy-range');
 		if (valid && (!swapOnly || square.piece)) {
 			square.el.ondragover = this._allowDrop;
-			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -376,7 +375,6 @@ class Board extends Container {
 
 		if (valid && !preview && path.length > 0) {
 			square.el.ondragover = this._allowDrop;
-			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -404,7 +402,6 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 			if (square.piece) {
-				square.piece.el.ondragover = this._allowDrop;
 				square.piece.el.classList.add('in-range');
 			}
 			this.squaresInRange.push(square);
@@ -427,7 +424,6 @@ class Board extends Container {
 		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'enemy-preview', 'invalid', 'selectable');
 		square.el.ondragover = null;
 		if (square.piece) {
-			square.piece.el.ondragover = null;
 			square.piece.el.classList.remove('in-range');
 		}
 	}
