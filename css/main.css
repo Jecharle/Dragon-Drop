@@ -421,18 +421,33 @@ strong {
 /*#endregion skill card*/
 
 /*#region phase change & end screens*/
+.skill-banner {
+	color: white;
+	background-color: #000000cc;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	position: absolute;
+	top: 20%;
+	z-index: 5;
+	animation: banner-display 1s linear;
+	pointer-events: none;
+}
 .phase-banner {
 	font: 2rem boldPixelFont;
 	background-color: white;
 	border-top: 1px solid black;
 	border-bottom: 1px solid black;
-	padding-top: 0.5em;
 	width: 100%;
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	overflow: hidden;
 	position: absolute;
 	z-index: 5;
-	animation: banner-display 600ms linear 2 alternate;
+	animation: banner-display 1s linear;
 	pointer-events: none;
 }
 .battle-end {
@@ -1128,19 +1143,15 @@ strong {
 @keyframes banner-display {
 	from {
 		height: 0;
-		color: transparent;
 	}
-	50% {
+	25% {
 		height: 1.5em;
-		color: transparent;
 	}
 	75% {
 		height: 1.5em;
-		color: black;
 	}
 	to {
-		height: 1.5em;
-		color: black;
+		height: 0;
 	}
 }
 @keyframes end-screen {

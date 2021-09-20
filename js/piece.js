@@ -1050,6 +1050,10 @@ class SkillCard extends Piece {
 	get fullDescription() {
 		return `<strong>${this.name}</strong><p>${this._description}</p><strong>${this._values}</strong>`;
 	}
+
+	get _showBanner() {
+		return true;
+	}
 	//#endregion text
 
 	//#region setup
@@ -1158,6 +1162,12 @@ class SkillCard extends Piece {
 	async use(target) {
 		if (!target || !this.canUse() || !this.validTarget(target)) return false;
 		this.user.face(target);
+
+		if (this._showBanner) {
+			var banner = new SkillBanner(this.name);
+			Game.scene.el.appendChild(banner.el); // TODO: This doesn't quite seem right?
+			await Game.asyncPause(1000); // this might be too long of a pause, as well
+		}
 
 		this._target = target;
 		this._squares = this._affectedSquares(this._target);

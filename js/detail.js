@@ -52,6 +52,22 @@ class PhaseBanner extends Detail {
 }
 
 /***************************************************
+ Skill name banner
+***************************************************/
+class SkillBanner extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.addEventListener('animationend', ev => {
+			ev.target.parentElement.removeChild(ev.target);
+		});
+	}
+
+	get elClass() {
+		return 'skill-banner';
+	}
+}
+
+/***************************************************
  Battle end screen
 ***************************************************/
 class EndScreen extends Detail {
