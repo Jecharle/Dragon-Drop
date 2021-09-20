@@ -504,16 +504,20 @@ strong {
 		width: var(--square-w);
 		height: var(--square-h);
 		pointer-events: none;
+		transform-style: preserve-3d;
 	}
-	.square::after {
-		content: "";
-		width: inherit;
-		height: inherit;
-		position: absolute;
-		z-index: 1;
-		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-		pointer-events: auto;
-	}
+		.move-range.square::after, .skill-range.square::after, .deploy-range.square::after {
+			content: "";
+			width: inherit;
+			height: inherit;
+			position: absolute;
+			transform: translateZ(99px);
+			clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+			pointer-events: auto;
+		}
+		.enemy-preview.move-range.square::after, .invalid.square::after {
+			pointer-events: none;
+		}
 	.square:hover::before {
 		background-color: white;
 		border: 1px solid black;

@@ -565,8 +565,6 @@ class BattleScene extends Scene {
 					this._selectTarget(piece.square);
 				} else if (this._unit == piece) {
 					this._deselectUnit();
-				} else if (piece.square) {
-					this.positionEvent(piece.square);
 				} else if (!this._unit.square) { // selecting undeployed units
 					this._selectUnit(piece);
 				}
@@ -578,9 +576,6 @@ class BattleScene extends Scene {
 				} else if (!dragging) {
 					this._deselectSkill();
 				}
-			} else if (this._skill && piece.square && !dragging) {
-				this.positionEvent(piece.square);
-				return;
 			}
 
 			if (piece.type == Piece.Unit && piece.myTurn) {
