@@ -103,3 +103,29 @@ class TestExplodeReaction extends OnDeathReaction {
 		await Game.asyncPause(200);
 	}
 };
+
+/***************************************************
+ Test shield aura
+***************************************************/
+class TestCoverReaction extends OnTurnEndReaction {
+
+	get name() {
+		return "Cover";
+	}
+	get _description() {
+		return "Increase Defense for adjacent allies";
+	}
+
+	_stats() {
+		this._area = 1;
+	}
+
+	async _unitEffects(unit, _target) {
+		this._showEffect(unit.square, unit.square, "test-buff-effect");
+		unit.addStatus(UnitPiece.Defense, 1);
+	}
+
+	async _endEffects(_target, _squares, _units) {
+		await Game.asyncPause(400);
+	}
+};

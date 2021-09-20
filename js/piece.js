@@ -241,6 +241,11 @@ class UnitPiece extends Piece {
 		return this.team.isEnemy(piece.team);
 	}
 
+	allowsMove(piece) {
+		// whether you allow another piece to pass you
+		return this.isAlly(piece);
+	}
+
 	get guest() {
 		return this._guest;
 	}
@@ -645,7 +650,7 @@ class UnitPiece extends Piece {
 	}
 	canPass(square) {
 		if (square.blocksMove) return false;
-		else return (square.piece == null || this.isAlly(square.piece));
+		else return (square.piece == null || square.piece.allowsMove(this));
 	}
 	//#endregion move
 

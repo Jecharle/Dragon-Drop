@@ -358,6 +358,7 @@ class TestBuildSkill extends SkillCard {
 	async _startEffects(_target, _squares, _units) { }
 	async _squareEffects(square, _target) {
 		var wall = new TestRockObject();
+		wall.setTeam(this.user.team);
 		square.parent.movePiece(wall, square);
 		wall.addTimedClass(500, 'spawn');
 		await Game.asyncPause(500);

@@ -57,12 +57,6 @@ class TestMeleeUnit extends UnitPiece {
 			new TestBuildSkill(this)
 		];
 	}
-
-	_setReactions() {
-		this._reactions = [
-			new TestCounterReaction(this),
-		];
-	}
 };
 
 class TestSupportUnit extends UnitPiece {
@@ -203,8 +197,16 @@ class ObjectPiece extends UnitPiece {
 	get canAct() { return false; }
 	get moveRange() { return 0; }
 	get aiImportance() { return 0.1; }
-	select() { return false; }
-	_setSelectable() { }
+	_setSelectable() { } // It's not selectable either so
+	_setUnselectable() { } // Prevent it from graying out
+
+	allowsMove(_piece) {
+		return false;
+	}
+
+	get shiftable() {
+		return false;
+	}
 
 	_baseStatusResist(_effect, _value) {
 		return true;
@@ -212,9 +214,11 @@ class ObjectPiece extends UnitPiece {
 }
 
 class TestRockObject extends ObjectPiece {
-
-	get shiftable() {
-		return false;
+	get name() {
+		return "Wall";
+	}
+	get _description() {
+		return "Raises the defense of adjacent units<br>Explodes when destroyed";
 	}
 
 	get defense() {
@@ -224,5 +228,12 @@ class TestRockObject extends ObjectPiece {
 	_stats() {
 		this.style = 'rock';
 		this._maxHp = 2;
+	}
+
+	_setReactions() {
+		this._reactions = [
+			new TestCoverReaction(this),
+			new TestExplodeReaction(this),
+		];
 	}
 }

@@ -18,7 +18,6 @@ strong {
 	font-family: boldPixelFont;
 	font-weight: normal;
 }
-/* TODO: Instead of defining the font sizes arbitrarily, use h1/h2/h3 elements with styling? */
 
 /*#region game window*/
 .game-window {
