@@ -623,9 +623,9 @@ class UnitPiece extends Piece {
 
 		var oldSquare = this.square;
 		if (target.parent.movePiece(this, target)) {
+			this.face(target, target.path[0]);
 			var moveTime = this.animateMove(target.path, this._moveStyle);
 			this.addTimedClass(moveTime, 'moving');
-			this.face(target, target.path[0]);
 			await Game.asyncPause(moveTime);
 
 			this.homeSquare = oldSquare;
@@ -680,8 +680,7 @@ class UnitPiece extends Piece {
 		path.forEach(square => {
 			keyframes.unshift({ transform: square.screenPosition });
 
-			var xFace = lastSquare.screenX < square.screenX ? -1 : 1;
-			var yFace = lastSquare.screenY < square.screenY ? -1 : 0;
+			var [xFace, yFace] = UnitPiece.getDirection(lastSquare, square);
 			turnframes.unshift({ '--x-scale': xFace, '--y-frame': yFace });
 
 			lastSquare = square;
@@ -727,28 +726,23 @@ class UnitPiece extends Piece {
 		return time;
 	}
 
+	static getDirection(target, from) {
+		var dx = target.x - from.x;
+		var dy = target.y - from.y;
+
+		var ydir = dx + dy < 0 ? -1 : 0;
+		var xdir = dx - dy < 0 ? -1 : 1;
+		return [xdir, ydir];
+	}
 	face(target, from) {
 		if (!from) from = this.square;
 		if (!from || !target || from.parent != target.parent) return;
 
-		if (from.screenX > target.screenX) {
-			this._xFacing = -1;
-		} else if (from.screenX < target.screenX) {
-			this._xFacing = 1;
-		}
-
-		if (from.screenY > target.screenY) {
-			this._yFacing = -1;
-		} else if (from.screenY < target.screenY) {
-			this._yFacing = 0;
-		}
-		this.setFacing(this._xFacing, this._yFacing);
-	}
-	setFacing(xFacing, yFacing) {
-		this._xFacing = xFacing;
-		this._yFacing = yFacing;
-		this.el.style.setProperty('--x-scale', this._xFacing);
-		this.el.style.setProperty('--y-frame', this._yFacing);
+		var [xFace, yFace] = UnitPiece.getDirection(target, from);
+		this._xFacing = xFace;
+		this._yFacing = yFace;
+		this.el.style.setProperty('--x-scale', xFace);
+		this.el.style.setProperty('--y-frame', yFace);
 	}
 
 	animateBump(target, origin) {
@@ -775,7 +769,8 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		if (this._xFacing < 0) vfx.el.classList.add("left");
+		vfx.el.style.setProperty('--x-scale', this._xFacing);
+		vfx.el.style.setProperty('--y-frame', this._yFacing);
 		this.square.parent.el.appendChild(vfx.el);
 	}
 	//#endregion animate
