@@ -515,19 +515,19 @@ strong {
 			clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 			pointer-events: auto;
 		}
-	.square:hover::before {
-		background-color: white;
-		border: 1px solid black;
-		position: absolute;
-		z-index: 2;
-		width: max-content;
-		height: max-content;
-		left: 0;
-		bottom: 110%;
-		border-radius: 2px;
-		padding: 1px;
-		animation: fade-out 0.1s 0.5s reverse both;
-	}
+		.square:hover::before {
+			background-color: white;
+			border: 1px solid black;
+			position: absolute;
+			transform: translateZ(98px);
+			width: max-content;
+			height: max-content;
+			left: 0;
+			bottom: 110%;
+			border-radius: 2px;
+			padding: 1px;
+			animation: fade-out 0.1s 0.5s reverse both;
+		}
 
 	/*#region terrain types*/
 	.square>.sprite {
@@ -718,6 +718,8 @@ strong {
 	display: flex;
 	justify-content: center;
 	transform-style: preserve-3d;
+	--x-scale: 1;
+	--y-frame: 0;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
@@ -727,8 +729,9 @@ strong {
 		z-index: 0;
 		bottom: 0;
 		background-repeat: no-repeat;
-		background-position: 0 0;
-		transition: transform 0.2s;
+		background-position-x: 0;
+		background-position-y: calc(var(--y-frame)*var(--unit-h));
+		transform: scaleX(var(--x-scale));
 	}
 	.unit>.shadow {
 		content: "";
@@ -780,9 +783,6 @@ strong {
 		--unit-w: 64px;
 		--unit-h: 64px;
 	}
-	.left.unit>.sprite {
-		transform: scaleX(-1);
-	}
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
 		filter: drop-shadow(1px 0 yellow)
 		drop-shadow(-1px 0 yellow)
@@ -790,15 +790,15 @@ strong {
 		drop-shadow(0px -1px yellow);
 	}
 	.moving>.sprite {
-		background-position-y: calc(-1*var(--unit-h));
+		background-position-y: calc((-2 + var(--y-frame))*var(--unit-h));
 		background-position-x: calc(-2*var(--unit-w));
 		animation: sprite-animation 0.3s steps(2) infinite;
 	}
 	.attack>.sprite {
-		background-position-y: calc(-3*var(--unit-h));
+		background-position-y: calc((-6 + var(--y-frame))*var(--unit-h));
 	}
 	.damaged>.sprite {
-		background-position-y: calc(-2*var(--unit-h));
+		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
 		animation: shake 0.15s;
 	}
 	.damaged>.shadow {
@@ -814,12 +814,9 @@ strong {
 		animation: drop-in 0.2s ease-in;
 	}
 	.dead>.sprite {
-		background-position-y: calc(-2*var(--unit-h));
+		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
 		animation: darken-and-fade 1s 0.2s both;
 	}
-		.dead::after {
-			animation: darken-and-fade 1s 0.2s both;
-		}
 	/*#endregion unit states and motions*/
 
 	/*#region unit skins*/

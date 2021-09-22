@@ -195,7 +195,8 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._facing = 1;
+		this._xFacing = 1;
+		this._yFacing = 0;
 		
 		this._status = {};
 		this._results = [];
@@ -675,23 +676,20 @@ class UnitPiece extends Piece {
 	_animatePath(path) {
 		var keyframes = [{}];
 		var turnframes = [{}];
-		var lastSquare = null, facing = this._facing;
+		var lastSquare = this.square;
 		path.forEach(square => {
 			keyframes.unshift({ transform: square.screenPosition });
-			if (lastSquare) {
-				if (square.screenX > lastSquare.screenX) facing = -1;
-				else if (square.screenX < lastSquare.screenX) facing = 1;
-				turnframes.unshift({ transform: `scaleX(${facing})` });
-				turnframes.unshift({ transform: `scaleX(${facing})` });
-			}
+
+			var xFace = lastSquare.screenX < square.screenX ? -1 : 1;
+			var yFace = lastSquare.screenY < square.screenY ? -1 : 0;
+			turnframes.unshift({ '--x-scale': xFace, '--y-frame': yFace });
+
 			lastSquare = square;
 		});
-		turnframes.unshift({
-			transform: `scaleX(${this._facing})`
-		});
+		turnframes.unshift(turnframes[0]);
 		var time = 200*(keyframes.length-1);
 		this.el.animate(keyframes, {duration: time, easing: "linear"});	
-		this.spriteEl.animate(turnframes, {duration: time, easing: "linear"});
+		this.el.animate(turnframes, {duration: time, easing: "linear"});
 		return time;
 	}
 	_animateJump(path) {
@@ -721,7 +719,7 @@ class UnitPiece extends Piece {
 		this.el.animate(keyframes, time/2);
 
 		var twistframes = [
-			{ transform: `scaleX(${this._facing})`},
+			{ transform: `scaleX(${this._xFacing})`},
 			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ }
 		];
@@ -733,14 +731,24 @@ class UnitPiece extends Piece {
 		if (!from) from = this.square;
 		if (!from || !target || from.parent != target.parent) return;
 
-		var facing = (target.x - target.y) - (from.x - from.y);
-		if (facing < 0) {
-			this.el.classList.add('left');
-			this._facing = -1;
-		} else if (facing > 0) {
-			this.el.classList.remove('left');
-			this._facing = 1;
+		if (from.screenX > target.screenX) {
+			this._xFacing = -1;
+		} else if (from.screenX < target.screenX) {
+			this._xFacing = 1;
 		}
+
+		if (from.screenY > target.screenY) {
+			this._yFacing = -1;
+		} else if (from.screenY < target.screenY) {
+			this._yFacing = 0;
+		}
+		this.setFacing(this._xFacing, this._yFacing);
+	}
+	setFacing(xFacing, yFacing) {
+		this._xFacing = xFacing;
+		this._yFacing = yFacing;
+		this.el.style.setProperty('--x-scale', this._xFacing);
+		this.el.style.setProperty('--y-frame', this._yFacing);
 	}
 
 	animateBump(target, origin) {
@@ -767,7 +775,7 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		if (this._facing < 0) vfx.el.classList.add("left");
+		if (this._xFacing < 0) vfx.el.classList.add("left");
 		this.square.parent.el.appendChild(vfx.el);
 	}
 	//#endregion animate
