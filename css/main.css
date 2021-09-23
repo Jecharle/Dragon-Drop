@@ -873,17 +873,23 @@ strong {
 .deploy-list {
 	position: absolute;
 	z-index: 0;
-	width: calc(var(--unit-w)*4);
-	height: calc(var(--unit-h));
+	width: calc(var(--unit-w)*2);
+	height: max-content;
+	left: 4px;
 	bottom: var(--face-h);
-	margin-left: var(--face-w);
 	display: flex;
-	flex-flow: row wrap;
+	flex-flow: column wrap;
 	justify-content: flex-start;
 	background-color: white;
 	border: 1px solid black;
 	border-radius: 4px;
 }
+	.deploy-list .lifebar {
+		visibility: visible;
+		top: unset;
+		bottom: var(--lifebar-h);
+		left: 100%;
+	}
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0;
