@@ -477,3 +477,46 @@ class ThrowSkill extends SkillCard {
 		await Game.asyncPause(time+100);
 	}
 };
+
+class ThrowSkill2 extends SkillCard {
+	get name() {
+		return "Throw 2";
+	}
+	get _description() {
+		return "Launch the target backward";
+	}
+
+	_stats() {
+		this.style = 'move-skill';
+		this._basePower = 1;
+		this._baseCooldown = 2;
+	}
+
+	inArea(origin, target) {
+		var userSquare = this.user.square;
+		return this._inLine(origin, target) &&
+			this._ahead(origin, target, userSquare.direction(origin)) &&
+			this._canSee(origin, target);
+	}
+
+	validTarget(target) {
+		return (target.piece?.shiftable);
+	}
+	async _startEffects(target) {
+		var time = this.user.animateBump(target);
+		this.user.addTimedClass(time, 'attack');
+		await Game.asyncPause(time/2);
+
+		var unit = target.piece;
+		unit.push(this.user.square, 10, {animation: UnitPiece.Path});
+		await Game.asyncPause(200);
+	}
+	async _unitEffects(unit, _target) {
+		if (!unit.evade()) {
+			unit.takeDamage(this.power);
+		}
+	}
+	async _endEffects(_target, _squares, _units) {
+		await Game.asyncPause(200);
+	}
+};

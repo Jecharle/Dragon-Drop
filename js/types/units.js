@@ -102,7 +102,7 @@ class TestPositionUnit extends UnitPiece {
 		this._skills = [
 			new TestPullSkill(this),
 			new TestAreaSkill(this),
-			new ThrowSkill(this),
+			new ThrowSkill2(this),
 		];
 	}
 };
