@@ -874,9 +874,9 @@ strong {
 	position: absolute;
 	z-index: 0;
 	width: calc(var(--unit-w)*2);
-	height: max-content;
-	left: 4px;
-	bottom: var(--face-h);
+	height: calc(var(--unit-h)*6);
+	left: 2px;
+	bottom: 2px;
 	display: flex;
 	flex-flow: column wrap;
 	justify-content: flex-start;
@@ -888,14 +888,13 @@ strong {
 		visibility: visible;
 		top: unset;
 		bottom: var(--lifebar-h);
-		left: 100%;
+		left: var(--unit-w);
 	}
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0;
 		margin-top: 1px;
 	}
-
 	.deploy-list .capacity-label {
 		position: absolute;
 		top: 1px;
