@@ -350,7 +350,7 @@ class UnitPiece extends Piece {
 	static get Defense() { return 'defense'; }
 	static get Speed() { return 'speed'; }
 	static get Regenerate() { return 'regenerate'; }
-	static get Poison() { return 'poison'; }
+	static get Burn() { return 'burn'; }
 	static get Evade() { return 'evade'; }
 	static get Anchor() { return 'anchor'; }
 	static get Charge() { return 'charge'; }
@@ -361,11 +361,11 @@ class UnitPiece extends Piece {
 		else return this._status[effect] || 0;
 	}
 
-	_applyPoison() {
-		if (this.getStatus(UnitPiece.Poison) > 0) {
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-poison-effect');
+	_applyBurn() {
+		if (this.getStatus(UnitPiece.Burn) > 0) {
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-burn-effect');
 			this.parent.el.appendChild(vfx.el);
-			this.takeDamage(this.getStatus(UnitPiece.Poison), { ignoreDefense: true });
+			this.takeDamage(this.getStatus(UnitPiece.Burn), { ignoreDefense: true });
 		}
 	}
 	_applyRegenerate() {
@@ -440,7 +440,7 @@ class UnitPiece extends Piece {
 		}
 
 		if (!props?.noCure) {
-			this._status[UnitPiece.Poison] = 0;
+			this._status[UnitPiece.Burn] = 0;
 		}
 
 		this.refresh();
@@ -501,11 +501,11 @@ class UnitPiece extends Piece {
 		if (this.resistsStatus(effect, value)) return;
 
 		switch(effect) {
-			case UnitPiece.Regenerate: case UnitPiece.Poison: // regenerate cancels out poison
-				if (effect == UnitPiece.Regenerate && this.getStatus(UnitPiece.Poison)) {
-					this._status[UnitPiece.Poison] = 0;
+			case UnitPiece.Regenerate: case UnitPiece.Burn: // regenerate cancels out burn
+				if (effect == UnitPiece.Regenerate && this.getStatus(UnitPiece.Burn)) {
+					this._status[UnitPiece.Burn] = 0;
 					break;
-				} if (effect == UnitPiece.Poison && this.getStatus(UnitPiece.Regenerate)) {
+				} if (effect == UnitPiece.Burn && this.getStatus(UnitPiece.Regenerate)) {
 					this._status[UnitPiece.Regenerate] = 0;
 					break;
 				}
@@ -597,12 +597,12 @@ class UnitPiece extends Piece {
 		this.refresh();
 	}
 	async updateStatusTurnEnd() {
-		if (this.getStatus(UnitPiece.Poison)) {
-			this._applyPoison();
+		if (this.getStatus(UnitPiece.Burn)) {
+			this._applyBurn();
 			this.refresh();
 			await Game.asyncPause(500);
 		}
-		this.removeStatus(UnitPiece.Poison);
+		this.removeStatus(UnitPiece.Burn);
 		this.removeStatus(UnitPiece.Power);
 		this.removeStatus(UnitPiece.Speed);
 		this.refresh();

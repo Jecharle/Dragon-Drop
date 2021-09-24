@@ -250,7 +250,7 @@ strong {
 		background-position-x: 0;
 		background-position-y: calc(-3*var(--icon-h));
 	}
-	.icon.poison {
+	.icon.burn {
 		background-position-x: calc(-1*var(--icon-w));
 		background-position-y: calc(-3*var(--icon-h));
 	}

@@ -212,9 +212,9 @@ class StatusList extends Detail {
 				number: statusObject[UnitPiece.Regenerate]
 			});
 		}
-		if (statusObject[UnitPiece.Poison]) {
-			this._addIcon('poison', {
-				number: -statusObject[UnitPiece.Poison]
+		if (statusObject[UnitPiece.Burn]) {
+			this._addIcon('burn', {
+				number: -statusObject[UnitPiece.Burn]
 			});
 		}
 

@@ -229,7 +229,7 @@ class TestHealSkill extends SkillCard {
 	}
 	_aiAllyTargetScore(unit, square) {
 		return Math.min(this.power, unit.maxHp-unit.hp)
-			+ unit.getStatus(UnitPiece.Poison)
+			+ unit.getStatus(UnitPiece.Burn)
 			- unit.hpRate;
 	}
 };
@@ -279,11 +279,11 @@ class TestDebuffSkill extends TestHealSkill {
 		return "Debuff";
 	}
 	get _description() {
-		return `Poison the target and decrease their Power, Defense, and Speed`;
+		return `Burn the target and decrease their Power, Defense, and Speed`;
 	}
 	get _effectText() {
 		return [
-			`${this.icon('poison')} ${this.power}`,
+			`${this.icon('burn')} ${this.power}`,
 			`${this.icon('power', this.icon('down'))} \
 			${this.icon('defense', this.icon('down'))} \
 			${this.icon('speed', this.icon('down'))} -1`
@@ -302,7 +302,7 @@ class TestDebuffSkill extends TestHealSkill {
 			unit.addStatus(UnitPiece.Power, -1);
 			unit.addStatus(UnitPiece.Defense, -1);
 			unit.addStatus(UnitPiece.Speed, -1);
-			unit.addStatus(UnitPiece.Poison, this.power);
+			unit.addStatus(UnitPiece.Burn, this.power);
 		}
 		await Game.asyncPause(200);
 	}
