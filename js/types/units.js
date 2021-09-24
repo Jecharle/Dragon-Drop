@@ -204,6 +204,10 @@ class ObjectPiece extends UnitPiece {
 		return false;
 	}
 
+	get extra() {
+		return true;
+	}
+
 	get shiftable() {
 		return false;
 	}

@@ -254,6 +254,11 @@ class UnitPiece extends Piece {
 		this._guest = true;
 	}
 
+	get extra() {
+		// extras are units that don't count toward victory or loss
+		return false;
+	}
+
 	get aiImportance() {
 		return 1.0;
 	}

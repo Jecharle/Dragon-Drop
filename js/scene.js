@@ -773,7 +773,7 @@ class Team {
 	}
 	get size() {
 		return this.members.reduce((count, member) => {
-			if (member.alive && member.square) return count+1;
+			if (member.alive && member.square && !member.extra) return count+1;
 			else return count;
 		}, 0);
 	}
