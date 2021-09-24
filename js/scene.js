@@ -171,10 +171,12 @@ class BattleScene extends Scene {
 		var newPiece = new data.type();
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
-			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			else if (data.ally) {
+			if (data.ally) {
 				newPiece.setTeam(this.playerTeam);
 				newPiece.setAsGuest();
+			}
+			else {
+				newPiece.setTeam(this.enemyTeam);
 			}
 			return newPiece;
 		}
