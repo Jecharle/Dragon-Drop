@@ -508,7 +508,7 @@ class ThrowSkill2 extends SkillCard {
 		await Game.asyncPause(time/2);
 
 		var unit = target.piece;
-		unit.push(this.user.square, 10, {animation: UnitPiece.Path});
+		unit.push(this.user.square, 10, {animation: UnitPiece.Path, uphill: true});
 		await Game.asyncPause(200);
 	}
 	async _unitEffects(unit, _target) {
