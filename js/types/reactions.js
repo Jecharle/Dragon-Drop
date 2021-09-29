@@ -118,7 +118,10 @@ class TestCoverReaction extends OnTurnEndReaction {
 
 	_stats() {
 		this._area = 1;
+		this._minArea = 1;
 	}
+
+	// TODO: Only works on allies, not enemies
 
 	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, unit.square, "test-buff-effect");

@@ -247,12 +247,13 @@ class BattleScene extends Scene {
 		}
 		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
 
-		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
+		if (!this._lastMove && this._canRedeploy) {
 			this._undoButtonEl.innerText = "Redeploy";
 		} else {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
-		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
+		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
+		this._undoButtonEl.disabled = this._autoPhase || (!this._lastMove && !this._canRedeploy);
 	}
 	//#endregion refresh
 
