@@ -38,6 +38,13 @@ class Game {
 		return null;//Game.scene.unsaved || null; // TEMP disabled for testing
 	}
 
+	static get width() {
+		return 512;
+	}
+	static get height() {
+		return 384;
+	}
+
 	static async asyncPause(milliseconds) {
 		if (!milliseconds || milliseconds < 0) return;
 
@@ -61,16 +68,17 @@ class Game {
 		this.el.classList.add('game-window');
 		document.body.appendChild(this.el);
 
-		//SaveData.loadAll(); // TEMP disabled for testing
+		SaveData.loadAll();
 
 		// TEMP initial party setup
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
+		Party.add(new TestStatusPartyMember() );
 
 		MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
-		})
+		});
 	}
 }
 Game.begin();

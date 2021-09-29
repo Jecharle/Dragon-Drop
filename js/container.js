@@ -9,6 +9,7 @@ class Container extends ElObj {
 		this.pieces = [];
 
 		this.el.onclick = this._click;
+		this.el.ondblclick = this._click;
 		this.el.ondrop = this._drop;
 		this.el.onmousemove = this._mouseOver;
 		this.el.ondragenter = this._mouseOver;
@@ -63,11 +64,10 @@ class Position extends SpriteElObj {
 	get screenX() { return 0; }
 	get screenY() { return 0; }
 	get screenZ() { return 0; }
-	get screenPosition() { return `translate(${this.screenX}px, ${this.screenY}px)`; }
+	get screenPosition() { return `translate3d(${this.screenX}px, ${this.screenY}px, ${this.screenZ}px)`; }
 	
 	refresh() {
 		this.el.style.transform = this.screenPosition;
-		this.el.style.zIndex = this.screenZ;
 	}
 };
 
@@ -81,6 +81,7 @@ class Board extends Container {
 		
 		this._w = sceneData.width;
 		this._h = sceneData.height;
+		this.center();
 
 		this.squares = [];
 		for (var y = 0; y < this.h; y++) {
@@ -90,6 +91,7 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
+		this._loadZ(sceneData.z);
 		this._loadTerrain(sceneData.terrain);
 
 		this.deployArea = [];
@@ -104,8 +106,26 @@ class Board extends Container {
 
 	get w() { return this._w; }
 	get h() { return this._h; }
+	
+	center() {
+		var height = Square.screenY(this.w+1, this.h+1, 0);
+		var offset = Square.screenX(this.w+1, 0, 0) + Square.screenX(0, this.h+1, 0);
+		this.el.style.top = `${Math.floor((Game.height - height)/2)}px`;
+		this.el.style.left = `${Math.floor((Game.width - offset)/2)}px`;
+	}
 
 	//#region setup
+	_loadZ(zData) {
+		if (!zData) return;
+		for (var y = 0; y < this.h; y++) {
+			if (zData.length <= y) break;
+			for (var x = 0; x < this.w; x++) {
+				if (zData[y].length <= x) break;
+				this.at(x, y).z = zData[y][x];
+				this.at(x, y).refresh();
+			}
+		}
+	}
 	_loadTerrain(terrainData) {
 		if (!terrainData) return;
 		terrainData.forEach(data => {
@@ -217,7 +237,6 @@ class Board extends Container {
 		}
 		if (!this.el.contains(piece.el)) this.el.appendChild(piece.el);
 		piece.el.style.transform = square.screenPosition;
-		piece.el.style.zIndex = square.screenZ;
 		piece.square = square;
 		this._fillPiece(piece, square);
 
@@ -228,7 +247,6 @@ class Board extends Container {
 			this._fillPiece(null, piece.square, piece.size);
 			piece.square = null;
 			piece.el.style.transform = "";
-			piece.el.style.zIndex = "";
 			return true;
 		}
 		return false;
@@ -263,7 +281,9 @@ class Board extends Container {
 			y += dy;
 			var newSquare = this.at(x, y);
 
-			if (newSquare && this.canFit(piece, newSquare)) {
+			if (newSquare && this.canFit(piece, newSquare)
+				&& (props?.uphill || newSquare.z <= square.z+1)
+				&& (!props?.downhill || newSquare.z > square.z-1)) {
 				square = newSquare;
 			} else {
 				break;
@@ -301,7 +321,6 @@ class Board extends Container {
 		square.el.classList.add('deploy-range');
 		if (valid && (!swapOnly || square.piece)) {
 			square.el.ondragover = this._allowDrop;
-			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -335,6 +354,9 @@ class Board extends Container {
 				if (!this.canFitThrough(unit, square)) {
 					continue;
 				}
+				if (square.z > newEdge.z+1) {
+					continue;
+				}
 				this._paintMoveRange(square, movesLeft, path, this.canFit(unit, square), preview);
 				edges.push(square);
 			}
@@ -349,12 +371,10 @@ class Board extends Container {
 
 		square.inRange = true;
 		square.el.classList.add('move-range');
-		if (path.length == 0) square.el.classList.add('move-start');
 		if (preview) square.el.classList.add('enemy-preview');
 
-		if (valid && !preview) {
+		if (valid && !preview && path.length > 0) {
 			square.el.ondragover = this._allowDrop;
-			if (square.piece) square.piece.el.ondragover = this._allowDrop;
 			this.squaresInRange.push(square);
 			square.el.classList.add('selectable');
 		} else {
@@ -382,7 +402,6 @@ class Board extends Container {
 		if (valid) {
 			square.el.ondragover = this._allowDrop;
 			if (square.piece) {
-				square.piece.el.ondragover = this._allowDrop;
 				square.piece.el.classList.add('in-range');
 			}
 			this.squaresInRange.push(square);
@@ -405,7 +424,6 @@ class Board extends Container {
 		square.el.classList.remove('deploy-range', 'move-range', 'move-start', 'skill-range', 'enemy-preview', 'invalid', 'selectable');
 		square.el.ondragover = null;
 		if (square.piece) {
-			square.piece.el.ondragover = null;
 			square.piece.el.classList.remove('in-range');
 		}
 	}
@@ -476,7 +494,7 @@ class Board extends Container {
 		if (ev.target && ev.target?.obj) {
 			var square = ev.target.obj;
 			if (square && Game.scene) {
-				Game.scene.positionEvent(square);
+				Game.scene.positionEvent(square, null, ev.type == 'dblclick');
 			}
 		}
 	}
@@ -507,6 +525,11 @@ class Square extends Position {
 		this.piece = null;
 		this.terrain = Square.Flat;
 		this.inRange = false;
+
+		this._sideEl = document.createElement('div');
+		this._sideEl.classList.add('side-sprite');
+		this.el.appendChild(this._sideEl);
+
 		this.refresh();
 	}
 
@@ -516,13 +539,13 @@ class Square extends Position {
 
 	//#region static position utility
 	static screenX(x, y, _z) {
-		return Math.floor(48 * (x - y));
+		return Math.floor(24 * (x - y));
 	}
 	static screenY(x, y, z) {
-		return Math.floor(24 * (x + y - z));
+		return Math.floor(12 * (x + y - z));
 	}
 	static screenZ(x, y, z) {
-		return Math.floor(24 * (x + y + z));
+		return Math.floor(12 * (x + y) + z);
 	}
 	//#endregion static position utility
 
@@ -544,13 +567,16 @@ class Square extends Position {
 	get screenZ() {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
+	get groundHeight() {
+		return Math.max(this.z*12, 0);
+	}
 	get _selfScreenZ() {
-		return Square.screenZ(this.x, this.y, this.z - 1);
+		return Square.screenZ(this.x, this.y, this.z - 12);
 	}
 
 	refresh() {
-		this.el.style.transform = this.screenPosition;
-		this.el.style.zIndex = this._selfScreenZ;
+		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
+		this._sideEl.style.height = `${this.groundHeight}px`;
 	}
 	//#endregion isometric
 
@@ -612,39 +638,11 @@ class Square extends Position {
 		return this._terrain;
 	}
 	set terrain(value) {
-		switch (this._terrain) {
-			case Square.Wall:
-				this.el.classList.remove('wall');
-				break;
-			case Square.Pit:
-				this.el.classList.remove('pit');
-				break;
-			case Square.Cover:
-				this.el.classList.remove('cover');
-				break;
-			case Square.Rough:
-				this.el.classList.remove('rough');
-				break;
-		}
-
-		this.z = 0;
 		this._terrain = value;
-
-		switch (this._terrain) {
-			case Square.Wall:
-				this.el.classList.add('wall');
-				this.z = 1;
-				break;
-			case Square.Pit:
-				this.el.classList.add('pit');
-				break;
-			case Square.Cover:
-				this.el.classList.add('cover');
-				break;
-			case Square.Rough:
-				this.el.classList.add('rough');
-				break;
-		}
+		this.el.classList.toggle('wall', this._terrain == Square.Wall);
+		this.el.classList.toggle('pit', this._terrain == Square.Pit);
+		this.el.classList.toggle('cover', this._terrain == Square.Cover);
+		this.el.classList.toggle('rough', this._terrain == Square.Rough);
 	}
 	get blocksMove() {
 		return (this.terrain&Square._BlockMove) == Square._BlockMove;
@@ -705,8 +703,6 @@ class DeployUnitList extends Container {
 	show() {
 		this._show();
 	}
-
-	// TODO: Show unit count + max deploy count
 	
 	//#region input events
 	_drop(ev) {
@@ -724,7 +720,7 @@ class DeployUnitList extends Container {
 		if (ev.target && ev.target?.obj) {
 			var container = ev.target.obj;
 			if (container && Game.scene) {
-				Game.scene.containerEvent(container);
+				Game.scene.containerEvent(container, null, ev.type == 'dblclick');
 			}
 		}
 	}
@@ -738,6 +734,7 @@ class SkillList extends Container {
 	constructor() {
 		super();
 		this._user = null;
+		this._team = null;
 		this._hide();
 
 		this._userInfo = new UnitInfo();
@@ -754,9 +751,11 @@ class SkillList extends Container {
 		this._user = user;
 		this._userInfo.unit = user;
 		if (!user) {
+			this._setTeam(null);
 			this._hide();
 			return false;
 		} else {
+			this._setTeam(user.team);
 			user.skills.forEach(skill => this._addSkill(skill));
 			this._show();
 			return true;
@@ -775,6 +774,19 @@ class SkillList extends Container {
 	_clearSkills() {
 		while(this.pieces.length) { this.removePiece(this.pieces[0]); }
 	}
+
+	get team() {
+		return this._team;
+	}
+	_setTeam(team) {
+		if (this._team && this._team.style) {
+			this.el.classList.remove(this._team.style);
+		}
+		this._team = team;
+		if (this._team && this._team.style) {
+			this.el.classList.add(this._team.style);
+		}
+	}
 	//#endregion list management
 }
 
@@ -791,6 +803,9 @@ class UnitInfo extends ElObj {
 
 		this._lifebar = new Lifebar(0, 0);
 		this.el.appendChild(this._lifebar.el);
+
+		this._statusList = new StatusList(null);
+		this.el.appendChild(this._statusList.el);
 
 		this._nameSpan = document.createElement("span");
 		this._nameSpan.classList.add('name');
@@ -816,6 +831,8 @@ class UnitInfo extends ElObj {
 			this.style = unit.style;
 			this._lifebar.maxValue = unit.maxHp;
 			this._lifebar.value = unit.hp;
+			this._lifebar.defenseValue = unit.defense;
+			this._statusList.value = unit._status;
 			this._nameSpan.innerText = unit.characterName;
 			this._tooltip.value = unit.fullDescription;
 		} else {
@@ -823,6 +840,8 @@ class UnitInfo extends ElObj {
 			this._unit = null;
 			this._lifebar.maxValue = 0;
 			this._lifebar.value = 0;
+			this._lifebar.defenseValue = 0; 
+			this._statusList.value = null;
 			this._nameSpan.innerText = "";
 			this._tooltip.value = "";
 		}
@@ -836,6 +855,7 @@ class UnitInfo extends ElObj {
 class OverworldMap extends Container {
 	constructor(mapData) {
 		super();
+		this._name = mapData.filename;
 		this.nodes = [];
 		this.edges = [];
 
@@ -848,6 +868,10 @@ class OverworldMap extends Container {
 
 	get elClass() {
 		return 'overworld-map';
+	}
+
+	get name() {
+		return this._name;
 	}
 
 	refresh() {
@@ -873,7 +897,7 @@ class OverworldMap extends Container {
 		eventData.forEach(data => {
 			var node = this.getNode(data.node);
 			if (node && data.type) {
-				var newEvent = new MapEvent(data);
+				var newEvent = new MapEvent(data, node);
 				if (newEvent.complete) this.unlockNodes(newEvent.unlocks, true);
 				node.setEvent(newEvent);
 			}
@@ -901,7 +925,7 @@ class OverworldMap extends Container {
 	connect(id1, id2, oneWay) {
 		var node1 = this.getNode(id1);
 		var node2 = this.getNode(id2);
-		if (node1 && node2 && !this._isConnected(node1, node2)) {
+		if (node1 && node2 && !this._connection(node1, node2)) {
 			var newEdge = new Edge(node1, node2, oneWay);
 			this.edges.push(newEdge);
 			this.el.appendChild(newEdge.el);
@@ -923,7 +947,7 @@ class OverworldMap extends Container {
 		}
 		return false;
 	}
-	_isConnected(start, end) {
+	_connection(start, end) {
 		return this.edges.find(edge => edge.otherNode(start) == end);
 	}
 	_allEdges(node) {
@@ -941,7 +965,8 @@ class OverworldMap extends Container {
 					this._allEdges(node).forEach(edge => {
 						if (edge.hidden) return;
 						edge.refresh();
-						edge.addTimedClass(1000, 'unlock');
+						if (edge.end == node) edge.addTimedClass(1500, 'unlock');
+						else edge.addTimedClass(2500, 'unlock', 'out');
 					});
 					await Game.asyncPause(1000);
 				}
@@ -952,25 +977,30 @@ class OverworldMap extends Container {
 	//#region move range
 	setReachableNodes(origin, range) {
 		if (!origin || origin.parent != this || range < 0) return;
-		this._paintReachableNode(origin, range, []);
-		var edges = [origin];
+		this._paintReachableNode(origin, range, [], []);
+		var frontier = [origin];
 
-		while (edges.length > 0) {
-			var newEdge = edges.pop();
-			var movesLeft = newEdge.movesLeft-1;
-			var path = [newEdge].concat(newEdge.path);
+		while (frontier.length > 0) {
+			var newNode = frontier.pop();
+			var movesLeft = newNode.movesLeft-1;
+			var path = [newNode].concat(newNode.path);
 
-			newEdge.adjacent.forEach(node => {
+			newNode.adjacent.forEach(node => {
 				if (node.hidden || node.inRange) return;
-				this._paintReachableNode(node, movesLeft, path);
-				if (movesLeft > 0) edges.unshift(node);
+				if (newNode.incomplete && node.incomplete) return;
+				var edgePath = [this._connection(newNode, node)].concat(newNode.edgePath);
+				this._paintReachableNode(node, movesLeft, path, edgePath);
+				if (movesLeft > 0) frontier.unshift(node);
 			});
 		}
+
+		this.edges.forEach(edge => edge.refresh());
 	}
-	_paintReachableNode(node, movesLeft, path) {
+	_paintReachableNode(node, movesLeft, nodePath, edgePath) {
 		node.inRange = true;
 		node.movesLeft = movesLeft;
-		node.path = path;
+		node.path = nodePath;
+		node.edgePath = edgePath
 		node.el.classList.add('selectable');
 		node.el.ondragover = this._allowDrop;
 	}
@@ -1006,7 +1036,7 @@ class OverworldMap extends Container {
 		if (ev.target && ev.target?.obj) {
 			var node = ev.target.obj;
 			if (node && Game.scene) {
-				Game.scene.positionEvent(node);
+				Game.scene.positionEvent(node, null, ev.type == 'dblclick');
 			}
 		}
 	}
@@ -1054,6 +1084,9 @@ class MapNode extends Position {
 		return this._id;
 	}
 
+	get fullId() {
+		return `${this.parent.name}/${this.id}`;
+	}
 
 	//#region map event
 	setEvent(event) {
@@ -1118,6 +1151,15 @@ class MapNode extends Position {
 			if (otherNode) adjacent.push(otherNode);
 		})
 		return adjacent;
+	}
+	get edges() {
+		if (!this.parent?.edges) return [];
+		var edges = [];
+		this.parent.edges.forEach(edge => {
+			var otherNode = edge.otherNode(this);
+			if (otherNode) edges.push(edge);
+		})
+		return edges;
 	}
 	//#endregion connections
 }

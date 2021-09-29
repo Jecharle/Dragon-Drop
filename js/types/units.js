@@ -17,6 +17,9 @@ UnitPiece.parseUnitType = function(string) {
 		// enemies
 		case "testenemy":
 			return TestEnemyUnit;
+		
+		case "testenemysupport":
+			return TestEnemySupportUnit;
 
 		// inanimate object
 		case "rockobject":
@@ -29,7 +32,7 @@ UnitPiece.parseUnitType = function(string) {
 };
 
 /***************************************************
- Subtypes of UnitPiece
+ "Unit" subtypes for player use
 ***************************************************/
 class TestMeleeUnit extends UnitPiece {
 	
@@ -40,7 +43,7 @@ class TestMeleeUnit extends UnitPiece {
 		return "Specialize in close-range combat";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'melee-unit';
 		this._maxHp = 6;
 		this._moveRange = 3;
@@ -50,8 +53,9 @@ class TestMeleeUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestRushSkill(this),
-			new TestMoveSkill(this)
-		]
+			new TestMoveSkill(this),
+			new TestBuildSkill(this)
+		];
 	}
 };
 
@@ -64,7 +68,7 @@ class TestSupportUnit extends UnitPiece {
 		return "Low health, but can attack at range and use support skills";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'support-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
@@ -73,9 +77,9 @@ class TestSupportUnit extends UnitPiece {
 	_setSkills() {
 		this._skills = [
 			new TestRangedSkill(this),
-			new TestHealSkill(this),
-			new TestBuildSkill(this),
-		]
+			new TestBuffSkill(this),
+			new TestHealSkill(this)
+		];
 	}
 };
 
@@ -88,7 +92,7 @@ class TestPositionUnit extends UnitPiece {
 		return "Low damage, but specialized in moving allies and enemies";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'position-unit';
 		this._maxHp = 4;
 		this._moveRange = 3;
@@ -98,10 +102,39 @@ class TestPositionUnit extends UnitPiece {
 		this._skills = [
 			new TestPullSkill(this),
 			new TestAreaSkill(this),
-			new TestPositionSkill(this),
-		]
+			new ThrowSkill2(this),
+		];
 	}
 };
+
+class TestStatusUnit extends UnitPiece {
+
+	get name() {
+		return "Status User";
+	}
+	get _description() {
+		return "Low damage, but can use buffs, debuffs, and statuses";
+	}
+
+	_stats() {
+		this.style = 'status-unit';
+		this._maxHp = 4;
+		this._moveRange = 2;
+	}
+
+	_setSkills() {
+		this._skills = [
+			new TestAttackSkill(this),
+			new TestBuffSkill(this),
+			new TestDebuffSkill(this),
+			new TestGuardSkill(this)
+		];
+	}
+};
+
+/***************************************************
+ "Unit" subtypes meant for enemies
+***************************************************/
 
 class TestEnemyUnit extends UnitPiece {
 	
@@ -112,7 +145,7 @@ class TestEnemyUnit extends UnitPiece {
 		return "Specialize in close-range combat";
 	}
 
-	_setStats() {
+	_stats() {
 		this.style = 'enemy-unit';
 		this._maxHp = 4;
 		this._moveRange = 2;
@@ -122,7 +155,37 @@ class TestEnemyUnit extends UnitPiece {
 		this._skills = [
 			new TestAttackSkill(this),
 			new TestAreaSkill(this),
-		]
+		];
+	}
+
+	_setReactions() {
+		this._reactions = [
+			new TestRageReaction(this),
+			new TestExplodeReaction(this),
+		];
+	}
+};
+
+class TestEnemySupportUnit extends UnitPiece {
+	
+	get name() {
+		return "Support Monster";
+	}
+	get _description() {
+		return "Low health, but can attack at range and use support skills";
+	}
+
+	_stats() {
+		this.style = 'enemy-support-unit';
+		this._maxHp = 2;
+		this._moveRange = 3;
+	}
+
+	_setSkills() {
+		this._skills = [
+			new TestRangedSkill(this),
+			// TODO: Support?
+		];
 	}
 };
 
@@ -133,21 +196,48 @@ class ObjectPiece extends UnitPiece {
 	get canMove() { return false; }
 	get canAct() { return false; }
 	get moveRange() { return 0; }
-	select() { return false; }
-	_setSelectable() { }
+	get aiImportance() { return 0.1; }
+	_setSelectable() { } // It's not selectable either so
+	_setUnselectable() { } // Prevent it from graying out
+
+	allowsMove(_piece) {
+		return false;
+	}
+
+	get extra() {
+		return true;
+	}
+
+	get shiftable() {
+		return false;
+	}
+
+	_baseStatusResist(_effect, _value) {
+		return true;
+	}
 }
 
 class TestRockObject extends ObjectPiece {
-
 	get name() {
-		return "Barrier";
+		return "Wall";
 	}
 	get _description() {
-		return "An obstacle used to control the battlefield";
+		return "Raises the defense of adjacent units<br>Explodes when destroyed";
 	}
 
-	_setStats() {
+	get defense() {
+		return super.defense + 1;
+	}
+
+	_stats() {
 		this.style = 'rock';
 		this._maxHp = 2;
+	}
+
+	_setReactions() {
+		this._reactions = [
+			new TestCoverReaction(this),
+			new TestExplodeReaction(this),
+		];
 	}
 }

@@ -3,6 +3,10 @@
  Load and store data from external files
 ***************************************************/
 class SceneModel {
+	constructor(filename) {
+		this.filename = filename;
+	}
+
 	// TODO: Generically applicable file-loading routine
 	static async load(folder, filename) {
 		var fullpath = `data/${folder}/${filename}.json`;
@@ -29,8 +33,8 @@ class SceneModel {
  MapSceneModel
 ***************************************************/
 class MapSceneModel extends SceneModel {
-	constructor(data) {
-		super();
+	constructor(data, filename) {
+		super(filename);
 
 		this.width = data?.width || 0;
 		this.height = data?.height || 0;
@@ -40,7 +44,7 @@ class MapSceneModel extends SceneModel {
 
 		this.connections = data?.connections || []; // node id 1, node id 2, one-way
 
-		this.events = data?.events.map(event => { // node id, type*, filename, params, oneTime, name, description
+		this.events = data?.events.map(event => { // node id, type*, filename, oneTime, name, description, rewards, nodes to unlock
 			event.type = MapEvent.parseEventType(event.type);
 			return event;
 		}) || [];
@@ -53,7 +57,7 @@ class MapSceneModel extends SceneModel {
 	static async load(filename) {
 		var data = await SceneModel.load("maps", filename);
 		// TODO: Handle errors while loading?
-		var sceneModel = new this(data);
+		var sceneModel = new this(data, filename);
 		return sceneModel;
 	}
 }
@@ -62,16 +66,19 @@ class MapSceneModel extends SceneModel {
  BattleSceneModel
 ***************************************************/
 class BattleSceneModel extends SceneModel {
-	constructor(data) {
-		super();
+	constructor(data, filename) {
+		super(filename);
 
 		this.maxTurns = data?.maxTurns || 0;
 		this.minTurns = data?.minTurns || 0;
 		this.defaultVictory = data?.defaultVictory || false;
 		this.maxDeploy = data?.maxDeploy || 4;
 
-		this.width = Math.max(Math.min(data?.width || 10, 10), 1);
-		this.height = Math.max(Math.min(data?.height || 10, 10), 1);
+		this.width = Math.max(Math.min(data?.width || 8, 10), 1);
+		this.height = Math.max(Math.min(data?.height || 8, 10), 1);
+
+		// z-level map
+		this.z = data?.z || [];
 
 		// x, y
 		this.deployment = data?.deployment || [];
@@ -94,7 +101,7 @@ class BattleSceneModel extends SceneModel {
 	static async load(filename) {
 		var data = await SceneModel.load("battles", filename);
 		// TODO: Handle errors while loading?
-		var sceneModel = new this(data);
+		var sceneModel = new this(data, filename);
 		return sceneModel;
 	}
 }

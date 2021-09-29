@@ -30,10 +30,10 @@ class ElObj {
 	}
 
 	_hide() {
-		this.el.style.visibility = "hidden";
+		this.el.style.display = "none";
 	}
 	_show() {
-		this.el.style.visibility = "visible";
+		this.el.style.display = "";
 	}
 
 	addTimedClass(duration, ...classList) {

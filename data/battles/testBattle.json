@@ -1,7 +1,23 @@
 {
 	"type": "battle",
 
+	"width": 10,
+	"height": 10,
+
 	"minTurns": 3,
+
+	"z": [
+		[3, 3, 3, 4, 5, 4, 3, 3, 1, 1],
+		[3, 2, 1, 1, 2, 2, 1, 1, 1, 2],
+		[3, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+		[3, 4, 1, 2, 2, 2, 2, 1, 1, 1],
+		[2, 3, 1, 2, 3, 3, 1, 1, 1, 1],
+		[2, 2, 2, 2, 3, 1, 1, 1, 1, 0],
+		[1, 2, 1, 2, 2, 2, 1, 1, 0, 0],
+		[1, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	],
 
 	"deployment": [
 		{"x": 3, "y": 6},
@@ -19,13 +35,11 @@
 	],
 
 	"units": [
-		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4, "enemy": true},
-		
-		{"turn": 0, "type": "TestPosition", "x": 4, "y": 7, "ally": true},
+		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4},
 
-		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
-		{"turn": 1, "type": "TestEnemy", "x": 5, "y": 4, "enemy": true},
+		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
+		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
 		
-		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4, "enemy": true}
+		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4}
 	]
 }

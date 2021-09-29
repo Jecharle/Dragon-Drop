@@ -56,9 +56,9 @@ class Scene extends ElObj {
 	//#endregion block during some async
 
 	//#region input events
-	pieceEvent(piece, dragging) { }
-	positionEvent(position, dragId) { }
-	containerEvent(container, dragId) { }
+	pieceEvent(piece, dragging, doubleClick) { }
+	positionEvent(position, dragId, doubleClick) { }
+	containerEvent(container, dragId, doubleClick) { }
 	mouseOver(position, dragId) { }
 	rightClick() { }
 
@@ -106,7 +106,6 @@ class BattleScene extends Scene {
 	_createTurnTitle() {
 		var turnTitle = document.createElement("span");
 		turnTitle.classList.add('turn-title');
-		turnTitle.style.textAlign = "center";
 		return turnTitle;
 	}
 	_createMenuButton() {
@@ -135,7 +134,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._nextTurn();
+			this._endTurn();
 		};
 		return button;
 	}
@@ -172,10 +171,12 @@ class BattleScene extends Scene {
 		var newPiece = new data.type();
 		var square = this._board.getNearestFit(newPiece, this._board.at(data.x, data.y))
 		if (this._board.movePiece(newPiece, square)) {
-			if (data.enemy) newPiece.setTeam(this.enemyTeam);
-			else if (data.ally) {
+			if (data.ally) {
 				newPiece.setTeam(this.playerTeam);
 				newPiece.setAsGuest();
+			}
+			else {
+				newPiece.setTeam(this.enemyTeam);
 			}
 			return newPiece;
 		}
@@ -246,12 +247,13 @@ class BattleScene extends Scene {
 		}
 		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
 
-		if (!this._lastMove && this._canRedeploy || this._phase == BattleScene.DeployPhase) {
+		if (!this._lastMove && this._canRedeploy) {
 			this._undoButtonEl.innerText = "Redeploy";
 		} else {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
-		this._undoButtonEl.disabled = !!(this._autoPhase || (!this._lastMove && !this._canRedeploy));
+		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
+		this._undoButtonEl.disabled = this._autoPhase || (!this._lastMove && !this._canRedeploy);
 	}
 	//#endregion refresh
 
@@ -285,16 +287,27 @@ class BattleScene extends Scene {
 		this._clearMoves();
 		this.refresh();
 	}
-	_nextTurn() {
+	async _endTurn() {
 		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
 		&& this._activeTeam && this._activeTeam.untouched
 		&& !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
 		}
-
+	
+		this.setBusy();
 		this._deselectSkill();
 		this._deselectUnit();
 		this._clearMoves();
+
+		if (this._activeTeam && this._phase != BattleScene.DeployPhase) {
+			await this._activeTeam.turnEndEffects();
+			this._setActiveTeam(null);
+		}
+
+		if (this._phase == BattleScene.EnemyPhase) {
+			await this._addReinforcements();
+		}
+
 		switch (this._phase) {
 			case BattleScene.DeployPhase:
 				this._deployList.hide();
@@ -320,9 +333,16 @@ class BattleScene extends Scene {
 				break;
 		}
 		this.refresh();
-	
+
+		await Game.asyncPause(1000);
+		if (this._activeTeam) {
+			await this._activeTeam.turnStartEffects();
+		}
+
+		this.setDone();
+
 		if (this._autoPhase) {
-			Game.asyncPause(1000).then(() => this._aiProcessTurn());
+			this._aiProcessTurn();
 		}
 	}
 
@@ -394,7 +414,7 @@ class BattleScene extends Scene {
 	}
 	_showEndScreen(text) {
 		var endScreen = new EndScreen(text);
-		endScreen.el.onclick = ev => this._endBattle(); // TEMP
+		endScreen.el.onclick = () => this._endBattle(); // TEMP
 		this.el.appendChild(endScreen.el);
 	}
 
@@ -485,6 +505,7 @@ class BattleScene extends Scene {
 			this._clearMoves();
 			this._deselectSkill();
 			this._isBattleOver();
+			this._skillList.setUser(this._unit);
 		}
 		this.setDone();
 		return success;
@@ -518,7 +539,7 @@ class BattleScene extends Scene {
 	async _addReinforcements() {
 		for (var i = 0; i < this._reinforcementData.length; i++) {
 			var data = this._reinforcementData[i];
-			if (data.turn == this._turn) { // TODO: Other requirements?
+			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
 				newPiece.addTimedClass(500, 'spawn');
 				await Game.asyncPause(500);
@@ -547,8 +568,6 @@ class BattleScene extends Scene {
 					this._selectTarget(piece.square);
 				} else if (this._unit == piece) {
 					this._deselectUnit();
-				} else if (piece.square) {
-					this.positionEvent(piece.square);
 				} else if (!this._unit.square) { // selecting undeployed units
 					this._selectUnit(piece);
 				}
@@ -560,9 +579,6 @@ class BattleScene extends Scene {
 				} else if (!dragging) {
 					this._deselectSkill();
 				}
-			} else if (this._skill && piece.square && !dragging) {
-				this.positionEvent(piece.square);
-				return;
 			}
 
 			if (piece.type == Piece.Unit && piece.myTurn) {
@@ -661,7 +677,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Enter") {
-			this._nextTurn();
+			this._endTurn();
 		}
 
 		if (isFinite(key)) {
@@ -682,7 +698,7 @@ class BattleScene extends Scene {
 	async _aiProcessTurn() {
 		var aiControlUnits = this._activeTeam.members.filter(member => member.canAct || member.canMove);
 
-		var waitTime = 300; // TODO: Adjustable via settings?
+		var waitTime = 300;
 
 		while (aiControlUnits.length > 0) {
 			aiControlUnits.sort((a, b) => (a.aiUnitScore - b.aiUnitScore) || (Math.random() - 0.5));
@@ -724,11 +740,7 @@ class BattleScene extends Scene {
 		}
 		await Game.asyncPause(waitTime);
 
-		if (this._phase == BattleScene.EnemyPhase) {
-			await this._addReinforcements();
-		}
-
-		this._nextTurn();
+		this._endTurn();
 		return;
 	}
 	//#endregion ai
@@ -762,7 +774,7 @@ class Team {
 	}
 	get size() {
 		return this.members.reduce((count, member) => {
-			if (member.alive && member.square) return count+1;
+			if (member.alive && member.square && !member.extra) return count+1;
 			else return count;
 		}, 0);
 	}
@@ -776,11 +788,33 @@ class Team {
 		return this._auto;
 	}
 
+	async turnStartEffects() {
+		var members = [...this.members];
+		for (var i = 0; i < members.length; i++) {
+			await members[i].updateStatusTurnStart();
+		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].reactTurnStart();
+		}
+	}
+	async turnEndEffects() {
+		var members = [...this.members];
+		for (var i = 0; i < members.length; i++) {
+			await members[i].updateStatusTurnEnd();
+		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].reactTurnEnd();
+		}
+		for (var i = 0; i < members.length; i++) {
+			await members[i].dieIfDead();
+		}
+	}
+
 	startTurn() {
-		this.members.forEach(piece => piece.startTurn());
+		[...this.members].forEach(piece => piece.startTurn());
 	}
 	endTurn() {
-		this.members.forEach(piece => piece.endTurn());
+		[...this.members].forEach(piece => piece.endTurn());
 	}
 	//#endregion turn
 
@@ -806,15 +840,14 @@ class MapScene extends Scene {
 		this._camera = new ScrollingView(mapData.width, mapData.height);
 		this._map = new OverworldMap(mapData);
 		this._piece = new MapPiece();
+		this._node = null;
 
-		this._exploreButtonEl = this._createExploreButton();
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
 		// TODO: Pack this away into a method
 		this._camera.el.appendChild(this._map.el);
 		this.el.appendChild(this._camera.el);
-		this.el.appendChild(this._exploreButtonEl);
 		this.el.appendChild(this._eventDescriptionEl);
 		this.el.appendChild(this._menuButtonEl);
 		
@@ -824,7 +857,7 @@ class MapScene extends Scene {
 		} else {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
-		this._camera.setViewSize(1024, 576); // TEMP, until I can pull the resolution in natively
+		this._camera.setViewSize(Game.width, Game.height);
 	}
 
 	start() {
@@ -832,19 +865,13 @@ class MapScene extends Scene {
 
 		if (this._paused) {
 			var data = this._getData();
-			// TODO: Rather than the current node, store / read the event you were 'inside'
-			if (data.complete && this._currentNode.event) {
-				this._completeEvent(this._currentNode.event);
+			if (data.complete && this._node.event) {
+				this._completeEvent(this._node.event);
 			}
 			this._resume();
 		}
 
 		this.refresh();
-	}
-
-	// TODO: Allow selecting / deselecting the current node
-	get _currentNode() {
-		return this._piece.node;
 	}
 
 	//#region ui setup
@@ -853,7 +880,7 @@ class MapScene extends Scene {
 		button.classList.add('nav-button', 'explore-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._exploreNode(this._currentNode);
+			this._exploreNode(this._node);
 		};
 		return button;
 	}
@@ -884,49 +911,63 @@ class MapScene extends Scene {
 	_refreshNodes() {
 		this._map.refresh();
 		this._map.resetReachableNodes();
-		this._map.setReachableNodes(this._piece.node, 10); // TEMP very high range
+		this._map.setReachableNodes(this._piece.node, 1);
 	}
 
 	_refreshUi() {
-		switch (this._currentNode.event?.type) {
-			case MapEvent.Battle:
-				this._exploreButtonEl.innerText = "Fight";
-				break;
-			case MapEvent.Story:
-				this._exploreButtonEl.innerText = "View"; // TEMP?
-				break;
-			case MapEvent.Move:
-				this._exploreButtonEl.innerText = "Go";
-				break;
-			default:
-				this._exploreButtonEl.innerText = "Start";
-				break;
+		if (this._node) {
+			this._eventDescriptionEl.innerHTML = this._node.event?.fullDescription;
 		}
-
-		this.el.classList.toggle('hide-description', !this._currentNode.canExplore);
-		this._eventDescriptionEl.innerHTML = this._currentNode.event?.fullDescription;
+		this.el.classList.toggle('hide-description', !this._node?.canExplore);
 	}
 	//#endregion refresh
 
 	//#region actions
-	async _movePiece(node) {
-		this.setBusy();
-		this.el.classList.add('hide-description');
-		
-		this._camera.focus(node);
-		if (node.path) {
-			this._camera.animateMove(node.path, 750, 150);
-		} else if (this._piece.node) {
-			this._camera.animateMove([this._piece.node], 750, 150);
-		}
-		await this._piece.move(node);
+	async _selectNode(node, instant) {
+		var oldNode = this._node;
+		this._node = node;
 
+		if (oldNode) {
+			oldNode.el.classList.remove('selected');
+			this._map.nodes.forEach(node => node.el.classList.remove('path'));
+			this._map.edges.forEach(edge => edge.el.classList.remove('path'));
+		}
+
+		if (this._node) {
+			this._node.el.classList.add('selected');
+			this._node.path.forEach(node => node.el.classList.add('path'));
+			this._node.edgePath.forEach(edge => edge.el.classList.add('path'));
+		} else {
+			this.el.classList.add('hide-description');
+		}
+		return true;
+	}
+	async _deselectNode(instant) {
+		return this._selectNode(null, instant);
+	}
+
+	async _movePiece(node) {
+		if (!node) return false;
+
+		this.setBusy();
+		this._camera.center(node.screenX, node.screenY);
+		this._camera.animateMove([this._piece.node], 600);
+		await this._piece.move(node);
 		this.setDone();
+
+		return true;
 	}
 
 	async _exploreNode(node) {
-		if (!node || !node.canExplore) return false;
+		if (!node) return false;
 		
+		await this._movePiece(node);
+
+		if (!node.canExplore) {
+			this._deselectNode();
+			return true;
+		}
+
 		var event = node.event;
 
 		switch (event.type) {
@@ -949,7 +990,8 @@ class MapScene extends Scene {
 					Game.setScene( new MapScene(this._lastScene, model, event.param));
 				} else {
 					var destination = this._map.getNode(event.param);
-					if (destination) this._movePiece(destination);
+					if (destination) this._movePiece(destination); // TODO: This should just teleport
+					this._deselectNode();
 				}
 				this._completeEvent(event);
 				this.refresh();
@@ -964,39 +1006,52 @@ class MapScene extends Scene {
 
 	_completeEvent(event) {
 		if (!event || event.complete) return;
-		// TODO: Hand out some currency
 		event.setComplete();
 		if (event.hasReward) {
-			alert(`Got ${event.gold} gold and ${event.gems} gems.`);
+			if (event.gold && event.gems) alert(`Got ${event.gold} gold and ${event.gems} items`);
+			else if (event.gems) alert(`Got ${event.gems} items`);
+			else if (event.gold) alert(`Got ${event.gold} gold`);
 		}
+		SaveData.saveMap();
 		if (event.saved) {
-			SaveData.saveAll(); // TODO: Only save the part about the map
+			SaveData.saveFlags();
 		}
 		this._map.unlockNodes(event.unlocks).then(() => this.refresh());
-
+		this._deselectNode();
 	}
 	//#endregion actions
 
 	//#region input events
 	positionEvent(node, dragId) {
-		if (this.busy || !this._piece.idMatch(dragId)) return;
+		if (this.busy || dragId) return;
 
-		if (node.inRange) {
-			this._movePiece(node).then(result => this.refresh());
-			return;
+		if (this._node == node) {
+			this._exploreNode(this._node).then(() => this.refresh());
 		}
 	}
-	/*mouseOver(node, dragId) {
-		if (this.busy || !this._piece.idMatch(dragId)) return;
-	}*/
-	/*rightClick() {
+	mouseOver(node, dragId) {
+		if (this.busy || dragId) return;
+
+		if (!node) {
+			this._deselectNode();
+			this.refresh();
+		} else if (node.inRange && node != this._node) {
+			this._selectNode(node);
+			this.refresh();
+		}
+	}
+	rightClick() {
 		if (this.busy) return;
-	}*/
+
+		if (this._node) {
+			this._deselectNode().then(() => this.refresh());
+		}
+	}
 	keydown(key) {
 		if (this.busy) return;
 
-		if (key == "Enter") {
-			this._exploreNode(this._currentNode);
+		if (key == 'Escape') {
+			this._deselectNode().then(() => this.refresh());
 		}
 	}
 	//#endregion
@@ -1007,7 +1062,8 @@ class MapScene extends Scene {
  Map Scene -> Map Event
 ***************************************************/
 class MapEvent {
-	constructor(eventData) {
+	constructor(eventData, node) {
+		this.parent = node;
 		this._type = eventData.type;
 		[this._filename, this._param] = eventData.filename?.split("/") || [];
 
@@ -1015,10 +1071,11 @@ class MapEvent {
 		this._description = eventData.description || "";
 		this._oneTime = eventData.oneTime;
 
-		this._saveId = eventData.saveId;
-		this._complete = (this.saved && SaveData.getEventClear(this._saveId));
+		this._flagId = eventData.flag;
+		this._nodeId = this.parent.fullId;
+		this._complete = SaveData.getEventClear(this._nodeId) || (this.saved && SaveData.getFlag(this._flagId));
 		this._goldReward = eventData.gold || 0;
-		this._gemReward = eventData.gems || 0;
+		this._itemReward = eventData.items || 0;
 		this._unlocks = eventData.unlocks || [];
 	}
 
@@ -1083,13 +1140,14 @@ class MapEvent {
 	}
 
 	get saved() {
-		return !!this._saveId;
+		return !!this._flagId;
 	}
 
 	setComplete() {
 		this._complete = true;
+		SaveData.setEventClear(this._nodeId);
 		if (this.saved) {
-			SaveData.setEventClear(this._saveId);
+			SaveData.setFlag(this._flagId, 1);
 		}
 	}
 	//#endregion completion state
@@ -1099,7 +1157,7 @@ class MapEvent {
 		return this._goldReward;
 	}
 	get gems() {
-		return this._gemReward;
+		return this._itemReward;
 	}
 	get hasReward() {
 		return !!(this.gold || this.gems);
@@ -1198,22 +1256,29 @@ class ScrollingView extends ElObj {
 	//#endregion scroll boundaries
 
 	//#region animate
-	animateMove(path, speed, delay) {
-		if (!path || !speed) return 0;
+	async animateMove(path, speed, delay) {
+		if (!path || !speed) return false;
+		var moved = false;
 		var keyframes = [{}];
 		path.forEach(position => {
 			if (!position) return;
+
 			var x = this._clampX(position.screenX);
 			var y = this._clampY(position.screenY);
 			keyframes.unshift({
 				transform: this._scrollPosition(x, y)
 			});
+
+			if (x != this.x || y != this.y) moved = true;
 		});
+	
+		if (!moved) return true;
 
 		var time = speed*(keyframes.length-1);
 		delay = delay || 0;
 		this.el.animate(keyframes, {duration: time, delay: delay, easing: "linear", fill: "backwards"});
-		return time;
+		await Game.asyncPause(time+delay);
+		return true;
 	}
 	//#endregion animate
 }

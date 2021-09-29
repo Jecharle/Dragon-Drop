@@ -7,6 +7,22 @@ class Party {
 		console.log("Party object is static, do not instantiate");
 	}
 
+	static _stamina = 0;
+	static get stamina() {
+		return this._stamina;
+	}
+	static set stamina(value) {
+		this._stamina = Math.max(value, 0);
+	}
+
+	static _money = 0;
+	static get money() {
+		return this._money;
+	}
+	static set money(value) {
+		this._money = Math.max(value, 0);
+	}
+
 	static _members = []
 	static get members() {
 		return this._members;
@@ -27,7 +43,9 @@ class Party {
 		return false;
 	}
 
-	static _partySize = 6
+	// TODO: Party buffs, special items, etc?
+
+	static _partySize = 4
 	static get partySize() {
 		return this._partySize;
 	}
@@ -47,18 +65,23 @@ class Party {
 	}
 }
 
+/***************************************************
+Members of the party that generate units
+***************************************************/
 class PartyMember {
 	constructor() {
 		this.alive = true;
 	}
 
-	// TODO: Also provide the unit's skill list
 	get name() {
 		return "";
 	}
 
+	getEquipment() {
+		return [new TestEquip()];
+	}
+
 	getUnit() {
-		// TODO: also fill out the skill list?
 		return null;
 	}
 
@@ -74,7 +97,7 @@ class TestMeleePartyMember extends PartyMember {
 	get name() { return "Alice"; }
 
 	getUnit() {
-		return new TestMeleeUnit(this);
+		return new TestMeleeUnit(this.getEquipment(), this);
 	}
 }
 
@@ -82,7 +105,7 @@ class TestSupportPartyMember extends PartyMember {
 	get name() { return "Bob"; }
 
 	getUnit() {
-		return new TestSupportUnit(this);
+		return new TestSupportUnit(this.getEquipment(),this);
 	}
 }
 
@@ -90,6 +113,14 @@ class TestPositionPartyMember extends PartyMember {
 	get name() { return "Carol"; }
 
 	getUnit() {
-		return new TestPositionUnit(this);
+		return new TestPositionUnit(this.getEquipment(),this);
+	}
+}
+
+class TestStatusPartyMember extends PartyMember {
+	get name() { return "Dan"; }
+
+	getUnit() {
+		return new TestStatusUnit(this.getEquipment(),this);
 	}
 }

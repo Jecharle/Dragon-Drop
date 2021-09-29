@@ -20,6 +20,19 @@ class Detail extends ElObj {
 	get elType() {
 		return 'span';
 	}
+
+	static numberSprite(value, showPlus) {
+		var numberEl = document.createElement('div');
+		numberEl.classList.add('icon', 'number');
+		numberEl.style.backgroundPositionX = `${-8*Math.abs(value)}px`;
+		if (showPlus || value < 0) {
+			var signEl = document.createElement('div');
+			if (value < 0) signEl.classList.add('minus');
+			else signEl.classList.add('plus');
+			numberEl.appendChild(signEl);
+		}
+		return numberEl;
+	}
 };
 
 /***************************************************
@@ -35,6 +48,22 @@ class PhaseBanner extends Detail {
 
 	get elClass() {
 		return 'phase-banner';
+	}
+}
+
+/***************************************************
+ Skill name banner
+***************************************************/
+class SkillBanner extends Detail {
+	constructor(startValue) {
+		super(startValue);
+		this.el.addEventListener('animationend', ev => {
+			ev.target.parentElement.removeChild(ev.target);
+		});
+	}
+
+	get elClass() {
+		return 'skill-banner';
 	}
 }
 
@@ -55,7 +84,7 @@ class EndScreen extends Detail {
  Lifebar
 ***************************************************/
 class Lifebar extends Detail {
-	constructor(startValue, startMaxValue) {
+	constructor(startValue, startMaxValue, defenseValue) {
 		super();
 
 		this._subEl = document.createElement(this.elType);
@@ -66,8 +95,13 @@ class Lifebar extends Detail {
 		this._deltaEl.classList.add('change');
 		this.el.appendChild(this._deltaEl);
 
+		this._defEl = document.createElement(this.elType);
+		this._defEl.classList.add('defense');
+		this.el.appendChild(this._defEl);
+
 		this.maxValue = startMaxValue;
 		this.value = startValue;
+		this.defenseValue = defenseValue || 0;
 	}
 
 	get elType() {
@@ -102,10 +136,124 @@ class Lifebar extends Detail {
 		}
 	}
 
+	get defenseValue() {
+		return this._defense;
+	}
+	set defenseValue(value) {
+		this._defense = value;
+		this._defEl.classList.toggle('icon', value != 0);
+
+		if (this._defEl.firstChild) this._defEl.removeChild(this._defEl.firstChild);
+		if (value) this._defEl.appendChild(Detail.numberSprite(value));
+	}
+
 	static width(value, noPadding) {
-		var width = value*6;
-		if (width > 0 && !noPadding) width += 2;
+		var width = value*3;
+		if (width > 0 && !noPadding) width += 1;
 		return width+"px";
+	}
+}
+
+/***************************************************
+ Status icon list
+***************************************************/
+class StatusList extends Detail {
+	constructor(statusObject) {
+		super();
+		this._subEl = document.createElement(this.elType);
+		this._subEl.classList.add('inner');
+		this.el.appendChild(this._subEl);
+		this.value = statusObject;
+	}
+
+	get elClass() {
+		return 'status-list';
+	}
+
+	set value(statusObject) {
+		this._clearIcons();
+		if (!statusObject) return;
+		
+		if (statusObject[UnitPiece.Power]) {
+			this._addIcon('power', {
+				icon: statusObject[UnitPiece.Power] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Power]) > 1
+			});
+		}
+		if (statusObject[UnitPiece.Defense]) {
+			this._addIcon('defense', {
+				icon: statusObject[UnitPiece.Defense] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Defense]) > 1
+			});
+		}
+		if (statusObject[UnitPiece.Speed]) {
+			this._addIcon('speed', {
+				icon: statusObject[UnitPiece.Speed] > 0 ? 'up' : 'down',
+				double: Math.abs(statusObject[UnitPiece.Speed]) > 1
+			});
+		}
+
+		if (statusObject[UnitPiece.Charge]) {
+			this._addIcon('power', {
+				icon: 'time',
+				double: Math.abs(statusObject[UnitPiece.Charge]) > 1
+			});
+		}
+		if (statusObject[UnitPiece.Accelerate]) {
+			this._addIcon('speed', {
+				icon: 'time',
+				double: Math.abs(statusObject[UnitPiece.Accelerate]) > 1
+			});
+		}
+
+
+		if (statusObject[UnitPiece.Regenerate]) {
+			this._addIcon('regenerate', {
+				number: statusObject[UnitPiece.Regenerate]
+			});
+		}
+		if (statusObject[UnitPiece.Burn]) {
+			this._addIcon('burn', {
+				number: -statusObject[UnitPiece.Burn]
+			});
+		}
+
+		if (statusObject[UnitPiece.Evade]) {
+			this._addIcon('evade');
+		}
+
+		if (statusObject[UnitPiece.Anchor]) {
+			this._addIcon('anchor');
+		}
+
+		if (this._icons.length > 1) {
+			this._subEl.style.animationDuration = `${this._icons.length}s`;
+			this._subEl.style.animationTimingFunction = `steps(${this._icons.length})`;
+		} else {
+			this._subEl.style.animationDuration = null;
+			this._subEl.style.animationTimingFunction = null;
+		}
+	}
+
+	_addIcon(style, props) {
+		var newIconEl = this._newIcon(style);
+		newIconEl.classList.add('icon', style);
+		if (props) {
+			if (props.icon) newIconEl.appendChild(this._newIcon(props.icon));
+			else if (props.number) newIconEl.appendChild(Detail.numberSprite(props.number, props.plus));
+			if (props.double) newIconEl.appendChild(this._newIcon('double'));
+		}
+		this._subEl.appendChild(newIconEl);
+		this._icons.push(newIconEl);
+	}
+	_newIcon(...styles) {
+		var iconEl = document.createElement('div');
+		iconEl.classList.add('icon', ...styles);
+		return iconEl;
+	}
+	_clearIcons() {
+		if (this._icons) this._icons.forEach(el => this._subEl.removeChild(el));
+		this._icons = [];
 	}
 }
 
@@ -177,7 +325,6 @@ class CurrentMaxLabel extends Detail {
 		this._updateText();
 	}
 
-	// TODO: Also, text describing what it's counting?
 	_updateText() {
 		this.el.innerHTML = `${this._value}/${this._maxValue}`;
 	}
@@ -206,8 +353,7 @@ class SpriteEffect extends SpriteElObj {
 			this.el.parentElement.removeChild(this.el);
 		}, duration);
 		this.square = square;
-		this.el.style.transform = `translate(${square.screenX}px, ${square.screenY}px)`;
-		this.el.style.zIndex = square.screenZ;
+		this.el.style.transform = square.screenPosition;
 	}
 
 	get elClass() {
@@ -235,36 +381,27 @@ class SpriteEffect extends SpriteElObj {
 	}
 	_animateStraight(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 200;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
 	}
 	_animateArc(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 400;
 		this.el.animate(keyframes, {duration: time, easing: "linear"});
 
 		var jumpframes = [
 			{ },
-			{ top: "-128px" }
+			{ bottom: "64px" }
 		];
-		this.el.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 	}
 	_animateReturn(origin) {
 		var keyframes = [
-			{
-				transform: origin.screenPosition,
-				zIndex: origin.screenZ
-			},
+			{ transform: origin.screenPosition },
 			{}];
 		var time = 200;
 		this.el.animate(keyframes, {duration: time, iterations: 2, direction: "alternate", easing: "ease-out"});
@@ -301,6 +438,11 @@ class Edge extends ElObj {
 	}
 
 	refresh() {
+		if (this._end.hidden || this._start.hidden) {
+			this._hide();
+			return;
+		}
+
 		var dx = (this._end.screenX - this._start.screenX);
 		var dy = (this._end.screenY - this._start.screenY);
 		var width = Math.sqrt(dx*dx + dy*dy);
@@ -310,8 +452,10 @@ class Edge extends ElObj {
 
 		this.el.style.transform = `translate(${screenX}px, ${screenY}px) rotate(${angle}deg)`;
 		this.el.style.width = `${width}px`;
+		
+		this._show();
 
-		if (this._end.hidden || this._start.hidden) this._hide();
-		else this._show();
+		this.inRange = (this._start.inRange && this._end.inRange)
+		this.el.classList.toggle('selectable', this.inRange);
 	}
 }

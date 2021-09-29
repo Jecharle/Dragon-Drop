@@ -1,25 +1,46 @@
-/*#region game window*/
+@font-face {
+	font-family: pixelFont;
+	src: url(../font/slkscr.ttf);
+}
+@font-face {
+	font-family: boldPixelFont;
+	src: url(../font/slkscrb.ttf);
+}
 :root {
-	--game-w: 1024px;
-	--game-h: 576px;
+	--game-w: 512px;
+	--game-h: 384px;
+	font: 8px pixelFont;
+}
+button {
+	font: 8px pixelFont;
+}
+strong {
+	font-family: boldPixelFont;
+	font-weight: normal;
 }
 
+/*#region game window*/
 .game-window {
 	width: var(--game-w);
 	height: var(--game-h);
 	overflow: hidden;
 	border: 1px solid black; /*TEMP?*/
 	position: relative;
+
+	image-rendering: pixelated;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
+	transform-origin: 0 0;
+	transform: scale(2.0);
 }
 	.loading.game-window::before {
 		content: "Loading...";
 		position: absolute;
 		z-index: 99;
-		right: 8px;
-		bottom: 8px;
+		right: 4px;
+		bottom: 4px;
 		color: black;
-		font-size: 18px;
-		font-weight: bold;
+		font-family: boldPixelFont;
 	}
 
 .scene {
@@ -53,11 +74,10 @@
 /*#region battle scene UI*/
 .nav-button {
 	display: inline-block;
-	font-size: 18px;
 	color: white;
 	background-color: deepskyblue;
 	border: none;
-	padding: 12px;
+	padding: 6px;
 	width: 15%;
 	cursor: pointer;
 	position: absolute;
@@ -71,27 +91,195 @@
 		cursor: default;
 	}
 	.undo-button {
-		top: 12px;
-		left: 12%;
+		bottom: 12px;
+		left: 12px;
 	}
 	.end-turn-button {
-		bottom: 12px;
-		right: 12px;
-		height: 96px;
-		border-radius: 16px;
+		bottom: 2px;
+		right: 2px;
+		height: 48px;
+		border-radius: 8px;
 	}
 	.menu-button {
-		top: 12px;
-		left: 12px;
+		top: 6px;
+		left: 6px;
 		width: 10%;
 	}
 .turn-title {
-	font-size: 24px;
+	font-size: 2rem;
 	position: absolute;
-	top: 32px;
-	right: 64px;
+	top: 16px;
+	right: 32px;
+	text-align: center;
 }
 /*#endregion battle scene UI*/
+
+/*#region lifebar*/
+.lifebar {
+	position: absolute;
+	z-index: 2;
+	height: var(--lifebar-h);
+	top: 0;
+	background-image: url(../img/system/lifebar.png);
+	background-position: 0 0;
+	background-repeat: repeat-x;
+}
+	.lifebar>.inner {
+		position: absolute;
+		z-index: 0;
+		height: var(--lifebar-h);
+		background-image: inherit;
+		background-position: 0 calc(-1*var(--lifebar-h));
+		background-repeat: repeat-x;
+	}
+	.lifebar>.change {
+		position: absolute;
+		z-index: 1;
+		height: var(--lifebar-h);
+		background-image: inherit;
+		background-position: 0 calc(-2*var(--lifebar-h));
+		background-repeat: repeat-x;
+		visibility: hidden;
+	}
+	.hp-change .lifebar>.change {
+		animation: fade-out 0.8s 0.2s both;
+		visibility: visible;
+	}
+	.lifebar>.icon {
+		left: calc(100% + 1px);
+		top: -1px;
+	}
+/*#endregion lifebar*/
+
+/*#region status list*/
+.status-list {
+	position: absolute;
+	z-index: 2;
+	height: calc(var(--icon-h) + 3px);
+	width: 100%;
+	bottom: 0;
+	right: 0;
+}
+	.status-list .inner {
+		position: absolute;
+		height: inherit;
+		width: max-content;
+	}
+	.status-list .icon {
+		margin: 1px;
+		margin-top: 2px;
+	}
+	.status-list .icon .icon {
+		margin: unset;
+	}
+/*#endregion status list*/
+
+/*#region icons*/
+.icon {
+	display: inline-block;
+	position: relative;
+	height: var(--icon-h);
+	width: var(--icon-w);
+	background-image: url(../img/system/icons.png);
+	background-position: 0 0;
+}
+.icon .icon {
+	position: absolute;
+	left: 1px;
+	top: 1px;
+}
+.icon .double {
+	background-image: inherit;
+	background-position: inherit;
+	position: absolute;
+	left: -1px;
+	top: -2px;
+	z-index: -1;
+	filter: brightness(75%);
+}
+
+.number .minus, .number .plus, .number .times {
+	height: inherit;
+	width: inherit;
+	position: relative;
+	right: 1px;
+	background-image: inherit;
+	background-position-y: calc(-1*var(--icon-h));
+}
+.number .minus {
+	background-position-x: 0;
+}
+.number .plus {
+	background-position-x: calc(-1*var(--icon-w));
+}
+.number .times {
+	background-position-x: calc(-2*var(--icon-w));
+}
+	/*#region state icons*/
+	.icon.life {
+		background-position-x: 0;
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.power {
+		background-position-x: calc(-1*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.defense {
+		background-position-x: calc(-2*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.speed {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+
+	.icon.range {
+		background-position-x: calc(-4*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.non-los {
+		background-position-x: calc(-5*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+	.icon.cooldown {
+		background-position-x: calc(-6*var(--icon-w));
+		background-position-y: calc(-2*var(--icon-h));
+	}
+
+	.icon.regenerate {
+		background-position-x: 0;
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	.icon.burn {
+		background-position-x: calc(-1*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+
+	.icon.evade {
+		background-position-x: calc(-2*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	.icon.anchor {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-3*var(--icon-h));
+	}
+	/*#endregion state icons*/
+
+	/*#region modifier icons*/
+	.icon.time {
+		background-position-x: calc(-3*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	.icon.up {
+		background-position-x: calc(-4*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	.icon.down {
+		background-position-x: calc(-5*var(--icon-w));
+		background-position-y: calc(-1*var(--icon-h));
+	}
+	/*#endregion modifier icons*/
+/*#endregion icons*/
 
 /*#region skill list*/
 .skill-list {
@@ -100,15 +288,22 @@
 	justify-content: flex-start;
 	align-items: flex-end;
 	position: absolute;
-	bottom: 0px;
-	width: 40%;
+	bottom: 0;
+	width: max-content;
+	padding-left: 2px;
 }
+	.skill-list.ally {
+		background: linear-gradient(transparent, skyblue);
+	}
+	.skill-list.enemy {
+		background: linear-gradient(transparent, red);
+	}
+
 	/*#region selected unit info*/
 	.unit-info {
 		position: relative;
 		height: var(--face-h);
 		width: var(--face-w);
-		overflow: visible;
 		display: flex;
 		justify-content: flex-start;
 	}
@@ -117,35 +312,35 @@
 			width: var(--face-w);
 			box-sizing: border-box;
 			position: absolute;
-			bottom: 0px;
+			bottom: 0;
 			background-repeat: no-repeat;
 			background-position: bottom left;
-		}
-		.unit-info .lifebar {
-			visibility: visible;
+			transform: scale(1.5); /*Temporary, probably*/
+			transform-origin: 0 100%;
 		}
 		.unit-info .name {
 			position: absolute;
 			z-index: 2;
 			height: max-content;
 			width: max-content;
-			left: 0px;
+			left: 0;
 			bottom: 100%;
-			font-size: 16px;
-			font-weight: bold;
+			font-family: boldPixelFont;
 		}
 		.unit-info:hover .skill-description {
 			display: block;
 			bottom: 130%;
 		}
+		.unit-info .status-list .inner {
+			right: 0;
+		}
 	/*#endregion selected unit info*/
 /*#endregion skill list*/
 
-/*#region skill piece*/
+/*#region skill card*/
 .skill {
 	width: var(--skill-w);
 	height: var(--skill-h);
-	margin-left: 1px;
 	position: relative;
 	display: flex;
 	justify-content: center;
@@ -154,8 +349,8 @@
 	.skill>.sprite {
 		width: 100%;
 		height: 100%;
-		box-sizing: border-box;
 		position: absolute;
+		background-image: url(../img/skills/skillcards.png);
 	}
 	.skill-description {
 		display: none;
@@ -167,86 +362,96 @@
 		height: max-content;
 		left: 0%;
 		bottom: 110%;
-		border-radius: 4px;
-		padding: 5px;
+		border-radius: 2px;
+		padding: 3px;
 	}
-		.skill-description::after {
-			content: "";
-			position: absolute;
-			top: 100%;
-			left: 25px;
-			border-width: 5px;
-			border-style: solid;
-			border-color: black transparent transparent transparent;
-			pointer-events: none;
-		}
 	.cooldown-label {
-		font-size: 24px;
-		font-weight: bold;
+		font-family: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
 	}
 	.quantity-label {
-		font-size: 20px;
-		font-weight: bold;
+		font-family: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
-		right: 8px;
-		bottom: 6px;
+		right: 4px;
+		bottom: 1px;
 	}
 
 	/*#region skill states*/
 	.selectable.skill:hover, .skill.selected {
-		bottom: 4px;
+		bottom: 2px;
 	}
 	.selectable.skill:hover>.sprite, .skill.selected>.sprite {
-		border: 2px solid deepskyblue;
+		filter: drop-shadow(1px 0 yellow)
+		drop-shadow(-1px 0 yellow)
+		drop-shadow(0 1px yellow)
+		drop-shadow(0px -1px yellow);
 	}
-	.skill:hover .skill-description {
+	.skill:not(.dragging):hover .skill-description {
 		display: block;
 	}
 	/*#endregion skill states*/
 
 	/*#region skill icons*/
 	.attack-skill>.sprite {
-		background-color: red;
-		border-radius: 25%;
+		background-position: 0 0;
 	}
 	.heal-skill>.sprite {
-		background-color: green;
-		border-radius: 25%;
+		background-position: 0 calc(-3*var(--skill-h));
 	}
-	.build-skill>.sprite {
-		background-color: purple;
-		border-radius: 25%;
+	.defense-skill>.sprite {
+		background-position: 0 calc(-2*var(--skill-h));
 	}
 	.move-skill>.sprite {
-		background-color: cornflowerblue;
-		border-radius: 25%;
+		background-position: 0 calc(-4*var(--skill-h));
+	}
+	.buff-skill>.sprite {
+		background-position: 0 calc(-1*var(--skill-h));
+	}
+	.debuff-skill>.sprite {
+		background-position: 0 calc(-6*var(--skill-h));
+	}
+	.build-skill>.sprite {
+		background-position: 0 calc(-5*var(--skill-h));
 	}
 	/*#endregion skill icons*/
-/*#endregion skill piece*/
+/*#endregion skill card*/
 
 /*#region phase change & end screens*/
+.skill-banner {
+	color: white;
+	background-color: #000000cc;
+	width: 300%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	position: absolute;
+	bottom: 150%;
+	z-index: 5;
+	animation: banner-display 0.5s linear 2 alternate;
+	pointer-events: none;
+}
 .phase-banner {
-	font-size: 40px;
-	font-weight: bold;
+	font: 2rem boldPixelFont;
 	background-color: white;
 	border-top: 1px solid black;
 	border-bottom: 1px solid black;
 	width: 100%;
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	overflow: hidden;
 	position: absolute;
 	z-index: 5;
-	animation: banner-display 600ms linear 2 alternate;
+	animation: banner-display 0.7s linear 2 alternate;
 	pointer-events: none;
 }
 .battle-end {
-	font-size: 64px;
-	font-weight: bold;
+	font: 4rem boldPixelFont;
 	color: white;
 	background-color: #000000cc;
 	width: 100%;
@@ -263,29 +468,32 @@
 
 /*#region board structure*/
 :root {
-	--square-size: 128px;
+	--square-size: 64px;
 
-	--square-w: 96px;
-	--square-h: 48px;
-	--square-total-h: 96px;
+	--square-w: 48px;
+	--square-h: 24px;
+	--square-total-h: 48px;
 
-	--unit-w: 64px;	
-	--unit-h: 64px;
+	--unit-w: 32px;	
+	--unit-h: 32px;
 
-	--face-w: 96px;	
-	--face-h: 80px;
+	--face-w: 48px;	
+	--face-h: 40px;
 
-	--lifebar-h: 14px;
+	--lifebar-h: 7px;
 
-	--skill-w: 64px;
-	--skill-h: 64px;
+	--icon-h: 8px;
+	--icon-w: 8px;
+
+	--skill-w: 32px;
+	--skill-h: 32px;
 }
 .board {
 	display: flex;
 	justify-content: center;
 	position: absolute;
-	top: 24px;
 	z-index: 0;
+	transform-style: preserve-3d;
 }
 	.square {
 		display: flex;
@@ -296,56 +504,105 @@
 		width: var(--square-w);
 		height: var(--square-h);
 		pointer-events: none;
+		transform-style: preserve-3d;
 	}
-	.square::after {
-		content: "";
-		width: inherit;
-		height: inherit;
-		position: absolute;
-		z-index: 1;
-		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-		pointer-events: auto;
-	}
-	.square:hover::before {
-		background-color: white;
-		border: 1px solid black;
-		position: absolute;
-		z-index: 2;
-		width: max-content;
-		height: max-content;
-		left: 0;
-		bottom: 110%;
-		border-radius: 4px;
-		padding: 5px;
-		animation: fade-out 0.1s 0.5s reverse both;
-	}
+		.square::after {
+			content: "";
+			width: inherit;
+			height: inherit;
+			position: absolute;
+			clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+			pointer-events: auto;
+		}
+		.selectable.square::after {
+			transform: translateZ(99px);
+		}
+		.square:hover::before {
+			background-color: white;
+			border: 1px solid black;
+			position: absolute;
+			transform: translateZ(98px);
+			width: max-content;
+			height: max-content;
+			left: 0;
+			bottom: 110%;
+			border-radius: 2px;
+			padding: 1px;
+			animation: fade-out 0.1s 0.5s reverse both;
+		}
 
 	/*#region terrain types*/
 	.square>.sprite {
 		position: absolute;
 		z-index: -2;
 		width: var(--square-w);
-		height: var(--square-total-h);
-		top: 0px;
+		height: var(--square-h);
+		top: 0;
 		
-		background-image: url(../img/testTileset.png);
+		background-image: url(../img/tilesets/testTileset.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
+	.square>.side-sprite {
+		position: absolute;
+		z-index: -3;
+		width: var(--square-w);
+		top: calc(0.5*var(--square-h));
+		
+		background-image: url(../img/tilesets/testTileset.png);
+		background-repeat: repeat-y;
+		background-position: calc(-1*var(--square-w)) 0;
+	}
+	.square>.side-sprite::after {
+		content: "";
+		position: absolute;
+		z-index: -3;
+		width: var(--square-w);
+		height: var(--square-h);
+		top: 100%;
+		
+		background-image: url(../img/tilesets/testTileset.png);
+		background-repeat: no-repeat;
+		background-position: calc(-2*var(--square-w)) 0;
+	}
 		.pit>.sprite {
-			background-position-y: calc(-1*var(--square-total-h));
+			background-position-x: calc(-3*var(--square-w));
+		}
+		.pit>.side-sprite {
+			background-position-x: calc(-4*var(--square-w));
+		}
+		.pit>.side-sprite::after {
+			background-position-x: calc(-5*var(--square-w));
 		}
 		.cover>.sprite {
-			background-position-y: calc(-2*var(--square-total-h));
+			background-position-x: calc(-6*var(--square-w));
+		}
+		.cover>.side-sprite {
+			background-position-x: calc(-7*var(--square-w));
+		}
+		.cover>.side-sprite::after {
+			background-position-x: calc(-8*var(--square-w));
 		}
 			.cover:hover::before {
 				content: "Cover blocks line of sight, but allows movement";
 			}
 		.wall>.sprite {
-			background-position-y: calc(-3*var(--square-total-h));
+			background-position-x: calc(-9*var(--square-w));
+		}
+		.wall>.side-sprite {
+			background-position-x: calc(-10*var(--square-w));
+		}
+		.wall>.side-sprite::after {
+			background-position-x: calc(-11*var(--square-w));
 		}
 		.rough>.sprite {
-			background-position-y: calc(-4*var(--square-total-h));
+			background-position-x: calc(-12*var(--square-w));
+		}
+		.rough>.side-sprite {
+			background-position-x: calc(-13*var(--square-w));
+		}
+		.rough>.side-sprite::after {
+			background-position-x: calc(-14*var(--square-w));
 		}
 			.rough:hover::before {
 				content: "Rough terrain costs 2 squares of movement to enter";
@@ -357,12 +614,12 @@
 		content: "";
 		position: absolute;
 		z-index: -1;
-		top: 0px;
-		left: 0px;
+		top: 0;
+		left: 0;
 		opacity: 65%;
 		width: var(--square-w);
 		height: var(--square-h);
-		background-image: url(../img/tileHighlights.png);
+		background-image: url(../img/system/tileHighlights.png);
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
@@ -393,11 +650,11 @@
 		content: "";
 		position: absolute;
 		z-index: -0.5;
-		top: 0px;
-		left: 0px;
+		top: 0;
+		left: 0;
 		width: var(--square-w);
-		height: var(--square-h);
-		background-image: url(../img/path.png);
+		height: var(--square-total-h);
+		background-image: url(../img/system/path.png);
 		background-repeat: no-repeat;
 	}
 		/*#region single direction*/
@@ -405,13 +662,13 @@
 			background-position: 0 0;
 		}
 		.up>.sprite::before {
-			background-position: 0 calc(-1*var(--square-h));
+			background-position: 0 calc(-1*var(--square-total-h));
 		}
 		.right>.sprite::before {
-			background-position: 0 calc(-2*var(--square-h));
+			background-position: 0 calc(-2*var(--square-total-h));
 		}
 		.down>.sprite::before {
-			background-position: 0 calc(-3*var(--square-h));
+			background-position: 0 calc(-3*var(--square-total-h));
 		}
 		/*#endregion single direction*/
 		/*#region straight*/
@@ -419,7 +676,7 @@
 			background-position: calc(-1*var(--square-w)) 0;
 		}
 		.up.down>.sprite::before {
-			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		/*#endregion straight*/
 		/*#region corners*/
@@ -427,13 +684,13 @@
 			background-position: calc(-2*var(--square-w)) 0;
 		}
 		.up.right>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		.right.down>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-total-h));
 		}
 		.down.left>.sprite::before {
-			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-h));
+			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion corners*/
 		/*#region arrows*/
@@ -441,13 +698,13 @@
 			background-position: calc(-3*var(--square-w)) 0;
 		}
 		.up.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		.right.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-total-h));
 		}
 		.down.move-end>.sprite::before {
-			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-h));
+			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion arrows*/
 	/*#endregion move path*/
@@ -462,6 +719,9 @@
 	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
+	transform-style: preserve-3d;
+	--x-scale: 1;
+	--y-frame: 0;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
@@ -469,129 +729,144 @@
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
-		background-position: 0px 0px;
-		transition: transform 0.2s;
+		background-position-x: 0;
+		background-position-y: calc(var(--y-frame)*var(--unit-h));
+		transform: scaleX(var(--x-scale));
 	}
-	.unit::after {
+	.unit>.shadow {
 		content: "";
 		position: absolute;
 		z-index: -1;
-		bottom: 0px;
+		bottom: 0;
 		width: 100%;
 		height: 100%;
 		background-repeat: no-repeat;
-		background-image: url(../img/shadow.png);
+		background-image: url(../img/system/shadow.png);
 		opacity: 40%;
 	}
-
-	/*#region unit details*/
-	.lifebar {
-		position: absolute;
-		z-index: 2;
-		height: var(--lifebar-h);
-		top: -2px;
-		background-image: url(../img/lifebar.png);
-		background-position: 0px 0px;
-		background-repeat: repeat-x;
-		visibility: hidden;
+	.unit.in-range, .unit.in-area{
+		pointer-events: none;
 	}
-		.lifebar>.inner {
-			position: absolute;
-			z-index: 0;
-			left: 0px;
-			height: var(--lifebar-h);
-			background-image: url(../img/lifebar.png);
-			background-position: 0px calc(-1*var(--lifebar-h));
-			background-repeat: repeat-x;
+
+	/*#region unit status*/
+	.unit .lifebar {
+		visibility: hidden;
+		pointer-events: none;
+		transform: translateZ(99px);
+	}
+	.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
+		visibility: visible;
+	}
+
+	.unit .status-list {
+		width: calc(var(--icon-w) + 2px);
+		pointer-events: none;
+		overflow: hidden;
+		transform: translateZ(99px);
+	}
+		.unit .status-list .inner {
+			animation-name: marquee;
+			animation-iteration-count: infinite;
 		}
-		.lifebar>.change {
-			position: absolute;
-			z-index: 1;
-			height: var(--lifebar-h);
-			background-image: url(../img/lifebar.png);
-			background-position: 0px calc(-2*var(--lifebar-h));
-			background-repeat: repeat-x;
-			visibility: hidden;
+		@keyframes marquee {
+			from {
+				transform: translateX(0);
+			}
+			to {
+				transform: translateX(-100%);
+			}
 		}
-		.hp-change .lifebar>.change {
-			animation: fade-out 0.8s 0.2s both;
-			visibility: visible;
-		}
-		.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
-			visibility: visible;
-		}
-	/*#endregion unit details*/
+	/*#endregion unit status*/
 
 	/*#region unit states and motions*/
 	.unit.x2 {
-		--unit-w: 128px;
-		--unit-h: 128px;
-	}
-	.left.unit>.sprite {
-		transform: scaleX(-1);
+		--unit-w: 64px;
+		--unit-h: 64px;
 	}
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
-		filter: drop-shadow(2px 0px yellow)
-		drop-shadow(-2px 0px yellow)
-		drop-shadow(0px -2px yellow);
+		filter: drop-shadow(1px 0 yellow)
+		drop-shadow(-1px 0 yellow)
+		drop-shadow(0px 1px yellow)
+		drop-shadow(0px -1px yellow);
 	}
 	.moving>.sprite {
-		background-position-y: calc(-1*var(--unit-h));
+		background-position-y: calc((-2 + var(--y-frame))*var(--unit-h));
 		background-position-x: calc(-2*var(--unit-w));
 		animation: sprite-animation 0.3s steps(2) infinite;
 	}
 	.attack>.sprite {
-		background-position-y: calc(-3*var(--unit-h));
+		background-position-y: calc((-6 + var(--y-frame))*var(--unit-h));
 	}
 	.damaged>.sprite {
-		background-position-y: calc(-2*var(--unit-h));
-		animation: shake 150ms;
+		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
+		animation: shake 0.15s;
+	}
+	.damaged>.shadow {
+		animation: shake 0.15s;
+	}
+	.evade>.sprite {
+		animation: duck 0.15s 2 alternate;
+	}
+	.evade>.shadow {
+		animation: duck 0.15s 2 alternate;
 	}
 	.spawn>.sprite {
 		animation: drop-in 0.2s ease-in;
 	}
 	.dead>.sprite {
-		background-position-y: calc(-2*var(--unit-h));
+		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
 		animation: darken-and-fade 1s 0.2s both;
 	}
-		.dead::after {
-			animation: darken-and-fade 1s 0.2s both;
-		}
 	/*#endregion unit states and motions*/
 
 	/*#region unit skins*/
 	.melee-unit>.sprite {
-		background-image: url("../img/testMeleeUnit.png");
+		background-image: url("../img/sprites/testMeleeUnit.png");
 	}
 	.melee-unit>.face {
-		background-image: url("../img/testMeleeUnitFace.png");
+		background-image: url("../img/faces/testMeleeUnit.png");
 	}
 
 	.support-unit>.sprite {
-		background-image: url("../img/testSupportUnit.png");
+		background-image: url("../img/sprites/testSupportUnit.png");
 	}
 	.support-unit>.face {
-		background-image: url("../img/testSupportUnitFace.png");
+		background-image: url("../img/faces/testSupportUnit.png");
 	}
 
 	.position-unit>.sprite {
-		background-image: url("../img/testPositionUnit.png");
+		background-image: url("../img/sprites/testPositionUnit.png");
 	}
 	.position-unit>.face {
-		background-image: url("../img/testPositionUnitFace.png");
+		background-image: url("../img/faces/testPositionUnit.png");
+	}
+
+	.status-unit>.sprite {
+		background-image: url("../img/sprites/testStatusUnit.png");
+	}
+	.status-unit>.face {
+		background-image: url("../img/faces/testStatusUnit.png");
 	}
 
 	.enemy-unit>.sprite {
-		background-image: url("../img/testEnemyUnit.png");
+		background-image: url("../img/sprites/testEnemyUnit.png");
 	}
 	.enemy-unit>.face {
-		background-image: url("../img/testEnemyUnitFace.png");
+		background-image: url("../img/faces/testEnemyUnit.png");
+	}
+
+	.enemy-support-unit>.sprite {
+		background-image: url("../img/sprites/testEnemySupportUnit.png");
+	}
+	.enemy-support-unit>.face {
+		background-image: url("../img/faces/testEnemySupportUnit.png");
 	}
 
 	.rock>.sprite {
-		background-image: url("../img/testObject.png");
+		background-image: url("../img/sprites/testObject.png");
+		background-repeat: repeat-y;
 	}
 	/*#endregion unit skins*/
 /*#endregion unit*/
@@ -600,35 +875,32 @@
 .deploy-list {
 	position: absolute;
 	z-index: 0;
-	width: calc(var(--unit-w)*3);
-	height: calc(var(--unit-h)*2);
-	left: 12px;
-	bottom: 12px;
+	width: calc(var(--unit-w)*2);
+	height: calc(var(--unit-h)*6);
+	left: 2px;
+	bottom: 2px;
 	display: flex;
-	flex-flow: row wrap;
+	flex-flow: column wrap;
 	justify-content: flex-start;
 	background-color: white;
-	border: 2px solid black;
-	border-radius: 8px;
+	border: 1px solid black;
+	border-radius: 4px;
 }
-	.deploy-list::before {
-		content: "Party";
-		position: absolute;
-		top: -1.5em;
-		left: 0px;
-		font-weight: bold;
+	.deploy-list .lifebar {
+		visibility: visible;
+		top: unset;
+		bottom: var(--lifebar-h);
+		left: var(--unit-w);
 	}
 	.deploy-list .unit {
 		position: relative;
-		bottom: 0px;
-		margin-top: 2px;
+		bottom: 0;
+		margin-top: 1px;
 	}
-
 	.deploy-list .capacity-label {
 		position: absolute;
-		top: -1.5em;
-		right: 0px;
-		font-weight: bold;
+		top: 1px;
+		right: 2px;
 	}
 /*#endregion deploy list*/
 /*#endregion battle scene*/
@@ -639,9 +911,6 @@
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	/*TEMP below here*/
-	box-sizing: border-box;
-	border: 1px dotted black;
 }
 
 .overworld-map {
@@ -651,37 +920,29 @@
 	position: absolute;
 }
 
-.explore-button {
-	bottom: 12px;
-	right: 12px;
-	height: 96px;
-	border-radius: 16px;
-	transition: bottom 1s;
-}
 .map-node-description {
 	position: absolute;
-	bottom: 12px;
+	bottom: 6px;
 	width: 50%;
 	height: 5em;
 	background-color: white;
 	border: 1px solid black;
-	padding: 12px;
-	border-radius: 8px;
+	padding: 6px;
+	border-radius: 4px;
 	transition: bottom 1s;
 }
-	.hide-description .explore-button, .hide-description .map-node-description {
-		bottom: -20%;
+	.hide-description .map-node-description {
+		bottom: calc(-5em - 16px);
 	}
-
 
 .map-node {
 	display: flex;
 	justify-content: center;
 	position: absolute;
 	bottom: 0;
-	background-color: lightgray;
-	width: 64px;
-	height: 32px;
+	background-color: silver;
+	width: 32px;
+	height: 16px;
 	box-sizing: border-box;
 	border-radius: 50%;
 }
@@ -691,8 +952,11 @@
 	.map-node.repeatable {
 		background-color: cornflowerblue;
 	}
-	.selectable.map-node:hover {
-		border: 4px solid yellow;
+	.path.map-node {
+		border: 1px solid goldenrod;
+	}
+	.selected.map-node {
+		border: 2px solid yellow;
 	}
 	.map-node.unlock {
 		animation: fade-out 0.5s reverse backwards;
@@ -701,37 +965,47 @@
 .overworld-map .line {
 	position: absolute;
 	z-index: -1;
-	height: 2px;
+	height: 0;
 	transform-origin: left center;
-	background-color: black;
+	border-top: 1px dashed silver;
+	transition: border-color 0.5s;
 	pointer-events: none;
-	bottom: 16px;
-	left: 0px;
+	bottom: 8px;
+	left: 0;
 }
+	.overworld-map .line.selectable {
+		border-color: black;
+	}
+	.overworld-map .line.path {
+		border-color: goldenrod;
+	}
 	.overworld-map .line.unlock {
 		animation: draw-line 1s 0.5s backwards;
 	}
-	/*TODO: Alternate settings if the line comes FROM the new node?*/
+	.overworld-map .line.unlock.out {
+		animation: draw-line 1s 1.5s backwards;
+	}
 
 .map-piece {
-	width: 64px;
-	height: 64px;
+	width: 32px;
+	height: 32px;
 	box-sizing: border-box;
 	position: absolute;
 	bottom: 0;
 	display: flex;
 	justify-content: center;
+	pointer-events: none;
 }
 	.map-piece>.sprite {
-		width: 64px;
-		height: 64px;
+		width: 32px;
+		height: 32px;
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
-		background-position: 0px 0px;
-		background-image: url(../img/testMeleeUnit.png);
+		background-position: 0 0;
+		background-image: url(../img/sprites/testMeleeUnit.png);
 	}
 /*#endregion map scene*/
 
@@ -741,9 +1015,9 @@
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	top: -12px;
 	display: flex;
 	justify-content: center;
+	pointer-events: none;
 }
 	.sprite-effect>.sprite {
 		width: var(--unit-w);
@@ -751,40 +1025,47 @@
 		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
-		bottom: 0px;
+		bottom: 0;
 		background-repeat: no-repeat;
+	}
+
+	.left.sprite-effect>.sprite {
+		transform: scaleX(-1);
 	}
 
 	/*#region sprite effect skins*/
 	.test-attack-effect>.sprite {
-		background-image: url("../img/testAttack.png");
+		background-image: url("../img/vfx/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) both;
 	}
 	.test-heal-effect>.sprite {
-		background-image: url("../img/testHeal.png");
+		background-image: url("../img/vfx/testHeal.png");
 		background-position-x: calc(-5*var(--unit-w));
 		animation: sprite-animation 0.3s steps(5) both;
 	}
 	.test-shot-effect>.sprite {
-		background-image: url("../img/testBullet.png");
+		background-image: url("../img/vfx/testBullet.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.2s both;
 	}
 	.test-arc-effect>.sprite {
-		background-image: url("../img/testBullet.png");
+		background-image: url("../img/vfx/testBullet.png");
 		background-position-x: calc(-6*var(--unit-w));
 		animation: sprite-animation 0.2s steps(6) 0.4s both;
+	}
+	.test-buff-effect>.sprite {
+		background-image: url("../img/vfx/testBuff.png");
+		background-position-x: calc(-6*var(--unit-w));
+		animation: sprite-animation 0.4s steps(6) both;
 	}
 	/*#endregion sprite effect skins*/
 /*#endregion sprite effects*/
 
 /*#region popup text*/
 .popup-text {
-	font-size: 24px;
-	font-weight: bold;
 	color: white;
-	text-shadow: 2px 2px black;
+	text-shadow: 1px 1px black;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -797,25 +1078,35 @@
 /*#region holding area for keyframes*/
 @keyframes sprite-animation {
 	from {
-		background-position-x: 0px;
+		background-position-x: 0;
 	}
 }
 @keyframes shake {
 	from {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin-left: 0;
+		margin-right: 0;
 	}
 	25% {
 		margin-left: -8px;
-		margin-right: 8px;
+		margin-right: 4px;
 	}
 	75% {
-		margin-left: 8px;
+		margin-left: 4px;
 		margin-right: -8px;
 	}
 	to {
-		margin-left: 0px;
-		margin-right: 0px;
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+@keyframes duck {
+	from {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+	to {
+		margin-top: 8px;
+		margin-bottom: -16px;
 	}
 }
 @keyframes rise-up {
@@ -856,20 +1147,13 @@
 }
 @keyframes banner-display {
 	from {
-		height: 0px;
-		color: transparent;
+		height: 0;
 	}
 	50% {
-		height: 48px;
-		color: transparent;
-	}
-	75% {
-		height: 48px;
-		color: black;
+		height: 1.5em;
 	}
 	to {
-		height: 48px;
-		color: black;
+		height: 1.5em;
 	}
 }
 @keyframes end-screen {
@@ -879,7 +1163,7 @@
 	}
 	50% {
 		color: transparent;
-		font-size: 10em;
+		font-size: 15rem;
 	}
 	to {
 
