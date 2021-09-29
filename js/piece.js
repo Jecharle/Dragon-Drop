@@ -1331,10 +1331,7 @@ class SkillCard extends Piece {
 		return this.power;
 	}
 	_aiAllyTargetScore(unit, square) {
-		return -this.power*0.9;
-	}
-	_aiNeutralTargetScore(unit, square) {
-		return this.power*0.1;
+		return -this._aiEnemyTargetScore(unit, square)*0.9;
 	}
 	_aiUnitTargetScore(square, origin) {
 		if (square == origin) { // new square will include yourself
@@ -1346,7 +1343,7 @@ class SkillCard extends Piece {
 		} else if (this.user.isAlly(square.piece)) {
 			return this._aiAllyTargetScore(square.piece, square) * square.piece.aiImportance;
 		} else {
-			return this._aiNeutralTargetScore(square.piece, square) * square.piece.aiImportance;
+			return 0;
 		}
 	}
 	_aiSquareTargetScore(square) {
