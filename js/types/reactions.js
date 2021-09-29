@@ -23,7 +23,7 @@ class TestCounterReaction extends OnHitReaction {
 	}
 
 	validResult(result) {
-		return result.damage > 0 || result.evade;
+		return (result.damage > 0 && !result.critical ) || result.evade;
 	}
 
 	async _startEffects(target, _squares, _units) {
@@ -40,6 +40,7 @@ class TestCounterReaction extends OnHitReaction {
 		if (!unit.evade()) {
 			unit.takeDamage(this.power);
 		}
+		unit.face(this.user.square);
 		await Game.asyncPause(200);
 	}
 };
@@ -95,8 +96,9 @@ class TestExplodeReaction extends OnDeathReaction {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power);
+			unit.takeDamage(this.power, unit.directionFrom(this.user.square));
 		}
+		unit.face(this.user.square);
 	}
 
 	async _endEffects(_target, _squares, _units) {

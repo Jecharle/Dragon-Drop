@@ -197,7 +197,8 @@ class ObjectPiece extends UnitPiece {
 	get canAct() { return false; }
 	get moveRange() { return 0; }
 	get aiImportance() { return 0.1; }
-	_setSelectable() { } // It's not selectable either so
+
+	_setSelectable() { } // Prevent it from highlighting
 	_setUnselectable() { } // Prevent it from graying out
 
 	allowsMove(_piece) {
@@ -205,6 +206,10 @@ class ObjectPiece extends UnitPiece {
 	}
 
 	get extra() {
+		return true;
+	}
+
+	get criticalImmune() {
 		return true;
 	}
 

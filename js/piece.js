@@ -317,6 +317,10 @@ class UnitPiece extends Piece {
 		return this.getStatus(UnitPiece.Defense) + equipBonus;
 	}
 
+	get criticalImmune () {
+		return false;
+	}
+
 	get shiftable() {
 		var equipUnshiftable = this.equipment.some(equip => equip.unshiftable);
 		return !this.getStatus(UnitPiece.Anchor) && !equipUnshiftable;
@@ -417,8 +421,9 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, direction, props) {
 
-		// back attack = critical
-		if (!props?.noCritical && (props?.autoCritical || this.fromBack(direction))) {
+		// check for critical
+		if (!this.criticalImmune && !props?.noCritical
+			&& (props?.autoCritical || this.fromBack(direction))) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power = Math.max(power + criticalBonus, 0);
 			// TODO: critical visual effect?
@@ -429,10 +434,10 @@ class UnitPiece extends Piece {
 
 		// apply defense
 		if (!props?.ignoreDefense) {
-			power = Math.max(power - this.defense, 0);
+			power -= this.defense;
 		}
 
-		// inflict damage
+		// deal damage
 		if (power > 0) {
 			this.hp -= power;
 			this.addTimedClass(500, 'damaged');
@@ -440,12 +445,8 @@ class UnitPiece extends Piece {
 			if (this.results) {
 				this.results.damage += power;
 			}
-		}
-		// TODO: 0 damage effect?
-
-		// face attacker
-		if (direction && !props?.noRotate) {
-			this.faceDirection(UnitPiece.reverseDirection(direction));
+		} else {
+			// TODO: 0 damage effect?
 		}
 
 		this.refresh();
