@@ -1124,6 +1124,7 @@ class SkillCard extends Piece {
 		this._baseCooldown = 0;
 		this._maxUses = 0;
 		this._basePower = 0;
+		this._criticalBonus = 1;
 	}
 	_stats() {
 		this._basePower = 2;
@@ -1166,6 +1167,9 @@ class SkillCard extends Piece {
 
 	get power() {
 		return Math.max(this._basePower + this.user.powerBonus, 1);
+	}
+	get criticalBonus() {
+		return this._criticalBonus;
 	}
 	//#endregion attributes
 
@@ -1324,24 +1328,25 @@ class SkillCard extends Piece {
 	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
-	_aiSelfTargetScore(square) {
-		return this._aiAllyTargetScore(this.user, square);
+	_aiSelfTargetScore(square, origin) {
+		return this._aiAllyTargetScore(this.user, square, origin);
 	}
-	_aiEnemyTargetScore(unit, square) {
-		return this.power;
+	_aiEnemyTargetScore(unit, square, origin) {
+		var critical = !unit.criticalImmune && unit.fromBack(unit.getDirectionFrom(origin)) ? this.criticalBonus : 0;
+		return this.power + critical;
 	}
-	_aiAllyTargetScore(unit, square) {
-		return -this._aiEnemyTargetScore(unit, square)*0.9;
+	_aiAllyTargetScore(unit, square, origin) {
+		return -this._aiEnemyTargetScore(unit, square, origin)*0.9;
 	}
 	_aiUnitTargetScore(square, origin) {
 		if (square == origin) { // new square will include yourself
-			return this._aiSelfTargetScore(square);
+			return this._aiSelfTargetScore(square, origin);
 		} else if (!square.piece || square.piece == this.user) { // starting square will be empty
 			return 0;
 		} else if (this.user.isEnemy(square.piece)) {
-			return this._aiEnemyTargetScore(square.piece, square) * square.piece.aiImportance;
+			return this._aiEnemyTargetScore(square.piece, square, origin) * square.piece.aiImportance;
 		} else if (this.user.isAlly(square.piece)) {
-			return this._aiAllyTargetScore(square.piece, square) * square.piece.aiImportance;
+			return this._aiAllyTargetScore(square.piece, square, origin) * square.piece.aiImportance;
 		} else {
 			return 0;
 		}
