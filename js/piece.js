@@ -210,6 +210,10 @@ class UnitPiece extends Piece {
 	}
 
 	//#region attributes
+	get direction() {
+		return [this._xFacing, this._yFacing];
+	}
+
 	get size() { return this._size; }
 	set size(value) {
 		if (this._size > 1) {
@@ -412,12 +416,23 @@ class UnitPiece extends Piece {
 
 	//#region effects
 	takeDamage(power, direction, props) {
-		// TODO: directional damage bonus
 
+		// back attack = critical
+		if (!props?.noCritical && (props?.autoCritical || this.fromBack(direction))) {
+			var criticalBonus = props?.criticalBonus ?? 1;
+			power = Math.max(power + criticalBonus, 0);
+			// TODO: critical visual effect?
+			if (this.results) {
+				this.results.critical = true;
+			}
+		}
+
+		// apply defense
 		if (!props?.ignoreDefense) {
 			power = Math.max(power - this.defense, 0);
 		}
 
+		// inflict damage
 		if (power > 0) {
 			this.hp -= power;
 			this.addTimedClass(500, 'damaged');
@@ -426,25 +441,26 @@ class UnitPiece extends Piece {
 				this.results.damage += power;
 			}
 		}
+		// TODO: 0 damage effect?
 
-		// TODO: turn to face them
+		// face attacker
+		if (direction && !props?.noRotate) {
+			this.faceDirection(UnitPiece.reverseDirection(direction));
+		}
 
 		this.refresh();
 		return power;
 	}
 	heal(power, props) {
-		this.hp += power;
-
-		if (this.results) {
-			this.results.heal += power;
-		}
-
 		if (power > 0) {
+			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
-		}
-
-		if (!props?.noCure) {
-			this._status[UnitPiece.Burn] = 0;
+			if (this.results) {
+				this.results.heal += power;
+			}
+			if (!props?.noCure) {
+				this._status[UnitPiece.Burn] = 0;
+			}
 		}
 
 		this.refresh();
@@ -672,6 +688,15 @@ class UnitPiece extends Piece {
 		var ydir = dx + dy < 0 ? -1 : 0;
 		var xdir = dx - dy < 0 ? -1 : 1;
 		return [xdir, ydir];
+	}
+	static reverseDirection(direction) {
+		return [this._xFacing == 1 ? -1 : 1, this._yFacing == 0 ? -1 : 0];
+	}
+	getDirectionTo(target) {
+		UnitPiece.getDirection(target, this.square);
+	}
+	getDirectionFrom(from) {
+		UnitPiece.getDirection(this.square, from);
 	}
 	faceDirection(direction) {
 		if (!direction) return;
@@ -917,6 +942,7 @@ class SkillResult {
 		this.shift = 0;
 		this.evade = false;
 		this.swap = false;
+		this.critical = false;
 	}
 }
 
