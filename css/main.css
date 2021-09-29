@@ -506,14 +506,16 @@ strong {
 		pointer-events: none;
 		transform-style: preserve-3d;
 	}
-		.selectable.square::after {
+		.square::after {
 			content: "";
 			width: inherit;
 			height: inherit;
 			position: absolute;
-			transform: translateZ(99px);
 			clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 			pointer-events: auto;
+		}
+		.selectable.square::after {
+			transform: translateZ(99px);
 		}
 		.square:hover::before {
 			background-color: white;
