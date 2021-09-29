@@ -365,7 +365,7 @@ class UnitPiece extends Piece {
 		if (this.getStatus(UnitPiece.Burn) > 0) {
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-burn-effect');
 			this.parent.el.appendChild(vfx.el);
-			this.takeDamage(this.getStatus(UnitPiece.Burn), { ignoreDefense: true });
+			this.takeDamage(this.getStatus(UnitPiece.Burn), null, { ignoreDefense: true });
 		}
 	}
 	_applyRegenerate() {
@@ -411,7 +411,9 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, props) {
+	takeDamage(power, direction, props) {
+		// TODO: directional damage bonus
+
 		if (!props?.ignoreDefense) {
 			power = Math.max(power - this.defense, 0);
 		}
@@ -424,6 +426,8 @@ class UnitPiece extends Piece {
 				this.results.damage += power;
 			}
 		}
+
+		// TODO: turn to face them
 
 		this.refresh();
 		return power;
@@ -660,6 +664,45 @@ class UnitPiece extends Piece {
 	}
 	//#endregion move
 
+	//#region facing
+	static getDirection(target, from) {
+		var dx = target.x - from.x;
+		var dy = target.y - from.y;
+
+		var ydir = dx + dy < 0 ? -1 : 0;
+		var xdir = dx - dy < 0 ? -1 : 1;
+		return [xdir, ydir];
+	}
+	faceDirection(direction) {
+		if (!direction) return;
+		var [xFace, yFace] = direction;
+		this._xFacing = xFace;
+		this._yFacing = yFace;
+		this.el.style.setProperty('--x-scale', xFace);
+		this.el.style.setProperty('--y-frame', yFace);
+	}
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent) return;
+
+		this.faceDirection(UnitPiece.getDirection(target, from));
+	}
+	fromFront(direction) {
+		if (!direction) return false;
+		var [xDir, yDir] = direction;
+		return (this._xFacing != xDir && this._yFacing != yDir);
+	}
+	fromBack(direction) {
+		if (!direction) return false;
+		var [xDir, yDir] = direction;
+		return (this._xFacing == xDir && this._yFacing == yDir);
+	}
+	fromSide(direction) {
+		if (!direction) return false;
+		return (!this.fromBack(direction) && !this.fromFront(direction));
+	}
+	//#endregion facing
+
 	//#region animate
 	static get Path() { return 1; }
 	static get Jump() { return 2; }
@@ -729,25 +772,6 @@ class UnitPiece extends Piece {
 		];
 		this.spriteEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
 		return time;
-	}
-
-	static getDirection(target, from) {
-		var dx = target.x - from.x;
-		var dy = target.y - from.y;
-
-		var ydir = dx + dy < 0 ? -1 : 0;
-		var xdir = dx - dy < 0 ? -1 : 1;
-		return [xdir, ydir];
-	}
-	face(target, from) {
-		if (!from) from = this.square;
-		if (!from || !target || from.parent != target.parent) return;
-
-		var [xFace, yFace] = UnitPiece.getDirection(target, from);
-		this._xFacing = xFace;
-		this._yFacing = yFace;
-		this.el.style.setProperty('--x-scale', xFace);
-		this.el.style.setProperty('--y-frame', yFace);
 	}
 
 	animateBump(target, origin) {
