@@ -45,7 +45,7 @@ class TestMeleeUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'melee-unit';
-		this._maxHp = 6;
+		this._maxHp = 8;
 		this._moveRange = 3;
 	}
 
@@ -70,7 +70,7 @@ class TestSupportUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'support-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -94,7 +94,7 @@ class TestPositionUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'position-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 3;
 	}
 
@@ -118,7 +118,7 @@ class TestStatusUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'status-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -147,7 +147,7 @@ class TestEnemyUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'enemy-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -177,7 +177,7 @@ class TestEnemySupportUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'enemy-support-unit';
-		this._maxHp = 2;
+		this._maxHp = 4;
 		this._moveRange = 3;
 	}
 
