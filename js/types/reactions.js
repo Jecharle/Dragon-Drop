@@ -38,7 +38,7 @@ class TestCounterReaction extends OnHitReaction {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power);
+			unit.takeDamage(this.power, this.user.square);
 		}
 		unit.face(this.user.square);
 		await Game.asyncPause(200);
@@ -96,7 +96,7 @@ class TestExplodeReaction extends OnDeathReaction {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, unit.directionFrom(this.user.square));
+			unit.takeDamage(this.power, this.user.square);
 		}
 		unit.face(this.user.square);
 	}

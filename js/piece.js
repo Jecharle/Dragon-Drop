@@ -419,11 +419,11 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, direction, props) {
+	takeDamage(power, sourceSquare, props) {
 
 		// check for critical
 		if (!this.criticalImmune && !props?.noCritical
-			&& (props?.autoCritical || this.fromBack(direction))) {
+			&& (props?.autoCritical || this.isBehind(sourceSquare))) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power = Math.max(power + criticalBonus, 0);
 			// TODO: critical visual effect?
@@ -691,7 +691,7 @@ class UnitPiece extends Piece {
 		return [xdir, ydir];
 	}
 	static reverseDirection(direction) {
-		return [this._xFacing == 1 ? -1 : 1, this._yFacing == 0 ? -1 : 0];
+		return [direction[0] == 1 ? -1 : 1, direction[1] == 0 ? -1 : 0];
 	}
 	getDirectionTo(target) {
 		UnitPiece.getDirection(target, this.square);
@@ -713,19 +713,10 @@ class UnitPiece extends Piece {
 
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
-	fromFront(direction) {
-		if (!direction) return false;
-		var [xDir, yDir] = direction;
-		return (this._xFacing != xDir && this._yFacing != yDir);
-	}
-	fromBack(direction) {
-		if (!direction) return false;
-		var [xDir, yDir] = direction;
-		return (this._xFacing == xDir && this._yFacing == yDir);
-	}
-	fromSide(direction) {
-		if (!direction) return false;
-		return (!this.fromBack(direction) && !this.fromFront(direction));
+	isBehind(square) {
+		if (!square || this.square == square) return false;
+		var [xFace, yFace] = this.getDirectionFrom(square);
+		return (xFace == this._xFacing && yFace == this._yFacing);
 	}
 	//#endregion facing
 
@@ -1332,7 +1323,7 @@ class SkillCard extends Piece {
 		return this._aiAllyTargetScore(this.user, square, origin);
 	}
 	_aiEnemyTargetScore(unit, square, origin) {
-		var critical = !unit.criticalImmune && unit.fromBack(unit.getDirectionFrom(origin)) ? this.criticalBonus : 0;
+		var critical = !unit.criticalImmune && unit.isBehind(origin) ? this.criticalBonus : 0;
 		return this.power + critical;
 	}
 	_aiAllyTargetScore(unit, square, origin) {
@@ -1351,14 +1342,14 @@ class SkillCard extends Piece {
 			return 0;
 		}
 	}
-	_aiSquareTargetScore(square) {
+	_aiSquareTargetScore(square, origin) {
 		return 0;
 	}
 
 	_aiTargetScore(target, origin) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
-			return totalScore + this._aiSquareTargetScore(square) + this._aiUnitTargetScore(square, origin);
+			return totalScore + this._aiSquareTargetScore(square, origin) + this._aiUnitTargetScore(square, origin);
 		}, this._aiBaseTargetScore(target, origin));
 	}
 

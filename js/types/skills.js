@@ -28,7 +28,7 @@ class TestAttackSkill extends SkillCard {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.direction);
+			unit.takeDamage(this.power, this.user.square);
 			unit.push(this.user.square, 1, {animation: UnitPiece.Path});
 		}
 		unit.face(this.user.square);
@@ -86,7 +86,7 @@ class TestPullSkill extends TestAttackSkill {
 		if (this.user.isAlly(unit)) {
 			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
 		} else if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.direction);
+			unit.takeDamage(this.power, this.user.square);
 			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
 		}
 		unit.face(this.user.square);
@@ -172,11 +172,12 @@ class TestAreaSkill extends TestAttackSkill {
 	}
 
 	async _unitEffects(unit, target) {
+		// TODO: if you're in the center, calculate direction from the user?
 		if (!unit.evade()) {
-			unit.takeDamage(this.power); // TODO: calculate directionality for the AoE?
+			unit.takeDamage(this.power, target);
 			unit.push(target, 1, {animation: UnitPiece.Path});
 		}
-		unit.face(this.user.square); // TODO: face the center of the AoE?
+		unit.face(target);
 		await Game.asyncPause(150);
 	}
 
@@ -516,7 +517,7 @@ class ThrowSkill2 extends SkillCard {
 	}
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.direction);
+			unit.takeDamage(this.power, this.user.square);
 		}
 		unit.face(this.user.square);
 	}
