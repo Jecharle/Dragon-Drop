@@ -29,7 +29,7 @@ class TestAttackSkill extends SkillCard {
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
 			unit.takeDamage(this.power, this.user.square);
-			unit.push(this.user.square, 1, {animation: UnitPiece.Path});
+			unit.push(this.user.square, 1, {animation: UnitPiece.Straight});
 		}
 		unit.face(this.user.square);
 		await Game.asyncPause(200);
@@ -84,10 +84,10 @@ class TestPullSkill extends TestAttackSkill {
 
 	async _unitEffects(unit, _target) {
 		if (this.user.isAlly(unit)) {
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		} else if (!unit.evade()) {
 			unit.takeDamage(this.power, this.user.square);
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		}
 		unit.face(this.user.square);
 		await Game.asyncPause(200);
@@ -172,12 +172,11 @@ class TestAreaSkill extends TestAttackSkill {
 	}
 
 	async _unitEffects(unit, target) {
-		// TODO: if you're in the center, calculate direction from the user?
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, target);
-			unit.push(target, 1, {animation: UnitPiece.Path});
+			unit.takeDamage(this.power, this.user.square);
+			unit.push(target, 1, {animation: UnitPiece.Straight});
 		}
-		unit.face(target);
+		unit.face(this.user.square);
 		await Game.asyncPause(150);
 	}
 
@@ -512,7 +511,7 @@ class ThrowSkill2 extends SkillCard {
 		await Game.asyncPause(time/2);
 
 		var unit = target.piece;
-		unit.push(this.user.square, 10, {animation: UnitPiece.Path, uphill: true});
+		unit.push(this.user.square, 10, {animation: UnitPiece.Straight, uphill: true});
 		await Game.asyncPause(200);
 	}
 	async _unitEffects(unit, _target) {

@@ -738,6 +738,7 @@ class UnitPiece extends Piece {
 	static get Path() { return 1; }
 	static get Jump() { return 2; }
 	static get Teleport() { return 3; }
+	static get Straight() { return 4; }
 
 	animateMove(path, type) {
 		switch (type) {
@@ -746,13 +747,16 @@ class UnitPiece extends Piece {
 
 			case UnitPiece.Teleport:
 				return this._animateTeleport(path);
+			
+			case UnitPiece.Straight:
+				return this._animatePath(path, true);
 
 			default:
 			case UnitPiece.Path:
 				return this._animatePath(path);
 		}
 	}
-	_animatePath(path) {
+	_animatePath(path, noTurn) {
 		var keyframes = [{}];
 		var turnframes = [{}];
 		var lastSquare = this.square;
@@ -767,7 +771,7 @@ class UnitPiece extends Piece {
 		turnframes.unshift(turnframes[0]);
 		var time = 200*(keyframes.length-1);
 		this.el.animate(keyframes, {duration: time, easing: "linear"});	
-		this.el.animate(turnframes, {duration: time, easing: "linear"});
+		if (!noTurn) this.el.animate(turnframes, {duration: time, easing: "linear"});
 		return time;
 	}
 	_animateJump(path) {
