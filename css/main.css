@@ -736,7 +736,6 @@ strong {
 		transform: scaleX(var(--x-scale));
 	}
 	.unit>.shadow {
-		content: "";
 		position: absolute;
 		z-index: -1;
 		bottom: 0;
@@ -759,6 +758,28 @@ strong {
 	.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
 		visibility: visible;
 	}
+
+	.unit .facing-arrow {
+		visibility: hidden;
+		pointer-events: none;
+		position: absolute;
+		bottom: 0;
+		width: var(--square-w);
+		height: var(--square-h);
+		background-repeat: no-repeat;
+		background-image: url(../img/system/directions.png);
+		background-position-x: 0;
+		background-position-y: calc(var(--y-frame)*var(--square-h));
+		transform: scaleX(var(--x-scale)) translateZ(99px);
+	}
+	.unit:hover .facing-arrow, .in-range .facing-arrow, .in-area .facing-arrow {
+		visibility: visible;
+	}
+	/*
+	TODO: Conditions to show the arrow for clarity
+	TODO: Color-code by team?
+	TODO: Don't show for objects
+	*/
 
 	.unit .status-list {
 		width: calc(var(--icon-w) + 2px);

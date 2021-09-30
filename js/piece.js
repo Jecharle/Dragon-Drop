@@ -125,6 +125,10 @@ class UnitPiece extends Piece {
 		this._shadowEl.classList.add('shadow');
 		this.el.appendChild(this._shadowEl);
 
+		this._facingEl = document.createElement('div');
+		this._facingEl.classList.add('facing-arrow');
+		this.el.appendChild(this._facingEl);
+
 		this._initialize();
 	}
 
@@ -694,10 +698,10 @@ class UnitPiece extends Piece {
 		return [direction[0] == 1 ? -1 : 1, direction[1] == 0 ? -1 : 0];
 	}
 	getDirectionTo(target) {
-		UnitPiece.getDirection(target, this.square);
+		return UnitPiece.getDirection(target, this.square);
 	}
 	getDirectionFrom(from) {
-		UnitPiece.getDirection(this.square, from);
+		return UnitPiece.getDirection(this.square, from);
 	}
 	faceDirection(direction) {
 		if (!direction) return;
