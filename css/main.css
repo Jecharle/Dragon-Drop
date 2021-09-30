@@ -775,9 +775,11 @@ strong {
 	.unit:hover .facing-arrow, .in-range .facing-arrow, .in-area .facing-arrow {
 		visibility: visible;
 	}
+	.enemy .facing-arrow {
+		background-position-x: calc(-1 * var(--square-w));
+	}
+
 	/*
-	TODO: Conditions to show the arrow for clarity
-	TODO: Color-code by team?
 	TODO: Don't show for objects
 	*/
 
