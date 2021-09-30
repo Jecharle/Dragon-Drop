@@ -1338,7 +1338,7 @@ class SkillCard extends Piece {
 	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
-	_aiCriticalCondition(unit, square, origing) {
+	_aiCriticalCondition(unit, square, origin) {
 		return unit.isBehind(origin);
 	}
 	_aiSelfTargetScore(square, origin) {

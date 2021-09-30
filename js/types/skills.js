@@ -31,8 +31,8 @@ class TestAttackSkill extends SkillCard {
 			unit.takeDamage(this.power, this.user.square);
 			unit.push(this.user.square, 1, {animation: UnitPiece.Straight});
 		}
-		unit.face(this.user.square);
 		await Game.asyncPause(200);
+		unit.face(this.user.square);
 	}
 };
 
@@ -89,8 +89,8 @@ class TestPullSkill extends TestAttackSkill {
 			unit.takeDamage(this.power, this.user.square);
 			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		}
-		unit.face(this.user.square);
 		await Game.asyncPause(200);
+		unit.face(this.user.square);
 	}
 };
 
@@ -176,8 +176,8 @@ class TestAreaSkill extends TestAttackSkill {
 			unit.takeDamage(this.power, this.user.square);
 			unit.push(target, 1, {animation: UnitPiece.Straight});
 		}
-		unit.face(this.user.square);
 		await Game.asyncPause(150);
+		unit.face(this.user.square);
 	}
 
 	async _endEffects(_target, _squares, _units) {
