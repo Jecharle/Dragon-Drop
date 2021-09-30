@@ -190,41 +190,8 @@ class TestEnemySupportUnit extends UnitPiece {
 };
 
 /***************************************************
- "Unit" subtypes that don't move or have actions
+ Object subtypes that don't move or have actions
 ***************************************************/
-class ObjectPiece extends UnitPiece {
-	get canMove() { return false; }
-	get canAct() { return false; }
-	get moveRange() { return 0; }
-	get aiImportance() { return 0.1; }
-
-	_setSelectable() { } // Prevent it from highlighting
-	_setUnselectable() { } // Prevent it from graying out
-	_addDirectionEl() { } // Don't show a directional arrow
-
-	faceDirection(_direction) { } // can't turn
-
-	allowsMove(_piece) {
-		return false;
-	}
-
-	get extra() {
-		return true;
-	}
-
-	get criticalImmune() {
-		return true;
-	}
-
-	get shiftable() {
-		return false;
-	}
-
-	_baseStatusResist(_effect, _value) {
-		return true;
-	}
-}
-
 class TestRockObject extends ObjectPiece {
 	get name() {
 		return "Wall";
