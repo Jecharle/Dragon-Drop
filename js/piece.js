@@ -112,22 +112,13 @@ class UnitPiece extends Piece {
 		this._setReactions();
 
 		this.hp = this.maxHp;
-		this._lifebar = new Lifebar(this.hp, this.maxHp);
-		this.el.appendChild(this._lifebar.el);
-		
 		this._status = {};
-		this._statusList = new StatusList(this._status);
-		this.el.appendChild(this._statusList.el);
-
 		this._results = [];
 
-		this._shadowEl = document.createElement('div');
-		this._shadowEl.classList.add('shadow');
-		this.el.appendChild(this._shadowEl);
-
-		this._facingEl = document.createElement('div');
-		this._facingEl.classList.add('facing-arrow');
-		this.el.appendChild(this._facingEl);
+		this._addLifebar();
+		this._addStatusList();
+		this._addShadowEl();
+		this._addDirectionEl();
 
 		this._initialize();
 	}
@@ -142,6 +133,28 @@ class UnitPiece extends Piece {
 
 	get targetable() {
 		return true;
+	}
+
+	_addLifebar() {
+		this._lifebar = new Lifebar(this.hp, this.maxHp);
+		this.el.appendChild(this._lifebar.el);
+	}
+
+	_addStatusList() {
+		this._statusList = new StatusList(this._status);
+		this.el.appendChild(this._statusList.el);
+	}
+
+	_addShadowEl() {
+		this._shadowEl = document.createElement('div');
+		this._shadowEl.classList.add('shadow');
+		this.el.appendChild(this._shadowEl);
+	}
+
+	_addDirectionEl() {
+		this._directionEl = document.createElement('div');
+		this._directionEl.classList.add('facing-arrow');
+		this.el.appendChild(this._directionEl);
 	}
 
 	//#region text

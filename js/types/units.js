@@ -200,6 +200,9 @@ class ObjectPiece extends UnitPiece {
 
 	_setSelectable() { } // Prevent it from highlighting
 	_setUnselectable() { } // Prevent it from graying out
+	_addDirectionEl() { } // Don't show a directional arrow
+
+	faceDirection(_direction) { } // can't turn
 
 	allowsMove(_piece) {
 		return false;
