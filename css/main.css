@@ -743,6 +743,7 @@ strong {
 		height: 100%;
 		background-repeat: no-repeat;
 		background-image: url(../img/system/shadow.png);
+		transform: scaleX(var(--x-scale));
 		opacity: 40%;
 	}
 	.unit.in-range, .unit.in-area{
@@ -1038,9 +1039,12 @@ strong {
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
+	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
 	pointer-events: none;
+	--x-scale: 1;
+	--y-frame: 0;
 }
 	.sprite-effect>.sprite {
 		width: var(--unit-w);
@@ -1049,18 +1053,16 @@ strong {
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
-		background-repeat: no-repeat;
-	}
-
-	.left.sprite-effect>.sprite {
-		transform: scaleX(-1);
+		background-repeat: repeat-y;
+		background-position-y: calc(var(--y-frame)*var(--unit-h));
+		transform: scaleX(var(--x-scale));
 	}
 
 	/*#region sprite effect skins*/
 	.test-attack-effect>.sprite {
 		background-image: url("../img/vfx/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) both;
+		animation: sprite-animation 0.3s steps(6) both;
 	}
 	.test-heal-effect>.sprite {
 		background-image: url("../img/vfx/testHeal.png");

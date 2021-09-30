@@ -199,8 +199,7 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._xFacing = 1;
-		this._yFacing = 0;
+		this._direction = [1, 0];
 		
 		this._status = {};
 		this._results = [];
@@ -215,7 +214,7 @@ class UnitPiece extends Piece {
 
 	//#region attributes
 	get direction() {
-		return [this._xFacing, this._yFacing];
+		return this._direction;
 	}
 
 	get size() { return this._size; }
@@ -705,11 +704,9 @@ class UnitPiece extends Piece {
 	}
 	faceDirection(direction) {
 		if (!direction) return;
-		var [xFace, yFace] = direction;
-		this._xFacing = xFace;
-		this._yFacing = yFace;
-		this.el.style.setProperty('--x-scale', xFace);
-		this.el.style.setProperty('--y-frame', yFace);
+		this._direction = direction;
+		this.el.style.setProperty('--x-scale', direction[0]);
+		this.el.style.setProperty('--y-frame', direction[1]);
 	}
 	face(target, from) {
 		if (!from) from = this.square;
@@ -719,8 +716,8 @@ class UnitPiece extends Piece {
 	}
 	isBehind(square) {
 		if (!square || this.square == square) return false;
-		var [xFace, yFace] = this.getDirectionFrom(square);
-		return (xFace == this._xFacing && yFace == this._yFacing);
+		var dirTo = this.getDirectionFrom(square);
+		return (dirTo[0] == this.direction[0] && dirTo[1] == this.direction[1]);
 	}
 	//#endregion facing
 
@@ -749,8 +746,8 @@ class UnitPiece extends Piece {
 		path.forEach(square => {
 			keyframes.unshift({ transform: square.screenPosition });
 
-			var [xFace, yFace] = UnitPiece.getDirection(lastSquare, square);
-			turnframes.unshift({ '--x-scale': xFace, '--y-frame': yFace });
+			var [xDir, yDir] = UnitPiece.getDirection(lastSquare, square);
+			turnframes.unshift({ '--x-scale': xDir, '--y-frame': yDir });
 
 			lastSquare = square;
 		});
@@ -787,7 +784,7 @@ class UnitPiece extends Piece {
 		this.el.animate(keyframes, time/2);
 
 		var twistframes = [
-			{ transform: `scaleX(${this._xFacing})`},
+			{ transform: `scaleX(var(--x-scale))`},
 			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ }
 		];
@@ -819,8 +816,8 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		vfx.el.style.setProperty('--x-scale', this._xFacing);
-		vfx.el.style.setProperty('--y-frame', this._yFacing);
+		vfx.el.style.setProperty('--x-scale', this.direction[0]);
+		vfx.el.style.setProperty('--y-frame', this.direction[1]);
 		this.square.parent.el.appendChild(vfx.el);
 	}
 	//#endregion animate
@@ -1288,7 +1285,11 @@ class SkillCard extends Piece {
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
 		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
-		if (origin && target.screenX < origin.screenX) vfx.el.classList.toggle('left');
+		if (origin) {
+			var direction = UnitPiece.getDirection(target, origin);
+			vfx.el.style.setProperty('--x-scale', direction[0]);
+			vfx.el.style.setProperty('--y-frame', direction[1]);
+		}
 		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
