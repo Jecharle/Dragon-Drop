@@ -1177,9 +1177,6 @@ class SkillCard extends Piece {
 	get power() {
 		return Math.max(this._basePower + this.user.powerBonus, 1);
 	}
-	get criticalBonus() {
-		return this._criticalBonus;
-	}
 	//#endregion attributes
 
 	//#region selection
@@ -1341,11 +1338,14 @@ class SkillCard extends Piece {
 	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
+	_aiCriticalCondition(unit, square, origing) {
+		return unit.isBehind(origin);
+	}
 	_aiSelfTargetScore(square, origin) {
 		return this._aiAllyTargetScore(this.user, square, origin);
 	}
 	_aiEnemyTargetScore(unit, square, origin) {
-		var critical = !unit.criticalImmune && unit.isBehind(origin) ? this.criticalBonus : 0;
+		var critical = !unit.criticalImmune && this._aiCriticalCondition(unit, square, origin) ? this._criticalBonus : 0;
 		return this.power + critical;
 	}
 	_aiAllyTargetScore(unit, square, origin) {
