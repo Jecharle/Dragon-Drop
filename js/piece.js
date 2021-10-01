@@ -701,6 +701,11 @@ class UnitPiece extends Piece {
 	//#endregion move
 
 	//#region facing
+	static North = [1, -1];
+	static South = [-1, 0];
+	static East = [1, 0];
+	static West = [-1, -1];
+	
 	static getDirection(target, from) {
 		var dx = target.x - from.x;
 		var dy = target.y - from.y;

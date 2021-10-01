@@ -691,6 +691,21 @@ class BattleScene extends Scene {
 				this.refresh();
 			}
 		}
+
+		if (this._unit && this._unit.myTurn) {
+			if (key == "ArrowUp") {
+				this._unit.faceDirection(UnitPiece.North);
+			}
+			if (key == "ArrowDown") {
+				this._unit.faceDirection(UnitPiece.South);
+			}
+			if (key == "ArrowLeft") {
+				this._unit.faceDirection(UnitPiece.West);
+			}
+			if (key == "ArrowRight") {
+				this._unit.faceDirection(UnitPiece.East);
+			}
+		}
 	}
 	//#endregion input events
 
