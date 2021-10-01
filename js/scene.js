@@ -314,7 +314,6 @@ class BattleScene extends Scene {
 				this._phase = BattleScene.PlayerPhase;
 				this._enableGuests(this.playerTeam);
 				this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
-				this.playerTeam.members.forEach(unit => unit.aiSetDirection());
 				this._showPhaseBanner("Battle Start");
 				this._canRedeploy = true;
 				break;
