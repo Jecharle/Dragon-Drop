@@ -387,7 +387,7 @@ class UnitPiece extends Piece {
 
 	_applyBurn() {
 		if (this.getStatus(UnitPiece.Burn) > 0) {
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-burn-effect');
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'burn-effect');
 			this.parent.el.appendChild(vfx.el);
 			this.takeDamage(this.getStatus(UnitPiece.Burn), null, { ignoreDefense: true });
 		}
