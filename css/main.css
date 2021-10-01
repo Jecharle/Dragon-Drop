@@ -1057,6 +1057,13 @@ strong {
 	}
 
 	/*#region sprite effect skins*/
+	.critical-hit-effect>.sprite {
+		/*TODO: Make a unique sprite for critical damage*/
+		background-image: url("../img/vfx/testBuff.png");
+		background-position-x: calc(-6*var(--unit-w));
+		animation: sprite-animation 0.3s steps(6) 2 alternate both;
+	}
+	/*TODO: Add a burn damage effect*/
 	.test-attack-effect>.sprite {
 		background-image: url("../img/vfx/testAttack.png");
 		background-position-x: calc(-6*var(--unit-w));

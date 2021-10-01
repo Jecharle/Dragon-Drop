@@ -442,7 +442,10 @@ class UnitPiece extends Piece {
 			&& (props?.autoCritical || this.isBehind(sourceSquare))) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power = Math.max(power + criticalBonus, 0);
-			// TODO: critical visual effect?
+
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'critical-hit-effect');
+			this.parent.el.appendChild(vfx.el);
+
 			if (this.results) {
 				this.results.critical = true;
 			}
