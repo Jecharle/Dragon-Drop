@@ -705,7 +705,7 @@ class UnitPiece extends Piece {
 	static South = [-1, 0];
 	static East = [1, 0];
 	static West = [-1, -1];
-	
+
 	static getDirection(target, from) {
 		var dx = target.x - from.x;
 		var dy = target.y - from.y;
@@ -731,7 +731,7 @@ class UnitPiece extends Piece {
 	}
 	face(target, from) {
 		if (!from) from = this.square;
-		if (!from || !target || from.parent != target.parent) return;
+		if (!from || !target || from.parent != target.parent || from == target) return;
 
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
@@ -862,6 +862,19 @@ class UnitPiece extends Piece {
 		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
 		else return 0;
 	}
+	aiSetDirection() {
+		var unit = this;
+		var value = 0;
+		this.parent.pieces.forEach(piece => {
+			if (piece.square && unit.isEnemy(piece) && piece.aiImportance > 0) {
+				var newValue = unit.square.distance(piece.square) / piece.aiImportance;
+				if (!value || newValue < value) {
+					unit.face(piece.square);
+					value = newValue;
+				}
+			}
+		});
+	}
 	_aiGetBestSkill(square) {
 		return this.skills.reduce((best, skill) => {
 			if (!skill.canUse()) return best;
@@ -885,7 +898,7 @@ class UnitPiece extends Piece {
 		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
-			// in range trumps out of range (already in-range)
+			// in range trumps out of range (already in range)
 			if (best.move?.inRange && !square.inRange) return best;
 			
 			var newPlan = this._aiGetBestSkill(square);

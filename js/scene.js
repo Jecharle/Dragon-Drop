@@ -313,6 +313,8 @@ class BattleScene extends Scene {
 				this._deployList.hide();
 				this._phase = BattleScene.PlayerPhase;
 				this._enableGuests(this.playerTeam);
+				this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
+				this.playerTeam.members.forEach(unit => unit.aiSetDirection());
 				this._showPhaseBanner("Battle Start");
 				this._canRedeploy = true;
 				break;
@@ -737,6 +739,7 @@ class BattleScene extends Scene {
 			this.refresh();
 
 			if (!this._skill) {
+				this._unit.aiSetDirection();
 				this._deselectUnit();
 				continue;
 			}
@@ -748,6 +751,7 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
+			this._unit.aiSetDirection();
 			this._deselectUnit();
 			this.refresh();
 
