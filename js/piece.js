@@ -14,6 +14,7 @@ class Piece extends SpriteElObj {
 		this.el.onclick = this._click;
 		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
+		this.el.ondrag = this._hold;
 		this.el.ondragend = this._drop;
 	}
 
@@ -80,9 +81,12 @@ class Piece extends SpriteElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.currentTarget.id);
 		var piece = ev.currentTarget.obj;
-		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TODO: Fix the scaling, etc?
 		if (Game.scene) Game.scene.pieceEvent(piece, true);
 		piece.el.classList.add('dragging');
+	}
+	_hold(ev) {
+
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
@@ -854,6 +858,23 @@ class UnitPiece extends Piece {
 	}
 	deselect() {
 		this.el.classList.remove('selected');
+	}
+	_hold(ev) {
+		if (!ev.screenX && !ev.screenY) return;
+		
+		// TODO: Clean up the conditions, migrate it to scene processing?
+		var unit = ev.currentTarget.obj;
+		if (unit && unit.myTurn && !unit.canMove) {
+			var [x, y] = unit.direction;
+			
+			if (ev.offsetX > 4) x = 1;
+			else if (ev.offsetX < -4) x = -1;
+
+			if (ev.offsetY > 4) y = 0;
+			else if (ev.offsetY < -4) y = -1;
+			
+			unit.faceDirection([x, y]);
+		}
 	}
 	//#endregion input events
 
