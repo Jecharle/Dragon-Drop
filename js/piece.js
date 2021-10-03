@@ -334,7 +334,7 @@ class UnitPiece extends Piece {
 	}
 
 	get criticalImmune () {
-		return false;
+		return this.equipment.some(equip => equip.criticalImmune);
 	}
 
 	get shiftable() {
@@ -1103,7 +1103,11 @@ class Equipment extends Piece {
 	}
 	//#endregion skills
 
-	//#region status resists
+	//#region resistances
+	get criticalImmune() {
+		return false;
+	}
+
 	resistsStatus(effect, value) {
 		return false;
 	}
@@ -1111,7 +1115,7 @@ class Equipment extends Piece {
 	get unshiftable() {
 		return false;
 	}
-	//#endregion status resists
+	//#endregion status resistances
 
 	//#region stat bonuses
 	get maxHpBonus() {
