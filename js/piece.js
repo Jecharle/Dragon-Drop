@@ -997,6 +997,9 @@ class ObjectPiece extends UnitPiece {
 	_addDirectionEl() { } // Don't show a directional arrow
 
 	faceDirection(_direction) { } // can't turn
+	get canFace() {
+		return false;
+	}
 
 	allowsMove(_piece) {
 		return false;
