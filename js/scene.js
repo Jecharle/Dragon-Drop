@@ -694,7 +694,7 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._unit && this._unit.myTurn) {
+		if (this._unit && this._unit.canFace) {
 			if (key == "ArrowUp") {
 				this._unit.faceDirection(UnitPiece.North);
 			}
@@ -864,11 +864,7 @@ class MapScene extends Scene {
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
-		// TODO: Pack this away into a method
-		this._camera.el.appendChild(this._map.el);
-		this.el.appendChild(this._camera.el);
-		this.el.appendChild(this._eventDescriptionEl);
-		this.el.appendChild(this._menuButtonEl);
+		this._buildView();
 		
 		var startNode = this._map.getNode(startNodeId);
 		if (startNode) {
@@ -918,6 +914,12 @@ class MapScene extends Scene {
 		button.innerText = "Menu";
 		button.disabled = true; // TEMP
 		return button;
+	}
+	_buildView() {
+		this._camera.el.appendChild(this._map.el);
+		this.el.appendChild(this._camera.el);
+		this.el.appendChild(this._eventDescriptionEl);
+		this.el.appendChild(this._menuButtonEl);
 	}
 	//#endregion ui setup
 

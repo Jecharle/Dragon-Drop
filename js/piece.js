@@ -50,15 +50,11 @@ class Piece extends SpriteElObj {
 
 	//#region refresh
 	refresh() { }
-	_setSelectable(selectable) {
-		this.el.setAttribute("draggable", Boolean(selectable));
-		if (selectable) {
-			this.el.classList.add('selectable');
-			this.el.classList.remove('viewable');
-		} else {
-			this.el.classList.remove('selectable');
-			this.el.classList.add('viewable');
-		}
+	_setSelectable(selectable, draggable) {
+		this.el.setAttribute("draggable", selectable || draggable);
+
+		this.el.classList.toggle('selectable', selectable);
+		this.el.classList.toggle('viewable', !selectable);
 	}
 	_setUnselectable(unselectable) {
 		if (unselectable) {
@@ -422,7 +418,8 @@ class UnitPiece extends Piece {
 
 		this._refreshSkills();
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
+			this.myTurn && (this.canMove || this.canFace));
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -621,6 +618,9 @@ class UnitPiece extends Piece {
 	}
 	get canAct() {
 		return this.alive && !this.actionUsed;
+	}
+	get canFace() {
+		return this.alive && this.myTurn;
 	}
 
 	async updateStatusTurnStart() {
@@ -862,9 +862,8 @@ class UnitPiece extends Piece {
 	_hold(ev) {
 		if (!ev.screenX && !ev.screenY) return;
 		
-		// TODO: Clean up the conditions, migrate it to scene processing?
 		var unit = ev.currentTarget.obj;
-		if (unit && unit.myTurn && !unit.canMove) {
+		if (unit && unit.canFace && !unit.canMove) {
 			var [x, y] = unit.direction;
 			
 			if (ev.offsetX > 4) x = 1;
@@ -873,7 +872,7 @@ class UnitPiece extends Piece {
 			if (ev.offsetY > 4) y = 0;
 			else if (ev.offsetY < -4) y = -1;
 			
-			unit.faceDirection([x, y]);
+			unit.faceDirection([x, y]); // TODO: Call a Scene function instead?
 		}
 	}
 	//#endregion input events
