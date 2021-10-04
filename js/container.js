@@ -544,7 +544,9 @@ class Square extends Position {
 		this._pathEl.classList.add('path-sprite');
 		this.el.appendChild(this._pathEl);
 		
-		// TODO: Top decorations will be yet another sprite, probably?
+		this._decoEl = document.createElement('div');
+		this._decoEl.classList.add('deco-sprite');
+		this.el.appendChild(this._decoEl);
 	}
 
 	//#region static position utility

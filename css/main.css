@@ -562,6 +562,22 @@ strong {
 			}
 	/*#endregion terrain types*/
 
+	/*#region tile decorations*/	
+	.square>.deco-sprite {
+		position: absolute;
+		z-index: 1;
+		bottom: calc(100% - var(--square-h));
+		width: var(--square-w);
+		background-repeat: no-repeat;
+		background-position: 0 0;
+	}
+		/*TODO: Determine sprite via tile setting, not terrain type*/
+		.wall>.deco-sprite {
+			background-image: url(../img/tilesets/testPillar.png);
+			height: 60px;
+		}
+	/*#endregion tile decorations*/
+
 	/*#region range / area highlighting*/
 	.square>.highlight-sprite {
 		position: absolute;
@@ -678,7 +694,6 @@ strong {
 	.unit>.sprite {
 		width: var(--unit-w);
 		height: var(--unit-h);
-		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
@@ -686,6 +701,7 @@ strong {
 		background-position-x: 0;
 		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
 		transform: scaleX(var(--x-scale));
+		pointer-events: none;
 	}
 	.unit>.shadow {
 		position: absolute;
@@ -697,9 +713,20 @@ strong {
 		background-image: url(../img/system/shadow.png);
 		transform: scaleX(var(--x-scale));
 		opacity: 40%;
+		pointer-events: none;
 	}
 	.unit.in-range, .unit.in-area{
 		pointer-events: none;
+	}
+	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
+		filter: drop-shadow(1px 0 yellow)
+		drop-shadow(-1px 0 yellow)
+		drop-shadow(0px 1px yellow)
+		drop-shadow(0px -1px yellow);
+	}
+	.unit:hover>.sprite {
+		/*TODO: Temporary? Still want to get those ghost images in*/
+		transform: scaleX(var(--x-scale)) translateZ(99px);
 	}
 
 	/*#region unit status*/
@@ -757,12 +784,7 @@ strong {
 		--unit-w: 64px;
 		--unit-h: 64px;
 	}
-	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
-		filter: drop-shadow(1px 0 yellow)
-		drop-shadow(-1px 0 yellow)
-		drop-shadow(0px 1px yellow)
-		drop-shadow(0px -1px yellow);
-	}
+
 	.moving>.sprite {
 		--motion-index: 1;
 		background-position-x: calc(-2*var(--unit-w));
