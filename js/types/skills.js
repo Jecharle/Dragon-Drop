@@ -481,6 +481,9 @@ class ThrowSkill extends SkillCard {
 	}
 };
 
+/***************************************************
+ Alternate test positioning skill
+***************************************************/
 class ThrowSkill2 extends SkillCard {
 	get name() {
 		return "Throw 2";

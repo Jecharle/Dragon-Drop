@@ -13,6 +13,9 @@ UnitPiece.parseUnitType = function(string) {
 
 		case "testposition":
 			return TestPositionUnit;
+		
+		case "teststatus":
+			return TestStatusUnit;
 
 		// enemies
 		case "testenemy":
