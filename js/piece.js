@@ -770,9 +770,10 @@ class UnitPiece extends Piece {
 				return this._animatePath(path);
 		}
 	}
-	_animatePath(path, noTurn) {
+	_animatePath(path, sliding) {
 		var keyframes = [{}];
 		var turnframes = [{}];
+		var jumpframes = [];
 		var lastSquare = this.square;
 		path.forEach(square => {
 			keyframes.unshift({ transform: square.screenPosition });
@@ -780,12 +781,22 @@ class UnitPiece extends Piece {
 			var [xDir, yDir] = UnitPiece.getDirection(lastSquare, square);
 			turnframes.unshift({ '--x-scale': xDir, '--y-frame': yDir });
 
+			if (lastSquare.z != square.z) {
+				jumpframes.unshift({ bottom: 0 }, { bottom: '7px' }, { bottom: '8px' }, { bottom: '7px' }, { bottom: 0 });
+		 	} else {
+				jumpframes.unshift({ }, { }, { }, { }, { });
+			}
+
 			lastSquare = square;
 		});
 		turnframes.unshift(turnframes[0]);
-		var time = 200*(keyframes.length-1);
-		this.el.animate(keyframes, {duration: time, easing: "linear"});	
-		if (!noTurn) this.el.animate(turnframes, {duration: time, easing: "linear"});
+		var time = 250*(keyframes.length-1);
+		var timeSettings = {duration: time, easing: "linear"};
+		this.el.animate(keyframes, timeSettings);	
+		if (!sliding) {
+			this.el.animate(turnframes, timeSettings);
+			this.spriteEl.animate(jumpframes, timeSettings);
+		}
 		return time;
 	}
 	_animateJump(path) {
