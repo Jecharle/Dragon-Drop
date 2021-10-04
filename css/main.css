@@ -189,8 +189,7 @@ strong {
 	top: 1px;
 }
 .icon .double {
-	background-image: inherit;
-	background-position: inherit;
+	background: inherit;
 	position: absolute;
 	left: -1px;
 	top: -2px;
@@ -702,6 +701,7 @@ strong {
 		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
 		transform: scaleX(var(--x-scale));
 		pointer-events: none;
+		transform-style: preserve-3d;
 	}
 	.unit>.shadow {
 		position: absolute;
@@ -718,15 +718,21 @@ strong {
 	.unit.in-range, .unit.in-area{
 		pointer-events: none;
 	}
-	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
+	.unit:hover>.sprite::after {
+		content: "";
+		width: var(--unit-w);
+		height: var(--unit-h);
+		position: absolute;
+		background: inherit;
+		transform: translateZ(99px);
+		opacity: 50%;
+	}
+	/*TODO: Is there a way for this to not be transparent without flattening anything?*/
+	.unit.selectable.selected>.sprite::after, .unit.selectable:hover>.sprite::after {
 		filter: drop-shadow(1px 0 yellow)
 		drop-shadow(-1px 0 yellow)
 		drop-shadow(0px 1px yellow)
 		drop-shadow(0px -1px yellow);
-	}
-	.unit:hover>.sprite {
-		/*TODO: Temporary? Still want to get those ghost images in*/
-		transform: scaleX(var(--x-scale)) translateZ(99px);
 	}
 
 	/*#region unit status*/
