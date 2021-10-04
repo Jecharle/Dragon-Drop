@@ -526,15 +526,25 @@ class Square extends Position {
 		this.terrain = Square.Flat;
 		this.inRange = false;
 
-		this._sideEl = document.createElement('div');
-		this._sideEl.classList.add('side-sprite');
-		this.el.appendChild(this._sideEl);
+		this.addSubsprites();
 
 		this.refresh();
 	}
 
 	get elClass() {
 		return 'square';
+	}
+
+	addSubsprites() {
+		this._selectEl = document.createElement('div');
+		this._selectEl.classList.add('highlight-sprite');
+		this.el.appendChild(this._selectEl);
+
+		this._pathEl = document.createElement('div');
+		this._pathEl.classList.add('path-sprite');
+		this.el.appendChild(this._pathEl);
+		
+		// TODO: Top decorations will be yet another sprite, probably?
 	}
 
 	//#region static position utility
@@ -568,7 +578,7 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get groundHeight() {
-		return Math.max(this.z*12, 0);
+		return Math.max(this.z*12, 0) + 48;
 	}
 	get _selfScreenZ() {
 		return Square.screenZ(this.x, this.y, this.z - 12);
@@ -576,7 +586,7 @@ class Square extends Position {
 
 	refresh() {
 		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
-		this._sideEl.style.height = `${this.groundHeight}px`;
+		this.spriteEl.style.height = `${this.groundHeight}px`;
 	}
 	//#endregion isometric
 
