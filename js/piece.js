@@ -438,18 +438,12 @@ class UnitPiece extends Piece {
 	//#region effects
 	takeDamage(power, sourceSquare, props) {
 
-		// check for critical
-		if (!this.criticalImmune && !props?.noCritical
-			&& (props?.autoCritical || this.isBehind(sourceSquare))) {
+		// check for critical (by default, back attacks are critical)
+		var criticalHit = false;
+		if (!this.criticalImmune && (props?.critical || this.isBehind(sourceSquare))) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power = Math.max(power + criticalBonus, 0);
-
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'critical-hit-effect');
-			this.parent.el.appendChild(vfx.el);
-
-			if (this.results) {
-				this.results.critical = true;
-			}
+			criticalHit = true;
 		}
 
 		// apply defense
@@ -462,8 +456,16 @@ class UnitPiece extends Piece {
 			this.hp -= power;
 			this.addTimedClass(500, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
+			
+			if (criticalHit) {
+				var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'critical-hit-effect');
+				this.parent.el.appendChild(vfx.el);
+				this.addTimedClass(500, 'critical');
+			}
+
 			if (this.results) {
 				this.results.damage += power;
+				this.results.critical ||= criticalHit;
 			}
 		} else {
 			// TODO: 0 damage effect?

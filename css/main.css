@@ -827,6 +827,9 @@ strong {
 		.damaged>.shadow {
 			animation: shake 0.15s;
 		}
+		.critical.damaged>.sprite, .critical.damaged>.shadow {
+			animation-iteration-count: 2;
+		}
 	.evade>.sprite {
 		animation: duck 0.15s 2 alternate;
 	}
@@ -1058,10 +1061,10 @@ strong {
 
 	/*#region sprite effect skins*/
 	.critical-hit-effect>.sprite {
-		/*TODO: Make a unique sprite for critical damage*/
-		background-image: url("../img/vfx/testBuff.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.3s steps(6) 2 alternate both;
+		background-image: url("../img/vfx/critical.png");
+		background-position-x: calc(-5*var(--unit-w));
+		animation: sprite-animation 0.25s steps(5) both;
+		bottom: 50%;
 	}
 	/*TODO: Add a burn damage effect*/
 	.test-attack-effect>.sprite {
