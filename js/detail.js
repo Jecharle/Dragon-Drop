@@ -261,11 +261,12 @@ class StatusList extends Detail {
  Popup text
 ***************************************************/
 class PopupText extends Detail {
-	constructor(startValue) {
+	constructor(startValue, ...classList) {
 		super(startValue);
-		this.el.addEventListener('animationend', ev => {
-			ev.target.parentElement.removeChild(ev.target);
-		});
+		this.el.classList.add(...classList);
+		setTimeout(() => {
+			this.el.parentElement.removeChild(this.el);
+		}, 1000);
 	}
 
 	get elClass() {
@@ -348,7 +349,7 @@ class HoverDescription extends Detail {
 class SpriteEffect extends SpriteElObj {
 	constructor(square, duration, ...classList) {
 		super();
-		this.el.classList.add(...classList)
+		this.el.classList.add(...classList);
 		setTimeout(() => {
 			this.el.parentElement.removeChild(this.el);
 		}, duration);

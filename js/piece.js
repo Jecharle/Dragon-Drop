@@ -136,6 +136,7 @@ class UnitPiece extends Piece {
 		return true;
 	}
 
+	//#region sub sprites
 	_addLifebar() {
 		this._lifebar = new Lifebar(this.hp, this.maxHp);
 		this.el.appendChild(this._lifebar.el);
@@ -163,6 +164,7 @@ class UnitPiece extends Piece {
 		this._ghostEl.classList.add('sprite','ghost');
 		this.el.appendChild(this._ghostEl);
 	}
+	//#endregion sub sprites
 
 	//#region text
 	icon(style, content) {
@@ -465,9 +467,11 @@ class UnitPiece extends Piece {
 			this.addTimedClass(1200, 'hp-change');
 			
 			if (criticalHit) {
-				var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'critical-hit-effect');
-				this.parent.el.appendChild(vfx.el);
 				this.addTimedClass(500, 'critical');
+				this.el.appendChild(new PopupText(`${power}`, 'critical').el);
+			}
+			else {
+				this.el.appendChild(new PopupText(`${power}`).el);
 			}
 
 			if (this.results) {
@@ -476,6 +480,7 @@ class UnitPiece extends Piece {
 			}
 		} else {
 			// TODO: 0 damage effect?
+			this.el.appendChild(new PopupText(`0`).el);
 		}
 
 		this.refresh();
@@ -485,6 +490,7 @@ class UnitPiece extends Piece {
 		if (power > 0) {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
+			this.el.appendChild(new PopupText(`+${power}`, 'heal').el);
 			if (this.results) {
 				this.results.heal += power;
 			}

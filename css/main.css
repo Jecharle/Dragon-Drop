@@ -569,7 +569,7 @@ strong {
 		width: var(--square-w);
 		background-repeat: no-repeat;
 		background-position: 0 0;
-		transform: translateZ(24px);
+		transform: translateZ(13px);
 	}
 		/*TODO: Determine sprite via tile setting, not terrain type*/
 		.wall>.deco-sprite {
@@ -1047,12 +1047,6 @@ strong {
 	}
 
 	/*#region sprite effect skins*/
-	.critical-hit-effect>.sprite {
-		background-image: url("../img/vfx/critical.png");
-		--motion-frames: 5;
-		animation-duration: 0.25s;
-		bottom: 50%;
-	}
 	.burn-effect>.sprite {
 		background-image: url("../img/vfx/burn.png");
 		--motion-frames: 5;
@@ -1097,9 +1091,15 @@ strong {
 	justify-content: center;
 	align-items: center;
 	position: absolute;
-	z-index: 4;
 	animation: rise-up 1s ease-out;
+	transform: translateZ(99px);
 }
+	.popup-text.heal {
+		color: greenyellow;
+	}
+	.popup-text.critical {
+		animation: rise-up 1s ease-out, critical-flash 0.15s steps(2) infinite alternate;
+	}
 /*#endregion popup text*/
 
 /*#region holding area for keyframes*/
@@ -1138,13 +1138,21 @@ strong {
 }
 @keyframes rise-up {
 	from {
-		bottom: 95%;
+		bottom: 100%;
 	}
 	50% {
 		bottom: 120%;
 	}
 	to {
 		bottom: 120%;
+	}
+}
+@keyframes critical-flash {
+	from {
+		
+	}
+	to {
+		color: red;
 	}
 }
 @keyframes fade-out {
