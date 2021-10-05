@@ -569,11 +569,16 @@ strong {
 		width: var(--square-w);
 		background-repeat: no-repeat;
 		background-position: 0 0;
+		transform: translateZ(24px);
 	}
 		/*TODO: Determine sprite via tile setting, not terrain type*/
 		.wall>.deco-sprite {
 			background-image: url(../img/tilesets/testPillar.png);
 			height: 60px;
+		}
+		.cover>.deco-sprite {
+			background-image: url(../img/tilesets/testGrassDeco.png);
+			height: 36px;
 		}
 	/*#endregion tile decorations*/
 
