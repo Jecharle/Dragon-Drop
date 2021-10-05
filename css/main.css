@@ -1058,15 +1058,15 @@ strong {
 		--motion-frames: 5;
 		animation-duration: 0.5s;
 	}
+	.heal-effect>.sprite {
+		background-image: url("../img/vfx/heal.png");
+		--motion-frames: 5;
+		animation-duration: 0.5s;
+	}
 
 	.test-attack-effect>.sprite {
 		background-image: url("../img/vfx/testAttack.png");
 		--motion-frames: 6;
-		animation-duration: 0.3s;
-	}
-	.test-heal-effect>.sprite {
-		background-image: url("../img/vfx/testHeal.png");
-		--motion-frames: 5;
 		animation-duration: 0.3s;
 	}
 	.test-shot-effect>.sprite {

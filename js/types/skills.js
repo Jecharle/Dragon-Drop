@@ -222,7 +222,7 @@ class TestHealSkill extends SkillCard {
 	}
 	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
-		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		this._showEffect(unit.square, this.user.square, "heal-effect");
 		unit.heal(this.power);
 		await Game.asyncPause(200);
 	}
@@ -301,7 +301,7 @@ class TestDebuffSkill extends TestHealSkill {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			this._showEffect(unit.square, this.user.square, "test-heal-effect");
+			this._showEffect(unit.square, this.user.square, "heal-effect");
 			unit.addStatus(UnitPiece.Power, -1);
 			unit.addStatus(UnitPiece.Defense, -1);
 			unit.addStatus(UnitPiece.Speed, -1);
@@ -333,7 +333,7 @@ class TestGuardSkill extends TestHealSkill {
 	}
 
 	async _unitEffects(unit, _target) {
-		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		this._showEffect(unit.square, this.user.square, "heal-effect");
 		unit.addStatus(UnitPiece.Anchor);
 		unit.addStatus(UnitPiece.Evade);
 		await Game.asyncPause(200);

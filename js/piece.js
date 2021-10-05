@@ -401,7 +401,7 @@ class UnitPiece extends Piece {
 	}
 	_applyRegenerate() {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-heal-effect');
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'heal-effect');
 			this.parent.el.appendChild(vfx.el);
 			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
 		}
