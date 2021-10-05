@@ -119,6 +119,7 @@ class UnitPiece extends Piece {
 		this._addStatusList();
 		this._addShadowEl();
 		this._addDirectionEl();
+		this._addGhostEl();
 
 		this._initialize();
 	}
@@ -155,6 +156,12 @@ class UnitPiece extends Piece {
 		this._directionEl = document.createElement('div');
 		this._directionEl.classList.add('facing-arrow');
 		this.el.appendChild(this._directionEl);
+	}
+
+	_addGhostEl() {
+		this._ghostEl = document.createElement('div');
+		this._ghostEl.classList.add('sprite','ghost');
+		this.el.appendChild(this._ghostEl);
 	}
 
 	//#region text
@@ -763,14 +770,14 @@ class UnitPiece extends Piece {
 				return this._animateTeleport(path);
 			
 			case UnitPiece.Straight:
-				return this._animatePath(path, true);
+				return this._animatePath(path, false, true);
 
 			default:
 			case UnitPiece.Path:
 				return this._animatePath(path);
 		}
 	}
-	_animatePath(path, sliding) {
+	_animatePath(path, noJump, noTurn) {
 		var keyframes = [{}];
 		var turnframes = [{}];
 		var jumpframes = [];
@@ -793,9 +800,12 @@ class UnitPiece extends Piece {
 		var time = 250*(keyframes.length-1);
 		var timeSettings = {duration: time, easing: "linear"};
 		this.el.animate(keyframes, timeSettings);	
-		if (!sliding) {
+		if (!noTurn) {
 			this.el.animate(turnframes, timeSettings);
+		}
+		if (!noJump) {
 			this.spriteEl.animate(jumpframes, timeSettings);
+			this._ghostEl.animate(jumpframes, timeSettings);
 		}
 		return time;
 	}
@@ -813,6 +823,7 @@ class UnitPiece extends Piece {
 			{ bottom: "64px" }
 		];
 		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this._ghostEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return time;
 	}
 	_animateTeleport(path) {
@@ -831,6 +842,7 @@ class UnitPiece extends Piece {
 			{ }
 		];
 		this.spriteEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
+		this._ghostEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
 		return time;
 	}
 
@@ -1695,6 +1707,8 @@ class OnTurnEndReaction extends ReactionCard {
 		return await this.use(this.user.square);
 	}
 }
+
+// TODO: Reactions to the result of your own skill? Got a kill, landed a critical, hit X enemies, etc?
 
 /***************************************************
  Map Piece

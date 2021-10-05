@@ -701,6 +701,8 @@ strong {
 		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
 		transform: scaleX(var(--x-scale));
 		pointer-events: none;
+		display: flex;
+		justify-content: center;
 		transform-style: preserve-3d;
 	}
 	.unit>.shadow {
@@ -715,23 +717,13 @@ strong {
 		opacity: 40%;
 		pointer-events: none;
 	}
+	.unit>.sprite.ghost {
+		transform: scaleX(var(--x-scale)) translateZ(99px);
+		opacity: 35%;
+	}
 	.unit.in-range, .unit.in-area{
 		pointer-events: none;
 	}
-	.unit.selected>.sprite, .unit:hover>.sprite {
-		/*TEMP: Stuff pops to the front when you hover it, just to make sure it's visible*/
-		transform: scaleX(var(--x-scale)) translateZ(99px);
-	}
-	/*TODO: Is there a way to do the ghost-image without mucking up filters ?*/
-	/*.unit:hover>.sprite::after {
-		content: "";
-		width: var(--unit-w);
-		height: var(--unit-h);
-		position: absolute;
-		background: inherit;
-		transform: translateZ(99px);
-		opacity: 50%;
-	}*/
 	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
 		filter: drop-shadow(1px 0 yellow)
 		drop-shadow(-1px 0 yellow)
