@@ -694,6 +694,7 @@ strong {
 	--x-scale: 1;
 	--y-frame: 0;
 	--motion-index: 0;
+	--motion-frames: 0;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
@@ -701,14 +702,14 @@ strong {
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
-		background-repeat: no-repeat;
-		background-position-x: 0;
-		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
 		transform: scaleX(var(--x-scale));
+		background-repeat: no-repeat;
+		background-position-x: calc(-1 * var(--unit-w) * var(--motion-frames));
+		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
+		animation-name: sprite-animation;
+		animation-timing-function: steps(var(--motion-frames));
+		animation-fill-mode: both;
 		pointer-events: none;
-		display: flex;
-		justify-content: center;
-		transform-style: preserve-3d;
 	}
 	.unit>.shadow {
 		position: absolute;
@@ -794,8 +795,9 @@ strong {
 
 	.moving>.sprite {
 		--motion-index: 1;
-		background-position-x: calc(-2*var(--unit-w));
-		animation: sprite-animation 0.3s steps(2) infinite;
+		--motion-frames: 2;
+		animation-duration: 0.3s;
+		animation-iteration-count: infinite;
 	}
 	.attack>.sprite {
 		--motion-index: 3;
@@ -1026,6 +1028,7 @@ strong {
 	--x-scale: 1;
 	--y-frame: 0;
 	--motion-index: 0;
+	--motion-frames: 0;
 }
 	.sprite-effect>.sprite {
 		width: var(--unit-w);
@@ -1034,43 +1037,49 @@ strong {
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
-		background-repeat: repeat-y;
-		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
 		transform: scaleX(var(--x-scale));
+		background-repeat: repeat-y;
+		background-position-x: calc(-1 * var(--unit-w) * var(--motion-frames));
+		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
+		animation-name: sprite-animation;
+		animation-timing-function: steps(var(--motion-frames));
+		animation-fill-mode: both;
 	}
 
 	/*#region sprite effect skins*/
 	.critical-hit-effect>.sprite {
 		background-image: url("../img/vfx/critical.png");
-		background-position-x: calc(-5*var(--unit-w));
-		animation: sprite-animation 0.25s steps(5) both;
+		--motion-frames: 5;
+		animation-duration: 0.25s;
 		bottom: 50%;
 	}
 	/*TODO: Add a burn damage effect*/
 	.test-attack-effect>.sprite {
 		background-image: url("../img/vfx/testAttack.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.3s steps(6) both;
+		--motion-frames: 6;
+		animation-duration: 0.3s;
 	}
 	.test-heal-effect>.sprite {
 		background-image: url("../img/vfx/testHeal.png");
-		background-position-x: calc(-5*var(--unit-w));
-		animation: sprite-animation 0.3s steps(5) both;
+		--motion-frames: 5;
+		animation-duration: 0.3s;
 	}
 	.test-shot-effect>.sprite {
 		background-image: url("../img/vfx/testBullet.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) 0.2s both;
+		--motion-frames: 6;
+		animation-duration: 0.2s;
+		animation-delay: 0.2s;
 	}
 	.test-arc-effect>.sprite {
 		background-image: url("../img/vfx/testBullet.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) 0.4s both;
+		--motion-frames: 6;
+		animation-duration: 0.2s;
+		animation-delay: 0.4s;
 	}
 	.test-buff-effect>.sprite {
 		background-image: url("../img/vfx/testBuff.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.4s steps(6) both;
+		--motion-frames: 6;
+		animation-duration: 0.4s;
 	}
 	/*#endregion sprite effect skins*/
 /*#endregion sprite effects*/
