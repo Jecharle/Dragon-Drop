@@ -8,6 +8,7 @@ class Menu extends ElObj {
 		super();
 		this.parent = parent;
 		this._addAllButtons();
+		this.close();
 	}
 
 	get elClass() {
@@ -15,16 +16,17 @@ class Menu extends ElObj {
 	}
 
 	_addAllButtons() {
-		this._closeButton = this._addButton('close-button');
+		this._closeButton = this._addButton("Close", 'close-button');
 		this._closeButton.onclick = () => {
 			this.close();
 		}
 		this.el.appendChild(this._closeButton);
 	}
 
-	_addButton(...classList) {
+	_addButton(text, ...classList) {
 		var newButton = document.createElement("button");
 		newButton.classList.add(...classList);
+		newButton.innerText = text;
 		newButton.type = "button";
 		return newButton;
 	}
@@ -51,10 +53,28 @@ class OptionsMenu extends Menu {
 		super.open();
 	}
 
-	// TODO: Auto-turn options
+	_addAllButtons() {
+		this._closeButton = this._addButton("Confirm", 'close-button');
+		this._closeButton.onclick = () => {
+			this._applyChanges();
+			this.close();
+		}
+		this.el.appendChild(this._closeButton);
+
+		this._closeButton = this._addButton("Cancel", 'close-button');
+		this._closeButton.onclick = () => {
+			this.close();
+		}
+		this.el.appendChild(this._closeButton);
+	}
+
+	// TODO: Block access to the background elements while the menu is up?
+
+	// TODO: Auto-facing options
 	// TODO: End-of-turn prompt option
 	// TODO: Enemy turn speed option?
-	// TODO: Placeholders for volume options
+	// TODO: SFX volume
+	// TODO: BGM volume
 
 	// TODO: Save option changes
 
@@ -65,8 +85,7 @@ class OptionsMenu extends Menu {
 	// Each button is created and styled along with its labels
 	// Each button triggers an effect in the menu
 
-	close() {
+	_applyChanges() {
 		SaveData.saveOptions();
-		super.close();
 	}
 }

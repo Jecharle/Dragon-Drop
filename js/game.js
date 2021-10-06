@@ -76,8 +76,11 @@ class Game {
 		Party.add(new TestPositionPartyMember());
 		Party.add(new TestStatusPartyMember() );
 
-		MapSceneModel.load("testMap").then(mapModel => {
+		/*MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
+		});*/
+		BattleSceneModel.load("testBattle").then(battleModel => {
+			this.setScene(new BattleScene(null, battleModel));
 		});
 	}
 }

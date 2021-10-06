@@ -70,6 +70,27 @@ strong {
 }
 /*#endregion common styles*/
 
+/*#region menus*/
+.menu {
+	width: max-content;
+	height: max-content;
+	background-color: white;
+	border: 1px solid black;
+	z-index: 9;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 4px;
+}
+.menu button {
+	margin: 2px;
+}
+/* TODO: Row container */
+/* TODO: Button / label setup? */
+/*#endregion menus*/
+
 /*#region battle scene*/
 /*#region battle scene UI*/
 .nav-button {

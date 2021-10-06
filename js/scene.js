@@ -87,6 +87,8 @@ class BattleScene extends Scene {
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
+		this._optionsMenu = new OptionsMenu(this);
+
 		this._buildDOM();
 	}
 
@@ -112,11 +114,10 @@ class BattleScene extends Scene {
 		var button = document.createElement("button");
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
-		/*button.onclick = () => {
-			TODO: Open the menu
-		};*/
+		button.onclick = () => {
+			this._optionsMenu.open();
+		};
 		button.innerText = "Menu";
-		button.disabled = true; // TEMP
 		return button;
 	}
 	_createUndoButton() {
@@ -148,6 +149,8 @@ class BattleScene extends Scene {
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
 		this.el.appendChild(this._deployList.el);
+
+		this.el.appendChild(this._optionsMenu.el);
 	}
 	//#endregion ui setup
 
@@ -751,7 +754,7 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
-			this._unit.aiSetDirection();
+			if (this._unit) this._unit.aiSetDirection();
 			this._deselectUnit();
 			this.refresh();
 
