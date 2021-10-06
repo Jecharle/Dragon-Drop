@@ -448,11 +448,10 @@ class UnitPiece extends Piece {
 	takeDamage(power, sourceSquare, props) {
 
 		// check for critical (by default, back attacks are critical)
-		var criticalHit = false;
-		if (!this.criticalImmune && (props?.critical || this.isBehind(sourceSquare))) {
+		var criticalHit = !this.criticalImmune && (props?.critical || this.isBehind(sourceSquare));
+		if (criticalHit) {
 			var criticalBonus = props?.criticalBonus ?? 1;
-			power = Math.max(power + criticalBonus, 0);
-			criticalHit = true;
+			power += criticalBonus;
 		}
 
 		// apply defense
@@ -468,10 +467,10 @@ class UnitPiece extends Piece {
 			
 			if (criticalHit) {
 				this.addTimedClass(500, 'critical');
-				this.el.appendChild(new PopupText(`${power}`, 'critical').el);
+				this.showPopup(`${power}`, 'critical');
 			}
 			else {
-				this.el.appendChild(new PopupText(`${power}`).el);
+				this.showPopup(`${power}`);
 			}
 
 			if (this.results) {
@@ -479,8 +478,10 @@ class UnitPiece extends Piece {
 				this.results.critical ||= criticalHit;
 			}
 		} else {
-			// TODO: 0 damage effect?
-			this.el.appendChild(new PopupText(`0`).el);
+			this.showPopup("0");
+			if (this.results) {
+				this.results.blocked = true;
+			}
 		}
 
 		this.refresh();
@@ -490,7 +491,7 @@ class UnitPiece extends Piece {
 		if (power > 0) {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
-			this.el.appendChild(new PopupText(`+${power}`, 'heal').el);
+			this.showPopup(`+${power}`, 'heal');
 			if (this.results) {
 				this.results.heal += power;
 			}
@@ -880,6 +881,11 @@ class UnitPiece extends Piece {
 		vfx.el.style.setProperty('--y-frame', this.direction[1]);
 		this.square.parent.el.appendChild(vfx.el);
 	}
+
+	showPopup(text, ...classes) {
+		var popup = new PopupText(text, ...classes);
+		this.el.appendChild(popup.el);
+	}
 	//#endregion animate
 
 	//#region input events
@@ -1061,6 +1067,7 @@ class SkillResult {
 		this.damage = 0;
 		this.healing = 0;
 		this.shift = 0;
+		this.blocked = false; // hit but took no damage
 		this.evade = false;
 		this.swap = false;
 		this.critical = false;
