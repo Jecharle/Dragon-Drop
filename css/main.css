@@ -14,7 +14,7 @@
 button {
 	font: 8px pixelFont;
 }
-strong {
+strong, h1, h2 {
 	font-family: boldPixelFont;
 	font-weight: normal;
 }
@@ -81,14 +81,25 @@ strong {
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	align-items: center;
+	align-items: flex-start;
 	padding: 4px;
+	pointer-events: auto;
+}
+.menu-row {
+	width: max-content;
+	height: max-content;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+.menu-row.accept-cancel {
+	width: 100%;
+	margin-top: 8px;
+	justify-content: flex-end;
 }
 .menu button {
 	margin: 2px;
 }
-/* TODO: Row container */
-/* TODO: Button / label setup? */
 /*#endregion menus*/
 
 /*#region battle scene*/

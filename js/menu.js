@@ -7,7 +7,7 @@ class Menu extends ElObj {
 	constructor(parent) {
 		super();
 		this.parent = parent;
-		this._addAllButtons();
+		this._addAllControls();
 		this.close();
 	}
 
@@ -15,7 +15,7 @@ class Menu extends ElObj {
 		return 'menu';
 	}
 
-	_addAllButtons() {
+	_addAllControls() {
 		this._closeButton = this._addButton("Close", 'close-button');
 		this._closeButton.onclick = () => {
 			this.close();
@@ -24,11 +24,18 @@ class Menu extends ElObj {
 	}
 
 	_addButton(text, ...classList) {
-		var newButton = document.createElement("button");
+		var newButton = document.createElement('button');
 		newButton.classList.add(...classList);
 		newButton.innerText = text;
 		newButton.type = "button";
 		return newButton;
+	}
+
+	_addRow(...classList) {
+		var newRow = document.createElement('div');
+		newRow.classList.add('menu-row', ...classList);
+		this.el.appendChild(newRow);
+		return newRow;
 	}
 
 	open() {
@@ -49,43 +56,69 @@ class Menu extends ElObj {
 class OptionsMenu extends Menu {
 
 	open() {
-		// TODO: Set options from the saved option data
+		this._loadOptions();
 		super.open();
 	}
 
-	_addAllButtons() {
-		this._closeButton = this._addButton("Confirm", 'close-button');
-		this._closeButton.onclick = () => {
-			this._applyChanges();
-			this.close();
-		}
-		this.el.appendChild(this._closeButton);
+	// TODO: Block access to the parent element while the menu is up?
 
-		this._closeButton = this._addButton("Cancel", 'close-button');
-		this._closeButton.onclick = () => {
-			this.close();
-		}
-		this.el.appendChild(this._closeButton);
+	//#region option rows
+	_addAllControls() {
+		this._addTitle();
+		// TODO: End-of-turn prompt frequency radio button
+		this._addAutoFaceRow();
+		// TODO: SFX volume slider
+		// TODO: BGM volume slider
+		this._addCloseRow();
 	}
 
-	// TODO: Block access to the background elements while the menu is up?
+	_addTitle() {
+		this._titleHeader = document.createElement('h1');
+		this._titleHeader.innerText = "Options";
+		this.el.appendChild(this._titleHeader);
+	}
 
-	// TODO: Auto-facing options
-	// TODO: End-of-turn prompt option
-	// TODO: Enemy turn speed option?
-	// TODO: SFX volume
-	// TODO: BGM volume
+	_addAutoFaceRow() {
+		var row = this._addRow();
 
-	// TODO: Save option changes
+		this._autoFaceCheckbox = document.createElement('input');
+		this._autoFaceCheckbox.id = "autoFaceCheckbox";
+		this._autoFaceCheckbox.type = "checkbox";
+		row.appendChild(this._autoFaceCheckbox);
 
-	// TODO: Cancel changes
+		this._autoFaceLabel = document.createElement('label');
+		this._autoFaceLabel.innerText = "Automatically face nearest enemy";
+		this._autoFaceLabel.htmlFor = "autoFaceCheckbox";
+		row.appendChild(this._autoFaceLabel);
+	}
 
-	// TODO: Reset to default?
+	_addCloseRow() {
+		var row = this._addRow('accept-cancel');
+		this._acceptButton = this._addButton("Accept", 'close-button');
+		this._acceptButton.onclick = () => {
+			this._saveChanges();
+			this.close();
+		}
+		row.appendChild(this._acceptButton);
 
-	// Each button is created and styled along with its labels
-	// Each button triggers an effect in the menu
+		this._cancelButton = this._addButton("Cancel", 'close-button');
+		this._cancelButton.onclick = () => {
+			this.close();
+		}
+		row.appendChild(this._cancelButton);
+	}
+	//#endregion option rows
 
-	_applyChanges() {
+	//#region load/save
+	_loadOptions() {
+		// TODO: Set option values based on the content of SaveData
+		this._autoFaceCheckbox.checked = !!SaveData.getOption('autoFace');
+	}
+
+	_saveChanges() {
+		// TODO: Pull the option values into the SaveData structure
+		SaveData.setOption('autoFace', !!this._autoFaceCheckbox.checked);
 		SaveData.saveOptions();
 	}
+	//#endregion load/save
 }

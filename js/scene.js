@@ -323,6 +323,9 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.PlayerPhase:
+				if (SaveData.getOption('autoFace')) {
+					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
+				}
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");

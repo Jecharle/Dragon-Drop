@@ -32,7 +32,7 @@ class SaveData {
 	//#region options
 	static setOption(option, value) {
 		if (!option) return;
-		this.options[flag] = value;
+		this.options[option] = value;
 	}
 	static getOption(option) {
 		if (!option) return 0;
