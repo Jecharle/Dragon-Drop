@@ -29,6 +29,17 @@ class SaveData {
 	}
 	//#endregion mapEvent
 
+	//#region options
+	static setOption(option, value) {
+		if (!option) return;
+		this.options[flag] = value;
+	}
+	static getOption(option) {
+		if (!option) return 0;
+		return this.options[option] || 0;
+	}
+	//#endregion options
+
 	//#region save / load
 	static get storage() { return sessionStorage; } // TEMP: Don't keep saves while I'm testing things
 
@@ -85,6 +96,16 @@ class SaveData {
 	}
 	static clearFlags() {
 		this._clearAttribute('flags');
+	}
+
+	static loadOptions() {
+		this._loadAttribute('options');
+	}
+	static saveOptions() {
+		this._saveAttribute('options');
+	}
+	static clearOptions() {
+		this._clearAttribute('options');
 	}
 	//#endregion save / load
 }
