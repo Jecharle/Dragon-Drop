@@ -13,6 +13,9 @@ UnitPiece.parseUnitType = function(string) {
 
 		case "testposition":
 			return TestPositionUnit;
+		
+		case "teststatus":
+			return TestStatusUnit;
 
 		// enemies
 		case "testenemy":
@@ -45,7 +48,7 @@ class TestMeleeUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'melee-unit';
-		this._maxHp = 6;
+		this._maxHp = 8;
 		this._moveRange = 3;
 	}
 
@@ -70,7 +73,7 @@ class TestSupportUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'support-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -94,7 +97,7 @@ class TestPositionUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'position-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 3;
 	}
 
@@ -118,7 +121,7 @@ class TestStatusUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'status-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -147,7 +150,7 @@ class TestEnemyUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'enemy-unit';
-		this._maxHp = 4;
+		this._maxHp = 6;
 		this._moveRange = 2;
 	}
 
@@ -177,7 +180,7 @@ class TestEnemySupportUnit extends UnitPiece {
 
 	_stats() {
 		this.style = 'enemy-support-unit';
-		this._maxHp = 2;
+		this._maxHp = 4;
 		this._moveRange = 3;
 	}
 
@@ -190,33 +193,8 @@ class TestEnemySupportUnit extends UnitPiece {
 };
 
 /***************************************************
- "Unit" subtypes that don't move or have actions
+ Object subtypes that don't move or have actions
 ***************************************************/
-class ObjectPiece extends UnitPiece {
-	get canMove() { return false; }
-	get canAct() { return false; }
-	get moveRange() { return 0; }
-	get aiImportance() { return 0.1; }
-	_setSelectable() { } // It's not selectable either so
-	_setUnselectable() { } // Prevent it from graying out
-
-	allowsMove(_piece) {
-		return false;
-	}
-
-	get extra() {
-		return true;
-	}
-
-	get shiftable() {
-		return false;
-	}
-
-	_baseStatusResist(_effect, _value) {
-		return true;
-	}
-}
-
 class TestRockObject extends ObjectPiece {
 	get name() {
 		return "Wall";

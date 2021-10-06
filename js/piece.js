@@ -14,6 +14,7 @@ class Piece extends SpriteElObj {
 		this.el.onclick = this._click;
 		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
+		this.el.ondrag = this._hold;
 		this.el.ondragend = this._drop;
 	}
 
@@ -49,15 +50,11 @@ class Piece extends SpriteElObj {
 
 	//#region refresh
 	refresh() { }
-	_setSelectable(selectable) {
-		this.el.setAttribute("draggable", Boolean(selectable));
-		if (selectable) {
-			this.el.classList.add('selectable');
-			this.el.classList.remove('viewable');
-		} else {
-			this.el.classList.remove('selectable');
-			this.el.classList.add('viewable');
-		}
+	_setSelectable(selectable, draggable) {
+		this.el.setAttribute("draggable", selectable || draggable);
+
+		this.el.classList.toggle('selectable', selectable);
+		this.el.classList.toggle('viewable', !selectable);
 	}
 	_setUnselectable(unselectable) {
 		if (unselectable) {
@@ -80,9 +77,12 @@ class Piece extends SpriteElObj {
 	_drag(ev) {
 		ev.dataTransfer.setData("piece", ev.currentTarget.id);
 		var piece = ev.currentTarget.obj;
-		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TEMP until I make it detect the size
+		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TODO: Fix the scaling, etc?
 		if (Game.scene) Game.scene.pieceEvent(piece, true);
 		piece.el.classList.add('dragging');
+	}
+	_hold(ev) {
+
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
@@ -112,18 +112,14 @@ class UnitPiece extends Piece {
 		this._setReactions();
 
 		this.hp = this.maxHp;
-		this._lifebar = new Lifebar(this.hp, this.maxHp);
-		this.el.appendChild(this._lifebar.el);
-		
 		this._status = {};
-		this._statusList = new StatusList(this._status);
-		this.el.appendChild(this._statusList.el);
-
 		this._results = [];
 
-		this._shadowEl = document.createElement('div');
-		this._shadowEl.classList.add('shadow');
-		this.el.appendChild(this._shadowEl);
+		this._addLifebar();
+		this._addStatusList();
+		this._addShadowEl();
+		this._addDirectionEl();
+		this._addGhostEl();
 
 		this._initialize();
 	}
@@ -139,6 +135,36 @@ class UnitPiece extends Piece {
 	get targetable() {
 		return true;
 	}
+
+	//#region sub sprites
+	_addLifebar() {
+		this._lifebar = new Lifebar(this.hp, this.maxHp);
+		this.el.appendChild(this._lifebar.el);
+	}
+
+	_addStatusList() {
+		this._statusList = new StatusList(this._status);
+		this.el.appendChild(this._statusList.el);
+	}
+
+	_addShadowEl() {
+		this._shadowEl = document.createElement('div');
+		this._shadowEl.classList.add('shadow');
+		this.el.appendChild(this._shadowEl);
+	}
+
+	_addDirectionEl() {
+		this._directionEl = document.createElement('div');
+		this._directionEl.classList.add('facing-arrow');
+		this.el.appendChild(this._directionEl);
+	}
+
+	_addGhostEl() {
+		this._ghostEl = document.createElement('div');
+		this._ghostEl.classList.add('sprite','ghost');
+		this.el.appendChild(this._ghostEl);
+	}
+	//#endregion sub sprites
 
 	//#region text
 	icon(style, content) {
@@ -195,8 +221,7 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this._xFacing = 1;
-		this._yFacing = 0;
+		this._direction = [1, 0];
 		
 		this._status = {};
 		this._results = [];
@@ -210,6 +235,10 @@ class UnitPiece extends Piece {
 	}
 
 	//#region attributes
+	get direction() {
+		return this._direction;
+	}
+
 	get size() { return this._size; }
 	set size(value) {
 		if (this._size > 1) {
@@ -313,6 +342,10 @@ class UnitPiece extends Piece {
 		return this.getStatus(UnitPiece.Defense) + equipBonus;
 	}
 
+	get criticalImmune () {
+		return this.equipment.some(equip => equip.criticalImmune);
+	}
+
 	get shiftable() {
 		var equipUnshiftable = this.equipment.some(equip => equip.unshiftable);
 		return !this.getStatus(UnitPiece.Anchor) && !equipUnshiftable;
@@ -363,14 +396,14 @@ class UnitPiece extends Piece {
 
 	_applyBurn() {
 		if (this.getStatus(UnitPiece.Burn) > 0) {
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-burn-effect');
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'burn-effect');
 			this.parent.el.appendChild(vfx.el);
-			this.takeDamage(this.getStatus(UnitPiece.Burn), { ignoreDefense: true });
+			this.takeDamage(this.getStatus(UnitPiece.Burn), null, { ignoreDefense: true });
 		}
 	}
 	_applyRegenerate() {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
-			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'test-heal-effect');
+			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'heal-effect');
 			this.parent.el.appendChild(vfx.el);
 			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
 		}
@@ -394,7 +427,8 @@ class UnitPiece extends Piece {
 
 		this._refreshSkills();
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct));
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
+			this.myTurn && (this.canMove || this.canFace));
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -411,17 +445,42 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, props) {
-		if (!props?.ignoreDefense) {
-			power = Math.max(power - this.defense, 0);
+	takeDamage(power, sourceSquare, props) {
+
+		// check for critical (by default, back attacks are critical)
+		var criticalHit = !this.criticalImmune && (props?.critical || this.isBehind(sourceSquare));
+		if (criticalHit) {
+			var criticalBonus = props?.criticalBonus ?? 1;
+			power += criticalBonus;
 		}
 
+		// apply defense
+		if (!props?.ignoreDefense) {
+			power -= this.defense;
+		}
+
+		// deal damage
 		if (power > 0) {
 			this.hp -= power;
 			this.addTimedClass(500, 'damaged');
 			this.addTimedClass(1200, 'hp-change');
+			
+			if (criticalHit) {
+				this.addTimedClass(500, 'critical');
+				this.showPopup(`${power}`, 'critical');
+			}
+			else {
+				this.showPopup(`${power}`);
+			}
+
 			if (this.results) {
 				this.results.damage += power;
+				this.results.critical ||= criticalHit;
+			}
+		} else {
+			this.showPopup("0");
+			if (this.results) {
+				this.results.blocked = true;
 			}
 		}
 
@@ -429,18 +488,16 @@ class UnitPiece extends Piece {
 		return power;
 	}
 	heal(power, props) {
-		this.hp += power;
-
-		if (this.results) {
-			this.results.heal += power;
-		}
-
 		if (power > 0) {
+			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
-		}
-
-		if (!props?.noCure) {
-			this._status[UnitPiece.Burn] = 0;
+			this.showPopup(`+${power}`, 'heal');
+			if (this.results) {
+				this.results.heal += power;
+			}
+			if (!props?.noCure) {
+				this._status[UnitPiece.Burn] = 0;
+			}
 		}
 
 		this.refresh();
@@ -578,6 +635,9 @@ class UnitPiece extends Piece {
 	get canAct() {
 		return this.alive && !this.actionUsed;
 	}
+	get canFace() {
+		return this.alive && this.myTurn;
+	}
 
 	async updateStatusTurnStart() {
 		if (this.getStatus(UnitPiece.Regenerate)) {
@@ -660,10 +720,53 @@ class UnitPiece extends Piece {
 	}
 	//#endregion move
 
+	//#region facing
+	static North = [1, -1];
+	static South = [-1, 0];
+	static East = [1, 0];
+	static West = [-1, -1];
+
+	static getDirection(target, from) {
+		var dx = target.x - from.x;
+		var dy = target.y - from.y;
+
+		var ydir = dx + dy < 0 ? -1 : 0;
+		var xdir = dx - dy < 0 ? -1 : 1;
+		return [xdir, ydir];
+	}
+	static reverseDirection(direction) {
+		return [direction[0] == 1 ? -1 : 1, direction[1] == 0 ? -1 : 0];
+	}
+	getDirectionTo(target) {
+		return UnitPiece.getDirection(target, this.square);
+	}
+	getDirectionFrom(from) {
+		return UnitPiece.getDirection(this.square, from);
+	}
+	faceDirection(direction) {
+		if (!direction) return;
+		this._direction = direction;
+		this.el.style.setProperty('--x-scale', direction[0]);
+		this.el.style.setProperty('--y-frame', direction[1]);
+	}
+	face(target, from) {
+		if (!from) from = this.square;
+		if (!from || !target || from.parent != target.parent || from == target) return;
+
+		this.faceDirection(UnitPiece.getDirection(target, from));
+	}
+	isBehind(square) {
+		if (!square || this.square == square) return false;
+		var dirTo = this.getDirectionFrom(square);
+		return (dirTo[0] == this.direction[0] && dirTo[1] == this.direction[1]);
+	}
+	//#endregion facing
+
 	//#region animate
 	static get Path() { return 1; }
 	static get Jump() { return 2; }
 	static get Teleport() { return 3; }
+	static get Straight() { return 4; }
 
 	animateMove(path, type) {
 		switch (type) {
@@ -672,28 +775,45 @@ class UnitPiece extends Piece {
 
 			case UnitPiece.Teleport:
 				return this._animateTeleport(path);
+			
+			case UnitPiece.Straight:
+				return this._animatePath(path, false, true);
 
 			default:
 			case UnitPiece.Path:
 				return this._animatePath(path);
 		}
 	}
-	_animatePath(path) {
+	_animatePath(path, noJump, noTurn) {
 		var keyframes = [{}];
 		var turnframes = [{}];
+		var jumpframes = [];
 		var lastSquare = this.square;
 		path.forEach(square => {
 			keyframes.unshift({ transform: square.screenPosition });
 
-			var [xFace, yFace] = UnitPiece.getDirection(lastSquare, square);
-			turnframes.unshift({ '--x-scale': xFace, '--y-frame': yFace });
+			var [xDir, yDir] = UnitPiece.getDirection(lastSquare, square);
+			turnframes.unshift({ '--x-scale': xDir, '--y-frame': yDir });
+
+			if (lastSquare.z != square.z) {
+				jumpframes.unshift({ bottom: 0 }, { bottom: '7px' }, { bottom: '8px' }, { bottom: '7px' }, { bottom: 0 });
+		 	} else {
+				jumpframes.unshift({ }, { }, { }, { }, { });
+			}
 
 			lastSquare = square;
 		});
 		turnframes.unshift(turnframes[0]);
-		var time = 200*(keyframes.length-1);
-		this.el.animate(keyframes, {duration: time, easing: "linear"});	
-		this.el.animate(turnframes, {duration: time, easing: "linear"});
+		var time = 250*(keyframes.length-1);
+		var timeSettings = {duration: time, easing: "linear"};
+		this.el.animate(keyframes, timeSettings);	
+		if (!noTurn) {
+			this.el.animate(turnframes, timeSettings);
+		}
+		if (!noJump) {
+			this.spriteEl.animate(jumpframes, timeSettings);
+			this._ghostEl.animate(jumpframes, timeSettings);
+		}
 		return time;
 	}
 	_animateJump(path) {
@@ -710,6 +830,7 @@ class UnitPiece extends Piece {
 			{ bottom: "64px" }
 		];
 		this.spriteEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
+		this._ghostEl.animate(jumpframes, {duration: time/2, iterations: 2, direction: "alternate", easing: "ease-out"});
 		return time;
 	}
 	_animateTeleport(path) {
@@ -723,31 +844,13 @@ class UnitPiece extends Piece {
 		this.el.animate(keyframes, time/2);
 
 		var twistframes = [
-			{ transform: `scaleX(${this._xFacing})`},
+			{ transform: `scaleX(var(--x-scale))`},
 			{ transform: `scaleX(0) scaleY(1.5)` },
 			{ }
 		];
 		this.spriteEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
+		this._ghostEl.animate(twistframes, {duration: time, easing: "ease-in-out"});
 		return time;
-	}
-
-	static getDirection(target, from) {
-		var dx = target.x - from.x;
-		var dy = target.y - from.y;
-
-		var ydir = dx + dy < 0 ? -1 : 0;
-		var xdir = dx - dy < 0 ? -1 : 1;
-		return [xdir, ydir];
-	}
-	face(target, from) {
-		if (!from) from = this.square;
-		if (!from || !target || from.parent != target.parent) return;
-
-		var [xFace, yFace] = UnitPiece.getDirection(target, from);
-		this._xFacing = xFace;
-		this._yFacing = yFace;
-		this.el.style.setProperty('--x-scale', xFace);
-		this.el.style.setProperty('--y-frame', yFace);
 	}
 
 	animateBump(target, origin) {
@@ -774,9 +877,14 @@ class UnitPiece extends Piece {
 	_showDeathAnimation() {
 		if (!this.square) return;
 		var vfx = new SpriteEffect(this.square, 1000, "unit", this.style, "dead");
-		vfx.el.style.setProperty('--x-scale', this._xFacing);
-		vfx.el.style.setProperty('--y-frame', this._yFacing);
+		vfx.el.style.setProperty('--x-scale', this.direction[0]);
+		vfx.el.style.setProperty('--y-frame', this.direction[1]);
 		this.square.parent.el.appendChild(vfx.el);
+	}
+
+	showPopup(text, ...classes) {
+		var popup = new PopupText(text, ...classes);
+		this.el.appendChild(popup.el);
 	}
 	//#endregion animate
 
@@ -788,12 +896,41 @@ class UnitPiece extends Piece {
 	deselect() {
 		this.el.classList.remove('selected');
 	}
+	_hold(ev) {
+		if (!ev.screenX && !ev.screenY) return;
+		
+		var unit = ev.currentTarget.obj;
+		if (unit && unit.canFace && !unit.canMove) {
+			var [x, y] = unit.direction;
+			
+			if (ev.offsetX > 4) x = 1;
+			else if (ev.offsetX < -4) x = -1;
+
+			if (ev.offsetY > 4) y = 0;
+			else if (ev.offsetY < -4) y = -1;
+			
+			unit.faceDirection([x, y]); // TODO: Call a Scene function instead?
+		}
+	}
 	//#endregion input events
 
 	//#region ai
 	get aiUnitScore() {
 		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
 		else return 0;
+	}
+	aiSetDirection() {
+		var unit = this;
+		var value = 0;
+		this.parent.pieces.forEach(piece => {
+			if (piece.square && unit.isEnemy(piece) && piece.aiImportance > 0) {
+				var newValue = unit.square.distance(piece.square) / piece.aiImportance;
+				if (!value || newValue < value) {
+					unit.face(piece.square);
+					value = newValue;
+				}
+			}
+		});
 	}
 	_aiGetBestSkill(square) {
 		return this.skills.reduce((best, skill) => {
@@ -818,7 +955,7 @@ class UnitPiece extends Piece {
 		var bestPlan = this.parent.squares.reduce((best, square) => {
 			// square must be reachable
 			if (square.invalid || !square.path) return best;
-			// in range trumps out of range (already in-range)
+			// in range trumps out of range (already in range)
 			if (best.move?.inRange && !square.inRange) return best;
 			
 			var newPlan = this._aiGetBestSkill(square);
@@ -884,6 +1021,45 @@ class UnitPiece extends Piece {
 };
 
 /***************************************************
+ Object piece, for inanimate "units"
+***************************************************/
+class ObjectPiece extends UnitPiece {
+	get canMove() { return false; }
+	get canAct() { return false; }
+	get moveRange() { return 0; }
+	get aiImportance() { return 0.1; }
+
+	_setSelectable() { } // Prevent it from highlighting
+	_setUnselectable() { } // Prevent it from graying out
+	_addDirectionEl() { } // Don't show a directional arrow
+
+	faceDirection(_direction) { } // can't turn
+	get canFace() {
+		return false;
+	}
+
+	allowsMove(_piece) {
+		return false;
+	}
+
+	get extra() {
+		return true;
+	}
+
+	get criticalImmune() {
+		return true;
+	}
+
+	get shiftable() {
+		return false;
+	}
+
+	_baseStatusResist(_effect, _value) {
+		return true;
+	}
+}
+
+/***************************************************
  Results of a skill or reaction used on a unit
 ***************************************************/
 class SkillResult {
@@ -891,8 +1067,10 @@ class SkillResult {
 		this.damage = 0;
 		this.healing = 0;
 		this.shift = 0;
+		this.blocked = false; // hit but took no damage
 		this.evade = false;
 		this.swap = false;
+		this.critical = false;
 	}
 }
 
@@ -963,7 +1141,11 @@ class Equipment extends Piece {
 	}
 	//#endregion skills
 
-	//#region status resists
+	//#region resistances
+	get criticalImmune() {
+		return false;
+	}
+
 	resistsStatus(effect, value) {
 		return false;
 	}
@@ -971,7 +1153,7 @@ class Equipment extends Piece {
 	get unshiftable() {
 		return false;
 	}
-	//#endregion status resists
+	//#endregion status resistances
 
 	//#region stat bonuses
 	get maxHpBonus() {
@@ -1073,6 +1255,7 @@ class SkillCard extends Piece {
 		this._baseCooldown = 0;
 		this._maxUses = 0;
 		this._basePower = 0;
+		this._criticalBonus = 1;
 	}
 	_stats() {
 		this._basePower = 2;
@@ -1238,7 +1421,11 @@ class SkillCard extends Piece {
 	_showEffect(target, origin, ...styles) {
 		if (!target) return;
 		var vfx = new SpriteEffect(target, 1000, 'sprite-effect', ...styles);
-		if (origin && target.screenX < origin.screenX) vfx.el.classList.toggle('left');
+		if (origin) {
+			var direction = UnitPiece.getDirection(target, origin);
+			vfx.el.style.setProperty('--x-scale', direction[0]);
+			vfx.el.style.setProperty('--y-frame', direction[1]);
+		}
 		target.parent.el.appendChild(vfx.el);
 		return vfx;
 	}
@@ -1273,39 +1460,40 @@ class SkillCard extends Piece {
 	_aiBaseTargetScore(target, origin) {
 		return 0;
 	}
-	_aiSelfTargetScore(square) {
-		return this._aiAllyTargetScore(this.user, square);
+	_aiCriticalCondition(unit, square, origin) {
+		return unit.isBehind(origin);
 	}
-	_aiEnemyTargetScore(unit, square) {
-		return this.power;
+	_aiSelfTargetScore(square, origin) {
+		return this._aiAllyTargetScore(this.user, square, origin);
 	}
-	_aiAllyTargetScore(unit, square) {
-		return -this.power*0.9;
+	_aiEnemyTargetScore(unit, square, origin) {
+		var critical = !unit.criticalImmune && this._aiCriticalCondition(unit, square, origin) ? this._criticalBonus : 0;
+		return this.power + critical;
 	}
-	_aiNeutralTargetScore(unit, square) {
-		return this.power*0.1;
+	_aiAllyTargetScore(unit, square, origin) {
+		return -this._aiEnemyTargetScore(unit, square, origin)*0.9;
 	}
 	_aiUnitTargetScore(square, origin) {
 		if (square == origin) { // new square will include yourself
-			return this._aiSelfTargetScore(square);
+			return this._aiSelfTargetScore(square, origin);
 		} else if (!square.piece || square.piece == this.user) { // starting square will be empty
 			return 0;
 		} else if (this.user.isEnemy(square.piece)) {
-			return this._aiEnemyTargetScore(square.piece, square) * square.piece.aiImportance;
+			return this._aiEnemyTargetScore(square.piece, square, origin) * square.piece.aiImportance;
 		} else if (this.user.isAlly(square.piece)) {
-			return this._aiAllyTargetScore(square.piece, square) * square.piece.aiImportance;
+			return this._aiAllyTargetScore(square.piece, square, origin) * square.piece.aiImportance;
 		} else {
-			return this._aiNeutralTargetScore(square.piece, square) * square.piece.aiImportance;
+			return 0;
 		}
 	}
-	_aiSquareTargetScore(square) {
+	_aiSquareTargetScore(square, origin) {
 		return 0;
 	}
 
 	_aiTargetScore(target, origin) {
 		var area = this._affectedSquares(target);
 		return area.reduce((totalScore, square) => {
-			return totalScore + this._aiSquareTargetScore(square) + this._aiUnitTargetScore(square, origin);
+			return totalScore + this._aiSquareTargetScore(square, origin) + this._aiUnitTargetScore(square, origin);
 		}, this._aiBaseTargetScore(target, origin));
 	}
 
@@ -1532,6 +1720,8 @@ class OnTurnEndReaction extends ReactionCard {
 		return await this.use(this.user.square);
 	}
 }
+
+// TODO: Reactions to the result of your own skill? Got a kill, landed a critical, hit X enemies, etc?
 
 /***************************************************
  Map Piece

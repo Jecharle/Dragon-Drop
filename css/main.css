@@ -189,8 +189,7 @@ strong {
 	top: 1px;
 }
 .icon .double {
-	background-image: inherit;
-	background-position: inherit;
+	background: inherit;
 	position: absolute;
 	left: -1px;
 	top: -2px;
@@ -534,84 +533,57 @@ strong {
 	/*#region terrain types*/
 	.square>.sprite {
 		position: absolute;
+		top: 0;
 		z-index: -2;
 		width: var(--square-w);
-		height: var(--square-h);
-		top: 0;
-		
-		background-image: url(../img/tilesets/testTileset.png);
-		background-repeat: no-repeat;
-		background-position: 0 0;
+		border: var(--square-h) solid transparent;
+		box-sizing: border-box;
+		border-image: url(../img/tilesets/testTile.png) 40% 50% repeat;
 	}
-	.square>.side-sprite {
-		position: absolute;
-		z-index: -3;
-		width: var(--square-w);
-		top: calc(0.5*var(--square-h));
-		
-		background-image: url(../img/tilesets/testTileset.png);
-		background-repeat: repeat-y;
-		background-position: calc(-1*var(--square-w)) 0;
-	}
-	.square>.side-sprite::after {
-		content: "";
-		position: absolute;
-		z-index: -3;
-		width: var(--square-w);
-		height: var(--square-h);
-		top: 100%;
-		
-		background-image: url(../img/tilesets/testTileset.png);
-		background-repeat: no-repeat;
-		background-position: calc(-2*var(--square-w)) 0;
-	}
+		/*TODO: Determine sprite via tile setting, not terrain type*/
 		.pit>.sprite {
-			background-position-x: calc(-3*var(--square-w));
-		}
-		.pit>.side-sprite {
-			background-position-x: calc(-4*var(--square-w));
-		}
-		.pit>.side-sprite::after {
-			background-position-x: calc(-5*var(--square-w));
+			border-image-source: url(../img/tilesets/testPit.png);
 		}
 		.cover>.sprite {
-			background-position-x: calc(-6*var(--square-w));
-		}
-		.cover>.side-sprite {
-			background-position-x: calc(-7*var(--square-w));
-		}
-		.cover>.side-sprite::after {
-			background-position-x: calc(-8*var(--square-w));
+			border-image-source: url(../img/tilesets/testGrass.png);
 		}
 			.cover:hover::before {
-				content: "Cover blocks line of sight, but allows movement";
+				content: "Cover";
 			}
 		.wall>.sprite {
-			background-position-x: calc(-9*var(--square-w));
-		}
-		.wall>.side-sprite {
-			background-position-x: calc(-10*var(--square-w));
-		}
-		.wall>.side-sprite::after {
-			background-position-x: calc(-11*var(--square-w));
+			border-image-source: url(../img/tilesets/testBlocked.png);
 		}
 		.rough>.sprite {
-			background-position-x: calc(-12*var(--square-w));
-		}
-		.rough>.side-sprite {
-			background-position-x: calc(-13*var(--square-w));
-		}
-		.rough>.side-sprite::after {
-			background-position-x: calc(-14*var(--square-w));
+			border-image-source: url(../img/tilesets/testWater.png);
 		}
 			.rough:hover::before {
-				content: "Rough terrain costs 2 squares of movement to enter";
+				content: "Rough terrain";
 			}
 	/*#endregion terrain types*/
 
+	/*#region tile decorations*/	
+	.square>.deco-sprite {
+		position: absolute;
+		z-index: 1;
+		bottom: calc(100% - var(--square-h));
+		width: var(--square-w);
+		background-repeat: no-repeat;
+		background-position: 0 0;
+		transform: translateZ(13px);
+	}
+		/*TODO: Determine sprite via tile setting, not terrain type*/
+		.wall>.deco-sprite {
+			background-image: url(../img/tilesets/testPillar.png);
+			height: 60px;
+		}
+		.cover>.deco-sprite {
+			background-image: url(../img/tilesets/testGrassDeco.png);
+			height: 36px;
+		}
+	/*#endregion tile decorations*/
+
 	/*#region range / area highlighting*/
-	.square>.sprite::after {
-		content: "";
+	.square>.highlight-sprite {
 		position: absolute;
 		z-index: -1;
 		top: 0;
@@ -623,31 +595,30 @@ strong {
 		background-repeat: no-repeat;
 		background-position: 0 0;
 	}
-		.move-range>.sprite::after {
+		.move-range>.highlight-sprite {
 			background-position-y: calc(-1*var(--square-h));
 		}
-		.skill-range>.sprite::after {
+		.skill-range>.highlight-sprite {
 			background-position-y: calc(-2*var(--square-h));
 		}
-		.deploy-range>.sprite::after {
+		.deploy-range>.highlight-sprite {
 			background-position-y: calc(-3*var(--square-h));
 		}
-		.enemy-preview.move-range>.sprite::after {
+		.enemy-preview.move-range>.highlight-sprite {
 			background-position-y: calc(-4*var(--square-h));
 		}
 
-		.square.selected>.sprite::after {
+		.square.selected>.highlight-sprite {
 			background-position-x: calc(-1*var(--square-w));
 		}
 
-		.invalid>.sprite::after {
+		.invalid>.highlight-sprite {
 			opacity: 35%;
 		}
 	/*#endregion range / area highlighting*/
 
 	/*#region move path*/
-	.square.move-path>.sprite::before {
-		content: "";
+	.square.move-path>.path-sprite {
 		position: absolute;
 		z-index: -0.5;
 		top: 0;
@@ -658,52 +629,52 @@ strong {
 		background-repeat: no-repeat;
 	}
 		/*#region single direction*/
-		.left>.sprite::before {
+		.left>.path-sprite {
 			background-position: 0 0;
 		}
-		.up>.sprite::before {
+		.up>.path-sprite {
 			background-position: 0 calc(-1*var(--square-total-h));
 		}
-		.right>.sprite::before {
+		.right>.path-sprite {
 			background-position: 0 calc(-2*var(--square-total-h));
 		}
-		.down>.sprite::before {
+		.down>.path-sprite {
 			background-position: 0 calc(-3*var(--square-total-h));
 		}
 		/*#endregion single direction*/
 		/*#region straight*/
-		.left.right>.sprite::before {
+		.left.right>.path-sprite {
 			background-position: calc(-1*var(--square-w)) 0;
 		}
-		.up.down>.sprite::before {
+		.up.down>.path-sprite {
 			background-position: calc(-1*var(--square-w)) calc(-1*var(--square-total-h));
 		}
 		/*#endregion straight*/
 		/*#region corners*/
-		.left.up>.sprite::before {
+		.left.up>.path-sprite {
 			background-position: calc(-2*var(--square-w)) 0;
 		}
-		.up.right>.sprite::before {
+		.up.right>.path-sprite {
 			background-position: calc(-2*var(--square-w)) calc(-1*var(--square-total-h));
 		}
-		.right.down>.sprite::before {
+		.right.down>.path-sprite {
 			background-position: calc(-2*var(--square-w)) calc(-2*var(--square-total-h));
 		}
-		.down.left>.sprite::before {
+		.down.left>.path-sprite {
 			background-position: calc(-2*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion corners*/
 		/*#region arrows*/
-		.left.move-end>.sprite::before {
+		.left.move-end>.path-sprite {
 			background-position: calc(-3*var(--square-w)) 0;
 		}
-		.up.move-end>.sprite::before {
+		.up.move-end>.path-sprite {
 			background-position: calc(-3*var(--square-w)) calc(-1*var(--square-total-h));
 		}
-		.right.move-end>.sprite::before {
+		.right.move-end>.path-sprite {
 			background-position: calc(-3*var(--square-w)) calc(-2*var(--square-total-h));
 		}
-		.down.move-end>.sprite::before {
+		.down.move-end>.path-sprite {
 			background-position: calc(-3*var(--square-w)) calc(-3*var(--square-total-h));
 		}
 		/*#endregion arrows*/
@@ -722,21 +693,25 @@ strong {
 	transform-style: preserve-3d;
 	--x-scale: 1;
 	--y-frame: 0;
+	--motion-index: 0;
+	--motion-frames: 0;
 }
 	.unit>.sprite {
 		width: var(--unit-w);
 		height: var(--unit-h);
-		box-sizing: border-box;
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
-		background-repeat: no-repeat;
-		background-position-x: 0;
-		background-position-y: calc(var(--y-frame)*var(--unit-h));
 		transform: scaleX(var(--x-scale));
+		background-repeat: no-repeat;
+		background-position-x: calc(-1 * var(--unit-w) * var(--motion-frames));
+		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
+		animation-name: sprite-animation;
+		animation-timing-function: steps(var(--motion-frames));
+		animation-fill-mode: both;
+		pointer-events: none;
 	}
 	.unit>.shadow {
-		content: "";
 		position: absolute;
 		z-index: -1;
 		bottom: 0;
@@ -744,10 +719,22 @@ strong {
 		height: 100%;
 		background-repeat: no-repeat;
 		background-image: url(../img/system/shadow.png);
+		transform: scaleX(var(--x-scale));
 		opacity: 40%;
+		pointer-events: none;
+	}
+	.unit>.sprite.ghost {
+		transform: scaleX(var(--x-scale)) translateZ(99px);
+		opacity: 35%;
 	}
 	.unit.in-range, .unit.in-area{
 		pointer-events: none;
+	}
+	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
+		filter: drop-shadow(1px 0 yellow)
+		drop-shadow(-1px 0 yellow)
+		drop-shadow(0px 1px yellow)
+		drop-shadow(0px -1px yellow);
 	}
 
 	/*#region unit status*/
@@ -758,6 +745,26 @@ strong {
 	}
 	.unit:hover .lifebar, .hp-change .lifebar, .in-range .lifebar, .in-area .lifebar {
 		visibility: visible;
+	}
+
+	.unit .facing-arrow {
+		visibility: hidden;
+		pointer-events: none;
+		position: absolute;
+		bottom: 0;
+		width: var(--square-w);
+		height: var(--square-h);
+		background-repeat: no-repeat;
+		background-image: url(../img/system/directions.png);
+		background-position-x: 0;
+		background-position-y: calc(var(--y-frame)*var(--square-h));
+		transform: scaleX(var(--x-scale)) translateZ(99px);
+	}
+	.unit:hover .facing-arrow, .in-range .facing-arrow, .in-area .facing-arrow {
+		visibility: visible;
+	}
+	.enemy .facing-arrow {
+		background-position-x: calc(-1 * var(--square-w));
 	}
 
 	.unit .status-list {
@@ -785,38 +792,37 @@ strong {
 		--unit-w: 64px;
 		--unit-h: 64px;
 	}
-	.unit.selectable.selected>.sprite, .unit.selectable:hover>.sprite {
-		filter: drop-shadow(1px 0 yellow)
-		drop-shadow(-1px 0 yellow)
-		drop-shadow(0px 1px yellow)
-		drop-shadow(0px -1px yellow);
-	}
+
 	.moving>.sprite {
-		background-position-y: calc((-2 + var(--y-frame))*var(--unit-h));
-		background-position-x: calc(-2*var(--unit-w));
-		animation: sprite-animation 0.3s steps(2) infinite;
+		--motion-index: 1;
+		--motion-frames: 2;
+		animation-duration: 0.3s;
+		animation-iteration-count: infinite;
 	}
 	.attack>.sprite {
-		background-position-y: calc((-6 + var(--y-frame))*var(--unit-h));
+		--motion-index: 3;
 	}
 	.damaged>.sprite {
-		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
+		--motion-index: 2;
 		animation: shake 0.15s;
 	}
-	.damaged>.shadow {
-		animation: shake 0.15s;
-	}
+		.damaged>.shadow {
+			animation: shake 0.15s;
+		}
+		.critical.damaged>.sprite, .critical.damaged>.shadow {
+			animation-iteration-count: 2;
+		}
 	.evade>.sprite {
 		animation: duck 0.15s 2 alternate;
 	}
-	.evade>.shadow {
-		animation: duck 0.15s 2 alternate;
-	}
+		.evade>.shadow {
+			animation: duck 0.15s 2 alternate;
+		}
 	.spawn>.sprite {
 		animation: drop-in 0.2s ease-in;
 	}
 	.dead>.sprite {
-		background-position-y: calc((-4 + var(--y-frame))*var(--unit-h));
+		--motion-index: 2;
 		animation: darken-and-fade 1s 0.2s both;
 	}
 	/*#endregion unit states and motions*/
@@ -1015,9 +1021,14 @@ strong {
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
+	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
 	pointer-events: none;
+	--x-scale: 1;
+	--y-frame: 0;
+	--motion-index: 0;
+	--motion-frames: 0;
 }
 	.sprite-effect>.sprite {
 		width: var(--unit-w);
@@ -1026,38 +1037,48 @@ strong {
 		position: absolute;
 		z-index: 0;
 		bottom: 0;
-		background-repeat: no-repeat;
-	}
-
-	.left.sprite-effect>.sprite {
-		transform: scaleX(-1);
+		transform: scaleX(var(--x-scale));
+		background-repeat: repeat-y;
+		background-position-x: calc(-1 * var(--unit-w) * var(--motion-frames));
+		background-position-y: calc(var(--unit-h) * (var(--y-frame) - 2*var(--motion-index)));
+		animation-name: sprite-animation;
+		animation-timing-function: steps(var(--motion-frames));
+		animation-fill-mode: both;
 	}
 
 	/*#region sprite effect skins*/
+	.burn-effect>.sprite {
+		background-image: url("../img/vfx/burn.png");
+		--motion-frames: 5;
+		animation-duration: 0.5s;
+	}
+	.heal-effect>.sprite {
+		background-image: url("../img/vfx/heal.png");
+		--motion-frames: 5;
+		animation-duration: 0.5s;
+	}
+
 	.test-attack-effect>.sprite {
 		background-image: url("../img/vfx/testAttack.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) both;
-	}
-	.test-heal-effect>.sprite {
-		background-image: url("../img/vfx/testHeal.png");
-		background-position-x: calc(-5*var(--unit-w));
-		animation: sprite-animation 0.3s steps(5) both;
+		--motion-frames: 6;
+		animation-duration: 0.3s;
 	}
 	.test-shot-effect>.sprite {
 		background-image: url("../img/vfx/testBullet.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) 0.2s both;
+		--motion-frames: 6;
+		animation-duration: 0.2s;
+		animation-delay: 0.2s;
 	}
 	.test-arc-effect>.sprite {
 		background-image: url("../img/vfx/testBullet.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.2s steps(6) 0.4s both;
+		--motion-frames: 6;
+		animation-duration: 0.2s;
+		animation-delay: 0.4s;
 	}
 	.test-buff-effect>.sprite {
 		background-image: url("../img/vfx/testBuff.png");
-		background-position-x: calc(-6*var(--unit-w));
-		animation: sprite-animation 0.4s steps(6) both;
+		--motion-frames: 6;
+		animation-duration: 0.4s;
 	}
 	/*#endregion sprite effect skins*/
 /*#endregion sprite effects*/
@@ -1070,9 +1091,15 @@ strong {
 	justify-content: center;
 	align-items: center;
 	position: absolute;
-	z-index: 4;
 	animation: rise-up 1s ease-out;
+	transform: translateZ(99px);
 }
+	.popup-text.heal {
+		color: greenyellow;
+	}
+	.popup-text.critical {
+		animation: rise-up 1s ease-out, critical-flash 0.15s steps(2) infinite alternate;
+	}
 /*#endregion popup text*/
 
 /*#region holding area for keyframes*/
@@ -1111,13 +1138,21 @@ strong {
 }
 @keyframes rise-up {
 	from {
-		bottom: 95%;
+		bottom: 100%;
 	}
 	50% {
 		bottom: 120%;
 	}
 	to {
 		bottom: 120%;
+	}
+}
+@keyframes critical-flash {
+	from {
+		
+	}
+	to {
+		color: red;
 	}
 }
 @keyframes fade-out {

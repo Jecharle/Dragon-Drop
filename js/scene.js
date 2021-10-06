@@ -279,6 +279,7 @@ class BattleScene extends Scene {
 		this._turn = 1;
 		this._phase = BattleScene.PlayerPhase;
 		this._setActiveTeam(this.playerTeam);
+		this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 		this._deployList.hide();
 		this._showPhaseBanner("Battle Start");
 
@@ -313,6 +314,7 @@ class BattleScene extends Scene {
 				this._deployList.hide();
 				this._phase = BattleScene.PlayerPhase;
 				this._enableGuests(this.playerTeam);
+				this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 				this._showPhaseBanner("Battle Start");
 				this._canRedeploy = true;
 				break;
@@ -691,6 +693,21 @@ class BattleScene extends Scene {
 				this.refresh();
 			}
 		}
+
+		if (this._unit && this._unit.canFace) {
+			if (key == "ArrowUp") {
+				this._unit.faceDirection(UnitPiece.North);
+			}
+			if (key == "ArrowDown") {
+				this._unit.faceDirection(UnitPiece.South);
+			}
+			if (key == "ArrowLeft") {
+				this._unit.faceDirection(UnitPiece.West);
+			}
+			if (key == "ArrowRight") {
+				this._unit.faceDirection(UnitPiece.East);
+			}
+		}
 	}
 	//#endregion input events
 
@@ -722,6 +739,7 @@ class BattleScene extends Scene {
 			this.refresh();
 
 			if (!this._skill) {
+				this._unit.aiSetDirection();
 				this._deselectUnit();
 				continue;
 			}
@@ -733,6 +751,7 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
+			this._unit.aiSetDirection();
 			this._deselectUnit();
 			this.refresh();
 
@@ -845,11 +864,7 @@ class MapScene extends Scene {
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
-		// TODO: Pack this away into a method
-		this._camera.el.appendChild(this._map.el);
-		this.el.appendChild(this._camera.el);
-		this.el.appendChild(this._eventDescriptionEl);
-		this.el.appendChild(this._menuButtonEl);
+		this._buildView();
 		
 		var startNode = this._map.getNode(startNodeId);
 		if (startNode) {
@@ -899,6 +914,12 @@ class MapScene extends Scene {
 		button.innerText = "Menu";
 		button.disabled = true; // TEMP
 		return button;
+	}
+	_buildView() {
+		this._camera.el.appendChild(this._map.el);
+		this.el.appendChild(this._camera.el);
+		this.el.appendChild(this._eventDescriptionEl);
+		this.el.appendChild(this._menuButtonEl);
 	}
 	//#endregion ui setup
 

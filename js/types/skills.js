@@ -28,10 +28,11 @@ class TestAttackSkill extends SkillCard {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power);
-			unit.push(this.user.square, 1, {animation: UnitPiece.Path});
+			unit.takeDamage(this.power, this.user.square);
+			unit.push(this.user.square, 1, {animation: UnitPiece.Straight});
 		}
 		await Game.asyncPause(200);
+		unit.face(this.user.square);
 	}
 };
 
@@ -83,12 +84,13 @@ class TestPullSkill extends TestAttackSkill {
 
 	async _unitEffects(unit, _target) {
 		if (this.user.isAlly(unit)) {
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		} else if (!unit.evade()) {
-			unit.takeDamage(this.power);
-			unit.pull(this.user.square, 1, {animation: UnitPiece.Path, uphill: true});
+			unit.takeDamage(this.power, this.user.square);
+			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		}
 		await Game.asyncPause(200);
+		unit.face(this.user.square);
 	}
 };
 
@@ -171,10 +173,11 @@ class TestAreaSkill extends TestAttackSkill {
 
 	async _unitEffects(unit, target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power);
-			unit.push(target, 1, {animation: UnitPiece.Path});
+			unit.takeDamage(this.power, this.user.square);
+			unit.push(target, 1, {animation: UnitPiece.Straight});
 		}
 		await Game.asyncPause(150);
+		unit.face(this.user.square);
 	}
 
 	async _endEffects(_target, _squares, _units) {
@@ -219,7 +222,7 @@ class TestHealSkill extends SkillCard {
 	}
 	async _startEffects(_target, _squares, _units) { }
 	async _unitEffects(unit, _target) {
-		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		this._showEffect(unit.square, this.user.square, "heal-effect");
 		unit.heal(this.power);
 		await Game.asyncPause(200);
 	}
@@ -298,7 +301,7 @@ class TestDebuffSkill extends TestHealSkill {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			this._showEffect(unit.square, this.user.square, "test-heal-effect");
+			this._showEffect(unit.square, this.user.square, "heal-effect");
 			unit.addStatus(UnitPiece.Power, -1);
 			unit.addStatus(UnitPiece.Defense, -1);
 			unit.addStatus(UnitPiece.Speed, -1);
@@ -330,7 +333,7 @@ class TestGuardSkill extends TestHealSkill {
 	}
 
 	async _unitEffects(unit, _target) {
-		this._showEffect(unit.square, this.user.square, "test-heal-effect");
+		this._showEffect(unit.square, this.user.square, "heal-effect");
 		unit.addStatus(UnitPiece.Anchor);
 		unit.addStatus(UnitPiece.Evade);
 		await Game.asyncPause(200);
@@ -478,6 +481,9 @@ class ThrowSkill extends SkillCard {
 	}
 };
 
+/***************************************************
+ Alternate test positioning skill
+***************************************************/
 class ThrowSkill2 extends SkillCard {
 	get name() {
 		return "Throw 2";
@@ -508,13 +514,14 @@ class ThrowSkill2 extends SkillCard {
 		await Game.asyncPause(time/2);
 
 		var unit = target.piece;
-		unit.push(this.user.square, 10, {animation: UnitPiece.Path, uphill: true});
+		unit.push(this.user.square, 10, {animation: UnitPiece.Straight, uphill: true});
 		await Game.asyncPause(200);
 	}
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power);
+			unit.takeDamage(this.power, this.user.square);
 		}
+		unit.face(this.user.square);
 	}
 	async _endEffects(_target, _squares, _units) {
 		await Game.asyncPause(200);
