@@ -41,7 +41,6 @@ class Menu extends ElObj {
 	_addRow(...classList) {
 		var newRow = document.createElement('div');
 		newRow.classList.add('menu-row', ...classList);
-		this.el.appendChild(newRow);
 		return newRow;
 	}
 
@@ -53,8 +52,6 @@ class Menu extends ElObj {
 	}
 
 	// TODO: Should there be a "result" value, so the parent can get info back?
-
-	// TODO: For the formatting, probably gonna use a lot of flexboxes and less absolute positioning
 }
 
 /***************************************************
@@ -67,22 +64,23 @@ class OptionsMenu extends Menu {
 		super.open();
 	}
 
-	// TODO: Block access to the parent element while the menu is up?
-
 	//#region option rows
 	_addAllControls() {
-		this._addTitle();
-		this._addPromptFrequencyRow();
-		this._addAutoFaceRow();
-		this._addSoundRow();
-		this._addMusicRow();
-		this._addCloseRow();
+		this.el.appendChild(this._addTitle());
+		var optionBox = this._titleHeader = document.createElement('div');
+		optionBox.classList.add('menu-box');
+		optionBox.appendChild(this._addPromptFrequencyRow());
+		optionBox.appendChild(this._addAutoFaceRow());
+		optionBox.appendChild(this._addSoundRow());
+		optionBox.appendChild(this._addMusicRow());
+		optionBox.appendChild(this._addCloseRow());
+		this.el.appendChild(optionBox);
 	}
 
 	_addTitle() {
 		this._titleHeader = document.createElement('h1');
 		this._titleHeader.innerText = "Options";
-		this.el.appendChild(this._titleHeader);
+		return this._titleHeader;
 	}
 
 	_addPromptFrequencyRow() {
@@ -92,6 +90,7 @@ class OptionsMenu extends Menu {
 		this._turnPromptCheckbox.type = "checkbox";
 		row.appendChild(this._turnPromptCheckbox);
 		row.appendChild(this._addLabel("End turn confirmation", this._turnPromptCheckbox));
+		return row;
 	}
 
 	_addAutoFaceRow() {
@@ -101,6 +100,7 @@ class OptionsMenu extends Menu {
 		this._autoFaceCheckbox.type = "checkbox";
 		row.appendChild(this._autoFaceCheckbox);
 		row.appendChild(this._addLabel("Automatic facing", this._autoFaceCheckbox));
+		return row;
 	}
 
 	_addSoundRow() {
@@ -109,9 +109,10 @@ class OptionsMenu extends Menu {
 		this._sfxVolumeSlider.id = "sfxVolumeSlider";
 		this._sfxVolumeSlider.type = "range";
 		this._sfxVolumeSlider.min = 0;
-		this._sfxVolumeSlider.max = 100;
+		this._sfxVolumeSlider.max = 10;
 		row.appendChild(this._addLabel("Sound volume", this._sfxVolumeSlider));
 		row.appendChild(this._sfxVolumeSlider);
+		return row;
 	}
 
 	_addMusicRow() {
@@ -120,9 +121,10 @@ class OptionsMenu extends Menu {
 		this._bgmVolumeSlider.id = "bgmVolumeSlider";
 		this._bgmVolumeSlider.type = "range";
 		this._bgmVolumeSlider.min = 0;
-		this._bgmVolumeSlider.max = 100;
+		this._bgmVolumeSlider.max = 10;
 		row.appendChild(this._addLabel("Music volume", this._bgmVolumeSlider));
 		row.appendChild(this._bgmVolumeSlider);
+		return row;
 	}
 
 	_addCloseRow() {
@@ -139,6 +141,7 @@ class OptionsMenu extends Menu {
 			this.close();
 		}
 		row.appendChild(this._cancelButton);
+		return row;
 	}
 	//#endregion option rows
 
@@ -146,15 +149,15 @@ class OptionsMenu extends Menu {
 	_loadOptions() {
 		this._turnPromptCheckbox.checked = !SaveData.getOption('endTurnPrompt');
 		this._autoFaceCheckbox.checked = !!SaveData.getOption('autoFace');
-		this._sfxVolumeSlider.value = 100-SaveData.getOption('sfxVolume');
-		this._bgmVolumeSlider.value = 100-SaveData.getOption('bgmVolume');
+		this._sfxVolumeSlider.value = 10-SaveData.getOption('sfxVolume');
+		this._bgmVolumeSlider.value = 10-SaveData.getOption('bgmVolume');
 	}
 
 	_saveChanges() {
 		SaveData.setOption('endTurnPrompt', !this._turnPromptCheckbox.checked);
-		SaveData.setOption('autoFace', !!this._autoFaceCheckbox.checked);
-		SaveData.setOption('sfxVolume', 100-this._sfxVolumeSlider.value);
-		SaveData.setOption('bgmVolume', 100-this._bgmVolumeSlider.value);
+		SaveData.setOption('autoFace', this._autoFaceCheckbox.checked);
+		SaveData.setOption('sfxVolume', 10-this._sfxVolumeSlider.value);
+		SaveData.setOption('bgmVolume', 10-this._bgmVolumeSlider.value);
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
