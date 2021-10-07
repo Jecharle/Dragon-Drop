@@ -293,8 +293,7 @@ class BattleScene extends Scene {
 	}
 	async _endTurn() {
 		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
-		&& this._activeTeam && this._activeTeam.untouched
-		&& !confirm("End turn?")) {
+		&& !SaveData.getOption('endTurnPrompt') && !confirm("End turn?")) {
 			return; // prompt to avoid ending turn without doing anything
 		}
 	

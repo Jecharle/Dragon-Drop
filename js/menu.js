@@ -85,43 +85,43 @@ class OptionsMenu extends Menu {
 		this.el.appendChild(this._titleHeader);
 	}
 
-	// TODO: Replace the checkboxes with buttons that change as you click, or something?
 	_addPromptFrequencyRow() {
 		var row = this._addRow();
-
 		this._turnPromptCheckbox = document.createElement('input');
 		this._turnPromptCheckbox.id = "turnPromptCheckbox";
 		this._turnPromptCheckbox.type = "checkbox";
-		row.appendChild(this._addLabel("Confirm end turn", this._turnPromptCheckbox));
 		row.appendChild(this._turnPromptCheckbox);
+		row.appendChild(this._addLabel("End turn confirmation", this._turnPromptCheckbox));
 	}
 
 	_addAutoFaceRow() {
 		var row = this._addRow();
-
 		this._autoFaceCheckbox = document.createElement('input');
 		this._autoFaceCheckbox.id = "autoFaceCheckbox";
 		this._autoFaceCheckbox.type = "checkbox";
-		row.appendChild(this._addLabel("Automatically face nearest enemy", this._autoFaceCheckbox));
 		row.appendChild(this._autoFaceCheckbox);
+		row.appendChild(this._addLabel("Automatic facing", this._autoFaceCheckbox));
 	}
 
-	// TODO: Figure out sliders
 	_addSoundRow() {
-		var row = this._addRow();
-
-		this._sfxVolumeSlider = document.createElement('button');
+		var row = this._addRow('volume-slider');
+		this._sfxVolumeSlider = document.createElement('input');
 		this._sfxVolumeSlider.id = "sfxVolumeSlider";
-		row.appendChild(this._addLabel("Sound volume: ", this._sfxVolumeSlider));
+		this._sfxVolumeSlider.type = "range";
+		this._sfxVolumeSlider.min = 0;
+		this._sfxVolumeSlider.max = 100;
+		row.appendChild(this._addLabel("Sound volume", this._sfxVolumeSlider));
 		row.appendChild(this._sfxVolumeSlider);
 	}
 
 	_addMusicRow() {
-		var row = this._addRow();
-
-		this._bgmVolumeSlider = document.createElement('button');
+		var row = this._addRow('volume-slider');
+		this._bgmVolumeSlider = document.createElement('input');
 		this._bgmVolumeSlider.id = "bgmVolumeSlider";
-		row.appendChild(this._addLabel("Music volume: ", this._bgmVolumeSlider));
+		this._bgmVolumeSlider.type = "range";
+		this._bgmVolumeSlider.min = 0;
+		this._bgmVolumeSlider.max = 100;
+		row.appendChild(this._addLabel("Music volume", this._bgmVolumeSlider));
 		row.appendChild(this._bgmVolumeSlider);
 	}
 
@@ -144,13 +144,17 @@ class OptionsMenu extends Menu {
 
 	//#region load/save
 	_loadOptions() {
-		this._turnPromptCheckbox.checked = !!SaveData.getOption('endTurnPrompt');
+		this._turnPromptCheckbox.checked = !SaveData.getOption('endTurnPrompt');
 		this._autoFaceCheckbox.checked = !!SaveData.getOption('autoFace');
+		this._sfxVolumeSlider.value = 100-SaveData.getOption('sfxVolume');
+		this._bgmVolumeSlider.value = 100-SaveData.getOption('bgmVolume');
 	}
 
 	_saveChanges() {
-		SaveData.setOption('endTurnPrompt', !!this._turnPromptCheckbox.checked);
+		SaveData.setOption('endTurnPrompt', !this._turnPromptCheckbox.checked);
 		SaveData.setOption('autoFace', !!this._autoFaceCheckbox.checked);
+		SaveData.setOption('sfxVolume', 100-this._sfxVolumeSlider.value);
+		SaveData.setOption('bgmVolume', 100-this._bgmVolumeSlider.value);
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
