@@ -31,6 +31,13 @@ class Menu extends ElObj {
 		return newButton;
 	}
 
+	_addLabel(text, control) {
+		var newLabel = document.createElement('label');
+		newLabel.innerText = text;
+		if (control) newLabel.htmlFor = control.id;
+		return newLabel;
+	}
+
 	_addRow(...classList) {
 		var newRow = document.createElement('div');
 		newRow.classList.add('menu-row', ...classList);
@@ -65,10 +72,10 @@ class OptionsMenu extends Menu {
 	//#region option rows
 	_addAllControls() {
 		this._addTitle();
-		// TODO: End-of-turn prompt frequency radio button
+		this._addPromptFrequencyRow();
 		this._addAutoFaceRow();
-		// TODO: SFX volume slider
-		// TODO: BGM volume slider
+		this._addSoundRow();
+		this._addMusicRow();
 		this._addCloseRow();
 	}
 
@@ -78,18 +85,44 @@ class OptionsMenu extends Menu {
 		this.el.appendChild(this._titleHeader);
 	}
 
+	// TODO: Replace the checkboxes with buttons that change as you click, or something?
+	_addPromptFrequencyRow() {
+		var row = this._addRow();
+
+		this._turnPromptCheckbox = document.createElement('input');
+		this._turnPromptCheckbox.id = "turnPromptCheckbox";
+		this._turnPromptCheckbox.type = "checkbox";
+		row.appendChild(this._addLabel("Confirm end turn", this._turnPromptCheckbox));
+		row.appendChild(this._turnPromptCheckbox);
+	}
+
 	_addAutoFaceRow() {
 		var row = this._addRow();
 
 		this._autoFaceCheckbox = document.createElement('input');
 		this._autoFaceCheckbox.id = "autoFaceCheckbox";
 		this._autoFaceCheckbox.type = "checkbox";
+		row.appendChild(this._addLabel("Automatically face nearest enemy", this._autoFaceCheckbox));
 		row.appendChild(this._autoFaceCheckbox);
+	}
 
-		this._autoFaceLabel = document.createElement('label');
-		this._autoFaceLabel.innerText = "Automatically face nearest enemy";
-		this._autoFaceLabel.htmlFor = "autoFaceCheckbox";
-		row.appendChild(this._autoFaceLabel);
+	// TODO: Figure out sliders
+	_addSoundRow() {
+		var row = this._addRow();
+
+		this._sfxVolumeSlider = document.createElement('button');
+		this._sfxVolumeSlider.id = "sfxVolumeSlider";
+		row.appendChild(this._addLabel("Sound volume: ", this._sfxVolumeSlider));
+		row.appendChild(this._sfxVolumeSlider);
+	}
+
+	_addMusicRow() {
+		var row = this._addRow();
+
+		this._bgmVolumeSlider = document.createElement('button');
+		this._bgmVolumeSlider.id = "bgmVolumeSlider";
+		row.appendChild(this._addLabel("Music volume: ", this._bgmVolumeSlider));
+		row.appendChild(this._bgmVolumeSlider);
 	}
 
 	_addCloseRow() {
@@ -111,12 +144,12 @@ class OptionsMenu extends Menu {
 
 	//#region load/save
 	_loadOptions() {
-		// TODO: Set option values based on the content of SaveData
+		this._turnPromptCheckbox.checked = !!SaveData.getOption('endTurnPrompt');
 		this._autoFaceCheckbox.checked = !!SaveData.getOption('autoFace');
 	}
 
 	_saveChanges() {
-		// TODO: Pull the option values into the SaveData structure
+		SaveData.setOption('endTurnPrompt', !!this._turnPromptCheckbox.checked);
 		SaveData.setOption('autoFace', !!this._autoFaceCheckbox.checked);
 		SaveData.saveOptions();
 	}
