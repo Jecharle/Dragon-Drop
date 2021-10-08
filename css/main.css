@@ -33,7 +33,7 @@ input[type="checkbox"] {
 	background-position: 0 0;
 }
 input[type="checkbox"]:checked {
-	background-position-x: -8px;
+	background-position-y: -8px;
 }
 input[type="checkbox"]:disabled {
 	filter: brightness(50%);
