@@ -17,7 +17,7 @@ strong, h1, h2 {
 }
 
 /*#region input element styles*/
-button {
+button, input {
 	font: 8px pixelFont;
 }
 
@@ -43,14 +43,48 @@ input[type="range"] {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
-	/* basic range */
+	background-color: transparent;
+	background-image: url(../img/system/slider.png);
+	height: 8px;
+	position: relative;
+	margin-bottom: 1em;
 }
-input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb {
+/*TODO: This is more specific to the volume sliders*/
+input[type="range"]::before {
+	content: "Off";
+	position: absolute;
+	bottom: -1em;
+	left: 0;
+	color: white;
+}
+input[type="range"]::after {
+	content: "Full";
+	position: absolute;
+	bottom: -1em;
+	right: 0;
+	color: white;
+}
+
+input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
-	appearance: none;
-	/* placement indicator */
+	width: 5px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
 }
-/* TODO: Style the track, too? */
+input[type="range"]::-moz-range-thumb {
+	width: 5px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
+}
+input[type="range"]::-ms-thumb {
+	width: 5px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
+}
+/* TODO: and a third copy for the MS tags */
 
 /*#endregion input element styles*/
 
