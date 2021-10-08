@@ -44,6 +44,8 @@ class Menu extends ElObj {
 		return newRow;
 	}
 
+	// TODO: Add menu boxes, titles, checkboxes, other inputs in general?
+
 	open() {
 		this._show();
 	}
@@ -69,7 +71,7 @@ class OptionsMenu extends Menu {
 		this.el.appendChild(this._addTitle());
 		var optionBox = this._titleHeader = document.createElement('div');
 		optionBox.classList.add('menu-box');
-		optionBox.appendChild(this._addPromptFrequencyRow());
+		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
 		optionBox.appendChild(this._addSoundRow());
 		optionBox.appendChild(this._addMusicRow());
@@ -83,13 +85,13 @@ class OptionsMenu extends Menu {
 		return this._titleHeader;
 	}
 
-	_addPromptFrequencyRow() {
+	_addEndTurnConfirmRow() {
 		var row = this._addRow();
-		this._turnPromptCheckbox = document.createElement('input');
-		this._turnPromptCheckbox.id = "turnPromptCheckbox";
-		this._turnPromptCheckbox.type = "checkbox";
-		row.appendChild(this._turnPromptCheckbox);
-		row.appendChild(this._addLabel("End turn confirmation", this._turnPromptCheckbox));
+		this._endTurnConfirmCheckbox = document.createElement('input');
+		this._endTurnConfirmCheckbox.id = "turnPromptCheckbox";
+		this._endTurnConfirmCheckbox.type = "checkbox";
+		row.appendChild(this._endTurnConfirmCheckbox);
+		row.appendChild(this._addLabel("End turn confirmation", this._endTurnConfirmCheckbox));
 		return row;
 	}
 
@@ -147,17 +149,18 @@ class OptionsMenu extends Menu {
 
 	//#region load/save
 	_loadOptions() {
-		this._turnPromptCheckbox.checked = !SaveData.getOption('endTurnPrompt');
-		this._autoFaceCheckbox.checked = !!SaveData.getOption('autoFace');
-		this._sfxVolumeSlider.value = 10-SaveData.getOption('sfxVolume');
-		this._bgmVolumeSlider.value = 10-SaveData.getOption('bgmVolume');
+		SaveData.loadOptions();
+		this._endTurnConfirmCheckbox.checked = SaveData.confirmEndTurn;
+		this._autoFaceCheckbox.checked = SaveData.autoFace;
+		this._sfxVolumeSlider.value = SaveData.sfxVolume;
+		this._bgmVolumeSlider.value = SaveData.bgmVolume;
 	}
 
 	_saveChanges() {
-		SaveData.setOption('endTurnPrompt', !this._turnPromptCheckbox.checked);
-		SaveData.setOption('autoFace', this._autoFaceCheckbox.checked);
-		SaveData.setOption('sfxVolume', 10-this._sfxVolumeSlider.value);
-		SaveData.setOption('bgmVolume', 10-this._bgmVolumeSlider.value);
+		SaveData.confirmEndTurn = this._endTurnConfirmCheckbox.checked;
+		SaveData.autoFace = this._autoFaceCheckbox.checked;
+		SaveData.sfxVolume = this._sfxVolumeSlider.value;
+		SaveData.bgmVolume = this._bgmVolumeSlider.value;
 		SaveData.saveOptions();
 	}
 	//#endregion load/save

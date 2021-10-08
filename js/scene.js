@@ -292,9 +292,10 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	async _endTurn() {
+		// TODO: Make this an in-engine prompt not a browser popup
 		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
-		&& !SaveData.getOption('endTurnPrompt') && !confirm("End turn?")) {
-			return; // prompt to avoid ending turn without doing anything
+		&& SaveData.confirmEndTurn && !confirm("End turn?")) {
+			return; // confirm before ending turn
 		}
 	
 		this.setBusy();
@@ -322,7 +323,7 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.PlayerPhase:
-				if (SaveData.getOption('autoFace')) {
+				if (SaveData.autoFace) {
 					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
 				}
 				this._phase = BattleScene.EnemyPhase;
