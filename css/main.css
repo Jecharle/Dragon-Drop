@@ -11,13 +11,64 @@
 	--game-h: 384px;
 	font: 8px pixelFont;
 }
-button {
-	font: 8px pixelFont;
-}
 strong, h1, h2 {
 	font-family: boldPixelFont;
 	font-weight: normal;
 }
+
+/*#region input element styles*/
+button {
+	font: 8px pixelFont;
+}
+
+/* TODO: Use background sprites instead of this vector stuff */
+input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 8px;
+	height: 8px;
+	background-image: url(../img/system/checkbox.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+}
+input[type="checkbox"]:checked {
+	background-position-x: -8px;
+}
+input[type="checkbox"]:disabled {
+	filter: brightness(50%);
+}
+
+input[type="range"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	/* basic range */
+}
+input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	/* placement indicator */
+}
+/* TODO: Style the track, too? */
+
+/*#endregion input element styles*/
+
+/*#region common styles*/
+.selectable, .viewable {
+	cursor: pointer;
+}
+.unselectable>.sprite {
+	filter: grayscale(100%);
+}
+
+.intro {
+	animation: fade-out 0.5s reverse backwards;
+}
+.outro {
+	animation: fade-out 0.5s forwards;
+}
+/*#endregion common styles*/
 
 /*#region game window*/
 .game-window {
@@ -54,22 +105,6 @@ strong, h1, h2 {
 }
 /*#endregion game window*/
 
-/*#region common styles*/
-.selectable, .viewable {
-	cursor: pointer;
-}
-.unselectable>.sprite {
-	filter: grayscale(100%);
-}
-
-.intro {
-	animation: fade-out 0.5s reverse backwards;
-}
-.outro {
-	animation: fade-out 0.5s forwards;
-}
-/*#endregion common styles*/
-
 /*#region menus*/
 .menu {
 	width: 100%;
@@ -82,7 +117,6 @@ strong, h1, h2 {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 4px;
 	pointer-events: auto;
 }
 .menu-box {
@@ -97,19 +131,18 @@ strong, h1, h2 {
 	width: max-content;
 	height: max-content;
 	display: flex;
-	justify-content: flex-start;
+	justify-content: justify;
 	align-items: center;
-	margin: 2px;
+	padding: 2px;
 }
 .menu-row.volume-slider {
 	flex-direction: column;
+	align-items: flex-start;
 }
 .menu-row.accept-cancel {
 	margin-top: 12px;
 	align-self: flex-end;
-}
-.menu button {
-	margin: 2px;
+	gap: 4px;
 }
 /*#endregion menus*/
 
@@ -925,7 +958,7 @@ strong, h1, h2 {
 	position: absolute;
 	z-index: 0;
 	width: calc(var(--unit-w)*2);
-	height: calc(var(--unit-h)*6);
+	height: calc(var(--unit-h)*5);
 	left: 2px;
 	bottom: 2px;
 	display: flex;
