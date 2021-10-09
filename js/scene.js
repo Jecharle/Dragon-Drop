@@ -87,7 +87,7 @@ class BattleScene extends Scene {
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
-		this._optionsMenu = new OptionsMenu(this);
+		this._battleMenu = new OptionsMenu(this);
 
 		this._buildDOM();
 	}
@@ -115,7 +115,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._optionsMenu.open();
+			this._openMenu();
 		};
 		button.innerText = "Menu";
 		return button;
@@ -150,7 +150,7 @@ class BattleScene extends Scene {
 		this.el.appendChild(this._skillList.el);
 		this.el.appendChild(this._deployList.el);
 
-		this.el.appendChild(this._optionsMenu.el);
+		this.el.appendChild(this._battleMenu.el);
 	}
 	//#endregion ui setup
 
@@ -432,6 +432,14 @@ class BattleScene extends Scene {
 	//#endregion phases
 
 	//#region action processing
+	_openMenu() {
+		// TODO: Use this section to hide stuff?
+		this.setBusy();
+		this._battleMenu.open(() => {
+			this.setDone();
+		});
+	}
+
 	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();

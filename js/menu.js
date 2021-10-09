@@ -99,15 +99,16 @@ class Menu extends ElObj {
 ***************************************************/
 class OptionsMenu extends Menu {
 
-	open() {
+	open(callback) {
 		this._loadOptions();
-		super.open();
+		super.open(callback);
 	}
 
 	//#region option rows
 	_addAllControls() {
 		this.el.appendChild(this._addTitle("Options"));
-		var optionBox = this._titleHeader = document.createElement('div');
+		
+		var optionBox = document.createElement('div');
 		optionBox.classList.add('menu-box');
 		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
