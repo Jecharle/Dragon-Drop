@@ -9,6 +9,7 @@ class Menu extends ElObj {
 		this.parent = parent;
 		this._addAllControls();
 		this._callback = null;
+		this._isOpen = false;
 		this.close(null);
 	}
 
@@ -24,6 +25,7 @@ class Menu extends ElObj {
 		this.el.appendChild(this._closeButton);
 	}
 
+	//#region controls
 	_addButton(text, ...classList) {
 		var newButton = document.createElement('button');
 		newButton.classList.add(...classList);
@@ -70,28 +72,32 @@ class Menu extends ElObj {
 		newRow.classList.add('menu-row', ...classList);
 		return newRow;
 	}
+	//#endregion controls
 
-	// TODO: Add menu boxes, titles, checkboxes, other inputs in general?
-
+	//#region open/close
 	open(callback) {
 		this._callback = callback;
+		this._isOpen = true;
 		this._show();
 	}
 	close(result) {
 		this._result = result || null;
-
-		if (this._callback) {
-			this._callback.call(this.parent);
-		}
-		this._callback = null;
+		this._isOpen = false;
 
 		this._hide();
+		if (this._callback) {
+			this._callback.call(this.parent, this.result);
+		}
+		this._callback = null;
 	}
 
+	get isOpen() {
+		return this._isOpen;
+	}
 	get result() {
 		return this._result;
 	}
-	// TODO: Should there be a "result" value, so the parent can get info back?
+	//#endregion open/close
 }
 
 /***************************************************
@@ -185,4 +191,40 @@ class OptionsMenu extends Menu {
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
+}
+
+/***************************************************
+ Battle Menu
+***************************************************/
+class BattleMenu extends Menu {
+	_addAllControls() {
+		this.el.appendChild(this._addTitle("Paused"));
+
+		// unpause
+		var row = this._addRow();
+		this._resumeButton = this._addButton("Resume");
+		this._resumeButton.onclick = () => {
+			this.close(0);
+		};
+		row.appendChild(this._resumeButton);
+		this.el.appendChild(row);
+
+		// options menu
+		row = this._addRow();
+		this._optionsButton = this._addButton("Options");
+		this._optionsButton.onclick = () => {
+			this.close(1);
+		};
+		row.appendChild(this._optionsButton);
+		this.el.appendChild(row);
+
+		// quit the battle
+		row = this._addRow();
+		this._quitButton = this._addButton("Give Up");
+		this._quitButton.onclick = () => {
+			this.close(2);
+		};
+		row.appendChild(this._quitButton);
+		this.el.appendChild(row);
+	}
 }
