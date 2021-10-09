@@ -21,7 +21,6 @@ button, input {
 	font: 8px pixelFont;
 }
 
-/* TODO: Use background sprites instead of this vector stuff */
 input[type="checkbox"] {
 	-webkit-appearance: none;
 	-moz-appearance: none;
@@ -84,7 +83,6 @@ input[type="range"]::-ms-thumb {
 	background-image: url(../img/system/slider.png);
 	background-position-y: -8px;
 }
-/* TODO: and a third copy for the MS tags */
 
 /*#endregion input element styles*/
 

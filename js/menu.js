@@ -8,7 +8,8 @@ class Menu extends ElObj {
 		super();
 		this.parent = parent;
 		this._addAllControls();
-		this.close();
+		this._callback = null;
+		this.close(null);
 	}
 
 	get elClass() {
@@ -31,11 +32,37 @@ class Menu extends ElObj {
 		return newButton;
 	}
 
-	_addLabel(text, control) {
+	_addCheckbox(id, ...classList) {
+		var newCheckbox = document.createElement('input');
+		newCheckbox.classList.add(...classList);
+		newCheckbox.type = "checkbox";
+		newCheckbox.id = id;
+		return newCheckbox;
+	}
+
+	_addSlider(id, min, max, ...classList) {
+		var newSlider = document.createElement('input');
+		newSlider.classList.add(...classList);
+		newSlider.type = "range";
+		newSlider.min = min;
+		newSlider.max = max;
+		newSlider.id = id;
+		return newSlider;
+	}
+
+	_addLabel(text, control, ...classList) {
 		var newLabel = document.createElement('label');
+		newLabel.classList.add(...classList);
 		newLabel.innerText = text;
 		if (control) newLabel.htmlFor = control.id;
 		return newLabel;
+	}
+
+	_addTitle(text, ...classList) {
+		var newTitle = document.createElement('h1');
+		newTitle.classList.add(...classList);
+		newTitle.innerText = text;
+		return newTitle;
 	}
 
 	_addRow(...classList) {
@@ -46,13 +73,24 @@ class Menu extends ElObj {
 
 	// TODO: Add menu boxes, titles, checkboxes, other inputs in general?
 
-	open() {
+	open(callback) {
+		this._callback = callback;
 		this._show();
 	}
-	close() {
+	close(result) {
+		this._result = result || null;
+
+		if (this._callback) {
+			this._callback.call(this.parent);
+		}
+		this._callback = null;
+
 		this._hide();
 	}
 
+	get result() {
+		return this._result;
+	}
 	// TODO: Should there be a "result" value, so the parent can get info back?
 }
 
@@ -68,7 +106,7 @@ class OptionsMenu extends Menu {
 
 	//#region option rows
 	_addAllControls() {
-		this.el.appendChild(this._addTitle());
+		this.el.appendChild(this._addTitle("Options"));
 		var optionBox = this._titleHeader = document.createElement('div');
 		optionBox.classList.add('menu-box');
 		optionBox.appendChild(this._addEndTurnConfirmRow());
@@ -79,17 +117,9 @@ class OptionsMenu extends Menu {
 		this.el.appendChild(optionBox);
 	}
 
-	_addTitle() {
-		this._titleHeader = document.createElement('h1');
-		this._titleHeader.innerText = "Options";
-		return this._titleHeader;
-	}
-
 	_addEndTurnConfirmRow() {
 		var row = this._addRow();
-		this._endTurnConfirmCheckbox = document.createElement('input');
-		this._endTurnConfirmCheckbox.id = "turnPromptCheckbox";
-		this._endTurnConfirmCheckbox.type = "checkbox";
+		this._endTurnConfirmCheckbox = this._addCheckbox("turnPromptCheckbox");
 		row.appendChild(this._endTurnConfirmCheckbox);
 		row.appendChild(this._addLabel("End turn confirmation", this._endTurnConfirmCheckbox));
 		return row;
@@ -97,9 +127,7 @@ class OptionsMenu extends Menu {
 
 	_addAutoFaceRow() {
 		var row = this._addRow();
-		this._autoFaceCheckbox = document.createElement('input');
-		this._autoFaceCheckbox.id = "autoFaceCheckbox";
-		this._autoFaceCheckbox.type = "checkbox";
+		this._autoFaceCheckbox = this._addCheckbox("autoFaceCheckbox");
 		row.appendChild(this._autoFaceCheckbox);
 		row.appendChild(this._addLabel("Automatic facing", this._autoFaceCheckbox));
 		return row;
@@ -107,11 +135,7 @@ class OptionsMenu extends Menu {
 
 	_addSoundRow() {
 		var row = this._addRow('volume-slider');
-		this._sfxVolumeSlider = document.createElement('input');
-		this._sfxVolumeSlider.id = "sfxVolumeSlider";
-		this._sfxVolumeSlider.type = "range";
-		this._sfxVolumeSlider.min = 0;
-		this._sfxVolumeSlider.max = 10;
+		this._sfxVolumeSlider = this._addSlider("sfxVolumeSlider", 0, 10);
 		row.appendChild(this._addLabel("Sound volume", this._sfxVolumeSlider));
 		row.appendChild(this._sfxVolumeSlider);
 		return row;
@@ -119,11 +143,7 @@ class OptionsMenu extends Menu {
 
 	_addMusicRow() {
 		var row = this._addRow('volume-slider');
-		this._bgmVolumeSlider = document.createElement('input');
-		this._bgmVolumeSlider.id = "bgmVolumeSlider";
-		this._bgmVolumeSlider.type = "range";
-		this._bgmVolumeSlider.min = 0;
-		this._bgmVolumeSlider.max = 10;
+		this._bgmVolumeSlider = this._addSlider("bgmVolumeSlider", 0, 10);
 		row.appendChild(this._addLabel("Music volume", this._bgmVolumeSlider));
 		row.appendChild(this._bgmVolumeSlider);
 		return row;
@@ -134,13 +154,13 @@ class OptionsMenu extends Menu {
 		this._acceptButton = this._addButton("Accept", 'close-button');
 		this._acceptButton.onclick = () => {
 			this._saveChanges();
-			this.close();
+			this.close(1);
 		}
 		row.appendChild(this._acceptButton);
 
 		this._cancelButton = this._addButton("Cancel", 'close-button');
 		this._cancelButton.onclick = () => {
-			this.close();
+			this.close(0);
 		}
 		row.appendChild(this._cancelButton);
 		return row;
