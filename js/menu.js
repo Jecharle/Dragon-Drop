@@ -97,6 +97,13 @@ class Menu extends ElObj {
 		return this._result;
 	}
 	//#endregion open/close
+
+	//#region input events
+	rightClick() {}
+
+	keydown(key) { }
+	keyup(key) { }
+	//#endregion input events
 }
 
 /***************************************************
@@ -137,6 +144,20 @@ class YesNoMenu extends Menu {
 		return row;
 	}
 	//#endregion rows
+
+	//#region input events
+	rightClick() {
+		this.close(0);
+	}
+
+	keydown(key) {
+		if (key == 'Enter') {
+			this.close(1);
+		} else if (key == 'Escape') {
+			this.close(0);
+		}
+	}
+	//#endregion input events
 }
 
 /***************************************************
@@ -234,6 +255,21 @@ class OptionsMenu extends Menu {
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
+
+	//#region input events
+	rightClick() {
+		this.close(0);
+	}
+
+	keydown(key) {
+		if (key == 'Enter') {
+			this._saveChanges();
+			this.close(1);
+		} else if (key == 'Escape') {
+			this.close(0);
+		}
+	}
+	//#endregion input events
 }
 
 /***************************************************
@@ -269,4 +305,16 @@ class BattleMenu extends Menu {
 		};
 		this.el.appendChild(this._quitButton);
 	}
+
+	//#region input events
+	rightClick() {
+		this.close(0);
+	}
+
+	keydown(key) {
+		if (key == 'Enter' || key == 'Escape') {
+			this.close(0);
+		}
+	}
+	//#endregion input events
 }

@@ -9,7 +9,7 @@ class Scene extends ElObj {
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
 		this._paused = false;
-		this._activeMenu = false;
+		this._activeMenu = null;
 		this.setDone();
 
 		this._yesNoPrompt = new YesNoMenu(this);
@@ -596,12 +596,14 @@ class BattleScene extends Scene {
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
-		} else if (this._unit == this._lastMove) { // undo move before deselecting
+		} else if (this._unit && this._unit == this._lastMove) { // undo move before deselecting
 			this._undoMove();
 		} else if (this._unit) {
 			this._deselectUnit();
-		} else {
+		} else if (this._lastMove) {
 			this._undoMove();
+		} else {
+			this._openBattleMenu();
 		}
 	}
 
@@ -727,13 +729,23 @@ class BattleScene extends Scene {
 		}
 	}
 	rightClick() {
-		if (this._autoPhase || this.busy) return; // TEMP?
+		if (this._activeMenu) {
+			this._activeMenu.rightClick();
+			return;
+		}
+
+		if (this._autoPhase || this.busy) return;
 
 		this._goBack();
 		this.refresh();
 	}
 	keydown(key) {
-		if (this._autoPhase || this.busy) return; // TEMP?
+		if (this._activeMenu) {
+			this._activeMenu.keydown(key);
+			return;
+		}
+
+		if (this._autoPhase || this.busy) return;
 
 		if (key == "Escape") {
 			this._goBack();
@@ -945,7 +957,7 @@ class MapScene extends Scene {
 	start() {
 		this._camera.focus(this._piece.node);
 
-		if (this._paused) {
+		if (this.paused) {
 			var data = this._getData();
 			if (data.complete && this._node.event) {
 				this._completeEvent(this._node.event);
