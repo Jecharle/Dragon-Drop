@@ -201,6 +201,9 @@ input[type="range"]::-ms-thumb {
 	align-self: flex-end;
 	gap: 4px;
 }
+.menu-row.yes-no {
+	gap: 16px;
+}
 /*#endregion menus*/
 
 /*#region battle scene*/

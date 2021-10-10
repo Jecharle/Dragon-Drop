@@ -129,7 +129,7 @@ class YesNoMenu extends Menu {
 	}
 
 	_addYesNoRow() {
-		var row = this._addRow();
+		var row = this._addRow('yes-no');
 		this._acceptButton = this._addButton("Yes", 'close-button');
 		this._acceptButton.onclick = () => {
 			this.close(1);
