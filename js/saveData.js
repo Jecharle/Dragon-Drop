@@ -29,6 +29,45 @@ class SaveData {
 	}
 	//#endregion mapEvent
 
+	//#region options
+	static setOption(option, value) {
+		if (!option) return;
+		this.options[option] = value;
+	}
+	static getOption(option) {
+		if (!option) return 0;
+		return this.options[option] || 0;
+	}
+
+	static get confirmEndTurn() {
+		return !this.getOption('confirmTurnEnd');
+	}
+	static set confirmEndTurn(value) {
+		this.setOption('confirmTurnEnd', !value);
+	}
+
+	static get autoFace() {
+		return !!this.getOption('autoFace');
+	}
+	static set autoFace(value) {
+		this.setOption('autoFace', !!value);
+	}
+
+	static get sfxVolume() {
+		return 10-this.getOption('sfxVolume');
+	}
+	static set sfxVolume(value) {
+		this.setOption('sfxVolume', 10-value);
+	}
+
+	static get bgmVolume() {
+		return 10-this.getOption('bgmVolume');
+	}
+	static set bgmVolume(value) {
+		this.setOption('bgmVolume', 10-value);
+	}
+	//#endregion options
+
 	//#region save / load
 	static get storage() { return sessionStorage; } // TEMP: Don't keep saves while I'm testing things
 
@@ -85,6 +124,16 @@ class SaveData {
 	}
 	static clearFlags() {
 		this._clearAttribute('flags');
+	}
+
+	static loadOptions() {
+		this._loadAttribute('options');
+	}
+	static saveOptions() {
+		this._saveAttribute('options');
+	}
+	static clearOptions() {
+		this._clearAttribute('options');
 	}
 	//#endregion save / load
 }

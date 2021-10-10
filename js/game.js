@@ -79,6 +79,9 @@ class Game {
 		MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
 		});
+		/*BattleSceneModel.load("testBattle").then(battleModel => {
+			this.setScene(new BattleScene(null, battleModel));
+		});*/
 	}
 }
 Game.begin();

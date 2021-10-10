@@ -9,7 +9,11 @@ class Scene extends ElObj {
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
 		this._paused = false;
+		this._activeMenu = null;
 		this.setDone();
+
+		this._yesNoPrompt = new YesNoMenu(this);
+		this.el.appendChild(this._yesNoPrompt.el);
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -31,6 +35,29 @@ class Scene extends ElObj {
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
 	_resume() { this._paused = false; }
+
+	//#region menus
+	_openMenu(menu, callback) {
+		if (!menu || this.busy) return;
+		this.setBusy();
+		this._activeMenu = menu;
+		menu.open(result => {
+			this.setDone();
+			this._activeMenu = null;
+			callback.call(this, result);
+		});
+	}
+	_openPrompt(message, callback) {
+		if (this.busy) return;
+		this.setBusy();
+		this._activeMenu = this._yesNoPrompt;
+		this._yesNoPrompt.open(message, result => {
+			this.setDone();
+			this._activeMenu = null;
+			callback.call(this, result);
+		});
+	}
+	//#endregion menus
 
 	//#region inter-scene communication
 	sendData(data) {
@@ -87,6 +114,9 @@ class BattleScene extends Scene {
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
+		this._battleMenu = new BattleMenu(this);
+		this._optionsMenu = new OptionsMenu(this);
+
 		this._buildDOM();
 	}
 
@@ -112,11 +142,10 @@ class BattleScene extends Scene {
 		var button = document.createElement("button");
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
-		/*button.onclick = () => {
-			TODO: Open the menu
-		};*/
+		button.onclick = () => {
+			this._openBattleMenu();
+		};
 		button.innerText = "Menu";
-		button.disabled = true; // TEMP
 		return button;
 	}
 	_createUndoButton() {
@@ -134,7 +163,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._endTurn();
+			this._playerEndTurn();
 		};
 		return button;
 	}
@@ -148,6 +177,9 @@ class BattleScene extends Scene {
 		this.el.appendChild(this._board.el);
 		this.el.appendChild(this._skillList.el);
 		this.el.appendChild(this._deployList.el);
+
+		this.el.appendChild(this._battleMenu.el);
+		this.el.appendChild(this._optionsMenu.el);
 	}
 	//#endregion ui setup
 
@@ -207,7 +239,7 @@ class BattleScene extends Scene {
 			if (this._unit && !this._unit.myTurn) {
 				this._board.setMoveArea(this._unit);
 			}
-			this._board.setDeployArea( (this._unit && this._unit.myTurn),
+			this._board.setDeployArea( this._unit?.myTurn ? this._unit : null,
 				(this.playerTeam.size >= this._maxDeploy && !this._unit?.square) );
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
@@ -289,12 +321,6 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	async _endTurn() {
-		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
-		&& this._activeTeam && this._activeTeam.untouched
-		&& !confirm("End turn?")) {
-			return; // prompt to avoid ending turn without doing anything
-		}
-	
 		this.setBusy();
 		this._deselectSkill();
 		this._deselectUnit();
@@ -320,6 +346,9 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.PlayerPhase:
+				if (SaveData.autoFace) {
+					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
+				}
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
@@ -425,6 +454,44 @@ class BattleScene extends Scene {
 	}
 	//#endregion phases
 
+	//#region menus
+	_openBattleMenu() {
+		this._openMenu(this._battleMenu, result => {
+			// result 0 just closes the menu
+			if (result == 1) {
+				this._openOptions();
+			} else if (result == 2) {
+				this._giveUp();
+			}
+		});
+	}
+	_openOptions() {
+		this._openMenu(this._optionsMenu, _result => {
+			this._openBattleMenu();
+		});
+	}
+	_giveUp () {
+		this._openPrompt("Give up on the battle?", result => {
+			if (result == 1) {
+				this._lose();
+			} else {
+				this._openBattleMenu();
+			}
+		});
+	}
+	_playerEndTurn() {
+		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
+			this._endTurn();
+		} else {
+			this._openPrompt("End Turn?", result => {
+				if (result == 1) {
+					this._endTurn();
+				}
+			});
+		}
+	}
+	//#endregion menus
+
 	//#region action processing
 	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
@@ -529,12 +596,14 @@ class BattleScene extends Scene {
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
-		} else if (this._unit == this._lastMove) { // undo move before deselecting
+		} else if (this._unit && this._unit == this._lastMove) { // undo move before deselecting
 			this._undoMove();
 		} else if (this._unit) {
 			this._deselectUnit();
-		} else {
+		} else if (this._lastMove) {
 			this._undoMove();
+		} else {
+			this._openBattleMenu();
 		}
 	}
 
@@ -660,13 +729,23 @@ class BattleScene extends Scene {
 		}
 	}
 	rightClick() {
-		if (this._autoPhase || this.busy) return; // TEMP?
+		if (this._activeMenu) {
+			this._activeMenu.rightClick();
+			return;
+		}
+
+		if (this._autoPhase || this.busy) return;
 
 		this._goBack();
 		this.refresh();
 	}
 	keydown(key) {
-		if (this._autoPhase || this.busy) return; // TEMP?
+		if (this._activeMenu) {
+			this._activeMenu.keydown(key);
+			return;
+		}
+
+		if (this._autoPhase || this.busy) return;
 
 		if (key == "Escape") {
 			this._goBack();
@@ -679,7 +758,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Enter") {
-			this._endTurn();
+			this._playerEndTurn();
 		}
 
 		if (isFinite(key)) {
@@ -751,7 +830,7 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
-			this._unit.aiSetDirection();
+			if (this._unit) this._unit.aiSetDirection();
 			this._deselectUnit();
 			this.refresh();
 
@@ -864,6 +943,9 @@ class MapScene extends Scene {
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
+		this._mapMenu = new MapMenu(this);
+		this._optionsMenu = new OptionsMenu(this);
+
 		this._buildView();
 		
 		var startNode = this._map.getNode(startNodeId);
@@ -878,7 +960,7 @@ class MapScene extends Scene {
 	start() {
 		this._camera.focus(this._piece.node);
 
-		if (this._paused) {
+		if (this.paused) {
 			var data = this._getData();
 			if (data.complete && this._node.event) {
 				this._completeEvent(this._node.event);
@@ -908,11 +990,10 @@ class MapScene extends Scene {
 		var button = document.createElement("button");
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
-		/*button.onclick = () => {
-			TODO: Open the menu
-		};*/
+		button.onclick = () => {
+			this._openMapMenu();
+		};
 		button.innerText = "Menu";
-		button.disabled = true; // TEMP
 		return button;
 	}
 	_buildView() {
@@ -920,6 +1001,8 @@ class MapScene extends Scene {
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._eventDescriptionEl);
 		this.el.appendChild(this._menuButtonEl);
+		this.el.appendChild(this._mapMenu.el);
+		this.el.appendChild(this._optionsMenu.el);
 	}
 	//#endregion ui setup
 
@@ -942,6 +1025,33 @@ class MapScene extends Scene {
 		this.el.classList.toggle('hide-description', !this._node?.canExplore);
 	}
 	//#endregion refresh
+
+	//#region menus
+	_openMapMenu() {
+		this._openMenu(this._mapMenu, result => {
+			// result 0 just closes the menu
+			if (result == 1) {
+				this._openOptions();
+			} else if (result == 2) {
+				this._quitToTitle();
+			}
+		});
+	}
+	_openOptions() {
+		this._openMenu(this._optionsMenu, _result => {
+			this._openMapMenu();
+		});
+	}
+	_quitToTitle () {
+		this._openPrompt("Return to title?", result => {
+			if (result == 1) {
+				// TODO: Quit to title screen
+			} else {
+				this._openMapMenu();
+			}
+		});
+	}
+	//#endregion menus
 
 	//#region actions
 	async _selectNode(node, instant) {

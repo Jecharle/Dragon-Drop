@@ -11,13 +11,118 @@
 	--game-h: 384px;
 	font: 8px pixelFont;
 }
-button {
-	font: 8px pixelFont;
-}
-strong {
+strong, h1, h2 {
 	font-family: boldPixelFont;
 	font-weight: normal;
 }
+
+/*#region input element styles*/
+button, input {
+	font: 8px pixelFont;
+	cursor: pointer;
+}
+button:disabled, input:disabled {
+	cursor: default;
+}
+
+.button {
+	width: max-content;
+	height: max-content;
+	padding: 2px;
+	box-sizing: border-box;
+	border: 4px solid transparent;
+	border-image-source: url(../img/system/button.png);
+	border-image-repeat: repeat;
+	border-image-slice: 4 4 fill;
+	cursor: pointer;
+}
+.button:hover {
+	filter: brightness(150%);
+}
+
+input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 8px;
+	height: 8px;
+	background-image: url(../img/system/checkbox.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+}
+input[type="checkbox"]:checked {
+	background-position-y: -8px;
+}
+input[type="checkbox"]:disabled {
+	filter: brightness(50%);
+}
+
+input[type="range"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	background-image: url(../img/system/slider.png);
+	height: 8px;
+	position: relative;
+	margin-bottom: 1em;
+}
+/*TODO: This is more specific to the volume sliders*/
+input[type="range"]::before {
+	content: "Off";
+	position: absolute;
+	bottom: -1em;
+	left: 0;
+	color: white;
+}
+input[type="range"]::after {
+	content: "Full";
+	position: absolute;
+	bottom: -1em;
+	right: 0;
+	color: white;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 6px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
+}
+input[type="range"]::-moz-range-thumb {
+	width: 6px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
+}
+input[type="range"]::-ms-thumb {
+	width: 6px;
+	height: 8px;
+	background-image: url(../img/system/slider.png);
+	background-position-y: -8px;
+}
+
+/*#endregion input element styles*/
+
+/*#region common styles*/
+.selectable,.viewable {
+	cursor: pointer;
+}
+	.selectable.draggable,.viewable.draggable {
+		cursor: all-scroll;
+	}
+.unselectable>.sprite {
+	filter: grayscale(100%);
+}
+
+.intro {
+	animation: fade-out 0.5s reverse backwards;
+}
+.outro {
+	animation: fade-out 0.5s forwards;
+}
+/*#endregion common styles*/
 
 /*#region game window*/
 .game-window {
@@ -54,21 +159,52 @@ strong {
 }
 /*#endregion game window*/
 
-/*#region common styles*/
-.selectable, .viewable {
-	cursor: pointer;
+/*#region menus*/
+.menu {
+	width: 100%;
+	height: 100%;
+	background-color: #000000aa;
+	color: white;
+	z-index: 9;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	pointer-events: auto;
 }
-.unselectable>.sprite {
-	filter: grayscale(100%);
+.menu-box {
+	width: max-content;
+	height: max-content;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
 }
-
-.intro {
-	animation: fade-out 0.5s reverse backwards;
+.menu-row {
+	width: max-content;
+	height: max-content;
+	display: flex;
+	justify-content: justify;
+	align-items: center;
+	padding: 2px;
 }
-.outro {
-	animation: fade-out 0.5s forwards;
+.menu.battle-menu,.menu.map-menu {
+	gap: 8px;
 }
-/*#endregion common styles*/
+.menu-row.volume-slider {
+	flex-direction: column;
+	align-items: flex-start;
+}
+.menu-row.accept-cancel {
+	margin-top: 12px;
+	align-self: flex-end;
+	gap: 4px;
+}
+.menu-row.yes-no {
+	gap: 16px;
+}
+/*#endregion menus*/
 
 /*#region battle scene*/
 /*#region battle scene UI*/
@@ -79,7 +215,6 @@ strong {
 	border: none;
 	padding: 6px;
 	width: 15%;
-	cursor: pointer;
 	position: absolute;
 }
 	.nav-button:hover {
@@ -88,7 +223,6 @@ strong {
 	.nav-button:disabled {
 		color: lightgray;
 		background-color: gray;
-		cursor: default;
 	}
 	.undo-button {
 		bottom: 12px;
@@ -882,7 +1016,7 @@ strong {
 	position: absolute;
 	z-index: 0;
 	width: calc(var(--unit-w)*2);
-	height: calc(var(--unit-h)*6);
+	height: calc(var(--unit-h)*5);
 	left: 2px;
 	bottom: 2px;
 	display: flex;
