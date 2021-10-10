@@ -27,10 +27,9 @@ class Menu extends ElObj {
 
 	//#region controls
 	_addButton(text, ...classList) {
-		var newButton = document.createElement('button');
-		newButton.classList.add(...classList);
+		var newButton = document.createElement('div');
+		newButton.classList.add("button", ...classList);
 		newButton.innerText = text;
-		newButton.type = "button";
 		return newButton;
 	}
 
@@ -104,6 +103,10 @@ class Menu extends ElObj {
  Option Menu
 ***************************************************/
 class OptionsMenu extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('option-menu');
+	}
 
 	open(callback) {
 		this._loadOptions();
@@ -197,34 +200,33 @@ class OptionsMenu extends Menu {
  Battle Menu
 ***************************************************/
 class BattleMenu extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('battle-menu');
+	}
+
 	_addAllControls() {
 		this.el.appendChild(this._addTitle("Paused"));
 
 		// unpause
-		var row = this._addRow();
 		this._resumeButton = this._addButton("Resume");
 		this._resumeButton.onclick = () => {
 			this.close(0);
 		};
-		row.appendChild(this._resumeButton);
-		this.el.appendChild(row);
+		this.el.appendChild(this._resumeButton);
 
 		// options menu
-		row = this._addRow();
 		this._optionsButton = this._addButton("Options");
 		this._optionsButton.onclick = () => {
 			this.close(1);
 		};
-		row.appendChild(this._optionsButton);
-		this.el.appendChild(row);
+		this.el.appendChild(this._optionsButton);
 
 		// quit the battle
-		row = this._addRow();
 		this._quitButton = this._addButton("Give Up");
 		this._quitButton.onclick = () => {
 			this.close(2);
 		};
-		row.appendChild(this._quitButton);
-		this.el.appendChild(row);
+		this.el.appendChild(this._quitButton);
 	}
 }
