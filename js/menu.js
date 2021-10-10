@@ -318,3 +318,50 @@ class BattleMenu extends Menu {
 	}
 	//#endregion input events
 }
+
+/***************************************************
+ Map Screen Menu
+***************************************************/
+class MapMenu extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('map-menu');
+	}
+
+	_addAllControls() {
+		this.el.appendChild(this._addTitle("Paused"));
+
+		// unpause
+		this._resumeButton = this._addButton("Resume");
+		this._resumeButton.onclick = () => {
+			this.close(0);
+		};
+		this.el.appendChild(this._resumeButton);
+
+		// options menu
+		this._optionsButton = this._addButton("Options");
+		this._optionsButton.onclick = () => {
+			this.close(1);
+		};
+		this.el.appendChild(this._optionsButton);
+
+		// quit to title
+		this._quitButton = this._addButton("Return to title");
+		this._quitButton.onclick = () => {
+			this.close(2);
+		};
+		this.el.appendChild(this._quitButton);
+	}
+
+	//#region input events
+	rightClick() {
+		this.close(0);
+	}
+
+	keydown(key) {
+		if (key == 'Enter' || key == 'Escape') {
+			this.close(0);
+		}
+	}
+	//#endregion input events
+}

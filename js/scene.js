@@ -943,6 +943,9 @@ class MapScene extends Scene {
 		this._eventDescriptionEl = this._createEventDescription();
 		this._menuButtonEl = this._createMenuButton();
 
+		this._mapMenu = new MapMenu(this);
+		this._optionsMenu = new OptionsMenu(this);
+
 		this._buildView();
 		
 		var startNode = this._map.getNode(startNodeId);
@@ -987,11 +990,10 @@ class MapScene extends Scene {
 		var button = document.createElement("button");
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
-		/*button.onclick = () => {
-			TODO: Open the menu
-		};*/
+		button.onclick = () => {
+			this._openMapMenu();
+		};
 		button.innerText = "Menu";
-		button.disabled = true; // TEMP
 		return button;
 	}
 	_buildView() {
@@ -999,6 +1001,8 @@ class MapScene extends Scene {
 		this.el.appendChild(this._camera.el);
 		this.el.appendChild(this._eventDescriptionEl);
 		this.el.appendChild(this._menuButtonEl);
+		this.el.appendChild(this._mapMenu.el);
+		this.el.appendChild(this._optionsMenu.el);
 	}
 	//#endregion ui setup
 
@@ -1021,6 +1025,33 @@ class MapScene extends Scene {
 		this.el.classList.toggle('hide-description', !this._node?.canExplore);
 	}
 	//#endregion refresh
+
+	//#region menus
+	_openMapMenu() {
+		this._openMenu(this._mapMenu, result => {
+			// result 0 just closes the menu
+			if (result == 1) {
+				this._openOptions();
+			} else if (result == 2) {
+				this._quitToTitle();
+			}
+		});
+	}
+	_openOptions() {
+		this._openMenu(this._optionsMenu, _result => {
+			this._openMapMenu();
+		});
+	}
+	_quitToTitle () {
+		this._openPrompt("Return to title?", result => {
+			if (result == 1) {
+				// TODO: Quit to title screen
+			} else {
+				this._openMapMenu();
+			}
+		});
+	}
+	//#endregion menus
 
 	//#region actions
 	async _selectNode(node, instant) {

@@ -189,7 +189,7 @@ input[type="range"]::-ms-thumb {
 	align-items: center;
 	padding: 2px;
 }
-.menu.battle-menu {
+.menu.battle-menu,.menu.map-menu {
 	gap: 8px;
 }
 .menu-row.volume-slider {
