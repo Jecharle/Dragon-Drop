@@ -454,7 +454,7 @@ class BattleScene extends Scene {
 		});
 	}
 	_giveUp () {
-		// TODO: Quit the battle
+		this._lose();
 	}
 
 	_selectUnit(unit) {
