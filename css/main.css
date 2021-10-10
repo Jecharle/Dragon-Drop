@@ -19,6 +19,10 @@ strong, h1, h2 {
 /*#region input element styles*/
 button, input {
 	font: 8px pixelFont;
+	cursor: pointer;
+}
+button:disabled, input:disabled {
+	cursor: default;
 }
 
 .button {
@@ -30,6 +34,7 @@ button, input {
 	border-image-source: url(../img/system/button.png);
 	border-image-repeat: repeat;
 	border-image-slice: 4 4 fill;
+	cursor: pointer;
 }
 .button:hover {
 	filter: brightness(150%);
@@ -101,9 +106,12 @@ input[type="range"]::-ms-thumb {
 /*#endregion input element styles*/
 
 /*#region common styles*/
-.selectable, .viewable {
+.selectable,.viewable {
 	cursor: pointer;
 }
+	.selectable.draggable,.viewable.draggable {
+		cursor: all-scroll;
+	}
 .unselectable>.sprite {
 	filter: grayscale(100%);
 }
@@ -204,7 +212,6 @@ input[type="range"]::-ms-thumb {
 	border: none;
 	padding: 6px;
 	width: 15%;
-	cursor: pointer;
 	position: absolute;
 }
 	.nav-button:hover {
@@ -213,7 +220,6 @@ input[type="range"]::-ms-thumb {
 	.nav-button:disabled {
 		color: lightgray;
 		background-color: gray;
-		cursor: default;
 	}
 	.undo-button {
 		bottom: 12px;

@@ -52,6 +52,7 @@ class Piece extends SpriteElObj {
 	refresh() { }
 	_setSelectable(selectable, draggable) {
 		this.el.setAttribute("draggable", selectable || draggable);
+		this.el.classList.toggle('draggable', selectable || draggable);
 
 		this.el.classList.toggle('selectable', selectable);
 		this.el.classList.toggle('viewable', !selectable);
@@ -1733,7 +1734,7 @@ class MapPiece extends Piece {
 		this.node = null;
 
 		this.el.draggable = true;
-		this.el.classList.add('selectable');
+		this.el.classList.add('selectable', 'draggable');
 
 		this.refresh();
 	}
