@@ -89,6 +89,7 @@ class BattleScene extends Scene {
 
 		this._battleMenu = new BattleMenu(this);
 		this._optionsMenu = new OptionsMenu(this);
+		this._yesNoPrompt = new YesNoMenu(this);
 
 		this._buildDOM();
 	}
@@ -136,7 +137,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'end-turn-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._endTurn();
+			this._playerEndTurn();
 		};
 		return button;
 	}
@@ -153,6 +154,7 @@ class BattleScene extends Scene {
 
 		this.el.appendChild(this._battleMenu.el);
 		this.el.appendChild(this._optionsMenu.el);
+		this.el.appendChild(this._yesNoPrompt.el);
 	}
 	//#endregion ui setup
 
@@ -294,12 +296,6 @@ class BattleScene extends Scene {
 		this.refresh();
 	}
 	async _endTurn() {
-		// TODO: Make this an in-engine prompt not a browser popup
-		if (this._phase != BattleScene.DeployPhase && !this._autoPhase
-		&& SaveData.confirmEndTurn && !confirm("End turn?")) {
-			return; // confirm before ending turn
-		}
-	
 		this.setBusy();
 		this._deselectSkill();
 		this._deselectUnit();
@@ -454,7 +450,28 @@ class BattleScene extends Scene {
 		});
 	}
 	_giveUp () {
-		this._lose();
+		this.setBusy();
+		this._yesNoPrompt.open("Give up on the battle?", result => {
+			this.setDone();
+			if (result == 1) {
+				this._lose();
+			} else {
+				this._openMenu();
+			}
+		});
+	}
+	_playerEndTurn() {
+		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
+			this._endTurn();
+		} else {
+			this.setBusy();
+			this._yesNoPrompt.open("End Turn?", result => {
+				this.setDone();
+				if (result == 1) {
+					this._endTurn();
+				}
+			});
+		}
 	}
 
 	_selectUnit(unit) {
@@ -710,7 +727,7 @@ class BattleScene extends Scene {
 		}
 
 		if (key == "Enter") {
-			this._endTurn();
+			this._playerEndTurn();
 		}
 
 		if (isFinite(key)) {

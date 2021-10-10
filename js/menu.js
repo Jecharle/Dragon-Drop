@@ -100,6 +100,46 @@ class Menu extends ElObj {
 }
 
 /***************************************************
+ Yes-No Prompt Menu
+***************************************************/
+class YesNoMenu extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('yes-no-menu');
+	}
+
+	open(message, callback) {
+		this._message.innerText = message;
+		super.open(callback);
+	}
+
+	//#region rows
+	_addAllControls() {
+		this.el.appendChild(this._addTitle("Confirm"));
+		this._message = this._addLabel("");
+		this.el.appendChild(this._message);
+		this.el.appendChild(this._addYesNoRow());
+	}
+
+	_addYesNoRow() {
+		var row = this._addRow();
+		this._acceptButton = this._addButton("Yes", 'close-button');
+		this._acceptButton.onclick = () => {
+			this.close(1);
+		}
+		row.appendChild(this._acceptButton);
+
+		this._cancelButton = this._addButton("No", 'close-button');
+		this._cancelButton.onclick = () => {
+			this.close(0);
+		}
+		row.appendChild(this._cancelButton);
+		return row;
+	}
+	//#endregion rows
+}
+
+/***************************************************
  Option Menu
 ***************************************************/
 class OptionsMenu extends Menu {
@@ -113,7 +153,6 @@ class OptionsMenu extends Menu {
 		super.open(callback);
 	}
 
-	//#region option rows
 	_addAllControls() {
 		this.el.appendChild(this._addTitle("Options"));
 		
@@ -127,6 +166,7 @@ class OptionsMenu extends Menu {
 		this.el.appendChild(optionBox);
 	}
 
+	//#region option rows
 	_addEndTurnConfirmRow() {
 		var row = this._addRow();
 		this._endTurnConfirmCheckbox = this._addCheckbox("turnPromptCheckbox");
