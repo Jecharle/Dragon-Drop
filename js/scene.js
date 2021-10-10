@@ -9,7 +9,11 @@ class Scene extends ElObj {
 		this._lastScene = lastScene || null;
 		this._dataIn = null;
 		this._paused = false;
+		this._activeMenu = false;
 		this.setDone();
+
+		this._yesNoPrompt = new YesNoMenu(this);
+		this.el.appendChild(this._yesNoPrompt.el);
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -31,6 +35,29 @@ class Scene extends ElObj {
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
 	_resume() { this._paused = false; }
+
+	//#region menus
+	_openMenu(menu, callback) {
+		if (!menu || this.busy) return;
+		this.setBusy();
+		this._activeMenu = menu;
+		menu.open(result => {
+			this.setDone();
+			this._activeMenu = null;
+			callback.call(this, result);
+		});
+	}
+	_openPrompt(message, callback) {
+		if (this.busy) return;
+		this.setBusy();
+		this._activeMenu = this._yesNoPrompt;
+		this._yesNoPrompt.open(message, result => {
+			this.setDone();
+			this._activeMenu = null;
+			callback.call(this, result);
+		});
+	}
+	//#endregion menus
 
 	//#region inter-scene communication
 	sendData(data) {
@@ -89,7 +116,6 @@ class BattleScene extends Scene {
 
 		this._battleMenu = new BattleMenu(this);
 		this._optionsMenu = new OptionsMenu(this);
-		this._yesNoPrompt = new YesNoMenu(this);
 
 		this._buildDOM();
 	}
@@ -117,7 +143,7 @@ class BattleScene extends Scene {
 		button.classList.add('nav-button', 'menu-button');
 		button.type = "button";
 		button.onclick = () => {
-			this._openMenu();
+			this._openBattleMenu();
 		};
 		button.innerText = "Menu";
 		return button;
@@ -154,7 +180,6 @@ class BattleScene extends Scene {
 
 		this.el.appendChild(this._battleMenu.el);
 		this.el.appendChild(this._optionsMenu.el);
-		this.el.appendChild(this._yesNoPrompt.el);
 	}
 	//#endregion ui setup
 
@@ -429,11 +454,9 @@ class BattleScene extends Scene {
 	}
 	//#endregion phases
 
-	//#region action processing
-	_openMenu() {
-		this.setBusy();
-		this._battleMenu.open(result => {
-			this.setDone();
+	//#region menus
+	_openBattleMenu() {
+		this._openMenu(this._battleMenu, result => {
 			// result 0 just closes the menu
 			if (result == 1) {
 				this._openOptions();
@@ -443,20 +466,16 @@ class BattleScene extends Scene {
 		});
 	}
 	_openOptions() {
-		this.setBusy();
-		this._optionsMenu.open(result => {
-			this.setDone();
-			this._openMenu();
+		this._openMenu(this._optionsMenu, _result => {
+			this._openBattleMenu();
 		});
 	}
 	_giveUp () {
-		this.setBusy();
-		this._yesNoPrompt.open("Give up on the battle?", result => {
-			this.setDone();
+		this._openPrompt("Give up on the battle?", result => {
 			if (result == 1) {
 				this._lose();
 			} else {
-				this._openMenu();
+				this._openBattleMenu();
 			}
 		});
 	}
@@ -464,16 +483,16 @@ class BattleScene extends Scene {
 		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
 			this._endTurn();
 		} else {
-			this.setBusy();
-			this._yesNoPrompt.open("End Turn?", result => {
-				this.setDone();
+			this._openPrompt("End Turn?", result => {
 				if (result == 1) {
 					this._endTurn();
 				}
 			});
 		}
 	}
+	//#endregion menus
 
+	//#region action processing
 	_selectUnit(unit) {
 		if (unit && !unit.select()) return false;
 		if (this._skill) this._deselectSkill();
