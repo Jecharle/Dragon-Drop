@@ -212,7 +212,7 @@ class BattleScene extends Scene {
 			if (this._unit && !this._unit.myTurn) {
 				this._board.setMoveArea(this._unit);
 			}
-			this._board.setDeployArea( (this._unit && this._unit.myTurn),
+			this._board.setDeployArea( this._unit?.myTurn ? this._unit : null,
 				(this.playerTeam.size >= this._maxDeploy && !this._unit?.square) );
 		} else if (this._skill) {
 			this._board.setSkillArea(this._skill);
