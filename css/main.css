@@ -204,6 +204,16 @@ input[type="range"]::-ms-thumb {
 .menu-row.yes-no {
 	gap: 16px;
 }
+
+.menu.dialog-box {
+	top: 25%;
+	left: 25%;
+	width: 10em;
+	height: max-content;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 1em;
+}
 /*#endregion menus*/
 
 /*#region battle scene*/

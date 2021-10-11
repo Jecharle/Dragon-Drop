@@ -20,7 +20,7 @@ class Menu extends ElObj {
 	_addAllControls() {
 		this._closeButton = this._addButton("Close", 'close-button');
 		this._closeButton.onclick = () => {
-			this.close();
+			this.close(0);
 		}
 		this.el.appendChild(this._closeButton);
 	}
@@ -179,6 +179,7 @@ class OptionsMenu extends Menu {
 		
 		var optionBox = document.createElement('div');
 		optionBox.classList.add('menu-box');
+		optionBox.appendChild(this._addTextSpeedRow());
 		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
 		optionBox.appendChild(this._addSoundRow());
@@ -188,6 +189,14 @@ class OptionsMenu extends Menu {
 	}
 
 	//#region option rows
+	_addTextSpeedRow() {
+		var row = this._addRow('volume-slider');
+		this._textSpeedSlider = this._addSlider("textSpeedSlider", 0, 2);
+		row.appendChild(this._addLabel("Text speed", this._textSpeedSlider));
+		row.appendChild(this._textSpeedSlider);
+		return row;
+	}
+	
 	_addEndTurnConfirmRow() {
 		var row = this._addRow();
 		this._endTurnConfirmCheckbox = this._addCheckbox("turnPromptCheckbox");
@@ -241,6 +250,7 @@ class OptionsMenu extends Menu {
 	//#region load/save
 	_loadOptions() {
 		SaveData.loadOptions();
+		this._textSpeedSlider.value = SaveData.textSpeed;
 		this._endTurnConfirmCheckbox.checked = SaveData.confirmEndTurn;
 		this._autoFaceCheckbox.checked = SaveData.autoFace;
 		this._sfxVolumeSlider.value = SaveData.sfxVolume;
@@ -248,6 +258,7 @@ class OptionsMenu extends Menu {
 	}
 
 	_saveChanges() {
+		SaveData.textSpeed = this._textSpeedSlider.value;
 		SaveData.confirmEndTurn = this._endTurnConfirmCheckbox.checked;
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
@@ -361,6 +372,98 @@ class MapMenu extends Menu {
 	keydown(key) {
 		if (key == 'Enter' || key == 'Escape') {
 			this.close(0);
+		}
+	}
+	//#endregion input events
+}
+
+/***************************************************
+ Dialog box for text
+***************************************************/
+class DialogBox extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('dialog-box');
+		this._message = "";
+		this._progress = 0;
+		this._intervalFunction = null;
+
+		this.el.onclick = () => {
+			this._skip();
+		};
+	}
+
+	_addAllControls() {
+		this._textArea = this._addLabel(""); // TODO: Is the label the best option for this?
+		this.el.appendChild(this._textArea);
+	}
+
+	// TODO: Adjustable screen position
+
+	// TODO: Styling for speaker portraits?
+
+	//#region advancing
+	_start() {
+		this._progress = 0;
+		this._textArea.innerText = "";
+
+		if (SaveData.textSpeed >= 2) {
+			this._finish();
+		} else {
+			this._intervalFunction = setInterval(() => {
+				this._step();
+			}, 40*(2-SaveData.textSpeed)); // TODO: Figure out exact speeds
+		}
+	}
+	_step() {
+		this._progress++;
+
+		if (this.isDone) {
+			this._finish();
+		} else {
+			this._textArea.innerText = this._message.substr(0, this._progress);
+			// TODO: Text sounds!
+		}
+	}
+	_finish() {
+		this._progress = this._message.length;
+		this._textArea.innerText = this._message;
+		if (this._intervalFunction) clearInterval(this._intervalFunction);
+	}
+	get isDone() {
+		return !(this._message && this._progress < this._message.length);
+	}
+
+	_skip() {
+		if (this.isDone) {
+			this.close(0);
+		} else {
+			this._finish();
+		}
+	}
+	//#endregion advancing
+
+	//#region open/close
+	open(message, callback) {
+		this._message = message || "";
+		this._start();
+		super.open(callback);
+	}
+
+	close() {
+		if (!this.isDone) this._finish();
+		super.close(0);
+	}
+	//#endregion open/close
+
+	//#region input events
+	rightClick() {
+		this._skip();
+	}
+
+	keydown(key) {
+		if (key == 'Enter' || key == 'Escape') {
+			this._skip();
 		}
 	}
 	//#endregion input events
