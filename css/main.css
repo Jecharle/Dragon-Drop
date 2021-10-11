@@ -888,6 +888,12 @@ input[type="range"]::-ms-thumb {
 		drop-shadow(0px 1px yellow)
 		drop-shadow(0px -1px yellow);
 	}
+	.unit.enemy.selected>.sprite, .unit.enemy:hover>.sprite {
+		filter: drop-shadow(1px 0 red)
+		drop-shadow(-1px 0 red)
+		drop-shadow(0px 1px red)
+		drop-shadow(0px -1px red);
+	}
 
 	/*#region unit status*/
 	.unit .lifebar {
