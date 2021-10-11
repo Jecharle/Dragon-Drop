@@ -394,8 +394,11 @@ class DialogBox extends Menu {
 	}
 
 	_addAllControls() {
-		this._textArea = this._addLabel(""); // TODO: Is the label the best option for this?
-		this.el.appendChild(this._textArea);
+		var textbox = document.createElement('div');
+		textbox.classList.add('menu-box');
+		this._textArea = this._addLabel("", null, 'dialog-area'); // TODO: Is the label the best option for this?
+		textbox.appendChild(this._textArea);
+		this.el.appendChild(textbox);
 	}
 
 	// TODO: Adjustable screen position
