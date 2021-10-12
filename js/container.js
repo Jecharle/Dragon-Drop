@@ -580,7 +580,7 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get groundHeight() {
-		return Math.max(this.z*12, 0) + 48;
+		return Math.max(this.z*12, 0) + 36;
 	}
 	get _selfScreenZ() {
 		return Square.screenZ(this.x, this.y, this.z - 12);

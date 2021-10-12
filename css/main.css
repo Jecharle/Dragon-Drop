@@ -532,10 +532,10 @@ input[type="range"]::-ms-thumb {
 	}
 
 	/*#region skill states*/
-	.selectable.skill:hover, .skill.selected {
+	.skill.selectable:hover, .skill.selected {
 		bottom: 2px;
 	}
-	.selectable.skill:hover>.sprite, .skill.selected>.sprite {
+	.skill.selectable:hover>.sprite, .skill.selected>.sprite {
 		filter: drop-shadow(1px 0 yellow)
 		drop-shadow(-1px 0 yellow)
 		drop-shadow(0 1px yellow)
@@ -689,8 +689,9 @@ input[type="range"]::-ms-thumb {
 		z-index: -2;
 		width: var(--square-w);
 		border: var(--square-h) solid transparent;
+		border-bottom: calc(var(--square-h) / 2) solid transparent;
 		box-sizing: border-box;
-		border-image: url(../img/tilesets/testTile.png) 40% 50% repeat;
+		border-image: url(../img/tilesets/testTile.png) 50% 50% 25% repeat;
 	}
 		/*TODO: Determine sprite via tile setting, not terrain type*/
 		.pit>.sprite {
