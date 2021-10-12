@@ -28,7 +28,7 @@ class TestAttackSkill extends SkillCard {
 
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.square);
+			unit.takeDamage(this.power, this.user.direction);
 			unit.push(this.user.square, 1, {animation: UnitPiece.Straight});
 		}
 		await Game.asyncPause(200);
@@ -86,7 +86,7 @@ class TestPullSkill extends TestAttackSkill {
 		if (this.user.isAlly(unit)) {
 			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		} else if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.square);
+			unit.takeDamage(this.power, this.user.direction);
 			unit.pull(this.user.square, 1, {animation: UnitPiece.Straight, uphill: true});
 		}
 		await Game.asyncPause(200);
@@ -173,7 +173,7 @@ class TestAreaSkill extends TestAttackSkill {
 
 	async _unitEffects(unit, target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.square);
+			unit.takeDamage(this.power, this.user.direction);
 			unit.push(target, 1, {animation: UnitPiece.Straight});
 		}
 		await Game.asyncPause(150);
@@ -519,7 +519,7 @@ class ThrowSkill2 extends SkillCard {
 	}
 	async _unitEffects(unit, _target) {
 		if (!unit.evade()) {
-			unit.takeDamage(this.power, this.user.square);
+			unit.takeDamage(this.power, this.user.direction);
 		}
 		unit.face(this.user.square);
 	}

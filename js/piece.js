@@ -446,10 +446,10 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, sourceSquare, props) {
+	takeDamage(power, damageDirection, props) {
 
 		// check for critical (by default, back attacks are critical)
-		var criticalHit = !this.criticalImmune && (props?.critical || this.isBehind(sourceSquare));
+		var criticalHit = !this.criticalImmune && (props?.critical || this.sameDirection(damageDirection));
 		if (criticalHit) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power += criticalBonus;
@@ -756,10 +756,21 @@ class UnitPiece extends Piece {
 
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
+	sameDirection(direction) {
+		return (this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
+	}
+	oppositeDirection(direction) {
+		return (this.direction[0] != direction[0]) && (this.direction[1] != direction[1]);
+	}
 	isBehind(square) {
 		if (!square || this.square == square) return false;
 		var dirTo = this.getDirectionFrom(square);
-		return (dirTo[0] == this.direction[0] && dirTo[1] == this.direction[1]);
+		return this.sameDirection(dirTo);
+	}
+	isAhead(square) {
+		if (!square || this.square == square) return false;
+		var dirTo = this.getDirectionFrom(square);
+		return this.oppositeDirection(dirTo);
 	}
 	//#endregion facing
 
