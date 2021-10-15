@@ -479,7 +479,7 @@ class UnitPiece extends Piece {
 				this.results.critical ||= criticalHit;
 			}
 		} else {
-			this.showPopup("0");
+			this.showPopup("0", 'blocked');
 			if (this.results) {
 				this.results.blocked = true;
 			}

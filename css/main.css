@@ -20,6 +20,7 @@ strong, h1, h2 {
 button, input {
 	font: 8px pixelFont;
 	cursor: pointer;
+	user-select: none;
 }
 button:disabled, input:disabled {
 	cursor: default;
@@ -35,6 +36,7 @@ button:disabled, input:disabled {
 	border-image-repeat: repeat;
 	border-image-slice: 4 4 fill;
 	cursor: pointer;
+	user-select: none;
 }
 .button:hover {
 	filter: brightness(150%);
@@ -502,6 +504,7 @@ input[type="range"]::-ms-thumb {
 		height: 100%;
 		position: absolute;
 		background-image: url(../img/skills/skillcards.png);
+		pointer-events: none;
 	}
 	.skill-description {
 		display: none;
@@ -521,6 +524,8 @@ input[type="range"]::-ms-thumb {
 		color: white;
 		text-align: center;
 		position: absolute;
+		user-select: none;
+		pointer-events: none;
 	}
 	.quantity-label {
 		font-family: boldPixelFont;
@@ -529,6 +534,8 @@ input[type="range"]::-ms-thumb {
 		position: absolute;
 		right: 4px;
 		bottom: 1px;
+		user-select: none;
+		pointer-events: none;
 	}
 
 	/*#region skill states*/
@@ -1252,7 +1259,11 @@ input[type="range"]::-ms-thumb {
 	position: absolute;
 	animation: rise-up 1s ease-out;
 	transform: translateZ(99px);
+	user-select: none;
 }
+	.popup-text.blocked {
+		color: silver;
+	}
 	.popup-text.heal {
 		color: greenyellow;
 	}
