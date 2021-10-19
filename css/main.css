@@ -207,12 +207,16 @@ input[type="range"]::-ms-thumb {
 	gap: 16px;
 }
 
-.dialog-area {
+.menu-box.dialog-box {
+	position: absolute;
 	top: 10%;
 	left: 10%;
+	flex-direction: row;
+}
+
+.dialog {
 	width: 10em;
 	height: 4em;
-	position: absolute;
 	display: flex;
 	align-items: flex-start;
 	justify-content: flex-start;
@@ -221,8 +225,15 @@ input[type="range"]::-ms-thumb {
 	color: black;
 	padding: 1em;
 }
-
-/* TODO: Other elements like portraits, respoitioning, etc? */
+.menu-box .face {
+	height: var(--face-h);
+	width: var(--face-w);
+	box-sizing: border-box;
+	background-repeat: no-repeat;
+	background-position: bottom left;
+	transform: scale(1.5); /*Temporary, probably*/
+	transform-origin: 0 100%;
+}
 
 /*#endregion menus*/
 
@@ -847,7 +858,8 @@ input[type="range"]::-ms-thumb {
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	bottom: calc(0px - var(--square-h));
+	bottom: 0;
+	left: -100%;
 	display: flex;
 	justify-content: center;
 	transform-style: preserve-3d;

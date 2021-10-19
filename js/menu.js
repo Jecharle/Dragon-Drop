@@ -395,9 +395,15 @@ class DialogBox extends Menu {
 
 	_addAllControls() {
 		var textbox = document.createElement('div');
-		textbox.classList.add('menu-box');
-		this._textArea = this._addLabel("", null, 'dialog-area'); // TODO: Is the label the best option for this?
+		textbox.classList.add('menu-box', 'dialog-box', 'melee-unit'); // TODO: Speaker specified elsewhere
+
+		this._portrait = document.createElement("div");
+		this._portrait.classList.add('face');
+		textbox.appendChild(this._portrait);
+		
+		this._textArea = this._addLabel("", null, 'dialog'); // TODO: Is the label the best option for this?
 		textbox.appendChild(this._textArea);
+
 		this.el.appendChild(textbox);
 	}
 
