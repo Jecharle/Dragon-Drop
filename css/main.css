@@ -565,25 +565,25 @@ input[type="range"]::-ms-thumb {
 	/*#endregion skill states*/
 
 	/*#region skill icons*/
-	.attack-skill>.sprite {
+	.attack-skill .sprite {
 		background-position: 0 0;
 	}
-	.heal-skill>.sprite {
+	.heal-skill .sprite {
 		background-position: 0 calc(-3*var(--skill-h));
 	}
-	.defense-skill>.sprite {
+	.defense-skill .sprite {
 		background-position: 0 calc(-2*var(--skill-h));
 	}
-	.move-skill>.sprite {
+	.move-skill .sprite {
 		background-position: 0 calc(-4*var(--skill-h));
 	}
-	.buff-skill>.sprite {
+	.buff-skill .sprite {
 		background-position: 0 calc(-1*var(--skill-h));
 	}
-	.debuff-skill>.sprite {
+	.debuff-skill .sprite {
 		background-position: 0 calc(-6*var(--skill-h));
 	}
-	.build-skill>.sprite {
+	.build-skill .sprite {
 		background-position: 0 calc(-5*var(--skill-h));
 	}
 	/*#endregion skill icons*/
@@ -858,8 +858,7 @@ input[type="range"]::-ms-thumb {
 	height: var(--unit-h);
 	box-sizing: border-box;
 	position: absolute;
-	bottom: 0;
-	left: -100%;
+	bottom: calc(0px - var(--square-h));
 	display: flex;
 	justify-content: center;
 	transform-style: preserve-3d;
@@ -1006,38 +1005,38 @@ input[type="range"]::-ms-thumb {
 	/*#endregion unit states and motions*/
 
 	/*#region unit skins*/
-	.melee-unit>.sprite {
+	.melee-unit .sprite {
 		background-image: url("../img/sprites/testMeleeUnit.png");
 	}
-	.melee-unit>.face {
+	.melee-unit .face {
 		background-image: url("../img/faces/testMeleeUnit.png");
 	}
 
-	.support-unit>.sprite {
+	.support-unit .sprite {
 		background-image: url("../img/sprites/testSupportUnit.png");
 	}
-	.support-unit>.face {
+	.support-unit .face {
 		background-image: url("../img/faces/testSupportUnit.png");
 	}
 
-	.position-unit>.sprite {
+	.position-unit .sprite {
 		background-image: url("../img/sprites/testPositionUnit.png");
 	}
-	.position-unit>.face {
+	.position-unit .face {
 		background-image: url("../img/faces/testPositionUnit.png");
 	}
 
-	.status-unit>.sprite {
+	.status-unit .sprite {
 		background-image: url("../img/sprites/testStatusUnit.png");
 	}
-	.status-unit>.face {
+	.status-unit .face {
 		background-image: url("../img/faces/testStatusUnit.png");
 	}
 
-	.enemy-unit>.sprite {
+	.enemy-unit .sprite {
 		background-image: url("../img/sprites/testEnemyUnit.png");
 	}
-	.enemy-unit>.face {
+	.enemy-unit .face {
 		background-image: url("../img/faces/testEnemyUnit.png");
 	}
 
