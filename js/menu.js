@@ -384,6 +384,7 @@ class DialogBox extends Menu {
 	constructor(parent) {
 		super(parent);
 		this.el.classList.add('dialog-box');
+		this._queue = [];
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
@@ -394,26 +395,19 @@ class DialogBox extends Menu {
 	}
 
 	_addAllControls() {
-		var textbox = document.createElement('div');
-		textbox.classList.add('menu-box', 'dialog-box');
-
 		this._portrait = document.createElement("div");
 		this._portrait.classList.add('face');
-		textbox.appendChild(this._portrait);
+		this.el.appendChild(this._portrait);
 		
 		this._textArea = this._addLabel("", null, 'dialog');
-		textbox.appendChild(this._textArea);
-
-		this.el.appendChild(textbox);
+		this.el.appendChild(this._textArea);
 	}
 
-	// TODO: Adjustable screen position
-
-	// TODO: Styling for speaker portraits?
-
 	//#region advancing
-	_start() {
+	_start(message) {
+		// TODO: Get portrait / style settings from the message
 		this._progress = 0;
+		this._message = message || "";
 		this._textArea.innerText = "";
 
 		if (SaveData.textSpeed >= 2) {
@@ -444,18 +438,20 @@ class DialogBox extends Menu {
 	}
 
 	_skip() {
-		if (this.isDone) {
-			this.close(0);
-		} else {
+		if (!this.isDone) {
 			this._finish();
+		} else if (this._queue.length > 0) {
+			this._start(this._queue.shift());
+		} else {
+			this.close(0);
 		}
 	}
 	//#endregion advancing
 
 	//#region open/close
-	open(message, callback) {
-		this._message = message || "";
-		this._start();
+	open(messageList, callback) {
+		this._queue = messageList;
+		this._start(this._queue.shift());
 		super.open(callback);
 	}
 

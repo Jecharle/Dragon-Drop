@@ -207,15 +207,11 @@ input[type="range"]::-ms-thumb {
 	gap: 16px;
 }
 
-.menu-box.dialog-box {
-	position: absolute;
-	top: 10%;
-	left: 10%;
-	flex-direction: row;
-}
-
 .dialog {
-	width: 10em;
+	position: absolute;
+	top: 15%;
+	left: calc(15% + var(--face-w));
+	width: 12em;
 	height: 4em;
 	display: flex;
 	align-items: flex-start;
@@ -225,7 +221,10 @@ input[type="range"]::-ms-thumb {
 	color: black;
 	padding: 1em;
 }
-.menu-box .face {
+.dialog-box .face {
+	position: absolute;
+	top: 15%;
+	left: 15%;
 	height: var(--face-h);
 	width: var(--face-w);
 	box-sizing: border-box;
