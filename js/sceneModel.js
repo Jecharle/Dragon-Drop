@@ -89,13 +89,14 @@ class BattleSceneModel extends SceneModel {
 			return square;
 		}) || [];
 
-		// x, y, turn, type*, enemy?, ally?
+		// x, y, turn, type*, ally?
 		this.units = data?.units?.map(unit => {
 			unit.type = UnitPiece.parseUnitType(unit.type);
 			return unit;
 		}) || [];
 
-		// TODO: Tileset?
+		// mid-battle text cut-ins
+		this.dialog = data?.dialog || [];
 	}
 
 	static async load(filename) {

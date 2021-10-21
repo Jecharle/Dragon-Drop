@@ -14,6 +14,9 @@ class Scene extends ElObj {
 
 		this._yesNoPrompt = new YesNoMenu(this);
 		this.el.appendChild(this._yesNoPrompt.el);
+		
+		this._dialogBox = new DialogBox(this);
+		this.el.appendChild(this._dialogBox.el);
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -44,7 +47,7 @@ class Scene extends ElObj {
 		menu.open(result => {
 			this.setDone();
 			this._activeMenu = null;
-			callback.call(this, result);
+			if (callback) callback.call(this, result);
 		});
 	}
 	_openPrompt(message, callback) {
@@ -54,7 +57,18 @@ class Scene extends ElObj {
 		this._yesNoPrompt.open(message, result => {
 			this.setDone();
 			this._activeMenu = null;
-			callback.call(this, result);
+			if (callback) callback.call(this, result);
+		});
+	}
+	// TODO: This is very similar to the OpenPrompt method, can I standardize further?
+	_showDialog(dialogArray, callback) {
+		if (this.busy) return;
+		this.setBusy();
+		this._activeMenu = this._dialogBox;
+		this._dialogBox.open(dialogArray, () => {
+			this.setDone();
+			this._activeMenu = null;
+			if (callback) callback.call(this);
 		});
 	}
 	//#endregion menus
@@ -105,6 +119,7 @@ class BattleScene extends Scene {
 
 		this._addRestrictions(sceneData);
 		this._addMapUnits(sceneData.units);
+		this._addDialog(sceneData.dialog);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
 		this._deployList.deployLimit = this._maxDeploy;
@@ -215,6 +230,12 @@ class BattleScene extends Scene {
 		return null;
 	}
 	//#endregion unit setup
+
+	//#region dialog setup
+	_addDialog(dialogData) {
+		this._dialogData = dialogData || [];
+	}
+	//#endregion dialog setup
 
 	//#region rule setup
 	_addRestrictions(sceneData) {
@@ -374,6 +395,10 @@ class BattleScene extends Scene {
 
 		if (this._autoPhase) {
 			this._aiProcessTurn();
+		}
+		// TODO: Need to work more on this trigger
+		else {
+			this._processDialog();
 		}
 	}
 
@@ -616,7 +641,17 @@ class BattleScene extends Scene {
 				await Game.asyncPause(500);
 			}
 		}
-		return;
+	}
+
+	async _processDialog() {
+		for (var i = 0; i < this._dialogData.length; i++) {
+			var data = this._dialogData[i];
+			if (data.turn == this._turn) {
+				// TODO: I can honestly pack more meta-data in there
+				this._showDialog(data.message);
+				return;
+			}
+		}
 	}
 	//#endregion action processing
 

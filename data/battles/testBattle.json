@@ -41,5 +41,17 @@
 		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
 		
 		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4}
+	],
+
+	"dialog": [
+		{"turn": 1, "message": [
+			"melee-unit|Mic check, mic check, is this thing on?",
+			"support-unit|Sounds good to me."
+		]},
+		{"turn": 2, "message": [
+			"enemy-unit|Looks like it's working on this side too!",
+			"...It's weird that I can't talk on my turn, right?",
+			"none|It was, in fact, very weird."
+		]}
 	]
 }
