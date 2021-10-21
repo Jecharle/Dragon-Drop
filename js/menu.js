@@ -405,18 +405,18 @@ class DialogBox extends Menu {
 
 	//#region advancing
 	_start(message) {
-		// TODO: Get portrait / style settings from the message
-		this._progress = 0;
-		this._message = message || "";
-		this._textArea.innerText = "";
+		var input = message.split("#");
+		
+		if (input.length > 1) this.style = input[0];
 
-		if (SaveData.textSpeed >= 2) {
-			this._finish();
-		} else {
-			this._intervalFunction = setInterval(() => {
-				this._step();
-			}, 40*(2-SaveData.textSpeed)); // TODO: Figure out exact speeds
-		}
+		this._progress = 0;
+		this._message = input[input.length-1] || "";
+		this._textArea.innerText = "";
+		this.el.classList.remove('done');
+
+		this._intervalFunction = setInterval(() => {
+			this._step();
+		}, [80, 40, 20][SaveData.textSpeed]);
 	}
 	_step() {
 		this._progress++;
@@ -429,6 +429,7 @@ class DialogBox extends Menu {
 		}
 	}
 	_finish() {
+		this.el.classList.add('done');
 		this._progress = this._message.length;
 		this._textArea.innerText = this._message;
 		if (this._intervalFunction) clearInterval(this._intervalFunction);
