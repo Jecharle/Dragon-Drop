@@ -405,7 +405,7 @@ class DialogBox extends Menu {
 
 	//#region advancing
 	_start(message) {
-		var input = message.split("#");
+		var input = message.split("|");
 		
 		if (input.length > 1) this.style = input[0];
 
