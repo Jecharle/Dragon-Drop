@@ -569,14 +569,13 @@ class UnitPiece extends Piece {
 				if (effect == UnitPiece.Regenerate && this.getStatus(UnitPiece.Burn)) {
 					this._status[UnitPiece.Burn] = 0;
 					break;
-				} if (effect == UnitPiece.Burn && this.getStatus(UnitPiece.Regenerate)) {
+				}
+				if (effect == UnitPiece.Burn && this.getStatus(UnitPiece.Regenerate)) {
 					this._status[UnitPiece.Regenerate] = 0;
 					break;
 				}
-			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate)
-				if (value > this.getStatus(effect)) {
-					this._status[effect] = value;
-				}
+			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate and burn)
+				this._status[effect] += value;
 				break;
 			
 			case UnitPiece.Evade: case UnitPiece.Anchor: // non-scaling effects
@@ -584,12 +583,12 @@ class UnitPiece extends Piece {
 				break;
 
 			default: // standard buffs and debuffs
-				if (value > 0) {
-					if (this.getStatus(effect) < 0) this._status[effect] = 0;
-					else if (value > this.getStatus(effect)) this._status[effect] = value;
-				} else if (value < 0) {
-					if (this.getStatus(effect) > 0) this._status[effect] = 0;
-					else if (value < this.getStatus(effect)) this._status[effect] = value;
+				if (value > 0 && this.getStatus(effect) < 0) {
+					this._status[effect] = 0;
+				} else if (value < 0 && this.getStatus(effect) > 0) {
+					this._status[effect] = 0;
+				} else {
+					this._status[effect] += value;
 				}
 				break;
 		}
