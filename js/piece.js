@@ -155,9 +155,11 @@ class UnitPiece extends Piece {
 	}
 
 	_addDirectionEl() {
-		this._directionEl = document.createElement('div');
-		this._directionEl.classList.add('facing-arrow');
-		this.el.appendChild(this._directionEl);
+		if (this.hasDirection) {
+			this._directionEl = document.createElement('div');
+			this._directionEl.classList.add('facing-arrow');
+			this.el.appendChild(this._directionEl);
+		}
 	}
 
 	_addGhostEl() {
@@ -236,6 +238,10 @@ class UnitPiece extends Piece {
 	}
 
 	//#region attributes
+	get hasDirection() {
+		return true;
+	}
+	
 	get direction() {
 		return this._direction;
 	}
@@ -344,7 +350,7 @@ class UnitPiece extends Piece {
 	}
 
 	get criticalImmune () {
-		return this.equipment.some(equip => equip.criticalImmune);
+		return !this.hasDirection || this.equipment.some(equip => equip.criticalImmune);
 	}
 
 	get shiftable() {
@@ -637,7 +643,7 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 	get canFace() {
-		return this.alive && this.myTurn;
+		return this.alive && this.myTurn && this.hasDirection;
 	}
 
 	async updateStatusTurnStart() {
@@ -745,7 +751,7 @@ class UnitPiece extends Piece {
 		return UnitPiece.getDirection(this.square, from);
 	}
 	faceDirection(direction) {
-		if (!direction) return;
+		if (!direction || !this.hasDirection) return;
 		this._direction = direction;
 		this.el.style.setProperty('--x-scale', direction[0]);
 		this.el.style.setProperty('--y-frame', direction[1]);
@@ -1043,10 +1049,8 @@ class ObjectPiece extends UnitPiece {
 
 	_setSelectable() { } // Prevent it from highlighting
 	_setUnselectable() { } // Prevent it from graying out
-	_addDirectionEl() { } // Don't show a directional arrow
-
-	faceDirection(_direction) { } // can't turn
-	get canFace() {
+	
+	get hasDirection() {
 		return false;
 	}
 
@@ -1055,10 +1059,6 @@ class ObjectPiece extends UnitPiece {
 	}
 
 	get extra() {
-		return true;
-	}
-
-	get criticalImmune() {
 		return true;
 	}
 
