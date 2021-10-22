@@ -221,6 +221,12 @@ input[type="range"]::-ms-thumb {
 	color: black;
 	padding: 1em;
 }
+	.done .dialog::after {
+		content: 'V';
+		position: absolute;
+		right: 2px;
+		bottom: 0;
+	}
 .dialog-box .face {
 	position: absolute;
 	top: 15%;
