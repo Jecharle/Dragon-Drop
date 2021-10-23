@@ -403,11 +403,13 @@ class DialogBox extends Menu {
 		this.el.appendChild(this._textArea);
 	}
 
+
+
 	//#region advancing
 	_start(message) {
 		var input = message.split("|");
 		
-		if (input.length > 1) this.style = input[0];
+		if (input.length > 1) this.style = input[0].split(" ");
 
 		this._progress = 0;
 		this._message = input[input.length-1] || "";
@@ -468,7 +470,7 @@ class DialogBox extends Menu {
 	}
 
 	keydown(key) {
-		if (key == 'Enter' || key == 'Escape') {
+		if (key == 'Enter' || key == 'Escape' || key == 'Space') {
 			this._skip();
 		}
 	}

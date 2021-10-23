@@ -236,8 +236,16 @@ input[type="range"]::-ms-thumb {
 	box-sizing: border-box;
 	background-repeat: no-repeat;
 	background-position: bottom left;
-	transform: scale(1.5); /*Temporary, probably*/
-	transform-origin: 0 100%;
+}
+
+.dialog-box.right .face {
+	left: unset;
+	right: 15%;
+	transform: scaleX(-1);
+}
+.dialog-box.right .dialog {
+	left: unset;
+	right: calc(15% + var(--face-w));
 }
 
 /*#endregion menus*/
@@ -484,8 +492,6 @@ input[type="range"]::-ms-thumb {
 			bottom: 0;
 			background-repeat: no-repeat;
 			background-position: bottom left;
-			transform: scale(1.5); /*Temporary, probably*/
-			transform-origin: 0 100%;
 		}
 		.unit-info .name {
 			position: absolute;

@@ -46,10 +46,10 @@
 	"dialog": [
 		{"turn": 1, "message": [
 			"melee-unit|Mic check, mic check, is this thing on?",
-			"support-unit|Sounds good to me."
+			"support-unit right|Sounds good to me."
 		]},
 		{"turn": 2, "message": [
-			"enemy-unit|Looks like it's working on this side too!",
+			"enemy-unit right|Looks like it's working on this side too!",
 			"...It's weird that I can't talk on my turn, right?",
 			"none|It was, in fact, very weird."
 		]}
