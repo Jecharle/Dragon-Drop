@@ -7,6 +7,7 @@ class ElObj {
 		this.el = document.createElement(this.elType);
 		if (this.elClass) this.el.classList.add(this.elClass);
 		this.el.obj = this;
+		this._style = [];
 	}
 
 	get elType() {
@@ -20,11 +21,14 @@ class ElObj {
 		return this._style;
 	}
 	set style(value) {
-		if (this._style) {
-			this.el.classList.remove(this._style);
+		if (!Array.isArray(value)) {
+			value = [value];
 		}
-		if (value) {
-			this.el.classList.add(value);
+		if (this._style.length > 0) {
+			this.el.classList.remove(...this._style);
+		}
+		if (value.length > 0) {
+			this.el.classList.add(...value);
 		}
 		this._style = value;
 	}
