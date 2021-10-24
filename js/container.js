@@ -845,7 +845,7 @@ class UnitInfo extends ElObj {
 			this._lifebar.value = unit.hp;
 			this._lifebar.defenseValue = unit.defense;
 			this._statusList.value = unit._status;
-			this._nameSpan.innerText = unit.characterName;
+			this._nameSpan.innerHTML = `<strong>${unit.characterName}</strong>`;
 			this._tooltip.value = unit.fullDescription;
 		} else {
 			this.style = null;
@@ -854,7 +854,7 @@ class UnitInfo extends ElObj {
 			this._lifebar.value = 0;
 			this._lifebar.defenseValue = 0; 
 			this._statusList.value = null;
-			this._nameSpan.innerText = "";
+			this._nameSpan.innerHTML = "";
 			this._tooltip.value = "";
 		}
 	}

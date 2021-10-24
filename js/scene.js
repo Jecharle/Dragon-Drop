@@ -154,9 +154,8 @@ class BattleScene extends Scene {
 		return turnTitle;
 	}
 	_createMenuButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'menu-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'menu-button');
 		button.onclick = () => {
 			this._openBattleMenu();
 		};
@@ -164,9 +163,8 @@ class BattleScene extends Scene {
 		return button;
 	}
 	_createUndoButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'undo-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'undo-button');
 		button.onclick = () => {
 			this._undoMove();
 			this.refresh();
@@ -174,9 +172,8 @@ class BattleScene extends Scene {
 		return button;
 	}
 	_createEndTurnButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'end-turn-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'end-turn-button');
 		button.onclick = () => {
 			this._playerEndTurn();
 		};
@@ -298,7 +295,7 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
+		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
 
 		if (!this._lastMove && this._canRedeploy) {
 			this._undoButtonEl.innerText = "Redeploy";
@@ -306,7 +303,7 @@ class BattleScene extends Scene {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
 		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.disabled = this._autoPhase || (!this._lastMove && !this._canRedeploy);
+		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || (!this._lastMove && !this._canRedeploy));
 	}
 	//#endregion refresh
 
@@ -1011,9 +1008,8 @@ class MapScene extends Scene {
 
 	//#region ui setup
 	_createExploreButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'explore-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'explore-button');
 		button.onclick = () => {
 			this._exploreNode(this._node);
 		};
@@ -1025,9 +1021,8 @@ class MapScene extends Scene {
 		return textBox;
 	}
 	_createMenuButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'menu-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'menu-button');
 		button.onclick = () => {
 			this._openMapMenu();
 		};

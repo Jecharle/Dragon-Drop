@@ -1,32 +1,34 @@
 @font-face {
 	font-family: pixelFont;
-	src: url(../font/slkscr.ttf);
+	src: url(../font/MinimalFont5x7.ttf);
 }
 @font-face {
 	font-family: boldPixelFont;
-	src: url(../font/slkscrb.ttf);
+	src: url(../font/slkscr.ttf);
 }
 :root {
 	--game-w: 512px;
 	--game-h: 384px;
-	font: 8px pixelFont;
+	font: 14px pixelFont;
 }
 strong, h1, h2 {
-	font-family: boldPixelFont;
+	font: 13px boldPixelFont;
 	font-weight: normal;
 }
 
 /*#region input element styles*/
-button, input {
-	font: 8px pixelFont;
+input {
+	font: 14px pixelFont;
 	cursor: pointer;
 	user-select: none;
 }
-button:disabled, input:disabled {
+input:disabled {
 	cursor: default;
 }
 
 .button {
+	display: flex;
+	color: white;
 	width: max-content;
 	height: max-content;
 	padding: 2px;
@@ -35,11 +37,18 @@ button:disabled, input:disabled {
 	border-image-source: url(../img/system/button.png);
 	border-image-repeat: repeat;
 	border-image-slice: 4 4 fill;
+	align-items: center;
+	justify-content: center;
 	cursor: pointer;
 	user-select: none;
 }
 .button:hover {
 	filter: brightness(150%);
+}
+.button.disabled, .button.disabled:hover {
+	cursor: default;
+	pointer-events: none;
+	filter: grayscale(100%);
 }
 
 input[type="checkbox"] {
@@ -147,7 +156,6 @@ input[type="range"]::-ms-thumb {
 		right: 4px;
 		bottom: 4px;
 		color: black;
-		font-family: boldPixelFont;
 	}
 
 .scene {
@@ -253,21 +261,9 @@ input[type="range"]::-ms-thumb {
 /*#region battle scene*/
 /*#region battle scene UI*/
 .nav-button {
-	display: inline-block;
-	color: white;
-	background-color: deepskyblue;
-	border: none;
-	padding: 6px;
 	width: 15%;
 	position: absolute;
 }
-	.nav-button:hover {
-		background-color: skyblue;
-	}
-	.nav-button:disabled {
-		color: lightgray;
-		background-color: gray;
-	}
 	.undo-button {
 		bottom: 12px;
 		left: 12px;
@@ -276,7 +272,6 @@ input[type="range"]::-ms-thumb {
 		bottom: 2px;
 		right: 2px;
 		height: 48px;
-		border-radius: 8px;
 	}
 	.menu-button {
 		top: 6px;
@@ -500,7 +495,6 @@ input[type="range"]::-ms-thumb {
 			width: max-content;
 			left: 0;
 			bottom: 100%;
-			font-family: boldPixelFont;
 		}
 		.unit-info:hover .skill-description {
 			display: block;
@@ -542,7 +536,6 @@ input[type="range"]::-ms-thumb {
 		padding: 3px;
 	}
 	.cooldown-label {
-		font-family: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
@@ -550,7 +543,6 @@ input[type="range"]::-ms-thumb {
 		pointer-events: none;
 	}
 	.quantity-label {
-		font-family: boldPixelFont;
 		color: white;
 		text-align: center;
 		position: absolute;
@@ -616,7 +608,7 @@ input[type="range"]::-ms-thumb {
 	pointer-events: none;
 }
 .phase-banner {
-	font: 2rem boldPixelFont;
+	font: 2rem;
 	background-color: white;
 	border-top: 1px solid black;
 	border-bottom: 1px solid black;
@@ -631,7 +623,7 @@ input[type="range"]::-ms-thumb {
 	pointer-events: none;
 }
 .battle-end {
-	font: 4rem boldPixelFont;
+	font: 4rem;
 	color: white;
 	background-color: #000000cc;
 	width: 100%;
