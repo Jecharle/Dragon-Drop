@@ -28,7 +28,7 @@ input:disabled {
 
 .button {
 	display: flex;
-	color: white;
+	color: black;
 	width: max-content;
 	height: max-content;
 	padding: 2px;
@@ -48,7 +48,7 @@ input:disabled {
 .button.disabled, .button.disabled:hover {
 	cursor: default;
 	pointer-events: none;
-	filter: grayscale(100%);
+	filter: brightness(50%);
 }
 
 input[type="checkbox"] {
@@ -77,21 +77,6 @@ input[type="range"] {
 	height: 8px;
 	position: relative;
 	margin-bottom: 1em;
-}
-/*TODO: This is more specific to the volume sliders*/
-input[type="range"]::before {
-	content: "Off";
-	position: absolute;
-	bottom: -1em;
-	left: 0;
-	color: white;
-}
-input[type="range"]::after {
-	content: "Full";
-	position: absolute;
-	bottom: -1em;
-	right: 0;
-	color: white;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -202,7 +187,7 @@ input[type="range"]::-ms-thumb {
 .menu.battle-menu,.menu.map-menu {
 	gap: 8px;
 }
-.menu-row.volume-slider {
+.menu-row.volume-slider, .menu-row.speed-slider {
 	flex-direction: column;
 	align-items: flex-start;
 }
@@ -213,6 +198,36 @@ input[type="range"]::-ms-thumb {
 }
 .menu-row.yes-no {
 	gap: 16px;
+}
+
+.volume-slider input::before {
+	content: "Off";
+	position: absolute;
+	bottom: -1em;
+	left: 0;
+	color: white;
+}
+.volume-slider input::after {
+	content: "Full";
+	position: absolute;
+	bottom: -1em;
+	right: 0;
+	color: white;
+}
+
+.speed-slider input::before {
+	content: "Slow";
+	position: absolute;
+	bottom: -1em;
+	left: 0;
+	color: white;
+}
+.speed-slider input::after {
+	content: "Fast";
+	position: absolute;
+	bottom: -1em;
+	right: 0;
+	color: white;
 }
 
 .dialog {
@@ -623,7 +638,6 @@ input[type="range"]::-ms-thumb {
 	pointer-events: none;
 }
 .battle-end {
-	font: 4rem;
 	color: white;
 	background-color: #000000cc;
 	width: 100%;
@@ -635,6 +649,9 @@ input[type="range"]::-ms-thumb {
 	z-index: 5;
 	animation: end-screen 2s linear backwards;
 	animation-delay: 0.25s;
+}
+.battle-end strong {
+	font-size: 4em;
 }
 /*#endregion phase change & end screens*/
 

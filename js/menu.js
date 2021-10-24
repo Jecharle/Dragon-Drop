@@ -190,7 +190,7 @@ class OptionsMenu extends Menu {
 
 	//#region option rows
 	_addTextSpeedRow() {
-		var row = this._addRow('volume-slider');
+		var row = this._addRow('speed-slider');
 		this._textSpeedSlider = this._addSlider("textSpeedSlider", 0, 2);
 		row.appendChild(this._addLabel("Text speed", this._textSpeedSlider));
 		row.appendChild(this._textSpeedSlider);
