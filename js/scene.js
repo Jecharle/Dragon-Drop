@@ -327,6 +327,8 @@ class BattleScene extends Scene {
 		this._deselectUnit();
 		this._clearMoves();
 		this.refresh();
+
+		this._processDialog(0, false);
 	}
 	_skipDeploy() {
 		this._turn = 1;

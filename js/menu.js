@@ -419,6 +419,8 @@ class DialogBox extends Menu {
 		this._intervalFunction = setInterval(() => {
 			this._step();
 		}, [80, 40, 20][SaveData.textSpeed]);
+		
+		// TODO: Minor delay / startup transition, so it doesn't feel abrupt
 	}
 	_step() {
 		this._progress++;
@@ -470,7 +472,7 @@ class DialogBox extends Menu {
 	}
 
 	keydown(key) {
-		if (key == 'Enter' || key == 'Escape' || key == 'Space') {
+		if (key == 'Enter' || key == 'Escape' || key == 'Space' || key == ' ') {
 			this._skip();
 		}
 	}
