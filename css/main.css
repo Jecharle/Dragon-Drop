@@ -209,8 +209,8 @@ input[type="range"]::-ms-thumb {
 
 .dialog {
 	position: absolute;
-	top: 15%;
-	left: calc(15% + var(--face-w));
+	top: 20%;
+	left: 20%;
 	width: 12em;
 	height: 4em;
 	display: flex;
@@ -229,8 +229,8 @@ input[type="range"]::-ms-thumb {
 	}
 .dialog-box .face {
 	position: absolute;
-	top: 15%;
-	left: 15%;
+	top: 20%;
+	right: 80%;
 	height: var(--face-h);
 	width: var(--face-w);
 	box-sizing: border-box;
@@ -239,13 +239,13 @@ input[type="range"]::-ms-thumb {
 }
 
 .dialog-box.right .face {
-	left: unset;
-	right: 15%;
+	left: 80%;
+	right: unset;
 	transform: scaleX(-1);
 }
 .dialog-box.right .dialog {
 	left: unset;
-	right: calc(15% + var(--face-w));
+	right: 20%;
 }
 
 /*#endregion menus*/

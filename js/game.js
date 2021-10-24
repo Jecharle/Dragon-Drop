@@ -48,7 +48,7 @@ class Game {
 	static async asyncPause(milliseconds) {
 		if (!milliseconds || milliseconds < 0) return;
 
-		var timeout = new Promise((resolve, _reject) => {
+		var timeout = new Promise(resolve => {
 			setTimeout(() => resolve(), milliseconds);
 		});
 		return await timeout;

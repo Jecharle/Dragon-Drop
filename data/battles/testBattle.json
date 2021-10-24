@@ -48,10 +48,10 @@
 			"melee-unit|Mic check, mic check, is this thing on?",
 			"support-unit right|Sounds good to me."
 		]},
-		{"turn": 2, "message": [
+		{"turn": 1, "enemy": true, "message": [
 			"enemy-unit right|Looks like it's working on this side too!",
-			"...It's weird that I can't talk on my turn, right?",
-			"none|It was, in fact, very weird."
+			"It even shows up on my turn!",
+			"none|Yes, it finally works."
 		]}
 	]
 }

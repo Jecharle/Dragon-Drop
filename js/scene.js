@@ -386,19 +386,16 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 
-		await Game.asyncPause(1000);
+		await Game.asyncPause(1500);
 		if (this._activeTeam) {
 			await this._activeTeam.turnStartEffects();
 		}
-
 		this.setDone();
+
+		await this._processDialog(this._turn, (this._phase == BattleScene.EnemyPhase));
 
 		if (this._autoPhase) {
 			this._aiProcessTurn();
-		}
-		// TODO: Need to work more on this trigger
-		else {
-			this._processDialog();
 		}
 	}
 
@@ -643,15 +640,19 @@ class BattleScene extends Scene {
 		}
 	}
 
-	async _processDialog() {
-		for (var i = 0; i < this._dialogData.length; i++) {
-			var data = this._dialogData[i];
-			if (data.turn == this._turn) {
-				// TODO: I can honestly pack more meta-data in there
-				this._showDialog(data.message);
-				return;
+	async _processDialog(turn, enemyPhase) {
+		return new Promise(resolve => {
+			for (var i = 0; i < this._dialogData.length; i++) {
+				var data = this._dialogData[i];
+				if (data.turn == turn && !data.enemy == !enemyPhase) {
+					this._showDialog(data.message, () => {
+						resolve();
+					});
+					return;
+				}
 			}
-		}
+			resolve();
+		});
 	}
 	//#endregion action processing
 

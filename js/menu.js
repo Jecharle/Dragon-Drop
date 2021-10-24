@@ -412,7 +412,7 @@ class DialogBox extends Menu {
 		if (input.length > 1) this.style = input[0].split(" ");
 
 		this._progress = 0;
-		this._message = input[input.length-1] || "";
+		this._message = input.length > 0 ? input[input.length-1] : "";
 		this._textArea.innerText = "";
 		this.el.classList.remove('done');
 
