@@ -636,17 +636,14 @@ class Square extends Position {
 		if (!string) return this.None;
 		switch (string.toLowerCase()) {
 			case "plain":
-			case "flat":
 					return this.Plain;
-			case "hole":
 			case "pit":
 				return this.Pit;
 			case "grass":
-			case "cover":
 				return this.Grass;
 			case "wall":
 				return this.Column;
-			case "rough":
+			case "water":
 				return this.Water;
 			default:
 				return this.None;
@@ -669,18 +666,14 @@ class Square extends Position {
 		this.refresh();
 	}
 
-	get terrain() {
-		return this.ground.terrain|this.decoration.terrain;
-	}
-
 	get blocksMove() {
-		return (this.terrain&Square._BlockMove) == Square._BlockMove;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._BlockMove) == Square._BlockMove;
 	}
 	get blocksSight() {
-		return (this.terrain&Square._BlockSight) == Square._BlockSight;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._BlockSight) == Square._BlockSight;
 	}
 	get slowsMove() {
-		return (this.terrain&Square._SlowMove) == Square._SlowMove;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._SlowMove) == Square._SlowMove;
 	}
 	//#endregion terrain
 };

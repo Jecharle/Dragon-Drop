@@ -21,10 +21,10 @@
 
 	"terrain": [
 		{"type": "wall", "x": 2, "y": 5},
-		{"type": "rough", "x": 3, "y": 5},
+		{"type": "water", "x": 3, "y": 5},
 		{"type": "wall", "x": 4, "y": 5},
 		{"type": "pit", "x": 5, "y": 5},
-		{"type": "cover", "x": 6, "y": 5}
+		{"type": "grass", "x": 6, "y": 5}
 	],
 
 	"deployment": [
