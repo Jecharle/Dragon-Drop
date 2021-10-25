@@ -19,13 +19,6 @@
 		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 	],
 
-	"deployment": [
-		{"x": 3, "y": 6},
-		{"x": 4, "y": 6},
-		{"x": 5, "y": 6},
-		{"x": 6, "y": 6}
-	],
-
 	"terrain": [
 		{"type": "wall", "x": 2, "y": 5},
 		{"type": "rough", "x": 3, "y": 5},
@@ -34,18 +27,25 @@
 		{"type": "cover", "x": 6, "y": 5}
 	],
 
-	"units": [
-		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4},
+	"deployment": [
+		{"x": 3, "y": 6},
+		{"x": 4, "y": 6},
+		{"x": 5, "y": 6},
+		{"x": 6, "y": 6}
+	],
 
-		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
-		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
+	"units": [
+		{"turn": 0, "x": 4, "y": 4, "type": "TestEnemy"},
+
+		{"turn": 1, "x": 5, "y": 4, "type": "TestEnemySupport"},
+		{"turn": 1, "x": 5, "y": 4, "type": "TestEnemySupport"},
 		
-		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4}
+		{"turn": 2, "x": 6, "y": 4, "type": "TestEnemy"}
 	],
 
 	"dialog": [
 		{"turn": 0, "message": [
-			"This is your first battle"
+			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
 		]},
 		{"turn": 1, "message": [
 			"melee-unit|Mic check, mic check, is this thing on?",

@@ -729,25 +729,24 @@ input[type="range"]::-ms-thumb {
 		border: var(--square-h) solid transparent;
 		border-bottom: calc(var(--square-h) / 2) solid transparent;
 		box-sizing: border-box;
-		border-image: url(../img/tilesets/testTile.png) 50% 50% 25% repeat;
+		border-image: 50% 50% 25% repeat;
 	}
-		/*TODO: Determine sprite via tile setting, not terrain type*/
-		.pit>.sprite {
+		.tile-cube>.sprite {
+			border-image-source: url(../img/tilesets/testTile.png);
+		}
+		.tile-pit>.sprite {
 			border-image-source: url(../img/tilesets/testPit.png);
 		}
-		.cover>.sprite {
+		.tile-grass>.sprite {
 			border-image-source: url(../img/tilesets/testGrass.png);
 		}
-			.cover:hover::before {
+			.tile-grass:hover::before {
 				content: "Cover";
 			}
-		.wall>.sprite {
-			border-image-source: url(../img/tilesets/testBlocked.png);
-		}
-		.rough>.sprite {
+		.tile-water>.sprite {
 			border-image-source: url(../img/tilesets/testWater.png);
 		}
-			.rough:hover::before {
+			.tile-water:hover::before {
 				content: "Rough terrain";
 			}
 	/*#endregion terrain types*/
@@ -762,12 +761,11 @@ input[type="range"]::-ms-thumb {
 		background-position: 0 0;
 		transform: translateZ(13px);
 	}
-		/*TODO: Determine sprite via tile setting, not terrain type*/
-		.wall>.deco-sprite {
+		.deco-pillar>.deco-sprite {
 			background-image: url(../img/tilesets/testPillar.png);
 			height: 60px;
 		}
-		.cover>.deco-sprite {
+		.deco-grass>.deco-sprite {
 			background-image: url(../img/tilesets/testGrassDeco.png);
 			height: 36px;
 		}
@@ -917,7 +915,11 @@ input[type="range"]::-ms-thumb {
 	.unit>.sprite.ghost {
 		transform: scaleX(var(--x-scale)) translateZ(99px);
 		opacity: 35%;
+		visibility: hidden;
 	}
+		.unit:hover>.sprite.ghost, .unit.selected>.sprite.ghost {
+			visibility: visible;
+		}
 	.unit.in-range, .unit.in-area{
 		pointer-events: none;
 	}

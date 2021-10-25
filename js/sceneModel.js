@@ -7,7 +7,6 @@ class SceneModel {
 		this.filename = filename;
 	}
 
-	// TODO: Generically applicable file-loading routine
 	static async load(folder, filename) {
 		var fullpath = `data/${folder}/${filename}.json`;
 		Game.showLoading();
@@ -80,14 +79,16 @@ class BattleSceneModel extends SceneModel {
 		// z-level map
 		this.z = data?.z || [];
 
-		// x, y
-		this.deployment = data?.deployment || [];
-
 		// x, y, type*
 		this.terrain = data?.terrain?.map(square => {
 			square.type = Square.parseTerrain(square.type);
 			return square;
 		}) || [];
+
+		// TODO: Combine the z-levels and terrain, and add decorations
+
+		// x, y
+		this.deployment = data?.deployment || [];
 
 		// x, y, turn, type*, ally?
 		this.units = data?.units?.map(unit => {

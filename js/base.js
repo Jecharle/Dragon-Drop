@@ -24,6 +24,8 @@ class ElObj {
 		if (!Array.isArray(value)) {
 			value = [value];
 		}
+		value = value.filter(val => val != null);
+
 		if (this._style.length > 0) {
 			this.el.classList.remove(...this._style);
 		}
