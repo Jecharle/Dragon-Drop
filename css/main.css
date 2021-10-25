@@ -129,8 +129,6 @@ input[type="range"]::-ms-thumb {
 	position: relative;
 
 	image-rendering: pixelated;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: crisp-edges;
 	transform-origin: 0 0;
 	transform: scale(2.0);
 }
