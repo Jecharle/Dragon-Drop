@@ -623,27 +623,29 @@ class Square extends Position {
 	static get Water() { return { style: 'tile-water', terrain: Square._SlowMove }; }
 	static get Pit() { return { style: 'tile-pit', terrain: Square._BlocksMove }; }
 	
+	static parseGround(string) {
+		if (!string) return this.None;
+		switch (string.toLowerCase()) {
+			case "pl":
+				return this.Plain;
+			case "na":
+				return this.Pit;
+			case "gr":
+				return this.Grass;
+			case "wa":
+				return this.Water;
+			default:
+				return this.None;
+		}
+	}
+
 	static get Column() { return { style: 'deco-pillar', terrain: Square._BlockMove | Square._BlockSight }; }
 	static get TallGrass() { return { style: 'deco-grass', terrain: Square._BlockSight }; }
 	static get None() { return { style: null, terrain: 0 }; }
 
-	static parseTerrain(string) {
+	static parseDecoration(string) {
 		if (!string) return this.None;
 		switch (string.toLowerCase()) {
-			case "pl":
-			case "plain":
-					return this.Plain;
-			case "na":
-			case "pit":
-				return this.Pit;
-			case "gr":
-			case "grass":
-				return this.Grass;
-			case "wall":
-				return this.Column;
-			case "wa":
-			case "water":
-				return this.Water;
 			case "co":
 				return this.Column;
 			case "tg":

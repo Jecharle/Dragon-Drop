@@ -82,8 +82,8 @@ class BattleSceneModel extends SceneModel {
 			this.map[y] = this.map[y].map(attr => {
 				attr = attr.split("-");
 				var z = parseInt(attr[0]);
-				var ground = Square.parseTerrain(attr[1]);
-				var decoration = Square.parseTerrain(attr[2]);
+				var ground = Square.parseGround(attr[1]);
+				var decoration = Square.parseDecoration(attr[2]);
 				return {
 					z: z,
 					ground: ground,
