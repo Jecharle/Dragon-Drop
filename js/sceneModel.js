@@ -76,16 +76,21 @@ class BattleSceneModel extends SceneModel {
 		this.width = Math.max(Math.min(data?.width || 8, 10), 1);
 		this.height = Math.max(Math.min(data?.height || 8, 10), 1);
 
-		// z-level map
-		this.z = data?.z || [];
-
-		// x, y, type*
-		this.terrain = data?.terrain?.map(square => {
-			square.type = Square.parseTerrain(square.type);
-			return square;
-		}) || [];
-
-		// TODO: Combine the z-levels and terrain, and add decorations
+		// z, ground type, decoration type
+		this.map = data?.map || [];
+		for (var y = 0; y < this.map.length; y++) {
+			this.map[y] = this.map[y].map(attr => {
+				attr = attr.split("-");
+				var z = parseInt(attr[0]);
+				var ground = Square.parseTerrain(attr[1]);
+				var decoration = Square.parseTerrain(attr[2]);
+				return {
+					z: z,
+					ground: ground,
+					decoration: decoration
+				};
+			});
+		}
 
 		// x, y
 		this.deployment = data?.deployment || [];

@@ -91,8 +91,7 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
-		this._loadZ(sceneData.z);
-		this._loadTerrain(sceneData.terrain);
+		this._loadMap(sceneData.map);
 
 		this.deployArea = [];
 		this._loadDeployArea(sceneData.deployment);
@@ -115,30 +114,26 @@ class Board extends Container {
 	}
 
 	//#region setup
-	_loadZ(zData) {
-		if (!zData) return;
+	_loadMap(mapData) {
+		if (!mapData) return;
 		for (var y = 0; y < this.h; y++) {
-			if (zData.length <= y) break;
+			if (mapData.length <= y) break;
 			for (var x = 0; x < this.w; x++) {
-				if (zData[y].length <= x) break;
-				this.at(x, y).z = zData[y][x];
-				this.at(x, y).refresh();
+				if (mapData[y].length <= x) break;
+
+				this.at(x, y).z = mapData[y][x].z;
+				this.at(x, y).ground = mapData[y][x].ground;
+				this.at(x, y).decoration = mapData[y][x].decoration;
 			}
 		}
 	}
-	_loadTerrain(terrainData) {
-		if (!terrainData) return;
-		terrainData.forEach(data => {
-			this.at(data.x, data.y).ground = data.type;
-		});
-	}
+
 	_loadDeployArea(deployData) {
 		if (!deployData) return;
 		deployData.forEach(data => {
 			this._addDeploySquare(this.at(data.x, data.y));
 		});
 	}
-
 	_addDeploySquare(square) {
 		if (!square || square.parent != this) return;
 
@@ -525,7 +520,7 @@ class Square extends Position {
 		this.piece = null;
 		this.inRange = false;
 
-		this._ground = Square.Plain;
+		this._ground = Square.None;
 		this._decoration = Square.None;
 
 		this.addSubsprites();
@@ -635,16 +630,24 @@ class Square extends Position {
 	static parseTerrain(string) {
 		if (!string) return this.None;
 		switch (string.toLowerCase()) {
+			case "pl":
 			case "plain":
 					return this.Plain;
+			case "na":
 			case "pit":
 				return this.Pit;
+			case "gr":
 			case "grass":
 				return this.Grass;
 			case "wall":
 				return this.Column;
+			case "wa":
 			case "water":
 				return this.Water;
+			case "co":
+				return this.Column;
+			case "tg":
+				return this.TallGrass;
 			default:
 				return this.None;
 		}
