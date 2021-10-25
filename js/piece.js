@@ -412,7 +412,7 @@ class UnitPiece extends Piece {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'heal-effect');
 			this.parent.el.appendChild(vfx.el);
-			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
+			this.heal(this.getStatus(UnitPiece.Regenerate));
 		}
 	}
 	_applyDelayedBuff() {
@@ -494,16 +494,13 @@ class UnitPiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	heal(power, props) {
+	heal(power, _props) {
 		if (power > 0) {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
 			this.showPopup(`+${power}`, 'heal');
 			if (this.results) {
 				this.results.heal += power;
-			}
-			if (!props?.noCure) {
-				this._status[UnitPiece.Burn] = 0;
 			}
 		}
 

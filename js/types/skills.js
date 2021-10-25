@@ -224,6 +224,7 @@ class TestHealSkill extends SkillCard {
 	async _unitEffects(unit, _target) {
 		this._showEffect(unit.square, this.user.square, "heal-effect");
 		unit.heal(this.power);
+		unit.removeStatus(UnitPiece.Burn);
 		await Game.asyncPause(200);
 	}
 
