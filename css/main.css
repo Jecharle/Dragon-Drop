@@ -147,6 +147,7 @@ input[type="range"]::-ms-thumb {
 	box-sizing: border-box;
 	position: relative;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 }

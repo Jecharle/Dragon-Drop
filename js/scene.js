@@ -109,6 +109,61 @@ class Scene extends ElObj {
 }
 
 /***************************************************
+ Title scene
+***************************************************/
+class TitleScene extends Scene {
+	constructor() {
+		super(null);
+
+		this._titleEl = this._createTitle();
+		this._startButtonEl = this._createStartButton();
+		this._optionButtonEl = this._createOptionButton();
+
+		this._optionsMenu = new OptionsMenu(this);
+
+		this._buildDOM();
+	}
+
+	_createTitle() {
+		var title = document.createElement("h1");
+		title.classList.add('main-title');
+		title.innerText = "Dragon Drop";
+		return title;
+	}
+
+	_createStartButton() {
+		var button = document.createElement('div');
+		button.classList.add('button');
+		button.onclick = () => {
+			// TEMPORARY starting map
+			MapSceneModel.load("testMap").then(mapModel => {
+				Game.setScene(new MapScene(null, mapModel));
+			});
+		};
+		button.innerText = "Start Game";
+		return button;
+	}	
+
+	_createOptionButton() {
+		var button = document.createElement('div');
+		button.classList.add('button');
+		button.onclick = () => {
+			this._openMenu(this._optionsMenu);
+		};
+		button.innerText = "Options";
+		return button;
+	}
+
+	_buildDOM() {
+		this.el.appendChild(this._titleEl);
+		this.el.appendChild(this._startButtonEl);
+		this.el.appendChild(this._optionButtonEl);
+		
+		this.el.appendChild(this._optionsMenu.el);
+	}
+}
+
+/***************************************************
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
