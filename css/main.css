@@ -2,23 +2,15 @@
 	font-family: pixelFont;
 	src: url(../font/MinimalFont5x7.ttf);
 }
-@font-face {
-	font-family: boldPixelFont;
-	src: url(../font/slkscr.ttf);
-}
 :root {
 	--game-w: 512px;
 	--game-h: 384px;
-	font: 14px pixelFont;
-}
-strong, h1, h2 {
-	font: 13px boldPixelFont;
-	font-weight: normal;
+	font: 16px pixelFont;
 }
 
 /*#region input element styles*/
 input {
-	font: 14px pixelFont;
+	font: 16px pixelFont;
 	cursor: pointer;
 	user-select: none;
 }
