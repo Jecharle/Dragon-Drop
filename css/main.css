@@ -7,6 +7,9 @@
 	--game-h: 384px;
 	font: 16px pixelFont;
 }
+p {
+	margin-block: 0.25em;
+}
 
 /*#region input element styles*/
 input {
@@ -326,7 +329,7 @@ input[type="range"]::-ms-thumb {
 	}
 	.lifebar>.icon {
 		left: calc(100% + 1px);
-		top: -1px;
+		top: -3px;
 	}
 /*#endregion lifebar*/
 
@@ -545,7 +548,6 @@ input[type="range"]::-ms-thumb {
 		color: white;
 		text-align: center;
 		position: absolute;
-		user-select: none;
 		pointer-events: none;
 	}
 	.quantity-label {
@@ -554,7 +556,6 @@ input[type="range"]::-ms-thumb {
 		position: absolute;
 		right: 4px;
 		bottom: 1px;
-		user-select: none;
 		pointer-events: none;
 	}
 
