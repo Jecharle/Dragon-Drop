@@ -572,7 +572,7 @@ class UnitPiece extends Piece {
 					break;
 				}
 			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate and burn)
-				this._status[effect] += value;
+				this._status[effect] = value + this.getStatus(effect);
 				break;
 			
 			case UnitPiece.Evade: case UnitPiece.Anchor: // non-scaling effects
@@ -585,7 +585,7 @@ class UnitPiece extends Piece {
 				} else if (value < 0 && this.getStatus(effect) > 0) {
 					this._status[effect] = 0;
 				} else {
-					this._status[effect] += value;
+					this._status[effect] = value + this.getStatus(effect);
 				}
 				break;
 		}
