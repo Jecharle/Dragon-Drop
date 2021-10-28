@@ -76,7 +76,7 @@ class SaveData {
 	//#endregion options
 
 	//#region save / load
-	static get storage() { return sessionStorage; } // TEMP: Don't keep saves while I'm testing things
+	static get storage() { return localStorage; }
 
 	static _saveAttribute(attribute) {
 		var textData = JSON.stringify(this[attribute]);

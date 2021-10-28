@@ -118,6 +118,7 @@ class TitleScene extends Scene {
 		this._titleEl = this._createTitle();
 		this._startButtonEl = this._createStartButton();
 		this._optionButtonEl = this._createOptionButton();
+		this._clearButtonEl = this._createClearDataButton();
 
 		this._optionsMenu = new OptionsMenu(this);
 
@@ -134,23 +135,37 @@ class TitleScene extends Scene {
 	_createStartButton() {
 		var button = document.createElement('div');
 		button.classList.add('button');
+		button.innerText = "Start Game";
 		button.onclick = () => {
 			// TEMPORARY starting map
 			MapSceneModel.load("testMap").then(mapModel => {
 				Game.setScene(new MapScene(null, mapModel));
 			});
 		};
-		button.innerText = "Start Game";
 		return button;
 	}	
 
 	_createOptionButton() {
 		var button = document.createElement('div');
 		button.classList.add('button');
+		button.innerText = "Options";
 		button.onclick = () => {
 			this._openMenu(this._optionsMenu);
 		};
-		button.innerText = "Options";
+		return button;
+	}
+
+	_createClearDataButton() {
+		var button = document.createElement('div');
+		button.classList.add('button');
+		button.innerText = "Clear Data";
+		button.onclick = () => {
+			this._openPrompt("Really clear all data?", result => {
+				if (result == 1) {
+					SaveData.clearAll();
+				}
+			});
+		};
 		return button;
 	}
 
@@ -158,6 +173,7 @@ class TitleScene extends Scene {
 		this.el.appendChild(this._titleEl);
 		this.el.appendChild(this._startButtonEl);
 		this.el.appendChild(this._optionButtonEl);
+		this.el.appendChild(this._clearButtonEl);
 		
 		this.el.appendChild(this._optionsMenu.el);
 	}
