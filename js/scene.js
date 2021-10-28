@@ -1133,7 +1133,7 @@ class MapScene extends Scene {
 	_quitToTitle () {
 		this._openPrompt("Return to title?", result => {
 			if (result == 1) {
-				// TODO: Quit to title screen
+				Game.setScene(new TitleScene());
 			} else {
 				this._openMapMenu();
 			}
