@@ -36,12 +36,8 @@
 	],
 
 	"dialog": [
-		{"turn": 0, "message": [
-			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
-		]},
 		{"turn": 1, "message": [
-			"melee-unit|Mic check, mic check, is this thing on?",
-			"support-unit right|Sounds good to me."
+			"melee-unit|Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
 		]},
 		{"turn": 1, "enemy": true, "message": [
 			"enemy-unit right|Looks like it's working on this side too!",
