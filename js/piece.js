@@ -1214,6 +1214,16 @@ class SkillCard extends Piece {
 	icon(style, content) {
 		return `<div class="icon ${style}">${content || ""}</div>`;
 	}
+	number(value, showPlus) {
+		if (value > 9) value = 0;
+		var content = "";
+		if (value < 0) {
+			content = `<div class="minus"></div>`;
+		} else if (showPlus) {
+			content = `<div class="plus"></div>`;
+		}
+		return `<div class="icon number" style="background-position-x:${-8*Math.abs(value)}px">${content}</div>`;
+	}
 
 	get name() {
 		return "[Skill name]";
@@ -1657,6 +1667,8 @@ class ReactionCard extends SkillCard {
 	}
 	//#endregion triggers
 }
+
+// TODO: Can I use an "occasion" setting instead of a bunch of separate classes for this?
 
 class OnHitReaction extends ReactionCard {
 	canReact(target, _skill, result) {
