@@ -195,14 +195,14 @@ input[type="range"]::-ms-thumb {
 }
 
 .volume-slider input::before {
-	content: "Off";
+	content: "0%";
 	position: absolute;
 	bottom: -1em;
 	left: 0;
 	color: white;
 }
 .volume-slider input::after {
-	content: "Full";
+	content: "100%";
 	position: absolute;
 	bottom: -1em;
 	right: 0;

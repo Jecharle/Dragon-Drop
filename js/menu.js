@@ -388,7 +388,7 @@ class DialogBox extends Menu {
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
-		this._textSfx = new Audio("../sfx/step1.wav");
+		this._textSfx = AudioBooth.getSfx("../sfx/step1.wav");
 
 		this.el.onclick = () => {
 			this._skip();
@@ -430,10 +430,7 @@ class DialogBox extends Menu {
 			this._finish();
 		} else {
 			this._textArea.innerText = this._message.substr(0, this._progress);
-			if (this._progress % 3 == 0 && SaveData.sfxVolume > 0) {
-				this._textSfx.volume = (SaveData.sfxVolume / 10.0);
-				this._textSfx.play();
-			}
+			if (this._progress % 3 == 0) this._textSfx.play();
 		}
 	}
 	_finish() {
