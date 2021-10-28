@@ -263,6 +263,7 @@ class OptionsMenu extends Menu {
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
 		SaveData.bgmVolume = this._bgmVolumeSlider.value;
+		AudioBooth.refreshBgmVolume();
 		SaveData.saveOptions();
 	}
 	//#endregion load/save

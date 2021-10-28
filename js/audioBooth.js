@@ -3,6 +3,8 @@
 ***************************************************/
 class AudioBooth {
 	static sfx = {};
+	static bgm = {};
+	static _bgmAudio = null;
 
 	static getSfx(path) {
 		if (!path) return null;
@@ -14,8 +16,31 @@ class AudioBooth {
 		return this.sfx[path];
 	}
 
-	// TODO: Current music
-	// TODO: Method to change music source
+	static getBgm(path) {
+		if (!path) return null;
+
+		if (!this._bgmAudio) {
+			this._bgmAudio = new Audio();
+			this._bgmAudio.loop = true;
+		}
+
+		if (!this.bgm[path]) {
+			this.bgm[path] = new Bgm(this._bgmAudio, path);
+		}
+		return this.bgm[path];
+	}
+
+	static stopBgm() {
+		if (this._bgmAudio) {
+			this._bgmAudio.pause();
+		}
+	}
+
+	static refreshBgmVolume() {
+		if (this._bgmAudio) {
+			this._bgmAudio.volume = (SaveData.bgmVolume / 10);
+		}
+	}
 }
 
 /***************************************************
@@ -38,3 +63,26 @@ class Sfx {
  AudioBooth -> Bgm
  Wrapper for background music
 ***************************************************/
+class Bgm {
+	constructor(audio, track) {
+		this._audio = audio;
+		this._track = track;
+	}
+
+	play() {
+		this._audio.pause();
+		this._audio.volume = (SaveData.bgmVolume / 10);
+		this._audio.src = this._track;
+		this._audio.load();
+		this._audio.play();
+	}
+
+	stop() {
+		this._audio.pause();
+	}
+
+	resume() {
+		// TODO: Only if it's currently paused?
+		this._audio.play();
+	}
+}
