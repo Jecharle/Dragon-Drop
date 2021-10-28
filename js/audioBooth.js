@@ -10,7 +10,7 @@ class AudioBooth {
 		if (!path) return null;
 
 		if (!this.sfx[path]) {
-			var newSound = new Audio(path);
+			var newSound = new Audio("../sfx/"+path);
 			this.sfx[path] = new Sfx(newSound);
 		}
 		return this.sfx[path];
@@ -67,22 +67,26 @@ class Bgm {
 	constructor(audio, track) {
 		this._audio = audio;
 		this._track = track;
+		this._pausedAt = 0;
 	}
 
-	play() {
+	play(startPosition) {
 		this._audio.pause();
 		this._audio.volume = (SaveData.bgmVolume / 10);
-		this._audio.src = this._track;
+		this._audio.src = "../bgm/"+this._track;
 		this._audio.load();
+		this._audio.currentTime = startPosition || 0;
 		this._audio.play();
 	}
 
 	stop() {
 		this._audio.pause();
+		this._pausedAt = this._audio.currentTime;
 	}
 
 	resume() {
-		// TODO: Only if it's currently paused?
-		this._audio.play();
+		if (this._audio.paused) {
+			this.play(this._pausedAt);
+		}
 	}
 }

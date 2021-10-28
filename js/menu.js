@@ -389,7 +389,7 @@ class DialogBox extends Menu {
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
-		this._textSfx = AudioBooth.getSfx("../sfx/step1.wav");
+		this._textSfx = AudioBooth.getSfx("step1.wav");
 
 		this.el.onclick = () => {
 			this._skip();
