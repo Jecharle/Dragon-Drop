@@ -46,6 +46,11 @@ class PhaseBanner extends Detail {
 		});
 	}
 
+	set value(value) {
+		this._value = value;
+		this.el.innerHTML = `<strong>${value}</strong>`;
+	}
+
 	get elClass() {
 		return 'phase-banner';
 	}
@@ -73,6 +78,11 @@ class SkillBanner extends Detail {
 class EndScreen extends Detail {
 	constructor(startValue) {
 		super(startValue);
+	}
+
+	set value(value) {
+		this._value = value;
+		this.el.innerHTML = `<strong>${value}</strong>`;
 	}
 
 	get elClass() {
@@ -281,6 +291,11 @@ class CooldownLabel extends Detail {
 	get elClass() {
 		return 'cooldown-label';
 	}
+
+	set value(value) {
+		this._value = value;
+		this.el.innerHTML = `<strong>${value}</strong>`;
+	}
 }
 
 /***************************************************
@@ -291,7 +306,7 @@ class QuantityLabel extends Detail {
 		value += "";
 		if (value.length) value = "x"+value;
 		this._value = value;
-		this.el.innerHTML = value;
+		this.el.innerHTML = `<strong>${value}</strong>`;
 	}
 	get elClass() {
 		return 'quantity-label';
@@ -327,7 +342,7 @@ class CurrentMaxLabel extends Detail {
 	}
 
 	_updateText() {
-		this.el.innerHTML = `${this._value}/${this._maxValue}`;
+		this.el.innerHTML = `<strong>${this._value}/${this._maxValue}</strong>`;
 	}
 }
 

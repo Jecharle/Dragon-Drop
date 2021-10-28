@@ -6,17 +6,17 @@
 
 	"minTurns": 3,
 
-	"z": [
-		[3, 3, 3, 4, 5, 4, 3, 3, 1, 1],
-		[3, 2, 1, 1, 2, 2, 1, 1, 1, 2],
-		[3, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-		[3, 4, 1, 2, 2, 2, 2, 1, 1, 1],
-		[2, 3, 1, 2, 3, 3, 1, 1, 1, 1],
-		[2, 2, 2, 2, 2, 1, 1, 1, 1, 0],
-		[1, 2, 1, 2, 2, 2, 1, 1, 0, 0],
-		[1, 1, 1, 1, 0, 0, 1, 1, 1, 0],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	"map": [
+		["3-pl-  ","3-pl-  ","3-pl-  ","4-pl-  ","5-pl-  ","4-pl-  ","3-pl-  ","3-pl-  ","1-pl-  ","1-pl-  "],
+		["3-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","2-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","2-pl-  "],
+		["3-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
+		["3-pl-  ","4-pl-  ","1-pl-  ","2-pl-  ","2-pl-  ","2-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
+		["2-pl-  ","3-pl-  ","1-pl-  ","2-pl-  ","3-pl-  ","3-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
+		["2-pl-  ","2-pl-  ","1-pl-co","1-wa-  ","1-pl-co","0-na-  ","1-gr-tg","1-pl-  ","1-pl-  ","0-wa-  "],
+		["1-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","0-wa-  ","0-wa-  "],
+		["1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","0-pl-  ","0-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","0-wa-  "],
+		["1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
+		["1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "]
 	],
 
 	"deployment": [
@@ -26,20 +26,23 @@
 		{"x": 6, "y": 6}
 	],
 
-	"terrain": [
-		{"type": "wall", "x": 2, "y": 5},
-		{"type": "rough", "x": 3, "y": 5},
-		{"type": "wall", "x": 4, "y": 5},
-		{"type": "pit", "x": 5, "y": 5},
-		{"type": "cover", "x": 6, "y": 5}
+	"units": [
+		{"turn": 0, "x": 4, "y": 4, "type": "TestEnemy"},
+
+		{"turn": 1, "x": 5, "y": 4, "type": "TestEnemySupport"},
+		{"turn": 1, "x": 5, "y": 4, "type": "TestEnemySupport"},
+		
+		{"turn": 2, "x": 6, "y": 4, "type": "TestEnemy"}
 	],
 
-	"units": [
-		{"turn": 0, "type": "TestEnemy", "x": 4, "y": 4},
-
-		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
-		{"turn": 1, "type": "TestEnemySupport", "x": 5, "y": 4},
-		
-		{"turn": 2, "type": "TestEnemy", "x": 6, "y": 4}
+	"dialog": [
+		{"turn": 1, "message": [
+			"melee-unit|Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
+		]},
+		{"turn": 1, "enemy": true, "message": [
+			"enemy-unit right|Looks like it's working on this side too!",
+			"It even shows up on my turn!",
+			"none|Yes, it finally works."
+		]}
 	]
 }

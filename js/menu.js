@@ -20,7 +20,7 @@ class Menu extends ElObj {
 	_addAllControls() {
 		this._closeButton = this._addButton("Close", 'close-button');
 		this._closeButton.onclick = () => {
-			this.close();
+			this.close(0);
 		}
 		this.el.appendChild(this._closeButton);
 	}
@@ -179,6 +179,7 @@ class OptionsMenu extends Menu {
 		
 		var optionBox = document.createElement('div');
 		optionBox.classList.add('menu-box');
+		optionBox.appendChild(this._addTextSpeedRow());
 		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
 		optionBox.appendChild(this._addSoundRow());
@@ -188,6 +189,14 @@ class OptionsMenu extends Menu {
 	}
 
 	//#region option rows
+	_addTextSpeedRow() {
+		var row = this._addRow('speed-slider');
+		this._textSpeedSlider = this._addSlider("textSpeedSlider", 0, 2);
+		row.appendChild(this._addLabel("Text speed", this._textSpeedSlider));
+		row.appendChild(this._textSpeedSlider);
+		return row;
+	}
+	
 	_addEndTurnConfirmRow() {
 		var row = this._addRow();
 		this._endTurnConfirmCheckbox = this._addCheckbox("turnPromptCheckbox");
@@ -241,6 +250,7 @@ class OptionsMenu extends Menu {
 	//#region load/save
 	_loadOptions() {
 		SaveData.loadOptions();
+		this._textSpeedSlider.value = SaveData.textSpeed;
 		this._endTurnConfirmCheckbox.checked = SaveData.confirmEndTurn;
 		this._autoFaceCheckbox.checked = SaveData.autoFace;
 		this._sfxVolumeSlider.value = SaveData.sfxVolume;
@@ -248,6 +258,7 @@ class OptionsMenu extends Menu {
 	}
 
 	_saveChanges() {
+		SaveData.textSpeed = this._textSpeedSlider.value;
 		SaveData.confirmEndTurn = this._endTurnConfirmCheckbox.checked;
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
@@ -361,6 +372,108 @@ class MapMenu extends Menu {
 	keydown(key) {
 		if (key == 'Enter' || key == 'Escape') {
 			this.close(0);
+		}
+	}
+	//#endregion input events
+}
+
+/***************************************************
+ Dialog box for text
+***************************************************/
+class DialogBox extends Menu {
+	constructor(parent) {
+		super(parent);
+		this.el.classList.add('dialog-box');
+		this._queue = [];
+		this._message = "";
+		this._progress = 0;
+		this._intervalFunction = null;
+
+		this.el.onclick = () => {
+			this._skip();
+		};
+	}
+
+	_addAllControls() {
+		this._portrait = document.createElement("div");
+		this._portrait.classList.add('face');
+		this.el.appendChild(this._portrait);
+		
+		this._textArea = this._addLabel("", null, 'dialog');
+		this.el.appendChild(this._textArea);
+	}
+
+
+
+	//#region advancing
+	_start(message) {
+		var input = message.split("|");
+		
+		if (input.length > 1) this.style = input[0].split(" ");
+
+		this._progress = 0;
+		this._message = input.length > 0 ? input[input.length-1] : "";
+		this._textArea.innerText = "";
+		this.el.classList.remove('done');
+
+		this._intervalFunction = setInterval(() => {
+			this._step();
+		}, [80, 40, 20][SaveData.textSpeed]);
+		
+		// TODO: Minor delay / startup transition, so it doesn't feel abrupt
+	}
+	_step() {
+		this._progress++;
+
+		if (this.isDone) {
+			this._finish();
+		} else {
+			this._textArea.innerText = this._message.substr(0, this._progress);
+			// TODO: Text sounds!
+		}
+	}
+	_finish() {
+		this.el.classList.add('done');
+		this._progress = this._message.length;
+		this._textArea.innerText = this._message;
+		if (this._intervalFunction) clearInterval(this._intervalFunction);
+	}
+	get isDone() {
+		return !(this._message && this._progress < this._message.length);
+	}
+
+	_skip() {
+		if (!this.isDone) {
+			this._finish();
+		} else if (this._queue.length > 0) {
+			this._start(this._queue.shift());
+		} else {
+			this.close(0);
+		}
+	}
+	//#endregion advancing
+
+	//#region open/close
+	open(messageList, callback) {
+		this._queue = messageList;
+		this._start(this._queue.shift());
+		super.open(callback);
+	}
+
+	close() {
+		if (!this.isDone) this._finish();
+		super.close(0);
+	}
+	//#endregion open/close
+
+	//#region input events
+	rightClick() {
+		this._skip();
+	}
+
+	keydown(key) {
+		if (key == 'Enter' || key == 'Escape' || key == 'Space' || key == ' ') {
+			this._skip();
 		}
 	}
 	//#endregion input events

@@ -48,7 +48,7 @@ class Game {
 	static async asyncPause(milliseconds) {
 		if (!milliseconds || milliseconds < 0) return;
 
-		var timeout = new Promise((resolve, _reject) => {
+		var timeout = new Promise(resolve => {
 			setTimeout(() => resolve(), milliseconds);
 		});
 		return await timeout;
@@ -76,9 +76,10 @@ class Game {
 		Party.add(new TestPositionPartyMember());
 		Party.add(new TestStatusPartyMember() );
 
-		MapSceneModel.load("testMap").then(mapModel => {
+		this.setScene(new TitleScene());
+		/*MapSceneModel.load("testMap").then(mapModel => {
 			this.setScene(new MapScene(null, mapModel));
-		});
+		});*/
 		/*BattleSceneModel.load("testBattle").then(battleModel => {
 			this.setScene(new BattleScene(null, battleModel));
 		});*/

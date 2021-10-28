@@ -14,6 +14,9 @@ class Scene extends ElObj {
 
 		this._yesNoPrompt = new YesNoMenu(this);
 		this.el.appendChild(this._yesNoPrompt.el);
+		
+		this._dialogBox = new DialogBox(this);
+		this.el.appendChild(this._dialogBox.el);
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -44,7 +47,7 @@ class Scene extends ElObj {
 		menu.open(result => {
 			this.setDone();
 			this._activeMenu = null;
-			callback.call(this, result);
+			if (callback) callback.call(this, result);
 		});
 	}
 	_openPrompt(message, callback) {
@@ -54,7 +57,18 @@ class Scene extends ElObj {
 		this._yesNoPrompt.open(message, result => {
 			this.setDone();
 			this._activeMenu = null;
-			callback.call(this, result);
+			if (callback) callback.call(this, result);
+		});
+	}
+	// TODO: This is very similar to the OpenPrompt method, can I standardize further?
+	_showDialog(dialogArray, callback) {
+		if (this.busy) return;
+		this.setBusy();
+		this._activeMenu = this._dialogBox;
+		this._dialogBox.open(dialogArray, () => {
+			this.setDone();
+			this._activeMenu = null;
+			if (callback) callback.call(this);
 		});
 	}
 	//#endregion menus
@@ -95,6 +109,61 @@ class Scene extends ElObj {
 }
 
 /***************************************************
+ Title scene
+***************************************************/
+class TitleScene extends Scene {
+	constructor() {
+		super(null);
+
+		this._titleEl = this._createTitle();
+		this._startButtonEl = this._createStartButton();
+		this._optionButtonEl = this._createOptionButton();
+
+		this._optionsMenu = new OptionsMenu(this);
+
+		this._buildDOM();
+	}
+
+	_createTitle() {
+		var title = document.createElement("h1");
+		title.classList.add('main-title');
+		title.innerText = "Dragon Drop";
+		return title;
+	}
+
+	_createStartButton() {
+		var button = document.createElement('div');
+		button.classList.add('button');
+		button.onclick = () => {
+			// TEMPORARY starting map
+			MapSceneModel.load("testMap").then(mapModel => {
+				Game.setScene(new MapScene(null, mapModel));
+			});
+		};
+		button.innerText = "Start Game";
+		return button;
+	}	
+
+	_createOptionButton() {
+		var button = document.createElement('div');
+		button.classList.add('button');
+		button.onclick = () => {
+			this._openMenu(this._optionsMenu);
+		};
+		button.innerText = "Options";
+		return button;
+	}
+
+	_buildDOM() {
+		this.el.appendChild(this._titleEl);
+		this.el.appendChild(this._startButtonEl);
+		this.el.appendChild(this._optionButtonEl);
+		
+		this.el.appendChild(this._optionsMenu.el);
+	}
+}
+
+/***************************************************
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {
@@ -105,6 +174,7 @@ class BattleScene extends Scene {
 
 		this._addRestrictions(sceneData);
 		this._addMapUnits(sceneData.units);
+		this._addDialog(sceneData.dialog);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
 		this._deployList.deployLimit = this._maxDeploy;
@@ -139,9 +209,8 @@ class BattleScene extends Scene {
 		return turnTitle;
 	}
 	_createMenuButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'menu-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'menu-button');
 		button.onclick = () => {
 			this._openBattleMenu();
 		};
@@ -149,9 +218,8 @@ class BattleScene extends Scene {
 		return button;
 	}
 	_createUndoButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'undo-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'undo-button');
 		button.onclick = () => {
 			this._undoMove();
 			this.refresh();
@@ -159,9 +227,8 @@ class BattleScene extends Scene {
 		return button;
 	}
 	_createEndTurnButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'end-turn-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'end-turn-button');
 		button.onclick = () => {
 			this._playerEndTurn();
 		};
@@ -215,6 +282,12 @@ class BattleScene extends Scene {
 		return null;
 	}
 	//#endregion unit setup
+
+	//#region dialog setup
+	_addDialog(dialogData) {
+		this._dialogData = dialogData || [];
+	}
+	//#endregion dialog setup
 
 	//#region rule setup
 	_addRestrictions(sceneData) {
@@ -277,7 +350,7 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.disabled = !!(this._autoPhase || this.playerTeam.size == 0);
+		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
 
 		if (!this._lastMove && this._canRedeploy) {
 			this._undoButtonEl.innerText = "Redeploy";
@@ -285,7 +358,7 @@ class BattleScene extends Scene {
 			this._undoButtonEl.innerText = "Undo Move";
 		}
 		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.disabled = this._autoPhase || (!this._lastMove && !this._canRedeploy);
+		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || (!this._lastMove && !this._canRedeploy));
 	}
 	//#endregion refresh
 
@@ -306,6 +379,8 @@ class BattleScene extends Scene {
 		this._deselectUnit();
 		this._clearMoves();
 		this.refresh();
+
+		this._processDialog(0, false);
 	}
 	_skipDeploy() {
 		this._turn = 1;
@@ -365,12 +440,13 @@ class BattleScene extends Scene {
 		}
 		this.refresh();
 
-		await Game.asyncPause(1000);
+		await Game.asyncPause(1500);
 		if (this._activeTeam) {
 			await this._activeTeam.turnStartEffects();
 		}
-
 		this.setDone();
+
+		await this._processDialog(this._turn, (this._phase == BattleScene.EnemyPhase));
 
 		if (this._autoPhase) {
 			this._aiProcessTurn();
@@ -616,7 +692,21 @@ class BattleScene extends Scene {
 				await Game.asyncPause(500);
 			}
 		}
-		return;
+	}
+
+	async _processDialog(turn, enemyPhase) {
+		return new Promise(resolve => {
+			for (var i = 0; i < this._dialogData.length; i++) {
+				var data = this._dialogData[i];
+				if (data.turn == turn && !data.enemy == !enemyPhase) {
+					this._showDialog(data.message, () => {
+						resolve();
+					});
+					return;
+				}
+			}
+			resolve();
+		});
 	}
 	//#endregion action processing
 
@@ -973,9 +1063,8 @@ class MapScene extends Scene {
 
 	//#region ui setup
 	_createExploreButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'explore-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'explore-button');
 		button.onclick = () => {
 			this._exploreNode(this._node);
 		};
@@ -987,9 +1076,8 @@ class MapScene extends Scene {
 		return textBox;
 	}
 	_createMenuButton() {
-		var button = document.createElement("button");
-		button.classList.add('nav-button', 'menu-button');
-		button.type = "button";
+		var button = document.createElement('div');
+		button.classList.add('button', 'nav-button', 'menu-button');
 		button.onclick = () => {
 			this._openMapMenu();
 		};
@@ -1045,7 +1133,7 @@ class MapScene extends Scene {
 	_quitToTitle () {
 		this._openPrompt("Return to title?", result => {
 			if (result == 1) {
-				// TODO: Quit to title screen
+				Game.setScene(new TitleScene());
 			} else {
 				this._openMapMenu();
 			}
@@ -1187,7 +1275,6 @@ class MapScene extends Scene {
 	}
 	//#endregion
 }
-
 
 /***************************************************
  Map Scene -> Map Event

@@ -7,7 +7,6 @@ class SceneModel {
 		this.filename = filename;
 	}
 
-	// TODO: Generically applicable file-loading routine
 	static async load(folder, filename) {
 		var fullpath = `data/${folder}/${filename}.json`;
 		Game.showLoading();
@@ -77,25 +76,33 @@ class BattleSceneModel extends SceneModel {
 		this.width = Math.max(Math.min(data?.width || 8, 10), 1);
 		this.height = Math.max(Math.min(data?.height || 8, 10), 1);
 
-		// z-level map
-		this.z = data?.z || [];
+		// z, ground type, decoration type
+		this.map = data?.map || [];
+		for (var y = 0; y < this.map.length; y++) {
+			this.map[y] = this.map[y].map(attr => {
+				attr = attr.split("-");
+				var z = parseInt(attr[0]);
+				var ground = Square.parseGround(attr[1]);
+				var decoration = Square.parseDecoration(attr[2]);
+				return {
+					z: z,
+					ground: ground,
+					decoration: decoration
+				};
+			});
+		}
 
 		// x, y
 		this.deployment = data?.deployment || [];
 
-		// x, y, type*
-		this.terrain = data?.terrain?.map(square => {
-			square.type = Square.parseTerrain(square.type);
-			return square;
-		}) || [];
-
-		// x, y, turn, type*, enemy?, ally?
+		// x, y, turn, type*, ally?
 		this.units = data?.units?.map(unit => {
 			unit.type = UnitPiece.parseUnitType(unit.type);
 			return unit;
 		}) || [];
 
-		// TODO: Tileset?
+		// mid-battle text cut-ins
+		this.dialog = data?.dialog || [];
 	}
 
 	static async load(filename) {

@@ -155,9 +155,11 @@ class UnitPiece extends Piece {
 	}
 
 	_addDirectionEl() {
-		this._directionEl = document.createElement('div');
-		this._directionEl.classList.add('facing-arrow');
-		this.el.appendChild(this._directionEl);
+		if (this.hasDirection) {
+			this._directionEl = document.createElement('div');
+			this._directionEl.classList.add('facing-arrow');
+			this.el.appendChild(this._directionEl);
+		}
 	}
 
 	_addGhostEl() {
@@ -236,6 +238,10 @@ class UnitPiece extends Piece {
 	}
 
 	//#region attributes
+	get hasDirection() {
+		return true;
+	}
+	
 	get direction() {
 		return this._direction;
 	}
@@ -344,7 +350,7 @@ class UnitPiece extends Piece {
 	}
 
 	get criticalImmune () {
-		return this.equipment.some(equip => equip.criticalImmune);
+		return !this.hasDirection || this.equipment.some(equip => equip.criticalImmune);
 	}
 
 	get shiftable() {
@@ -406,7 +412,7 @@ class UnitPiece extends Piece {
 		if (this.getStatus(UnitPiece.Regenerate) > 0) {
 			var vfx = new SpriteEffect(this.square, 500, 'sprite-effect', 'heal-effect');
 			this.parent.el.appendChild(vfx.el);
-			this.heal(this.getStatus(UnitPiece.Regenerate), { noCure: true });
+			this.heal(this.getStatus(UnitPiece.Regenerate));
 		}
 	}
 	_applyDelayedBuff() {
@@ -446,10 +452,10 @@ class UnitPiece extends Piece {
 	//#endregion refresh
 
 	//#region effects
-	takeDamage(power, sourceSquare, props) {
+	takeDamage(power, damageDirection, props) {
 
 		// check for critical (by default, back attacks are critical)
-		var criticalHit = !this.criticalImmune && (props?.critical || this.isBehind(sourceSquare));
+		var criticalHit = !this.criticalImmune && (props?.critical || this.sameDirection(damageDirection));
 		if (criticalHit) {
 			var criticalBonus = props?.criticalBonus ?? 1;
 			power += criticalBonus;
@@ -479,7 +485,7 @@ class UnitPiece extends Piece {
 				this.results.critical ||= criticalHit;
 			}
 		} else {
-			this.showPopup("0");
+			this.showPopup("0", 'blocked');
 			if (this.results) {
 				this.results.blocked = true;
 			}
@@ -488,16 +494,13 @@ class UnitPiece extends Piece {
 		this.refresh();
 		return power;
 	}
-	heal(power, props) {
+	heal(power, _props) {
 		if (power > 0) {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
 			this.showPopup(`+${power}`, 'heal');
 			if (this.results) {
 				this.results.heal += power;
-			}
-			if (!props?.noCure) {
-				this._status[UnitPiece.Burn] = 0;
 			}
 		}
 
@@ -563,14 +566,13 @@ class UnitPiece extends Piece {
 				if (effect == UnitPiece.Regenerate && this.getStatus(UnitPiece.Burn)) {
 					this._status[UnitPiece.Burn] = 0;
 					break;
-				} if (effect == UnitPiece.Burn && this.getStatus(UnitPiece.Regenerate)) {
+				}
+				if (effect == UnitPiece.Burn && this.getStatus(UnitPiece.Regenerate)) {
 					this._status[UnitPiece.Regenerate] = 0;
 					break;
 				}
-			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate)
-				if (value > this.getStatus(effect)) {
-					this._status[effect] = value;
-				}
+			case UnitPiece.Charge: case UnitPiece.Accelerate: // positive-only statuses (includes regenerate and burn)
+				this._status[effect] = value + this.getStatus(effect);
 				break;
 			
 			case UnitPiece.Evade: case UnitPiece.Anchor: // non-scaling effects
@@ -578,12 +580,12 @@ class UnitPiece extends Piece {
 				break;
 
 			default: // standard buffs and debuffs
-				if (value > 0) {
-					if (this.getStatus(effect) < 0) this._status[effect] = 0;
-					else if (value > this.getStatus(effect)) this._status[effect] = value;
-				} else if (value < 0) {
-					if (this.getStatus(effect) > 0) this._status[effect] = 0;
-					else if (value < this.getStatus(effect)) this._status[effect] = value;
+				if (value > 0 && this.getStatus(effect) < 0) {
+					this._status[effect] = 0;
+				} else if (value < 0 && this.getStatus(effect) > 0) {
+					this._status[effect] = 0;
+				} else {
+					this._status[effect] = value + this.getStatus(effect);
 				}
 				break;
 		}
@@ -637,7 +639,7 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 	get canFace() {
-		return this.alive && this.myTurn;
+		return this.alive && this.myTurn && this.hasDirection;
 	}
 
 	async updateStatusTurnStart() {
@@ -745,7 +747,7 @@ class UnitPiece extends Piece {
 		return UnitPiece.getDirection(this.square, from);
 	}
 	faceDirection(direction) {
-		if (!direction) return;
+		if (!direction || !this.hasDirection) return;
 		this._direction = direction;
 		this.el.style.setProperty('--x-scale', direction[0]);
 		this.el.style.setProperty('--y-frame', direction[1]);
@@ -756,10 +758,21 @@ class UnitPiece extends Piece {
 
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
+	sameDirection(direction) {
+		return (this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
+	}
+	oppositeDirection(direction) {
+		return (this.direction[0] != direction[0]) && (this.direction[1] != direction[1]);
+	}
 	isBehind(square) {
 		if (!square || this.square == square) return false;
 		var dirTo = this.getDirectionFrom(square);
-		return (dirTo[0] == this.direction[0] && dirTo[1] == this.direction[1]);
+		return this.sameDirection(dirTo);
+	}
+	isAhead(square) {
+		if (!square || this.square == square) return false;
+		var dirTo = this.getDirectionFrom(square);
+		return this.oppositeDirection(dirTo);
 	}
 	//#endregion facing
 
@@ -1032,10 +1045,8 @@ class ObjectPiece extends UnitPiece {
 
 	_setSelectable() { } // Prevent it from highlighting
 	_setUnselectable() { } // Prevent it from graying out
-	_addDirectionEl() { } // Don't show a directional arrow
-
-	faceDirection(_direction) { } // can't turn
-	get canFace() {
+	
+	get hasDirection() {
 		return false;
 	}
 
@@ -1044,10 +1055,6 @@ class ObjectPiece extends UnitPiece {
 	}
 
 	get extra() {
-		return true;
-	}
-
-	get criticalImmune() {
 		return true;
 	}
 
@@ -1206,6 +1213,16 @@ class SkillCard extends Piece {
 	//#region text
 	icon(style, content) {
 		return `<div class="icon ${style}">${content || ""}</div>`;
+	}
+	number(value, showPlus) {
+		if (value > 9) value = 0;
+		var content = "";
+		if (value < 0) {
+			content = `<div class="minus"></div>`;
+		} else if (showPlus) {
+			content = `<div class="plus"></div>`;
+		}
+		return `<div class="icon number" style="background-position-x:${-8*Math.abs(value)}px">${content}</div>`;
 	}
 
 	get name() {
@@ -1650,6 +1667,8 @@ class ReactionCard extends SkillCard {
 	}
 	//#endregion triggers
 }
+
+// TODO: Can I use an "occasion" setting instead of a bunch of separate classes for this?
 
 class OnHitReaction extends ReactionCard {
 	canReact(target, _skill, result) {

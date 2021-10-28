@@ -91,8 +91,7 @@ class Board extends Container {
 				this.el.appendChild(square.el);
 			}
 		}
-		this._loadZ(sceneData.z);
-		this._loadTerrain(sceneData.terrain);
+		this._loadMap(sceneData.map);
 
 		this.deployArea = [];
 		this._loadDeployArea(sceneData.deployment);
@@ -115,30 +114,26 @@ class Board extends Container {
 	}
 
 	//#region setup
-	_loadZ(zData) {
-		if (!zData) return;
+	_loadMap(mapData) {
+		if (!mapData) return;
 		for (var y = 0; y < this.h; y++) {
-			if (zData.length <= y) break;
+			if (mapData.length <= y) break;
 			for (var x = 0; x < this.w; x++) {
-				if (zData[y].length <= x) break;
-				this.at(x, y).z = zData[y][x];
-				this.at(x, y).refresh();
+				if (mapData[y].length <= x) break;
+
+				this.at(x, y).z = mapData[y][x].z;
+				this.at(x, y).ground = mapData[y][x].ground;
+				this.at(x, y).decoration = mapData[y][x].decoration;
 			}
 		}
 	}
-	_loadTerrain(terrainData) {
-		if (!terrainData) return;
-		terrainData.forEach(data => {
-			this.at(data.x, data.y).terrain = data.type;
-		});
-	}
+
 	_loadDeployArea(deployData) {
 		if (!deployData) return;
 		deployData.forEach(data => {
 			this._addDeploySquare(this.at(data.x, data.y));
 		});
 	}
-
 	_addDeploySquare(square) {
 		if (!square || square.parent != this) return;
 
@@ -523,8 +518,10 @@ class Square extends Position {
 		this._y = y;
 		this._z = 0;
 		this.piece = null;
-		this.terrain = Square.Flat;
 		this.inRange = false;
+
+		this._ground = Square.None;
+		this._decoration = Square.None;
 
 		this.addSubsprites();
 
@@ -580,7 +577,7 @@ class Square extends Position {
 		return Square.screenZ(this.x, this.y, this.z);
 	}
 	get groundHeight() {
-		return Math.max(this.z*12, 0) + 48;
+		return Math.max(this.z*12, 0) + 36;
 	}
 	get _selfScreenZ() {
 		return Square.screenZ(this.x, this.y, this.z - 12);
@@ -589,6 +586,7 @@ class Square extends Position {
 	refresh() {
 		this.el.style.transform = `translate3d(${this.screenX}px, ${this.screenY}px, ${this._selfScreenZ}px)`;
 		this.spriteEl.style.height = `${this.groundHeight}px`;
+		this.style = [this.ground.style, this.decoration.style];
 	}
 	//#endregion isometric
 
@@ -616,57 +614,73 @@ class Square extends Position {
 	//#endregion utilities
 
 	//#region terrain
-	static get _BlockMove() { return 1; }
-	static get _BlockSight() { return 2; }
-	static get _SlowMove() { return 4; }
+	static get _SlowMove() { return 1; }
+	static get _BlockMove() { return 2; }
+	static get _BlockSight() { return 4; }
 
-	static get Flat() { return 0; }
-	static get Pit() { return Square._BlockMove; }
-	static get Cover() { return Square._BlockSight; }
-	static get Wall() { return Square._BlockMove | Square._BlockSight; }
-	static get Rough() { return Square._SlowMove; }
-
-	static parseTerrain(string) {
-		if (!string) return this.Flat;
+	static get Plain() { return { style: 'tile-cube', terrain: 0 }; }
+	static get Grass() { return { style: 'tile-grass', terrain: 0 }; }
+	static get Water() { return { style: 'tile-water', terrain: Square._SlowMove }; }
+	static get Pit() { return { style: 'tile-pit', terrain: Square._BlocksMove }; }
+	
+	static parseGround(string) {
+		if (!string) return this.None;
 		switch (string.toLowerCase()) {
-			case "hole":
-			case "pit":
+			case "pl":
+				return this.Plain;
+			case "na":
 				return this.Pit;
-			case "bush":
-			case "grass":
-			case "cover":
-				return this.Cover;
-			case "wall":
-				return this.Wall;
-			case "mud":
-			case "rough":
-				return this.Rough;
+			case "gr":
+				return this.Grass;
+			case "wa":
+				return this.Water;
 			default:
-				return this.Flat;
+				return this.None;
 		}
 	}
 
-	get terrain() {
-		return this._terrain;
+	static get Column() { return { style: 'deco-pillar', terrain: Square._BlockMove | Square._BlockSight }; }
+	static get TallGrass() { return { style: 'deco-grass', terrain: Square._BlockSight }; }
+	static get None() { return { style: null, terrain: 0 }; }
+
+	static parseDecoration(string) {
+		if (!string) return this.None;
+		switch (string.toLowerCase()) {
+			case "co":
+				return this.Column;
+			case "tg":
+				return this.TallGrass;
+			default:
+				return this.None;
+		}
 	}
-	set terrain(value) {
-		this._terrain = value;
-		this.el.classList.toggle('wall', this._terrain == Square.Wall);
-		this.el.classList.toggle('pit', this._terrain == Square.Pit);
-		this.el.classList.toggle('cover', this._terrain == Square.Cover);
-		this.el.classList.toggle('rough', this._terrain == Square.Rough);
+
+	get ground() {
+		return this._ground || Square.None;
 	}
+	set ground(value) {
+		this._ground = value || Square.None;
+		this.refresh();
+	}
+
+	get decoration() {
+		return this._decoration || Square.None;
+	}
+	set decoration(value) {
+		this._decoration = value || Square.None;
+		this.refresh();
+	}
+
 	get blocksMove() {
-		return (this.terrain&Square._BlockMove) == Square._BlockMove;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._BlockMove) == Square._BlockMove;
 	}
 	get blocksSight() {
-		return (this.terrain&Square._BlockSight) == Square._BlockSight;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._BlockSight) == Square._BlockSight;
 	}
 	get slowsMove() {
-		return (this.terrain&Square._SlowMove) == Square._SlowMove;
+		return ((this.ground.terrain | this.decoration.terrain) & Square._SlowMove) == Square._SlowMove;
 	}
 	//#endregion terrain
-
 };
 
 /***************************************************
@@ -845,7 +859,7 @@ class UnitInfo extends ElObj {
 			this._lifebar.value = unit.hp;
 			this._lifebar.defenseValue = unit.defense;
 			this._statusList.value = unit._status;
-			this._nameSpan.innerText = unit.characterName;
+			this._nameSpan.innerHTML = `<strong>${unit.characterName}</strong>`;
 			this._tooltip.value = unit.fullDescription;
 		} else {
 			this.style = null;
@@ -854,7 +868,7 @@ class UnitInfo extends ElObj {
 			this._lifebar.value = 0;
 			this._lifebar.defenseValue = 0; 
 			this._statusList.value = null;
-			this._nameSpan.innerText = "";
+			this._nameSpan.innerHTML = "";
 			this._tooltip.value = "";
 		}
 	}
