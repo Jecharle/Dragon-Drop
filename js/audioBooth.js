@@ -1,53 +1,19 @@
 /***************************************************
- Static object that handles sound & music playback
+ Class for playing sound effects
 ***************************************************/
-class AudioBooth {
-	static sfx = {};
-	static bgm = {};
-	static _bgmAudio = null;
+class Sfx {
+	static _sfxLibrary = {};
 
 	static getSfx(path) {
 		if (!path) return null;
 
-		if (!this.sfx[path]) {
-			var newSound = new Audio("../sfx/"+path);
-			this.sfx[path] = new Sfx(newSound);
+		if (!this._sfxLibrary[path]) {
+			var newSound = new Audio(`../sfx/${path}`);
+			this._sfxLibrary[path] = new Sfx(newSound);
 		}
-		return this.sfx[path];
+		return this._sfxLibrary[path];
 	}
 
-	static getBgm(path) {
-		if (!path) return null;
-
-		if (!this._bgmAudio) {
-			this._bgmAudio = new Audio();
-			this._bgmAudio.loop = true;
-		}
-
-		if (!this.bgm[path]) {
-			this.bgm[path] = new Bgm(this._bgmAudio, path);
-		}
-		return this.bgm[path];
-	}
-
-	static stopBgm() {
-		if (this._bgmAudio) {
-			this._bgmAudio.pause();
-		}
-	}
-
-	static refreshBgmVolume() {
-		if (this._bgmAudio) {
-			this._bgmAudio.volume = (SaveData.bgmVolume / 10);
-		}
-	}
-}
-
-/***************************************************
- AudioBooth -> Sfx
- Wrapper for playing sound effects
-***************************************************/
-class Sfx {
 	constructor(audio) {
 		this._audio = audio;
 	}
@@ -60,33 +26,67 @@ class Sfx {
 }
 
 /***************************************************
- AudioBooth -> Bgm
- Wrapper for background music
+ Class for playing background music
 ***************************************************/
 class Bgm {
-	constructor(audio, track) {
-		this._audio = audio;
+	static _bgmLibrary = {};
+	static _audio = null;
+	static _activeTrack = null;
+
+	static getBgm(path) {
+		if (!path) return null;
+
+		if (!this._audio) {
+			this._audio = new Audio();
+			this._audio.loop = true;
+		}
+
+		if (!this._bgmLibrary[path]) {
+			this._bgmLibrary[path] = new Bgm(path);
+		}
+		return this._bgmLibrary[path];
+	}
+
+	constructor(track) {
 		this._track = track;
 		this._pausedAt = 0;
 	}
 
 	play(startPosition) {
-		this._audio.pause();
-		this._audio.volume = (SaveData.bgmVolume / 10);
-		this._audio.src = "../bgm/"+this._track;
-		this._audio.load();
-		this._audio.currentTime = startPosition || 0;
-		this._audio.play();
+		Bgm._audio.volume = (SaveData.bgmVolume / 10);
+		Bgm._audio.src = `../bgm/${this._track}`;
+		Bgm._audio.load();
+		Bgm._audio.currentTime = startPosition || 0;
+		Bgm._audio.play();
+		Bgm._activeTrack = this;
 	}
 
 	stop() {
-		this._audio.pause();
-		this._pausedAt = this._audio.currentTime;
+		Bgm._audio.pause();
+		this._pausedAt = Bgm._audio.currentTime;
 	}
 
 	resume() {
-		if (this._audio.paused) {
+		if (Bgm._audio.paused) {
 			this.play(this._pausedAt);
+		}
+	}
+
+	static stop() {
+		if (this._activeTrack) {
+			this._activeTrack.stop();
+		}
+	}
+
+	static resume() {
+		if (this._activeTrack) {
+			this._activeTrack.resume();
+		}
+	}
+
+	static refreshVolume() {
+		if (this._bgmAudio) {
+			this._bgmAudio.volume = (SaveData.bgmVolume / 10);
 		}
 	}
 }

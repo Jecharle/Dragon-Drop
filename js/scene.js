@@ -204,6 +204,7 @@ class BattleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
+		this._battleBgm = Bgm.getBgm("Stoneworld Battle.mp3");
 	}
 
 	get unsaved() {
@@ -211,6 +212,7 @@ class BattleScene extends Scene {
 	}
 
 	start() {
+		this._battleBgm.play();
 		if (this._board.deployArea.length > 0) {
 			this._deploy();
 		} else {
@@ -542,6 +544,7 @@ class BattleScene extends Scene {
 	}
 
 	_endBattle() {
+		this._battleBgm.stop();
 		Game.setScene(this._lastScene);
 	}
 	//#endregion phases

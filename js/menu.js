@@ -263,7 +263,7 @@ class OptionsMenu extends Menu {
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
 		SaveData.bgmVolume = this._bgmVolumeSlider.value;
-		AudioBooth.refreshBgmVolume();
+		Bgm.refreshVolume();
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
@@ -389,7 +389,7 @@ class DialogBox extends Menu {
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
-		this._textSfx = AudioBooth.getSfx("step1.wav");
+		this._textSfx = Sfx.getSfx("step1.wav");
 
 		this.el.onclick = () => {
 			this._skip();
