@@ -31,7 +31,7 @@ class Sfx {
 class Bgm {
 	static _bgmLibrary = {};
 	static _audio = null;
-	static _activeTrack = null;
+	static _nowPlaying = null;
 
 	static getBgm(path) {
 		if (!path) return null;
@@ -58,7 +58,7 @@ class Bgm {
 		Bgm._audio.load();
 		Bgm._audio.currentTime = startPosition || 0;
 		Bgm._audio.play();
-		Bgm._activeTrack = this;
+		Bgm._nowPlaying = this;
 	}
 
 	stop() {
@@ -72,21 +72,13 @@ class Bgm {
 		}
 	}
 
-	static stop() {
-		if (this._activeTrack) {
-			this._activeTrack.stop();
-		}
-	}
-
-	static resume() {
-		if (this._activeTrack) {
-			this._activeTrack.resume();
-		}
+	static nowPlaying() {
+		return this._nowPlaying;
 	}
 
 	static refreshVolume() {
-		if (this._bgmAudio) {
-			this._bgmAudio.volume = (SaveData.bgmVolume / 10);
+		if (this._audio) {
+			this._audio.volume = (SaveData.bgmVolume / 10);
 		}
 	}
 }
