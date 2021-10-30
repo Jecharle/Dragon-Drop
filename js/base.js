@@ -48,6 +48,10 @@ class ElObj {
 	}
 }
 
+/***************************************************
+ SpriteElObj
+The root class for objects with separate sprites
+***************************************************/
 class SpriteElObj extends ElObj {
 	constructor() {
 		super();
@@ -56,4 +60,62 @@ class SpriteElObj extends ElObj {
 		this.spriteEl.obj = this;
 		this.el.appendChild(this.spriteEl);
 	}
+}
+
+/***************************************************
+ UiElObj
+The root class for objects with buttons and things
+***************************************************/
+class UiElObj extends ElObj {
+
+	// TODO: Basic handling for key input too?
+
+	//#region controls
+	_addButton(text, onclick, ...classList) {
+		var newButton = document.createElement('div');
+		newButton.classList.add("button", ...classList);
+		newButton.innerText = text;
+		newButton.onclick = onclick; // TODO: Put a wrapper around this
+		return newButton;
+	}
+
+	_addCheckbox(id, ...classList) {
+		var newCheckbox = document.createElement('input');
+		newCheckbox.classList.add(...classList);
+		newCheckbox.type = "checkbox";
+		newCheckbox.id = id;
+		return newCheckbox;
+	}
+
+	_addSlider(id, min, max, ...classList) {
+		var newSlider = document.createElement('input');
+		newSlider.classList.add(...classList);
+		newSlider.type = "range";
+		newSlider.min = min;
+		newSlider.max = max;
+		newSlider.id = id;
+		return newSlider;
+	}
+
+	_addLabel(text, control, ...classList) {
+		var newLabel = document.createElement('label');
+		newLabel.classList.add(...classList);
+		newLabel.innerText = text;
+		if (control) newLabel.htmlFor = control.id;
+		return newLabel;
+	}
+
+	_addTitle(text, ...classList) {
+		var newTitle = document.createElement('h1');
+		newTitle.classList.add(...classList);
+		newTitle.innerText = text;
+		return newTitle;
+	}
+
+	_addRow(...classList) {
+		var newRow = document.createElement('div');
+		newRow.classList.add('menu-row', ...classList);
+		return newRow;
+	}
+	//#endregion controls
 }

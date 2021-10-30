@@ -237,7 +237,6 @@ class UnitPiece extends Piece {
 
 	//#region sounds
 	_getSounds() {
-		// TODO: Get distinct sfx for these
 		this._sfxCritical = Sfx.getSfx("critical_damage.wav");
 		this._sfxDamage = Sfx.getSfx("damage.wav");
 		this._sfxBlock = Sfx.getSfx("no_damage.wav");

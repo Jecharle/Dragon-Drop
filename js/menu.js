@@ -3,7 +3,7 @@
  The root class for button-based menus for options,
  title screens, and maybe also dialog
 ***************************************************/
-class Menu extends ElObj {
+class Menu extends UiElObj {
 	constructor(parent) {
 		super();
 		this.parent = parent;
@@ -18,60 +18,11 @@ class Menu extends ElObj {
 	}
 
 	_addAllControls() {
-		this._closeButton = this._addButton("Close", 'close-button');
-		this._closeButton.onclick = () => {
-			this.close(0);
-		}
+		this._closeButton = this._addButton("Close", () => {
+				this.close(0);
+			}, 'close-button');
 		this.el.appendChild(this._closeButton);
 	}
-
-	//#region controls
-	_addButton(text, ...classList) {
-		var newButton = document.createElement('div');
-		newButton.classList.add("button", ...classList);
-		newButton.innerText = text;
-		return newButton;
-	}
-
-	_addCheckbox(id, ...classList) {
-		var newCheckbox = document.createElement('input');
-		newCheckbox.classList.add(...classList);
-		newCheckbox.type = "checkbox";
-		newCheckbox.id = id;
-		return newCheckbox;
-	}
-
-	_addSlider(id, min, max, ...classList) {
-		var newSlider = document.createElement('input');
-		newSlider.classList.add(...classList);
-		newSlider.type = "range";
-		newSlider.min = min;
-		newSlider.max = max;
-		newSlider.id = id;
-		return newSlider;
-	}
-
-	_addLabel(text, control, ...classList) {
-		var newLabel = document.createElement('label');
-		newLabel.classList.add(...classList);
-		newLabel.innerText = text;
-		if (control) newLabel.htmlFor = control.id;
-		return newLabel;
-	}
-
-	_addTitle(text, ...classList) {
-		var newTitle = document.createElement('h1');
-		newTitle.classList.add(...classList);
-		newTitle.innerText = text;
-		return newTitle;
-	}
-
-	_addRow(...classList) {
-		var newRow = document.createElement('div');
-		newRow.classList.add('menu-row', ...classList);
-		return newRow;
-	}
-	//#endregion controls
 
 	//#region open/close
 	open(callback) {
@@ -130,16 +81,14 @@ class YesNoMenu extends Menu {
 
 	_addYesNoRow() {
 		var row = this._addRow('yes-no');
-		this._acceptButton = this._addButton("Yes", 'close-button');
-		this._acceptButton.onclick = () => {
-			this.close(1);
-		}
+		this._acceptButton = this._addButton("Yes", () => {
+				this.close(1);
+			}, 'close-button');
 		row.appendChild(this._acceptButton);
 
-		this._cancelButton = this._addButton("No", 'close-button');
-		this._cancelButton.onclick = () => {
-			this.close(0);
-		}
+		this._cancelButton = this._addButton("No", () => {
+				this.close(0);
+			}, 'close-button');
 		row.appendChild(this._cancelButton);
 		return row;
 	}
@@ -231,17 +180,15 @@ class OptionsMenu extends Menu {
 
 	_addCloseRow() {
 		var row = this._addRow('accept-cancel');
-		this._acceptButton = this._addButton("Accept", 'close-button');
-		this._acceptButton.onclick = () => {
-			this._saveChanges();
-			this.close(1);
-		}
+		this._acceptButton = this._addButton("Accept", () => {
+				this._saveChanges();
+				this.close(1);
+			}, 'close-button');
 		row.appendChild(this._acceptButton);
 
-		this._cancelButton = this._addButton("Cancel", 'close-button');
-		this._cancelButton.onclick = () => {
-			this.close(0);
-		}
+		this._cancelButton = this._addButton("Cancel", () => {
+				this.close(0);
+			}, 'close-button');
 		row.appendChild(this._cancelButton);
 		return row;
 	}
@@ -297,24 +244,21 @@ class BattleMenu extends Menu {
 		this.el.appendChild(this._addTitle("Paused"));
 
 		// unpause
-		this._resumeButton = this._addButton("Resume");
-		this._resumeButton.onclick = () => {
-			this.close(0);
-		};
+		this._resumeButton = this._addButton("Resume", () => {
+				this.close(0);
+			});
 		this.el.appendChild(this._resumeButton);
 
 		// options menu
-		this._optionsButton = this._addButton("Options");
-		this._optionsButton.onclick = () => {
-			this.close(1);
-		};
+		this._optionsButton = this._addButton("Options", () => {
+				this.close(1);
+			});
 		this.el.appendChild(this._optionsButton);
 
 		// quit the battle
-		this._quitButton = this._addButton("Give Up");
-		this._quitButton.onclick = () => {
-			this.close(2);
-		};
+		this._quitButton = this._addButton("Give Up", () => {
+				this.close(2);
+			});
 		this.el.appendChild(this._quitButton);
 	}
 
@@ -344,24 +288,21 @@ class MapMenu extends Menu {
 		this.el.appendChild(this._addTitle("Paused"));
 
 		// unpause
-		this._resumeButton = this._addButton("Resume");
-		this._resumeButton.onclick = () => {
-			this.close(0);
-		};
+		this._resumeButton = this._addButton("Resume", () => {
+				this.close(0);
+			});
 		this.el.appendChild(this._resumeButton);
 
 		// options menu
-		this._optionsButton = this._addButton("Options");
-		this._optionsButton.onclick = () => {
-			this.close(1);
-		};
+		this._optionsButton = this._addButton("Options", () => {
+				this.close(1);
+			});
 		this.el.appendChild(this._optionsButton);
 
 		// quit to title
-		this._quitButton = this._addButton("Return to title");
-		this._quitButton.onclick = () => {
-			this.close(2);
-		};
+		this._quitButton = this._addButton("Return to title", () => {
+				this.close(2);
+			});
 		this.el.appendChild(this._quitButton);
 	}
 

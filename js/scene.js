@@ -3,7 +3,7 @@
 The root class that responds to user interaction
 and applies rules to pieces and containers
 ***************************************************/
-class Scene extends ElObj {
+class Scene extends UiElObj {
 	constructor(lastScene) {
 		super();
 		this._lastScene = lastScene || null;
@@ -133,40 +133,27 @@ class TitleScene extends Scene {
 	}
 
 	_createStartButton() {
-		var button = document.createElement('div');
-		button.classList.add('button');
-		button.innerText = "Start Game";
-		button.onclick = () => {
-			// TEMPORARY starting map
-			MapSceneModel.load("testMap").then(mapModel => {
-				Game.setScene(new MapScene(null, mapModel));
+		return this._addButton("Start Game", () => {
+				MapSceneModel.load("testMap").then(mapModel => { // TEMPORARY starting map
+					Game.setScene(new MapScene(null, mapModel));
+				});
 			});
-		};
-		return button;
 	}	
 
 	_createOptionButton() {
-		var button = document.createElement('div');
-		button.classList.add('button');
-		button.innerText = "Options";
-		button.onclick = () => {
-			this._openMenu(this._optionsMenu);
-		};
-		return button;
+		return this._addButton("Options", () => {
+				this._openMenu(this._optionsMenu);
+			});
 	}
 
 	_createClearDataButton() {
-		var button = document.createElement('div');
-		button.classList.add('button');
-		button.innerText = "Clear Data";
-		button.onclick = () => {
-			this._openPrompt("Really clear all data?", result => {
-				if (result == 1) {
-					SaveData.clearAll();
-				}
+		return this._addButton("Clear Data", () => {
+				this._openPrompt("Really clear all data?", result => {
+					if (result == 1) {
+						SaveData.clearAll();
+					}
+				});
 			});
-		};
-		return button;
 	}
 
 	_buildDOM() {
@@ -227,30 +214,20 @@ class BattleScene extends Scene {
 		return turnTitle;
 	}
 	_createMenuButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'menu-button');
-		button.onclick = () => {
-			this._openBattleMenu();
-		};
-		button.innerText = "Menu";
-		return button;
+		return this._addButton("Menu", () => {
+				this._openBattleMenu();
+			}, 'nav-button', 'menu-button');
 	}
 	_createUndoButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'undo-button');
-		button.onclick = () => {
-			this._undoMove();
-			this.refresh();
-		};
-		return button;
+		return this._addButton("Undo Move", () => {
+				this._undoMove();
+				this.refresh();
+			}, 'nav-button', 'undo-button');
 	}
 	_createEndTurnButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'end-turn-button');
-		button.onclick = () => {
+		return this._addButton("End Turn", () => {
 			this._playerEndTurn();
-		};
-		return button;
+		}, 'nav-button', 'end-turn-button');
 	}
 
 	_buildDOM() {
@@ -370,11 +347,6 @@ class BattleScene extends Scene {
 		}
 		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
 
-		if (!this._lastMove && this._canRedeploy) {
-			this._undoButtonEl.innerText = "Redeploy";
-		} else {
-			this._undoButtonEl.innerText = "Undo Move";
-		}
 		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
 		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || (!this._lastMove && !this._canRedeploy));
 	}
@@ -1082,6 +1054,7 @@ class MapScene extends Scene {
 
 	//#region ui setup
 	_createExploreButton() {
+		// TODO: This isn't currently used
 		var button = document.createElement('div');
 		button.classList.add('button', 'nav-button', 'explore-button');
 		button.onclick = () => {
@@ -1095,13 +1068,9 @@ class MapScene extends Scene {
 		return textBox;
 	}
 	_createMenuButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'menu-button');
-		button.onclick = () => {
-			this._openMapMenu();
-		};
-		button.innerText = "Menu";
-		return button;
+		return this._addButton("Menu", () => {
+				this._openMapMenu();
+			}, 'nav-button', 'menu-button');
 	}
 	_buildView() {
 		this._camera.el.appendChild(this._map.el);
