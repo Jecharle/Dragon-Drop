@@ -122,6 +122,8 @@ class UnitPiece extends Piece {
 		this._addDirectionEl();
 		this._addGhostEl();
 
+		this._getSounds();
+
 		this._initialize();
 	}
 
@@ -232,6 +234,17 @@ class UnitPiece extends Piece {
 		this.refresh();
 	}
 	//#endregion setup
+
+	//#region sounds
+	_getSounds() {
+		// TODO: Get distinct sfx for these
+		this._sfxCritical = Sfx.getSfx("step1.wav");
+		this._sfxDamage = Sfx.getSfx("step1.wav");
+		this._sfxBlock = Sfx.getSfx("step1.wav");
+		this._sfxHeal = Sfx.getSfx("step1.wav");
+		this._sfxDie = Sfx.getSfx("step1.wav");
+	}
+	//#endregion sounds
 
 	get equipment() {
 		return this._equipment;
@@ -447,6 +460,7 @@ class UnitPiece extends Piece {
 			this.setParent(null);
 			this.setTeam(null);
 			if (this._partyMember) this._partyMember.alive = false;
+			this._sfxDie.play();
 		}
 	}
 	//#endregion refresh
@@ -475,9 +489,11 @@ class UnitPiece extends Piece {
 			if (criticalHit) {
 				this.addTimedClass(500, 'critical');
 				this.showPopup(`${power}`, 'critical');
+				this._sfxCritical.play();
 			}
 			else {
 				this.showPopup(`${power}`);
+				this._sfxDamage.play();
 			}
 
 			if (this.results) {
@@ -486,6 +502,7 @@ class UnitPiece extends Piece {
 			}
 		} else {
 			this.showPopup("0", 'blocked');
+			this._sfxBlock.play();
 			if (this.results) {
 				this.results.blocked = true;
 			}
@@ -499,6 +516,7 @@ class UnitPiece extends Piece {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
 			this.showPopup(`+${power}`, 'heal');
+			this._sfxHeal.play();
 			if (this.results) {
 				this.results.heal += power;
 			}
@@ -759,7 +777,8 @@ class UnitPiece extends Piece {
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
 	sameDirection(direction) {
-		return (this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
+		return (this.direction && direction &&
+			this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
 	}
 	oppositeDirection(direction) {
 		return (this.direction[0] != direction[0]) && (this.direction[1] != direction[1]);

@@ -389,7 +389,7 @@ class DialogBox extends Menu {
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
-		this._textSfx = Sfx.getSfx("step1.wav");
+		this._sfxText = Sfx.getSfx("step1.wav");
 
 		this.el.onclick = () => {
 			this._skip();
@@ -404,8 +404,6 @@ class DialogBox extends Menu {
 		this._textArea = this._addLabel("", null, 'dialog');
 		this.el.appendChild(this._textArea);
 	}
-
-
 
 	//#region advancing
 	_start(message) {
@@ -431,7 +429,7 @@ class DialogBox extends Menu {
 			this._finish();
 		} else {
 			this._textArea.innerText = this._message.substr(0, this._progress);
-			if (this._progress % 3 == 0) this._textSfx.play();
+			if (this._progress % 3 == 0) this._sfxText.play();
 		}
 	}
 	_finish() {

@@ -5,7 +5,7 @@ class Sfx {
 	static _sfxLibrary = {};
 
 	static getSfx(path) {
-		if (!path) return null;
+		path = path || "/ERROR/";
 
 		if (!this._sfxLibrary[path]) {
 			var newSound = new Audio(`../sfx/${path}`);
