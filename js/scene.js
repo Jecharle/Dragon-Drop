@@ -151,6 +151,7 @@ class TitleScene extends Scene {
 				this._openPrompt("Really clear all data?", result => {
 					if (result == 1) {
 						SaveData.clearAll();
+						SaveData.saveAll();
 					}
 				});
 			});
@@ -226,8 +227,8 @@ class BattleScene extends Scene {
 	}
 	_createEndTurnButton() {
 		return this._addButton("End Turn", () => {
-			this._playerEndTurn();
-		}, 'nav-button', 'end-turn-button');
+				this._playerEndTurn();
+			}, 'nav-button', 'end-turn-button');
 	}
 
 	_buildDOM() {
@@ -348,7 +349,7 @@ class BattleScene extends Scene {
 		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
 
 		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || (!this._lastMove && !this._canRedeploy));
+		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || !this._lastMove);
 	}
 	//#endregion refresh
 
@@ -407,7 +408,6 @@ class BattleScene extends Scene {
 				this._enableGuests(this.playerTeam);
 				this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 				this._showPhaseBanner("Battle Start");
-				this._canRedeploy = true;
 				break;
 
 			case BattleScene.PlayerPhase:
@@ -590,13 +590,10 @@ class BattleScene extends Scene {
 		var unit = this._moveStack.pop();
 		if (unit) {
 			unit.undoMove();
-		} else if (this._canRedeploy) {
-			this._deploy();
 		}
 	}
 	_clearMoves() {
 		this._moveStack = [];
-		this._canRedeploy = false;
 	}
 	get _lastMove() {
 		if (this._moveStack.length > 0) return this._moveStack[this._moveStack.length-1];
