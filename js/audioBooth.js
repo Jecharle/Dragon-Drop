@@ -53,9 +53,12 @@ class Bgm {
 	}
 
 	play(startPosition) {
-		Bgm._audio.volume = (SaveData.bgmVolume / 10);
-		Bgm._audio.src = `../bgm/${this._track}`;
-		Bgm._audio.load();
+		if (Bgm.nowPlaying() != this) {
+			Bgm.nowPlaying()?.stop();
+			Bgm._audio.src = `../bgm/${this._track}`;
+			Bgm._audio.load();
+		}
+		Bgm.refreshVolume();
 		Bgm._audio.currentTime = startPosition || 0;
 		Bgm._audio.play();
 		Bgm._nowPlaying = this;
@@ -67,7 +70,7 @@ class Bgm {
 	}
 
 	resume() {
-		if (Bgm._audio.paused) {
+		if (Bgm.nowPlaying() != this || Bgm._audio.paused) {
 			this.play(this._pausedAt);
 		}
 	}

@@ -75,7 +75,11 @@ class UiElObj extends ElObj {
 		var newButton = document.createElement('div');
 		newButton.classList.add("button", ...classList);
 		newButton.innerText = text;
-		newButton.onclick = onclick; // TODO: Put a wrapper around this
+		var sfxClick = Sfx.getSfx("step1.wav");
+		newButton.onclick = () => {
+			sfxClick.play();
+			onclick();
+		};
 		return newButton;
 	}
 

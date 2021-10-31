@@ -32,6 +32,8 @@ class Scene extends UiElObj {
 		return false;
 	}
 
+	// TODO: Integrate background music into the scene structure?
+
 	start() { }
 	end() { }
 
@@ -192,7 +194,11 @@ class BattleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
-		this._battleBgm = Bgm.getBgm("Stoneworld Battle.mp3");
+		this._bgmBattle = Bgm.getBgm("Stoneworld Battle.mp3"); // TODO: Bgm should be kinda built into scenes, right?
+		this._sfxEndTurn = Sfx.getSfx("step1.wav");
+		this._sfxStartBattle = Sfx.getSfx("step1.wav");
+		this._sfxVictory = Sfx.getSfx("step1.wav");
+		this._sfxDefeat = Sfx.getSfx("step1.wav");
 	}
 
 	get unsaved() {
@@ -200,7 +206,8 @@ class BattleScene extends Scene {
 	}
 
 	start() {
-		this._battleBgm.play();
+		super.start();
+		this._bgmBattle.play();
 		if (this._board.deployArea.length > 0) {
 			this._deploy();
 		} else {
@@ -379,6 +386,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(this.playerTeam);
 		this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 		this._deployList.hide();
+		this._sfxStartBattle.play();
 		this._showPhaseBanner("Battle Start");
 
 		this._deselectSkill();
@@ -399,6 +407,12 @@ class BattleScene extends Scene {
 
 		if (this._phase == BattleScene.EnemyPhase) {
 			await this._addReinforcements();
+		}
+
+		if (this._phase == BattleScene.DeployPhase) {
+			this._sfxStartBattle.play();
+		} else {
+			this._sfxEndTurn.play();
 		}
 
 		switch (this._phase) {
@@ -495,6 +509,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Victory!");
+		this._sfxVictory.play();
 	}
 	_lose() {
 		if (this._lastScene) this._lastScene.sendData({ complete: false });
@@ -503,6 +518,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Defeat");
+		this._sfxDefeat.play();
 	}
 
 	_showPhaseBanner(text) {
@@ -516,7 +532,7 @@ class BattleScene extends Scene {
 	}
 
 	_endBattle() {
-		this._battleBgm.stop();
+		this._bgmBattle.stop();
 		Game.setScene(this._lastScene);
 	}
 	//#endregion phases
