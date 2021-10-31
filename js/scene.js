@@ -34,19 +34,12 @@ class Scene extends UiElObj {
 		return false;
 	}
 
-	start() { this._applyBgm(); }
+	start() { Bgm.play(this._bgm); }
 	end() { }
 
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
-	_resume() { this._paused = false; this._applyBgm(); }
-
-	_applyBgm() {
-		if (Bgm.nowPlaying() != this._bgm) {
-			Bgm.nowPlaying()?.stop();
-			this._bgm?.play();
-		}
-	}
+	_resume() { this._paused = false; Bgm.play(this._bgm); }
 	
 	//#region menus
 	_openMenu(menu, callback) {
@@ -206,7 +199,7 @@ class BattleScene extends Scene {
 		this._sfxVictory = Sfx.getSfx("step1.wav");
 		this._sfxDefeat = Sfx.getSfx("step1.wav");
 
-		this._bgm = Bgm.getBgm("Stoneworld Battle.mp3");
+		this._bgm = "Stoneworld Battle.mp3";
 	}
 
 	get unsaved() {

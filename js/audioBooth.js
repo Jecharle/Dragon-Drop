@@ -29,54 +29,42 @@ class Sfx {
  Class for playing background music
 ***************************************************/
 class Bgm {
-	static _bgmLibrary = {};
 	static _audio = null;
-	static _nowPlaying = null;
+	static _path = null;
 
-	static getBgm(path) {
-		if (!path) return null;
-
+	static play(path, startTime) {
 		if (!this._audio) {
 			this._audio = new Audio();
 			this._audio.loop = true;
 		}
 
-		if (!this._bgmLibrary[path]) {
-			this._bgmLibrary[path] = new Bgm(path);
-		}
-		return this._bgmLibrary[path];
+		this.refreshVolume();
+
+		if (!path) {
+			this._path = "";
+			this._audio.pause();
+		} else if (path != this._path || this._audio.paused) {
+			this._path = path;
+			this._audio.src = `../bgm/${path}`;
+			this._audio.load();
+			this._audio.play();
+			if (startTime > 0) this._audio.currentTime = startTime;
+		}	
 	}
 
-	constructor(track) {
-		this._track = track;
-		this._pausedAt = 0;
+	static stop() {
+		this._audio?.pause();
+		return this._audio?.currentTime || 0;
 	}
 
-	play(startPosition) {
-		if (Bgm.nowPlaying() != this) {
-			Bgm.nowPlaying()?.stop();
-			Bgm._audio.src = `../bgm/${this._track}`;
-			Bgm._audio.load();
-		}
-		Bgm.refreshVolume();
-		Bgm._audio.currentTime = startPosition || 0;
-		Bgm._audio.play();
-		Bgm._nowPlaying = this;
-	}
-
-	stop() {
-		Bgm._audio.pause();
-		this._pausedAt = Bgm._audio.currentTime;
-	}
-
-	resume() {
-		if (Bgm.nowPlaying() != this || Bgm._audio.paused) {
-			this.play(this._pausedAt);
+	static resume() {
+		if (this._audio?.paused) {
+			this._audio?.play();
 		}
 	}
 
 	static nowPlaying() {
-		return this._nowPlaying;
+		return this._path;
 	}
 
 	static refreshVolume() {
