@@ -18,6 +18,8 @@ class Scene extends UiElObj {
 		this._dialogBox = new DialogBox(this);
 		this.el.appendChild(this._dialogBox.el);
 
+		this._bgm = null;
+
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
 			this.rightClick();
@@ -32,15 +34,20 @@ class Scene extends UiElObj {
 		return false;
 	}
 
-	// TODO: Integrate background music into the scene structure?
-
-	start() { }
+	start() { this._applyBgm(); }
 	end() { }
 
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
-	_resume() { this._paused = false; }
+	_resume() { this._paused = false; this._applyBgm(); }
 
+	_applyBgm() {
+		if (Bgm.nowPlaying() != this._bgm) {
+			Bgm.nowPlaying()?.stop();
+			this._bgm?.play();
+		}
+	}
+	
 	//#region menus
 	_openMenu(menu, callback) {
 		if (!menu || this.busy) return;
@@ -194,11 +201,12 @@ class BattleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
-		this._bgmBattle = Bgm.getBgm("Stoneworld Battle.mp3"); // TODO: Bgm should be kinda built into scenes, right?
 		this._sfxEndTurn = Sfx.getSfx("step1.wav");
 		this._sfxStartBattle = Sfx.getSfx("step1.wav");
 		this._sfxVictory = Sfx.getSfx("step1.wav");
 		this._sfxDefeat = Sfx.getSfx("step1.wav");
+
+		this._bgm = Bgm.getBgm("Stoneworld Battle.mp3");
 	}
 
 	get unsaved() {
@@ -207,7 +215,6 @@ class BattleScene extends Scene {
 
 	start() {
 		super.start();
-		this._bgmBattle.play();
 		if (this._board.deployArea.length > 0) {
 			this._deploy();
 		} else {
@@ -532,7 +539,6 @@ class BattleScene extends Scene {
 	}
 
 	_endBattle() {
-		this._bgmBattle.stop();
 		Game.setScene(this._lastScene);
 	}
 	//#endregion phases
