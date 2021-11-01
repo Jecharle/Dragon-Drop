@@ -3,8 +3,10 @@
  Load and store data from external files
 ***************************************************/
 class SceneModel {
-	constructor(filename) {
+	constructor(data, filename) {
 		this.filename = filename;
+
+		this.bgm = data?.bgm || null;
 	}
 
 	static async load(folder, filename) {
@@ -33,7 +35,7 @@ class SceneModel {
 ***************************************************/
 class MapSceneModel extends SceneModel {
 	constructor(data, filename) {
-		super(filename);
+		super(data, filename);
 
 		this.width = data?.width || 0;
 		this.height = data?.height || 0;
@@ -66,9 +68,7 @@ class MapSceneModel extends SceneModel {
 ***************************************************/
 class BattleSceneModel extends SceneModel {
 	constructor(data, filename) {
-		super(filename);
-
-		this.bgm = data?.bgm || null;
+		super(data, filename);
 
 		this.maxTurns = data?.maxTurns || 0;
 		this.minTurns = data?.minTurns || 0;

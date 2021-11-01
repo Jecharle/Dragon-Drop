@@ -125,6 +125,9 @@ class TitleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
+
+		this._bgm = "Babylon.mp3";
+		// TODO: Can't play sound until the user's clicked something, figure out how to best wait for that
 	}
 
 	_createTitle() {
@@ -1048,9 +1051,12 @@ class MapScene extends Scene {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
 		this._camera.setViewSize(Game.width, Game.height);
+
+		this._bgm = mapData.bgm || "";
 	}
 
 	start() {
+		super.start();
 		this._camera.focus(this._piece.node);
 
 		if (this.paused) {
