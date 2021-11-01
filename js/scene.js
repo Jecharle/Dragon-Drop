@@ -199,7 +199,7 @@ class BattleScene extends Scene {
 		this._sfxVictory = Sfx.getSfx("step1.wav");
 		this._sfxDefeat = Sfx.getSfx("step1.wav");
 
-		this._bgm = "Stoneworld Battle.mp3";
+		this._bgm = sceneData.bgm || "Stoneworld Battle.mp3";
 	}
 
 	get unsaved() {

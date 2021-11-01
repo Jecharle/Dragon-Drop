@@ -68,6 +68,8 @@ class BattleSceneModel extends SceneModel {
 	constructor(data, filename) {
 		super(filename);
 
+		this.bgm = data?.bgm || null;
+
 		this.maxTurns = data?.maxTurns || 0;
 		this.minTurns = data?.minTurns || 0;
 		this.defaultVictory = data?.defaultVictory || false;
