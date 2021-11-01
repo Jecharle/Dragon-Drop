@@ -1208,6 +1208,8 @@ class SkillCard extends Piece {
 		this._defaultStats();
 		this._stats();
 
+		this._loadSfx();
+
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
 
@@ -1227,6 +1229,10 @@ class SkillCard extends Piece {
 	get type() {
 		return Piece.Skill;
 	}
+
+	//#region sound
+	_loadSfx() { }
+	//#endregion sound
 
 	//#region text
 	icon(style, content) {
