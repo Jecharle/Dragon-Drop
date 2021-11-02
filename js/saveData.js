@@ -83,16 +83,19 @@ class SaveData {
 		if (textData) {
 			this.storage.setItem(attribute, textData);
 		} else {
-			this._clearAttribute(attribute);
+			this.storage.removeItem(attribute);
 		}
 	}
 	static _loadAttribute(attribute) {
 		var textData = this.storage.getItem(attribute);
 		if (textData) {
 			this[attribute] = JSON.parse(textData);
+		} else {
+			this[attribute] = {};
 		}
 	}
 	static _clearAttribute(attribute) {
+		this[attribute] = {};
 		this.storage.removeItem(attribute);
 	}
 
@@ -111,6 +114,7 @@ class SaveData {
 	 */
 	static clearAll() {
 		this.storage.clear();
+		this.loadAll();
 	}
 
 	static loadMap() {

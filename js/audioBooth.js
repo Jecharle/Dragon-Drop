@@ -46,8 +46,8 @@ class Bgm {
 		} else if (path != this._path || this._audio.paused) {
 			this._path = path;
 			this._audio.src = `../bgm/${path}`;
+			this._audio.autoplay = true;
 			this._audio.load();
-			this._audio.play();
 			if (startTime > 0) this._audio.currentTime = startTime;
 		}	
 	}

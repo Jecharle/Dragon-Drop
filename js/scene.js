@@ -156,7 +156,7 @@ class TitleScene extends Scene {
 				this._openPrompt("Really clear all data?", result => {
 					if (result == 1) {
 						SaveData.clearAll();
-						SaveData.saveAll();
+						Bgm.refreshVolume();
 					}
 				});
 			});
