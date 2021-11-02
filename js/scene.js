@@ -126,8 +126,7 @@ class TitleScene extends Scene {
 
 		this._buildDOM();
 
-		this._bgm = "Babylon.mp3";
-		// TODO: Can't play sound until the user's clicked something, figure out how to best wait for that
+		this._bgm = "";
 	}
 
 	_createTitle() {
