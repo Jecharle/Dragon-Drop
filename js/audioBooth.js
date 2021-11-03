@@ -32,10 +32,9 @@ class Bgm {
 	static _audio = null;
 	static _path = null;
 
-	static play(path, startTime) {
+	static play(path, startTime, playOnce) {
 		if (!this._audio) {
 			this._audio = new Audio();
-			this._audio.loop = true;
 		}
 
 		this.refreshVolume();
@@ -47,6 +46,7 @@ class Bgm {
 			this._path = path;
 			this._audio.src = `../bgm/${path}`;
 			this._audio.autoplay = true;
+			this._audio.loop = !playOnce;
 			this._audio.load();
 			if (startTime > 0) this._audio.currentTime = startTime;
 		}	
