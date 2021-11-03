@@ -196,9 +196,9 @@ class BattleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
-		this._sfxEndTurn = Sfx.getSfx("step1.wav");
-		this._sfxStartBattle = Sfx.getSfx("step1.wav");
-		this._sfxVictory = Sfx.getSfx("step1.wav");
+		this._sfxEndTurn = Sfx.getSfx("crunchy_up.wav");
+		this._sfxStartBattle = Sfx.getSfx("crunchy_up.wav");
+		this._sfxVictory = Sfx.getSfx("step1.wav"); // TODO: Sounds for these two
 		this._sfxDefeat = Sfx.getSfx("step1.wav");
 
 		this._bgm = sceneData.bgm || "Stoneworld Battle.mp3";
@@ -511,6 +511,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Victory!");
+		Bgm.stop();
 		this._sfxVictory.play();
 	}
 	_lose() {
@@ -520,6 +521,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Defeat");
+		Bgm.stop();
 		this._sfxDefeat.play();
 	}
 
