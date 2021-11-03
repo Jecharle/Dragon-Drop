@@ -618,13 +618,14 @@ class Square extends Position {
 	static get _BlockMove() { return 2; }
 	static get _BlockSight() { return 4; }
 
+	static get NoGround() { return { style: null, terrain: Square._BlockMove }; }
 	static get Plain() { return { style: 'tile-cube', terrain: 0 }; }
 	static get Grass() { return { style: 'tile-grass', terrain: 0 }; }
 	static get Water() { return { style: 'tile-water', terrain: Square._SlowMove }; }
-	static get Pit() { return { style: 'tile-pit', terrain: Square._BlocksMove }; }
+	static get Pit() { return { style: 'tile-pit', terrain: Square._BlockMove }; }
 	
 	static parseGround(string) {
-		if (!string) return this.None;
+		if (!string) return this.NoGround;
 		switch (string.toLowerCase()) {
 			case "pl":
 				return this.Plain;
@@ -635,23 +636,23 @@ class Square extends Position {
 			case "wa":
 				return this.Water;
 			default:
-				return this.None;
+				return this.NoGround;
 		}
 	}
 
+	static get NoDecoration() { return { style: null, terrain: 0 }; }
 	static get Column() { return { style: 'deco-pillar', terrain: Square._BlockMove | Square._BlockSight }; }
 	static get TallGrass() { return { style: 'deco-grass', terrain: Square._BlockSight }; }
-	static get None() { return { style: null, terrain: 0 }; }
 
 	static parseDecoration(string) {
-		if (!string) return this.None;
+		if (!string) return this.NoDecoration;
 		switch (string.toLowerCase()) {
 			case "co":
 				return this.Column;
 			case "tg":
 				return this.TallGrass;
 			default:
-				return this.None;
+				return this.NoDecoration;
 		}
 	}
 
