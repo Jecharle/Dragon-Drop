@@ -736,7 +736,7 @@ input[type="range"]::-ms-thumb {
 				content: "Cover";
 			}
 		.tile-water>.sprite {
-			border-image-source: url(../img/tilesets/testWater.png);
+			border-image-source: url(../img/tilesets/testWater.gif);
 		}
 			.tile-water:hover::before {
 				content: "Rough terrain";

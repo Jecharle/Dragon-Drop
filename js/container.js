@@ -520,8 +520,8 @@ class Square extends Position {
 		this.piece = null;
 		this.inRange = false;
 
-		this._ground = Square.None;
-		this._decoration = Square.None;
+		this._ground = Square.NoGround;
+		this._decoration = Square.NoDecoration;
 
 		this.addSubsprites();
 
