@@ -196,11 +196,6 @@ class BattleScene extends Scene {
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
-		this._sfxEndTurn = Sfx.getSfx("crunchy_up.wav");
-		this._sfxStartBattle = Sfx.getSfx("crunchy_up.wav");
-		this._bgmVictory = "News Theme.mp3"
-		this._bgmDefeat = "Der Kleber Sting.mp3"
-
 		this._bgm = sceneData.bgm || "Stoneworld Battle.mp3";
 	}
 
@@ -215,6 +210,17 @@ class BattleScene extends Scene {
 		} else {
 			this._skipDeploy();
 		}
+	}
+
+	_getSounds() {
+		super._getSounds();
+
+		this._sfxEndTurn = Sfx.getSfx("crunchy_up.wav");
+		this._sfxStartBattle = this._sfxEndTurn;
+		this._sfxMove = Sfx.getSfx("steps.wav");
+
+		this._bgmVictory = "News Theme.mp3"
+		this._bgmDefeat = "Der Kleber Sting.mp3"
 	}
 
 	//#region ui setup
@@ -594,6 +600,7 @@ class BattleScene extends Scene {
 	}
 	async _moveUnit(unit, square) {
 		this.setBusy();
+		this._sfxMove.play();
 		var success = unit.move(square);
 		this._clearAreas();
 		if (await success) {

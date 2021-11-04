@@ -8,6 +8,7 @@ class ElObj {
 		if (this.elClass) this.el.classList.add(this.elClass);
 		this.el.obj = this;
 		this._style = [];
+		this._getSounds();
 	}
 
 	get elType() {
@@ -46,6 +47,8 @@ class ElObj {
 		this.el.classList.add(...classList);
 		setTimeout(() => this.el.classList.remove(...classList), duration);
 	}
+
+	_getSounds() { }
 }
 
 /***************************************************

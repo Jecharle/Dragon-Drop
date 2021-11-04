@@ -237,6 +237,7 @@ class UnitPiece extends Piece {
 
 	//#region sounds
 	_getSounds() {
+		super._getSounds();
 		this._sfxCritical = Sfx.getSfx("critical_damage.wav");
 		this._sfxDamage = Sfx.getSfx("damage.wav");
 		this._sfxBlock = Sfx.getSfx("no_damage.wav");
@@ -1208,8 +1209,6 @@ class SkillCard extends Piece {
 		this._defaultStats();
 		this._stats();
 
-		this._loadSfx();
-
 		this._cooldownLabel = new CooldownLabel("");
 		this.el.appendChild(this._cooldownLabel.el);
 
@@ -1229,10 +1228,6 @@ class SkillCard extends Piece {
 	get type() {
 		return Piece.Skill;
 	}
-
-	//#region sound
-	_loadSfx() { }
-	//#endregion sound
 
 	//#region text
 	icon(style, content) {
