@@ -11,6 +11,25 @@ p {
 	margin-block: 0.25em;
 }
 
+/*#region common styles*/
+.selectable,.viewable {
+	cursor: pointer;
+}
+	.selectable.draggable,.viewable.draggable {
+		cursor: all-scroll;
+	}
+.unselectable>.sprite {
+	filter: grayscale(100%);
+}
+
+.intro {
+	animation: fade-out 0.5s reverse backwards;
+}
+.outro {
+	animation: fade-out 0.5s forwards;
+}
+/*#endregion common styles*/
+
 /*#region input element styles*/
 input {
 	font: 16px pixelFont;
@@ -95,25 +114,6 @@ input[type="range"]::-ms-thumb {
 }
 
 /*#endregion input element styles*/
-
-/*#region common styles*/
-.selectable,.viewable {
-	cursor: pointer;
-}
-	.selectable.draggable,.viewable.draggable {
-		cursor: all-scroll;
-	}
-.unselectable>.sprite {
-	filter: grayscale(100%);
-}
-
-.intro {
-	animation: fade-out 0.5s reverse backwards;
-}
-.outro {
-	animation: fade-out 0.5s forwards;
-}
-/*#endregion common styles*/
 
 /*#region game window*/
 .game-window {
@@ -929,6 +929,32 @@ input[type="range"]::-ms-thumb {
 	}
 
 	/*#region unit status*/
+	.unit.ally::before {
+		content: "";
+		visibility: hidden;
+		width: 7px;
+		height: 7px;
+		position: absolute;
+		top: 0;
+		background-image: url("../img/system/action.png");
+		background-position: 0 0;
+		background-repeat: no-repeat;
+		pointer-events: none;
+		transform: translateZ(99px);
+	}
+	.unit.ally.selectable::before {
+		visibility: visible;
+		/* Make it blink? */
+	}
+	.unit.ally.unselectable::before {
+		visibility: visible;
+		background-position-y: -7px;
+	}
+	.unit:hover::before, .hp-change.unit::before, .in-range.unit::before, .in-area.unit::before {
+		top: -7px;
+	}
+	/* TODO: Don't show it in the deploy dock */
+
 	.unit .lifebar {
 		visibility: hidden;
 		pointer-events: none;
