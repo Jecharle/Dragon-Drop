@@ -344,13 +344,19 @@ class DialogBox extends Menu {
 		
 		this._textArea = this._addLabel("", null, 'dialog');
 		this.el.appendChild(this._textArea);
+
+		this._nametag = this._addLabel("", this._textArea, 'nametag');
+		this.el.appendChild(this._nametag);
 	}
 
 	//#region advancing
 	_start(message) {
 		var input = message.split("|");
 		
-		if (input.length > 1) this.style = input[0].split(" ");
+		if (input.length > 1) {
+			this.style = input[0].split(" ");
+			this._nametag.innerText = this.style; // TODO: Get name (and maybe style?) from somewhere else
+		}
 
 		this._progress = 0;
 		this._message = input.length > 0 ? input[input.length-1] : "";

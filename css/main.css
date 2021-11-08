@@ -236,7 +236,7 @@ input[type="range"]::-ms-thumb {
 	border: 1px solid black;
 	background-color: white;
 	color: black;
-	padding: 1em;
+	padding: 0.5em;
 }
 	.done .dialog::after {
 		content: 'V';
@@ -244,6 +244,18 @@ input[type="range"]::-ms-thumb {
 		right: 2px;
 		bottom: 0;
 	}
+.nametag {
+	position: absolute;
+	top: 20%;
+	right: 80%;
+	height: max-content;
+	width: max-content;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	padding: 2px;
+}
 .dialog-box .face {
 	position: absolute;
 	top: 20%;
@@ -259,6 +271,10 @@ input[type="range"]::-ms-thumb {
 	left: 80%;
 	right: unset;
 	transform: scaleX(-1);
+}
+.dialog-box.right .nametag {
+	right:unset;
+	left: 80%;
 }
 .dialog-box.right .dialog {
 	left: unset;
