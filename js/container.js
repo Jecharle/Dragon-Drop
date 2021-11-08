@@ -40,6 +40,7 @@ class Container extends ElObj {
 	//#region input events
 	_allowDrop(ev) {
 		ev.preventDefault();
+		ev.dataTransfer.dropEffect = 'move';
 	}
 	_drop(ev) { }
 	_click(ev) { }
@@ -1044,9 +1045,6 @@ class OverworldMap extends Container {
 	//#endregion move range
 
 	//#region input events
-	_allowDrop(ev) {
-		ev.preventDefault();
-	}
 	_drop(ev) {
 		ev.preventDefault();
 		var dragElId = ev.dataTransfer.getData("piece");

@@ -51,8 +51,8 @@ class Piece extends SpriteElObj {
 	//#region refresh
 	refresh() { }
 	_setSelectable(selectable, draggable) {
-		this.el.setAttribute("draggable", selectable || draggable);
-		this.el.classList.toggle('draggable', selectable || draggable);
+		this.el.setAttribute("draggable", draggable);
+		this.el.classList.toggle('draggable', draggable);
 
 		this.el.classList.toggle('selectable', selectable);
 		this.el.classList.toggle('viewable', !selectable);
@@ -448,7 +448,7 @@ class UnitPiece extends Piece {
 		this._refreshSkills();
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
 		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
-			this.myTurn && (this.canMove || this.canFace));
+			this.myTurn && this.canMove); // TEMP can't drag immovable units
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -1471,7 +1471,7 @@ class SkillCard extends Piece {
 	//#region refresh
 	refresh() {
 		var usable = this.canUse();
-		this._setSelectable(usable);
+		this._setSelectable(usable, usable);
 		this._setUnselectable(!usable);
 		this._refreshLabels();
 	}

@@ -932,12 +932,12 @@ input[type="range"]::-ms-thumb {
 	.unit.ally::before {
 		content: "";
 		visibility: hidden;
-		width: 7px;
-		height: 7px;
+		width: 11px;
+		height: 11px;
 		position: absolute;
-		top: 0;
+		top: -2px;
 		background-image: url("../img/system/action.png");
-		background-position: 0 0;
+		background-position: 0 -11px;
 		background-repeat: no-repeat;
 		pointer-events: none;
 		transform: translateZ(99px);
@@ -946,14 +946,18 @@ input[type="range"]::-ms-thumb {
 		visibility: visible;
 		/* Make it blink? */
 	}
+	.unit.ally.selectable.draggable::before {
+		background-position-y: 0;
+	}
 	.unit.ally.unselectable::before {
 		visibility: visible;
-		background-position-y: -7px;
+		background-position-y: -22px;
 	}
+	/* TODO: Add an enemy indicator too...? */
 	.unit:hover::before, .hp-change.unit::before, .in-range.unit::before, .in-area.unit::before {
-		top: -7px;
+		top: -9px;
 	}
-	/* TODO: Don't show it in the deploy dock */
+	/* TODO: Don't show this or the facing arrow in the deploy dock */
 
 	.unit .lifebar {
 		visibility: hidden;
