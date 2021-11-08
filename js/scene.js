@@ -188,7 +188,7 @@ class BattleScene extends Scene {
 		this._deployList.deployLimit = this._maxDeploy;
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
-		this._undoButtonEl = this._createUndoButton();
+		this._waitButtonEl = this._createWaitButton();
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
@@ -234,11 +234,11 @@ class BattleScene extends Scene {
 				this._openBattleMenu();
 			}, 'nav-button', 'menu-button');
 	}
-	_createUndoButton() {
-		return this._addButton("Undo Move", () => {
-				this._undoMove();
+	_createWaitButton() {
+		return this._addButton("Wait", () => {
+				this._waitUnit();
 				this.refresh();
-			}, 'nav-button', 'undo-button');
+			}, 'nav-button', 'wait-button');
 	}
 	_createEndTurnButton() {
 		return this._addButton("End Turn", () => {
@@ -249,7 +249,7 @@ class BattleScene extends Scene {
 	_buildDOM() {
 		this.el.appendChild(this._turnTitleEl);
 		this.el.appendChild(this._menuButtonEl);
-		this.el.appendChild(this._undoButtonEl);
+		this.el.appendChild(this._waitButtonEl);
 		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
@@ -315,6 +315,12 @@ class BattleScene extends Scene {
 		this._refreshArea();
 		this._refreshTargetArea();
 		this._refreshUi();
+
+		// TEMP location
+		if (this._phase == BattleScene.PlayerPhase && this.playerTeam.allDone) {
+			this._endTurn();
+		}
+
 	}
 
 	_refreshArea() {
@@ -363,8 +369,8 @@ class BattleScene extends Scene {
 		}
 		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
 
-		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || !this._lastMove);
+		this._waitButtonEl.style.display = (this._phase == BattleScene.PlayerPhase && this._unit) ? "" : "none";
+		this._waitButtonEl.classList.toggle('disabled', !this._unit || !this._unit.canAct);
 	}
 	//#endregion refresh
 
@@ -594,7 +600,10 @@ class BattleScene extends Scene {
 	}
 	_deselectUnit() {
 		this._deselectTarget();
-		if (this._unit) this._unit.deselect();
+		if (this._unit) {
+			if (this._unit == this._lastMove) this._undoMove();
+			this._unit.deselect();
+		}
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
@@ -684,7 +693,7 @@ class BattleScene extends Scene {
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
-		} else if (this._unit && this._unit == this._lastMove) { // undo move before deselecting
+		} else if (this._unit && this._unit == this._lastMove) {
 			this._undoMove();
 		} else if (this._unit) {
 			this._deselectUnit();
@@ -693,6 +702,11 @@ class BattleScene extends Scene {
 		} else {
 			this._openBattleMenu();
 		}
+	}
+	_waitUnit() {
+		if (!this._unit) return;
+		this._unit.passTurn();
+		this._deselectUnit();
 	}
 
 	async _addReinforcements() {
@@ -921,7 +935,7 @@ class BattleScene extends Scene {
 
 			if (!this._skill) {
 				this._unit.aiSetDirection();
-				this._deselectUnit();
+				this._waitUnit();
 				continue;
 			}
 
@@ -983,6 +997,9 @@ class Team {
 	//#region turn
 	get untouched() {
 		return this.members.every(member => member.dead || (member.canMove && member.canAct));
+	}
+	get allDone() {
+		return !this.members.some(member => !member.dead && member.square && member.myTurn && member.canAct);
 	}
 	get isAuto() {
 		return this._auto;

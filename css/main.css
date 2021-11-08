@@ -289,7 +289,7 @@ input[type="range"]::-ms-thumb {
 	width: 15%;
 	position: absolute;
 }
-	.undo-button {
+	.wait-button {
 		bottom: 12px;
 		left: 12px;
 	}
@@ -945,31 +945,17 @@ input[type="range"]::-ms-thumb {
 	}
 
 	/*#region unit status*/
-	.unit.ally::before {
+	.unit.ally.selectable::before {
 		content: "";
-		visibility: hidden;
 		width: 11px;
 		height: 11px;
 		position: absolute;
 		top: -2px;
 		background-image: url("../img/system/action.png");
-		background-position: 0 -11px;
 		background-repeat: no-repeat;
 		pointer-events: none;
 		transform: translateZ(99px);
 	}
-	.unit.ally.selectable::before {
-		visibility: visible;
-		/* Make it blink? */
-	}
-	.unit.ally.selectable.draggable::before {
-		background-position-y: 0;
-	}
-	.unit.ally.unselectable::before {
-		visibility: visible;
-		background-position-y: -22px;
-	}
-	/* TODO: Add an enemy indicator too...? */
 	.unit:hover::before, .hp-change.unit::before, .in-range.unit::before, .in-area.unit::before {
 		top: -9px;
 	}

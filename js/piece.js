@@ -448,7 +448,7 @@ class UnitPiece extends Piece {
 		this._refreshSkills();
 		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
 		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
-			this.myTurn && this.canMove); // TEMP can't drag immovable units
+			this.myTurn && (this.canMove || this.canFace));
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -729,6 +729,11 @@ class UnitPiece extends Piece {
 			return true;
 		}
 		return false;
+	}
+
+	passTurn() {
+		this.actionUsed = true;
+		this.refresh();
 	}
 
 	canStand(square) {
