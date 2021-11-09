@@ -580,20 +580,16 @@ class BattleScene extends Scene {
 		});
 	}
 	_playerWaitUnit() {
-		if (!this._unit) return;
+		if (!this._unit || !this._unit.canAct || !this._unit.myTurn) return;
 
 		if (!SaveData.confirmEndTurn) {
-			if (SaveData.autoFace) {
-				this._unit.aiSetDirection();
-			}
+			if (SaveData.autoFace) this._unit.aiSetDirection();
 			this._waitUnit();
 			this.refresh();
 		} else {
 			this._openPrompt("Have this unit wait?", result => {
 				if (result) {
-					if (SaveData.autoFace) {
-						this._unit.aiSetDirection();
-					}
+					if (SaveData.autoFace) this._unit.aiSetDirection();
 					this._waitUnit();
 					this.refresh();
 				}
@@ -882,8 +878,6 @@ class BattleScene extends Scene {
 			this._goBack();
 			this.refresh();
 		}
-
-		// TODO: Wait shortcut
 
 		if (key == "Enter") {
 			this._playerEndTurn();

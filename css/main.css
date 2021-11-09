@@ -290,8 +290,8 @@ input[type="range"]::-ms-thumb {
 	position: absolute;
 }
 	.wait-button {
-		bottom: 12px;
-		left: 12px;
+		bottom: 4px;
+		left: 15%;
 	}
 	.end-turn-button {
 		bottom: 2px;
@@ -945,7 +945,7 @@ input[type="range"]::-ms-thumb {
 	}
 
 	/*#region unit status*/
-	.unit.ally.selectable::before {
+	.ally.selectable.unit::before {
 		content: "";
 		width: 11px;
 		height: 11px;
@@ -956,7 +956,7 @@ input[type="range"]::-ms-thumb {
 		pointer-events: none;
 		transform: translateZ(99px);
 	}
-	.unit:hover::before, .hp-change.unit::before, .in-range.unit::before, .in-area.unit::before {
+	.ally.unit:hover::before, .hp-change.ally.unit::before, .in-range.ally.unit::before, .in-area.ally.unit::before {
 		top: -9px;
 	}
 	/* TODO: Don't show this or the facing arrow in the deploy dock */
