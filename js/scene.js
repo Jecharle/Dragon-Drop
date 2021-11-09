@@ -236,8 +236,7 @@ class BattleScene extends Scene {
 	}
 	_createWaitButton() {
 		return this._addButton("Wait", () => {
-				this._waitUnit();
-				this.refresh();
+				this._playerWaitUnit();
 			}, 'nav-button', 'wait-button');
 	}
 	_createEndTurnButton() {
@@ -439,9 +438,6 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.PlayerPhase:
-				if (SaveData.autoFace) {
-					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
-				}
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
@@ -576,12 +572,30 @@ class BattleScene extends Scene {
 		});
 	}
 	_playerEndTurn() {
-		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
-			this._endTurn();
+		var prompt = (this._phase == BattleScene.DeployPhase) ? "Confirm deployment?" : "End Turn?";
+		this._openPrompt(prompt, result => {
+			if (result == 1) {
+				this._endTurn();
+			}
+		});
+	}
+	_playerWaitUnit() {
+		if (!this._unit) return;
+
+		if (!SaveData.confirmEndTurn) {
+			if (SaveData.autoFace) {
+				this._unit.aiSetDirection();
+			}
+			this._waitUnit();
+			this.refresh();
 		} else {
-			this._openPrompt("End Turn?", result => {
-				if (result == 1) {
-					this._endTurn();
+			this._openPrompt("Have this unit wait?", result => {
+				if (result) {
+					if (SaveData.autoFace) {
+						this._unit.aiSetDirection();
+					}
+					this._waitUnit();
+					this.refresh();
 				}
 			});
 		}
@@ -706,6 +720,7 @@ class BattleScene extends Scene {
 	_waitUnit() {
 		if (!this._unit) return;
 		this._unit.passTurn();
+		this._clearMoves();
 		this._deselectUnit();
 	}
 
@@ -863,15 +878,12 @@ class BattleScene extends Scene {
 
 		if (this._autoPhase || this.busy) return;
 
-		if (key == "Escape") {
+		if (key == "Escape" || key == "z" || key == "Z") {
 			this._goBack();
 			this.refresh();
 		}
 
-		if (key == "z" || key == "Z") {
-			this._undoMove();
-			this.refresh();
-		}
+		// TODO: Wait shortcut
 
 		if (key == "Enter") {
 			this._playerEndTurn();
