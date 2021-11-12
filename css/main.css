@@ -344,8 +344,8 @@ input[type="range"]::-ms-thumb {
 		visibility: visible;
 	}
 	.lifebar>.icon {
-		left: calc(100% + 1px);
-		top: -3px;
+		right: var(--icon-w);
+		top: -4px;
 	}
 /*#endregion lifebar*/
 
@@ -384,12 +384,12 @@ input[type="range"]::-ms-thumb {
 .icon .icon {
 	position: absolute;
 	left: 1px;
-	top: 1px;
+	top: -1px;
 }
 .icon .double {
 	background: inherit;
 	position: absolute;
-	left: -1px;
+	left: 1px;
 	top: -2px;
 	z-index: -1;
 	filter: brightness(75%);
