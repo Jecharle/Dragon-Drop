@@ -344,7 +344,7 @@ input[type="range"]::-ms-thumb {
 		visibility: visible;
 	}
 	.lifebar>.icon {
-		right: var(--icon-w);
+		right: calc(var(--icon-w) + 1px);
 		top: -4px;
 	}
 /*#endregion lifebar*/
