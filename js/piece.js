@@ -442,8 +442,8 @@ class UnitPiece extends Piece {
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && !this.canFace && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.canFace), this.myTurn && this.canMove);
+		this._setUnselectable(!this.canMove && !this.canAct && !this.isFacing && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.isFacing), this.myTurn && this.canMove);
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -651,8 +651,8 @@ class UnitPiece extends Piece {
 	get canAct() {
 		return this.alive && !this.actionUsed;
 	}
-	get canFace() {
-		return this.alive && this.hasDirection && !this.facingSet;
+	get isFacing() {
+		return this.alive && this.hasDirection && this._isFacing;
 	}
 
 	async updateStatusTurnStart() {
@@ -692,8 +692,8 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
-		this.facingSet = false;
-		this._directionSelector.hide();
+		this._isFacing = false;
+		if (this.hasDirection) this._directionSelector.hide();
 		this._skills.forEach(skill => skill.endTurn());
 		this._reactions.forEach(skill => skill.endTurn());
 		this.refresh();
@@ -720,7 +720,9 @@ class UnitPiece extends Piece {
 	undoMove() {
 		if (this.homeSquare == null) return false;
 		
+		var oldSquare = this.square;
 		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
+			this.animateMove([oldSquare], UnitPiece.Straight);
 			this.homeSquare = null;
 			this.refresh();
 			return true;
@@ -798,13 +800,14 @@ class UnitPiece extends Piece {
 	}
 
 	startFacing() {
-		if (!this.canFace) return false;
+		if (!this.hasDirection) return false;
+		this._isFacing = true;
 		this._directionSelector.show();
 		return true;
 	}
 	confirmFacing() {
-		if (this.canFace) {
-			this.facingSet = true;
+		if (this.isFacing) {
+			this._isFacing = false;
 			this._directionSelector.hide();
 			this.refresh();
 		}
