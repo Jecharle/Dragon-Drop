@@ -314,12 +314,6 @@ class BattleScene extends Scene {
 		this._refreshArea();
 		this._refreshTargetArea();
 		this._refreshUi();
-
-		// TEMP location
-		if (this._phase == BattleScene.PlayerPhase && this.playerTeam.allDone) {
-			this._endTurn();
-		}
-
 	}
 
 	_refreshArea() {
@@ -682,6 +676,7 @@ class BattleScene extends Scene {
 			this._deselectSkill();
 			this._isBattleOver();
 			this._skillList.setUser(this._unit);
+			this._unit.startFacing();
 		}
 		this.setDone();
 		return success;
@@ -717,7 +712,7 @@ class BattleScene extends Scene {
 		if (!this._unit) return;
 		this._unit.passTurn();
 		this._clearMoves();
-		this._deselectUnit();
+		this._unit.startFacing();
 	}
 
 	async _addReinforcements() {
@@ -759,7 +754,15 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._phase == BattleScene.DeployPhase) {
+		// TODO: This is kind of awkwardly bolted on, integrate the logic more cleanly
+		if (this._unit == piece && piece.myTurn && !piece.canAct && piece.canFace) {
+			piece.confirmFacing();
+			this._deselectUnit();
+
+			if (this.playerTeam.allDone) {
+				this._endTurn();
+			}
+		} else if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (!this._unit || !this._unit.myTurn || dragging) {
 					this._selectUnit(piece);
@@ -895,6 +898,7 @@ class BattleScene extends Scene {
 			}
 		}
 
+		// TODO: Work with this to refine it a bit more
 		if (this._unit && this._unit.canFace) {
 			if (key == "ArrowUp") {
 				this._unit.faceDirection(UnitPiece.North);
@@ -940,8 +944,10 @@ class BattleScene extends Scene {
 			this.refresh();
 
 			if (!this._skill) {
-				this._unit.aiSetDirection();
 				this._waitUnit();
+				this._unit.aiSetDirection();
+				this._unit.confirmFacing();
+				this._deselectUnit();
 				continue;
 			}
 
@@ -952,7 +958,10 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
-			if (this._unit) this._unit.aiSetDirection();
+			if (this._unit) {
+				this._unit.aiSetDirection();
+				this._unit.confirmFacing();
+			}
 			this._deselectUnit();
 			this.refresh();
 
@@ -1002,10 +1011,11 @@ class Team {
 
 	//#region turn
 	get untouched() {
-		return this.members.every(member => member.dead || (member.canMove && member.canAct));
+		return [...this.members].every(member => member.dead || (member.canMove && member.canAct));
 	}
 	get allDone() {
-		return !this.members.some(member => !member.dead && member.square && member.myTurn && member.canAct);
+		return [...this.members].every(member => member.dead || !member.square || !member.myTurn ||
+			!(member.canAct || member.canMove || member.canFace));
 	}
 	get isAuto() {
 		return this._auto;

@@ -971,23 +971,15 @@ input[type="range"]::-ms-thumb {
 	}
 
 	.unit .facing-arrow {
-		visibility: hidden;
-		pointer-events: none;
 		position: absolute;
-		bottom: 0;
-		width: var(--square-w);
-		height: var(--square-h);
+		bottom: calc(var(--square-h)/-2);
+		width: calc(2*var(--square-w));
+		height: calc(2*var(--square-h));
 		background-repeat: no-repeat;
 		background-image: url(../img/system/directions.png);
-		background-position-x: 0;
-		background-position-y: calc(var(--y-frame)*var(--square-h));
-		transform: scaleX(var(--x-scale)) translateZ(99px);
-	}
-	.unit:hover .facing-arrow, .in-range .facing-arrow, .in-area .facing-arrow {
-		visibility: visible;
-	}
-	.enemy .facing-arrow {
-		background-position-x: calc(-1 * var(--square-w));
+		background-position-x: calc((var(--x-scale) - 1)*var(--square-w));
+		background-position-y: calc(2*var(--y-frame)*var(--square-h));
+		transform: translateZ(99px);
 	}
 
 	.unit .status-list {

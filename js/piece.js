@@ -14,7 +14,6 @@ class Piece extends SpriteElObj {
 		this.el.onclick = this._click;
 		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
-		this.el.ondrag = this._hold;
 		this.el.ondragend = this._drop;
 	}
 
@@ -81,9 +80,6 @@ class Piece extends SpriteElObj {
 		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TODO: Fix the scaling, etc?
 		if (Game.scene) Game.scene.pieceEvent(piece, true);
 		piece.el.classList.add('dragging');
-	}
-	_hold(ev) {
-
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
@@ -158,9 +154,8 @@ class UnitPiece extends Piece {
 
 	_addDirectionEl() {
 		if (this.hasDirection) {
-			this._directionEl = document.createElement('div');
-			this._directionEl.classList.add('facing-arrow');
-			this.el.appendChild(this._directionEl);
+			this._directionSelector = new DirectionSelector(this);
+			this.el.appendChild(this._directionSelector.el);
 		}
 	}
 
@@ -226,6 +221,7 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this.facingSet = false;
 		this._direction = [1, 0];
 		
 		this._status = {};
@@ -446,9 +442,8 @@ class UnitPiece extends Piece {
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
-			this.myTurn && (this.canMove || this.canFace));
+		this._setUnselectable(!this.canMove && !this.canAct && !this.canFace && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.canFace), this.myTurn && this.canMove);
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -657,7 +652,7 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 	get canFace() {
-		return this.alive && this.myTurn && this.hasDirection;
+		return this.alive && this.hasDirection && !this.facingSet;
 	}
 
 	async updateStatusTurnStart() {
@@ -697,6 +692,8 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this.facingSet = false;
+		this._directionSelector.hide();
 		this._skills.forEach(skill => skill.endTurn());
 		this._reactions.forEach(skill => skill.endTurn());
 		this.refresh();
@@ -732,6 +729,7 @@ class UnitPiece extends Piece {
 	}
 
 	passTurn() {
+		this.homeSquare = this.homeSquare || this.square;
 		this.actionUsed = true;
 		this.refresh();
 	}
@@ -797,6 +795,19 @@ class UnitPiece extends Piece {
 		if (!square || this.square == square) return false;
 		var dirTo = this.getDirectionFrom(square);
 		return this.oppositeDirection(dirTo);
+	}
+
+	startFacing() {
+		if (!this.canFace) return false;
+		this._directionSelector.show();
+		return true;
+	}
+	confirmFacing() {
+		if (this.canFace) {
+			this.facingSet = true;
+			this._directionSelector.hide();
+			this.refresh();
+		}
 	}
 	//#endregion facing
 
@@ -933,22 +944,6 @@ class UnitPiece extends Piece {
 	}
 	deselect() {
 		this.el.classList.remove('selected');
-	}
-	_hold(ev) {
-		if (!ev.screenX && !ev.screenY) return;
-		
-		var unit = ev.currentTarget.obj;
-		if (unit && unit.canFace && !unit.canMove) {
-			var [x, y] = unit.direction;
-			
-			if (ev.offsetX > 4) x = 1;
-			else if (ev.offsetX < -4) x = -1;
-
-			if (ev.offsetY > 4) y = 0;
-			else if (ev.offsetY < -4) y = -1;
-			
-			unit.faceDirection([x, y]); // TODO: Call a Scene function instead?
-		}
 	}
 	//#endregion input events
 
@@ -1103,6 +1098,42 @@ class SkillResult {
 		this.evade = false;
 		this.swap = false;
 		this.critical = false;
+	}
+}
+
+/***************************************************
+ Special control for selecting a unit's direction
+***************************************************/
+class DirectionSelector extends ElObj {
+	constructor(parent) {
+		super();
+		this.parent = parent;
+		this.el.classList.add('facing-arrow');
+		
+		this.el.onclick = this._click;
+		this.el.onmousemove = this._mouseOver;
+
+		this.hide();
+	}
+
+	show() {
+		this._show();
+	}
+
+	hide() {
+		this._hide();
+	}
+	
+	_mouseOver(ev) {
+		if (!ev.screenX && !ev.screenY) return;
+		var obj = ev.currentTarget.obj;
+		if (obj && obj.parent && obj.parent.hasDirection) {
+			var dx = ev.offsetX - 48;
+			var dy = ev.offsetY - 24;
+			if (Math.abs(dx) > 8 && Math.abs(dy) > 8) {
+				obj.parent.faceDirection([ dx < 0 ? -1 : 1, dy < 0 ? -1 : 0 ]);
+			}
+		}
 	}
 }
 
