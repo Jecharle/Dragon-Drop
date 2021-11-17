@@ -360,7 +360,7 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.display = (this._autoPhase || this._unit) ? "none" : "";
+		this._endTurnButtonEl.style.display = (this._autoPhase || this._unit) ? "none" : "";
 		this._endTurnButtonEl.classList.toggle('disabled', this.playerTeam.size == 0);
 
 		this._waitButtonEl.style.display = (this._phase == BattleScene.PlayerPhase && this._unit) ? "" : "none";
@@ -627,6 +627,7 @@ class BattleScene extends Scene {
 	_undoMove() {
 		var unit = this._moveStack.pop();
 		if (unit) {
+			// TODO: Play the undo sound
 			unit.undoMove();
 		}
 	}
@@ -722,6 +723,7 @@ class BattleScene extends Scene {
 			var data = this._reinforcementData[i];
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
+				newPiece.aiSetDirection();
 				newPiece.addTimedClass(500, 'spawn');
 				await Game.asyncPause(500);
 			}
@@ -805,6 +807,12 @@ class BattleScene extends Scene {
 	}
 	positionEvent(square, dragId) {
 		if (!square || this._autoPhase || this.busy) return;
+
+		// TODO: Still kind of haphazardly bolted on, here
+		if (this._unit && this._unit.isFacing) {
+			this.refresh();
+			return;
+		}
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
