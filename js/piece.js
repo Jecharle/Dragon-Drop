@@ -853,9 +853,11 @@ class UnitPiece extends Piece {
 			var [xDir, yDir] = UnitPiece.getDirection(lastSquare, square);
 			turnframes.unshift({ '--x-scale': xDir, '--y-frame': yDir });
 
-			if (lastSquare.z != square.z) {
+			if (lastSquare.z > square.z) { // jump up
 				jumpframes.unshift({ bottom: 0 }, { bottom: '7px' }, { bottom: '8px' }, { bottom: '7px' }, { bottom: 0 });
-		 	} else {
+		 	} else if (lastSquare.z < square.z) { // drop down
+				jumpframes.unshift({ bottom: 0 }, { bottom: '3px' }, { bottom: '4px' }, { bottom: '2px' }, { bottom: 0 });
+		 	} else { // stay straight
 				jumpframes.unshift({ }, { }, { }, { }, { });
 			}
 
