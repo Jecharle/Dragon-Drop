@@ -152,6 +152,7 @@ class Lifebar extends Detail {
 	set defenseValue(value) {
 		this._defense = value;
 		this._defEl.classList.toggle('icon', value != 0);
+		this.el.style.marginLeft = (value != 0) ? "8px" : "";
 
 		if (this._defEl.firstChild) this._defEl.removeChild(this._defEl.firstChild);
 		if (value) this._defEl.appendChild(Detail.numberSprite(value));

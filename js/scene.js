@@ -188,7 +188,7 @@ class BattleScene extends Scene {
 		this._deployList.deployLimit = this._maxDeploy;
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
-		this._undoButtonEl = this._createUndoButton();
+		this._waitButtonEl = this._createWaitButton();
 		this._turnTitleEl = this._createTurnTitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
@@ -234,11 +234,10 @@ class BattleScene extends Scene {
 				this._openBattleMenu();
 			}, 'nav-button', 'menu-button');
 	}
-	_createUndoButton() {
-		return this._addButton("Undo Move", () => {
-				this._undoMove();
-				this.refresh();
-			}, 'nav-button', 'undo-button');
+	_createWaitButton() {
+		return this._addButton("Wait", () => {
+				this._playerWaitUnit();
+			}, 'nav-button', 'wait-button');
 	}
 	_createEndTurnButton() {
 		return this._addButton("End Turn", () => {
@@ -249,7 +248,7 @@ class BattleScene extends Scene {
 	_buildDOM() {
 		this.el.appendChild(this._turnTitleEl);
 		this.el.appendChild(this._menuButtonEl);
-		this.el.appendChild(this._undoButtonEl);
+		this.el.appendChild(this._waitButtonEl);
 		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
@@ -361,10 +360,11 @@ class BattleScene extends Scene {
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
+		this._endTurnButtonEl.style.display = (this._autoPhase || this._unit) ? "none" : "";
+		this._endTurnButtonEl.classList.toggle('disabled', this.playerTeam.size == 0);
 
-		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || !this._lastMove);
+		this._waitButtonEl.style.display = (this._phase == BattleScene.PlayerPhase && this._unit) ? "" : "none";
+		this._waitButtonEl.classList.toggle('disabled', !this._unit || !this._unit.canAct);
 	}
 	//#endregion refresh
 
@@ -433,9 +433,6 @@ class BattleScene extends Scene {
 				break;
 
 			case BattleScene.PlayerPhase:
-				if (SaveData.autoFace) {
-					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
-				}
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
@@ -570,12 +567,26 @@ class BattleScene extends Scene {
 		});
 	}
 	_playerEndTurn() {
-		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
-			this._endTurn();
+		var prompt = (this._phase == BattleScene.DeployPhase) ? "Confirm deployment?" : "End Turn?";
+		this._openPrompt(prompt, result => {
+			if (result == 1) {
+				this._endTurn();
+			}
+		});
+	}
+	_playerWaitUnit() {
+		if (!this._unit || !this._unit.canAct || !this._unit.myTurn) return;
+
+		if (!SaveData.confirmEndTurn) {
+			if (SaveData.autoFace) this._unit.aiSetDirection();
+			this._waitUnit();
+			this.refresh();
 		} else {
-			this._openPrompt("End Turn?", result => {
-				if (result == 1) {
-					this._endTurn();
+			this._openPrompt("Have this unit wait?", result => {
+				if (result) {
+					if (SaveData.autoFace) this._unit.aiSetDirection();
+					this._waitUnit();
+					this.refresh();
 				}
 			});
 		}
@@ -594,7 +605,10 @@ class BattleScene extends Scene {
 	}
 	_deselectUnit() {
 		this._deselectTarget();
-		if (this._unit) this._unit.deselect();
+		if (this._unit) {
+			if (this._unit == this._lastMove) this._undoMove();
+			this._unit.deselect();
+		}
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
@@ -613,6 +627,7 @@ class BattleScene extends Scene {
 	_undoMove() {
 		var unit = this._moveStack.pop();
 		if (unit) {
+			// TODO: Play the undo sound
 			unit.undoMove();
 		}
 	}
@@ -661,7 +676,9 @@ class BattleScene extends Scene {
 		if (await success) {
 			this._clearMoves();
 			this._deselectSkill();
-			this._isBattleOver();
+			if (!this._isBattleOver()) {
+				this._unit.startFacing();
+			}
 			this._skillList.setUser(this._unit);
 		}
 		this.setDone();
@@ -684,7 +701,7 @@ class BattleScene extends Scene {
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
-		} else if (this._unit && this._unit == this._lastMove) { // undo move before deselecting
+		} else if (this._unit && this._unit == this._lastMove) {
 			this._undoMove();
 		} else if (this._unit) {
 			this._deselectUnit();
@@ -694,12 +711,19 @@ class BattleScene extends Scene {
 			this._openBattleMenu();
 		}
 	}
+	_waitUnit() {
+		if (!this._unit) return;
+		this._unit.passTurn();
+		this._clearMoves();
+		this._unit.startFacing();
+	}
 
 	async _addReinforcements() {
 		for (var i = 0; i < this._reinforcementData.length; i++) {
 			var data = this._reinforcementData[i];
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
+				newPiece.aiSetDirection();
 				newPiece.addTimedClass(500, 'spawn');
 				await Game.asyncPause(500);
 			}
@@ -726,6 +750,12 @@ class BattleScene extends Scene {
 	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
+		// TODO: Mesh this in better earlier
+		if (this._unit && this._unit.isFacing && this._unit != piece) {
+			this.refresh();
+			return;
+		}
+
 		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
 			if (this._unit != piece) {
 				this._selectUnit(piece);
@@ -734,7 +764,16 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._phase == BattleScene.DeployPhase) {
+		// TODO: This is kind of awkwardly bolted on, integrate the logic more cleanly
+		// TODO: Work out when you can deselect a unit and when you can't
+		if (this._unit == piece && piece.isFacing) {
+			piece.confirmFacing();
+			this._deselectUnit();
+
+			if (this.playerTeam.allDone) {
+				this._endTurn();
+			}
+		} else if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (!this._unit || !this._unit.myTurn || dragging) {
 					this._selectUnit(piece);
@@ -753,7 +792,7 @@ class BattleScene extends Scene {
 					this._deselectSkill();
 				}
 			}
-
+			// TODO: Deselecting units should be harder 
 			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (this._unit != piece) {
 					this._selectUnit(piece);
@@ -768,6 +807,12 @@ class BattleScene extends Scene {
 	}
 	positionEvent(square, dragId) {
 		if (!square || this._autoPhase || this.busy) return;
+
+		// TODO: Still kind of haphazardly bolted on, here
+		if (this._unit && this._unit.isFacing) {
+			this.refresh();
+			return;
+		}
 
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
@@ -849,13 +894,8 @@ class BattleScene extends Scene {
 
 		if (this._autoPhase || this.busy) return;
 
-		if (key == "Escape") {
+		if (key == "Escape" || key == "z" || key == "Z") {
 			this._goBack();
-			this.refresh();
-		}
-
-		if (key == "z" || key == "Z") {
-			this._undoMove();
 			this.refresh();
 		}
 
@@ -875,7 +915,8 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._unit && this._unit.canFace) {
+		// TODO: Work with this to refine it a bit more
+		if (this._unit && this._unit.isFacing) {
 			if (key == "ArrowUp") {
 				this._unit.faceDirection(UnitPiece.North);
 			}
@@ -920,7 +961,9 @@ class BattleScene extends Scene {
 			this.refresh();
 
 			if (!this._skill) {
+				this._waitUnit();
 				this._unit.aiSetDirection();
+				this._unit.refresh();
 				this._deselectUnit();
 				continue;
 			}
@@ -932,7 +975,10 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
-			if (this._unit) this._unit.aiSetDirection();
+			if (this._unit) {
+				this._unit.aiSetDirection();
+				this._unit.refresh();
+			}
 			this._deselectUnit();
 			this.refresh();
 
@@ -982,7 +1028,11 @@ class Team {
 
 	//#region turn
 	get untouched() {
-		return this.members.every(member => member.dead || (member.canMove && member.canAct));
+		return [...this.members].every(member => member.dead || (member.canMove && member.canAct));
+	}
+	get allDone() {
+		return [...this.members].every(member => member.dead || !member.square || !member.myTurn ||
+			!(member.canAct || member.canMove || member.isFacing));
 	}
 	get isAuto() {
 		return this._auto;
