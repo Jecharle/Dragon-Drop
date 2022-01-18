@@ -222,6 +222,7 @@ class UnitPiece extends Piece {
 		this.actionUsed = false;
 		this.homeSquare = null;
 		this.facingSet = false;
+		this._isFacing = false;
 		this._direction = [1, 0];
 		
 		this._status = {};
@@ -442,8 +443,8 @@ class UnitPiece extends Piece {
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && !this.isFacing && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.isFacing), this.myTurn && this.canMove);
+		this._setUnselectable(!this.canMove && !this.canAct && !this.canFace && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.canFace), this.myTurn && this.canMove);
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -651,6 +652,9 @@ class UnitPiece extends Piece {
 	get canAct() {
 		return this.alive && !this.actionUsed;
 	}
+	get canFace() {
+		return this.alive && this.hasDirection && !this.facingSet;
+	}
 	get isFacing() {
 		return this.alive && this.hasDirection && this._isFacing;
 	}
@@ -692,6 +696,7 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this.facingSet = false;
 		this._isFacing = false;
 		if (this.hasDirection) this._directionSelector.hide();
 		this._skills.forEach(skill => skill.endTurn());
@@ -800,13 +805,14 @@ class UnitPiece extends Piece {
 	}
 
 	startFacing() {
-		if (!this.hasDirection) return false;
+		if (!this.hasDirection || !this.canFace) return false;
 		this._isFacing = true;
 		this._directionSelector.show();
 		return true;
 	}
 	confirmFacing() {
 		if (this.isFacing) {
+			this.facingSet = true;
 			this._isFacing = false;
 			this._directionSelector.hide();
 			this.refresh();
