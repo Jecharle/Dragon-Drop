@@ -217,7 +217,6 @@ class BattleScene extends Scene {
 
 		this._sfxEndTurn = Sfx.getSfx("crunchy_up.wav");
 		this._sfxStartBattle = this._sfxEndTurn;
-		this._sfxMove = Sfx.getSfx("steps.wav");
 
 		this._bgmVictory = "News Theme.mp3"
 		this._bgmDefeat = "Der Kleber Sting.mp3"
@@ -614,7 +613,7 @@ class BattleScene extends Scene {
 	}
 	async _moveUnit(unit, square) {
 		this.setBusy();
-		this._sfxMove.play();
+		unit._sfxMove.play();
 		var success = unit.move(square);
 		this._clearAreas();
 		if (await success) {

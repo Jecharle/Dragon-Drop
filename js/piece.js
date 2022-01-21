@@ -240,6 +240,7 @@ class UnitPiece extends Piece {
 		this._sfxBlock = Sfx.getSfx("no_damage.wav");
 		this._sfxHeal = Sfx.getSfx("heal.wav");
 		this._sfxDie = Sfx.getSfx("death.wav");
+		this._sfxMove = Sfx.getSfx("steps.wav");
 	}
 	//#endregion sounds
 
