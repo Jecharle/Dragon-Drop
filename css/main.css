@@ -1089,6 +1089,11 @@ input[type="range"]::-ms-thumb {
 		background-image: url("../img/sprites/testObject.png");
 		background-repeat: repeat-y;
 	}
+	.pillar>.sprite {
+		--unit-h: 48px;
+		background-image: url("../img/sprites/testPillarObject.png");
+		background-repeat: repeat-y;
+	}
 	/*#endregion unit skins*/
 /*#endregion unit*/
 
