@@ -306,7 +306,14 @@ input[type="range"]::-ms-thumb {
 .turn-title {
 	font-size: 2rem;
 	position: absolute;
-	top: 16px;
+	top: 0.5rem;
+	right: 24px;
+	text-align: center;
+}
+.turn-subtitle {
+	font-size: 1.5rem;
+	position: absolute;
+	top: 2rem;
 	right: 32px;
 	text-align: center;
 }
@@ -1101,32 +1108,31 @@ input[type="range"]::-ms-thumb {
 .deploy-list {
 	position: absolute;
 	z-index: 0;
-	width: calc(var(--unit-w)*2);
-	height: calc(var(--unit-h)*5);
-	left: 2px;
-	bottom: 2px;
+	/*width: calc(var(--unit-w)*6);*/
+	width: max-content;
+	height: calc(var(--unit-h));
+	top: 2px;
 	display: flex;
-	flex-flow: column wrap;
+	flex-flow: row wrap;
 	justify-content: flex-start;
 	background-color: white;
 	border: 1px solid black;
-	border-radius: 4px;
+	border-radius: 2px;
 }
 	.deploy-list .lifebar {
 		visibility: visible;
-		top: unset;
-		bottom: var(--lifebar-h);
-		left: var(--unit-w);
+	}
+	.deploy-list .ally.selectable.unit::before {
+		content: none;
 	}
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0;
-		margin-top: 1px;
 	}
 	.deploy-list .capacity-label {
 		position: absolute;
-		top: 1px;
-		right: 2px;
+		top: 0px;
+		right: -24px;
 	}
 /*#endregion deploy list*/
 /*#endregion battle scene*/

@@ -108,7 +108,7 @@ class Board extends Container {
 	get h() { return this._h; }
 	
 	center() {
-		var height = Square.screenY(this.w+1, this.h+1, 0);
+		var height = Square.screenY(this.w, this.h, 0);
 		var offset = Square.screenX(this.w+1, 0, 0) + Square.screenX(0, this.h+1, 0);
 		this.el.style.top = `${Math.floor((Game.height - height)/2)}px`;
 		this.el.style.left = `${Math.floor((Game.width - offset)/2)}px`;
@@ -696,9 +696,6 @@ class DeployUnitList extends Container {
 			if (team) unit.setTeam(team);
 		});
 
-		this._deployCounter = new CurrentMaxLabel(0, 0);
-		this.el.appendChild(this._deployCounter.el);
-
 		this.el.ondragover = this._allowDrop;
 	}
 
@@ -709,20 +706,6 @@ class DeployUnitList extends Container {
 
 	get elClass() {
 		return 'deploy-list';
-	}
-
-	get deployed() {
-		return this._deployCounter.value;
-	}
-	set deployed(value) {
-		this._deployCounter.value = value;
-	}
-
-	get deployLimit() {
-		return this._deployCounter.maxValue;
-	}
-	set deployLimit(value) {
-		this._deployCounter.maxValue = value;
 	}
 
 	hide() {

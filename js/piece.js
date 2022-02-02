@@ -336,6 +336,10 @@ class UnitPiece extends Piece {
 		return !this.dead;
 	}
 
+	get onField() {
+		return !!this.square;
+	}
+
 	get moveRange() {
 		var equipBonus = this.equipment.reduce((bonus, equip) => {
 			if (equip?.speedBonus) bonus += equip.speedBonus;

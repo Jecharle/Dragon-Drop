@@ -303,14 +303,15 @@ class CooldownLabel extends Detail {
  Limited quantity label
 ***************************************************/
 class QuantityLabel extends Detail {
+	get elClass() {
+		return 'quantity-label';
+	}
+
 	set value(value) {
 		value += "";
 		if (value.length) value = "x"+value;
 		this._value = value;
 		this.el.innerHTML = `<strong>${value}</strong>`;
-	}
-	get elClass() {
-		return 'quantity-label';
 	}
 }
 

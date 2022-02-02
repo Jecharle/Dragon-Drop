@@ -185,11 +185,11 @@ class BattleScene extends Scene {
 		this._addDialog(sceneData.dialog);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
-		this._deployList.deployLimit = this._maxDeploy;
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
 		this._waitButtonEl = this._createWaitButton();
 		this._turnTitleEl = this._createTurnTitle();
+		this._turnSubtitleEl = this._createTurnSubtitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
 		this._battleMenu = new BattleMenu(this);
@@ -228,6 +228,11 @@ class BattleScene extends Scene {
 		turnTitle.classList.add('turn-title');
 		return turnTitle;
 	}
+	_createTurnSubtitle() {
+		var turnTitle = document.createElement("span");
+		turnTitle.classList.add('turn-subtitle');
+		return turnTitle;
+	}
 	_createMenuButton() {
 		return this._addButton("Menu", () => {
 				this._openBattleMenu();
@@ -246,6 +251,7 @@ class BattleScene extends Scene {
 
 	_buildDOM() {
 		this.el.appendChild(this._turnTitleEl);
+		this.el.appendChild(this._turnSubtitleEl);
 		this.el.appendChild(this._menuButtonEl);
 		this.el.appendChild(this._waitButtonEl);
 		this.el.appendChild(this._endTurnButtonEl);
@@ -355,11 +361,19 @@ class BattleScene extends Scene {
 		}
 
 		if (this._phase == BattleScene.DeployPhase) {
+			this._turnSubtitleEl.innerText = `${this.playerTeam.size}/${this._maxDeploy}`;
+		} else if (this._phase == BattleScene.EnemyPhase) {
+			this._turnSubtitleEl.innerText = "Enemy";
+		} else {
+			this._turnSubtitleEl.innerText = "Player";
+		}
+
+		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Ready";
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.style.display = (this._autoPhase || this._unit) ? "none" : "";
+		this._endTurnButtonEl.style.display = (!this._autoPhase && !this._unit || this._phase == BattleScene.DeployPhase) ? "" : "none";
 		this._endTurnButtonEl.classList.toggle('disabled', this.playerTeam.size == 0);
 
 		this._waitButtonEl.style.display = (this._phase == BattleScene.PlayerPhase && this._unit) ? "" : "none";
@@ -646,13 +660,11 @@ class BattleScene extends Scene {
 	 	} else {
 			this._board.movePiece(piece, target);
 		}
-		this._deployList.deployed = this.playerTeam.size;
 		this._deselectUnit();
 	}
 	_retreatUnit(piece, container) {
 		if (piece.square) {
 			piece.setParent(container);
-			this._deployList.deployed = this.playerTeam.size;
 		}
 	}
 
@@ -768,18 +780,19 @@ class BattleScene extends Scene {
 		if (this._unit == piece && piece.isFacing) {
 			piece.confirmFacing();
 			this._deselectUnit();
+			// TODO: Facing sound effect?
 
 			if (this.playerTeam.allDone) {
 				this._endTurn();
 			}
 		} else if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
-				if (!this._unit || !this._unit.myTurn || dragging) {
-					this._selectUnit(piece);
-					this._selectTarget(piece.square);
-				} else if (this._unit == piece) {
+				if (this._unit == piece) {
 					this._deselectUnit();
-				} else if (!this._unit.square) { // selecting undeployed units
+				} else {
+					if (!dragging && piece.onField) {
+						this._retreatUnit(piece, this._deployList);
+					}
 					this._selectUnit(piece);
 				}
 			}
@@ -818,7 +831,13 @@ class BattleScene extends Scene {
 				this._deselectUnit();
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
+					var newUnit = square.piece;
 					this._swapDeploySquares(this._unit, square);
+					if (newUnit) {
+						this._selectUnit(newUnit);
+					} else {
+						this._deselectUnit();
+					}
 				} else {
 					this._selectTarget(square);
 					this._refreshTargetArea();
