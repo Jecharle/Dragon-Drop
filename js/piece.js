@@ -15,6 +15,8 @@ class Piece extends SpriteElObj {
 		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
 		this.el.ondragend = this._drop;
+
+		this._getSounds();
 	}
 
 	static _id = Math.floor(Math.random()*1000);
@@ -33,6 +35,13 @@ class Piece extends SpriteElObj {
 
 	get type() { return Piece.None; }
 	//#endregion piece type
+
+	//#region sounds
+	_getSounds() {
+		super._getSounds();
+		this.sfxSelect = Game.sfxAccept;
+	}
+	//#endregion sounds
 
 	//#region parent
 	setParent(container) {
@@ -66,8 +75,14 @@ class Piece extends SpriteElObj {
 	//#endregion
 
 	//#region input events
-	select() { return false; }
-	deselect() { }
+	select(noSound) {
+		this.el.classList.add('selected');
+		if(!noSound) this.sfxSelect.play();
+		return true;
+	}
+	deselect() {
+		this.el.classList.remove('selected');
+	}
 
 	_click(ev) {
 		ev.stopPropagation();
@@ -117,8 +132,6 @@ class UnitPiece extends Piece {
 		this._addShadowEl();
 		this._addDirectionEl();
 		this._addGhostEl();
-
-		this._getSounds();
 
 		this._initialize();
 	}
@@ -242,7 +255,6 @@ class UnitPiece extends Piece {
 		this._sfxDie = Sfx.getSfx("death.wav");
 		
 		this.sfxMove = Sfx.getSfx("steps.wav");
-		this.sfxSelect = Sfx.getSfx("step1.wav");
 		this.sfxSpawn = Sfx.getSfx("solid_hit2.wav"); // TODO: Spawn sound
 	}
 	//#endregion sounds
@@ -956,17 +968,6 @@ class UnitPiece extends Piece {
 	}
 	//#endregion animate
 
-	//#region input events
-	select() {
-		this.el.classList.add('selected');
-		this.sfxSelect.play();
-		return true;
-	}
-	deselect() {
-		this.el.classList.remove('selected');
-	}
-	//#endregion input events
-
 	//#region ai
 	get aiUnitScore() {
 		if (this.square) return -this._nearestPieceDistance(this.square, piece => this.isEnemy(piece));
@@ -1539,13 +1540,9 @@ class SkillCard extends Piece {
 	//#endregion refresh
 
 	//#region input events
-	select() {
+	select(noSound) {
 		if (!this.canUse()) return false;
-		this.el.classList.add('selected');
-		return true;
-	}
-	deselect() {
-		this.el.classList.remove('selected');
+		else return super.select(noSound);
 	}
 	//#endregion input events
 
