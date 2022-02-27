@@ -73,12 +73,18 @@ class UiElObj extends ElObj {
 
 	// TODO: Basic handling for key input too?
 
+	//#region overrideable settings
+	get sfxClick() {
+		return Game.sfxAccept;
+	}
+	//#endregion overrideable settings
+
 	//#region controls
 	_addButton(text, onclick, ...classList) {
 		var newButton = document.createElement('div');
 		newButton.classList.add("button", ...classList);
 		newButton.innerText = text;
-		var sfxClick = Sfx.getSfx("step1.wav");
+		var sfxClick = this.sfxClick;
 		newButton.onclick = () => {
 			sfxClick.play();
 			onclick();

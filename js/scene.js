@@ -206,7 +206,7 @@ class BattleScene extends Scene {
 	start() {
 		super.start();
 		if (this._board.deployArea.length > 0) {
-			this._deploy();
+			this._startDeploy();
 		} else {
 			this._skipDeploy();
 		}
@@ -387,7 +387,7 @@ class BattleScene extends Scene {
 	static get EnemyPhase() { return 2; }
 	static get EndPhase() { return -1; }
 
-	_deploy() {
+	_startDeploy() {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
@@ -619,7 +619,7 @@ class BattleScene extends Scene {
 	_deselectUnit() {
 		this._deselectTarget();
 		if (this._unit) {
-			if (this._unit == this._lastMove) this._undoMove();
+			if (this._unit == this._lastMove) this._undoMove(true);
 			this._unit.deselect();
 		}
 		this._unit = null;
@@ -627,7 +627,7 @@ class BattleScene extends Scene {
 	}
 	async _moveUnit(unit, square) {
 		this.setBusy();
-		unit._sfxMove.play();
+		unit.sfxMove.play();
 		var success = unit.move(square);
 		this._clearAreas();
 		if (await success) {
@@ -637,10 +637,10 @@ class BattleScene extends Scene {
 		this.setDone();
 		return success;
 	}
-	_undoMove() {
+	_undoMove(noSound) {
 		var unit = this._moveStack.pop();
 		if (unit) {
-			// TODO: Play the undo sound
+			if (!noSound) Game.sfxCancel.play();
 			unit.undoMove();
 		}
 	}
@@ -660,6 +660,7 @@ class BattleScene extends Scene {
 	 	} else {
 			this._board.movePiece(piece, target);
 		}
+		piece.sfxSpawn.play();
 		this._deselectUnit();
 	}
 	_retreatUnit(piece, container) {
@@ -673,6 +674,7 @@ class BattleScene extends Scene {
 		if (this._skill != skill) this._deselectSkill();
 
 		this._skill = skill;
+		Game.sfxAccept.play();
 		return true;
 	}
 	_deselectSkill() {
@@ -736,6 +738,7 @@ class BattleScene extends Scene {
 				var newPiece = this._addMapUnit(data);
 				newPiece.aiSetDirection();
 				newPiece.addTimedClass(500, 'spawn');
+				newPiece.sfxSpawn.play();
 				await Game.asyncPause(500);
 			}
 		}
@@ -761,12 +764,13 @@ class BattleScene extends Scene {
 	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
-		// TODO: Mesh this in better earlier
+		// TODO: Mesh this in better
 		if (this._unit && this._unit.isFacing && this._unit != piece) {
 			this.refresh();
 			return;
 		}
 
+		// selecting enemy pieces
 		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
 			if (this._unit != piece) {
 				this._selectUnit(piece);
@@ -875,6 +879,7 @@ class BattleScene extends Scene {
 		if (this._phase == BattleScene.DeployPhase && container == this._deployList) {
 			if (this._unit && this._unit.idMatch(dragId)) {
 				this._retreatUnit(this._unit, container);
+				Game.sfxCancel.play(); // TODO: Play a retreating noise?
 				this._deselectUnit();
 			}
 			this.refresh();

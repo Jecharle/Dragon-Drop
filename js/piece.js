@@ -240,7 +240,10 @@ class UnitPiece extends Piece {
 		this._sfxBlock = Sfx.getSfx("no_damage.wav");
 		this._sfxHeal = Sfx.getSfx("heal.wav");
 		this._sfxDie = Sfx.getSfx("death.wav");
-		this._sfxMove = Sfx.getSfx("steps.wav");
+		
+		this.sfxMove = Sfx.getSfx("steps.wav");
+		this.sfxSelect = Sfx.getSfx("step1.wav");
+		this.sfxSpawn = Sfx.getSfx("solid_hit2.wav"); // TODO: Spawn sound
 	}
 	//#endregion sounds
 
@@ -956,6 +959,7 @@ class UnitPiece extends Piece {
 	//#region input events
 	select() {
 		this.el.classList.add('selected');
+		this.sfxSelect.play();
 		return true;
 	}
 	deselect() {
