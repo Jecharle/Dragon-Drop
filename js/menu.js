@@ -129,6 +129,7 @@ class OptionsMenu extends Menu {
 		var optionBox = document.createElement('div');
 		optionBox.classList.add('menu-box');
 		optionBox.appendChild(this._addTextSpeedRow());
+		optionBox.appendChild(this._addTextAutoRow());
 		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
 		optionBox.appendChild(this._addSoundRow());
@@ -143,6 +144,14 @@ class OptionsMenu extends Menu {
 		this._textSpeedSlider = this._addSlider("textSpeedSlider", 0, 2);
 		row.appendChild(this._addLabel("Text speed", this._textSpeedSlider));
 		row.appendChild(this._textSpeedSlider);
+		return row;
+	}
+
+	_addTextAutoRow() {
+		var row = this._addRow();
+		this._textAutoCheckbox = this._addCheckbox("textAutoCheckbox");
+		row.appendChild(this._textAutoCheckbox);
+		row.appendChild(this._addLabel("Auto Advance Dialog", this._textAutoCheckbox));
 		return row;
 	}
 	
@@ -198,6 +207,7 @@ class OptionsMenu extends Menu {
 	_loadOptions() {
 		SaveData.loadOptions();
 		this._textSpeedSlider.value = SaveData.textSpeed;
+		this._textAutoCheckbox.checked = SaveData.textAuto;
 		this._endTurnConfirmCheckbox.checked = SaveData.confirmEndTurn;
 		this._autoFaceCheckbox.checked = SaveData.autoFace;
 		this._sfxVolumeSlider.value = SaveData.sfxVolume;
@@ -206,6 +216,7 @@ class OptionsMenu extends Menu {
 
 	_saveChanges() {
 		SaveData.textSpeed = this._textSpeedSlider.value;
+		SaveData.textAuto = this._textAutoCheckbox.checked;
 		SaveData.confirmEndTurn = this._endTurnConfirmCheckbox.checked;
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
@@ -330,6 +341,7 @@ class DialogBox extends Menu {
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
+		this._timeoutFunction = null;
 		this._sfxText = Sfx.getSfx("step1.wav");
 
 		this.el.onclick = () => {
@@ -383,13 +395,26 @@ class DialogBox extends Menu {
 		this.el.classList.add('done');
 		this._progress = this._message.length;
 		this._textArea.innerText = this._message;
-		if (this._intervalFunction) clearInterval(this._intervalFunction);
+		if (this._intervalFunction) {
+			clearInterval(this._intervalFunction);
+			this._intervalFunction = null;
+		}
+		if (SaveData.textAuto) {
+			this._timeoutFunction = setTimeout(() => {
+				this._skip();
+			}, 900);
+		}
 	}
 	get isDone() {
 		return !(this._message && this._progress < this._message.length);
 	}
 
 	_skip() {
+		if (this._timeoutFunction) {
+			clearTimeout(this._timeoutFunction);
+			this._timeoutFunction = null;
+		}
+
 		if (!this.isDone) {
 			this._finish();
 		} else if (this._queue.length > 0) {

@@ -46,6 +46,13 @@ class SaveData {
 		this.setOption('textSpeed', 1-value);
 	}
 
+	static get textAuto() {
+		return !!this.getOption('textAuto');
+	}
+	static set textAuto(value) {
+		this.setOption('textAuto', !!value);
+	}
+
 	static get confirmEndTurn() {
 		return !this.getOption('confirmTurnEnd');
 	}
