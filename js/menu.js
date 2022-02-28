@@ -336,7 +336,6 @@ class MapMenu extends Menu {
 class DialogBox extends Menu {
 	constructor(parent) {
 		super(parent);
-		this.el.classList.add('dialog-box');
 		this._queue = [];
 		this._message = "";
 		this._progress = 0;
@@ -351,15 +350,20 @@ class DialogBox extends Menu {
 
 	_addAllControls() {
 		// TODO: Add one more div to group everything together for easier styling
+		this._dialogBox = document.createElement("div");
+		this._dialogBox.classList.add('dialog-box');
+
 		this._portrait = document.createElement("div");
 		this._portrait.classList.add('face');
-		this.el.appendChild(this._portrait);
+		this._dialogBox.appendChild(this._portrait);
 		
 		this._textArea = this._addLabel("", null, 'dialog');
-		this.el.appendChild(this._textArea);
+		this._dialogBox.appendChild(this._textArea);
 
 		this._nametag = this._addLabel("", this._textArea, 'nametag');
-		this.el.appendChild(this._nametag);
+		this._dialogBox.appendChild(this._nametag);
+
+		this.el.appendChild(this._dialogBox);
 	}
 
 	//#region advancing
