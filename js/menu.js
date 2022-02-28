@@ -350,6 +350,7 @@ class DialogBox extends Menu {
 	}
 
 	_addAllControls() {
+		// TODO: Add one more div to group everything together for easier styling
 		this._portrait = document.createElement("div");
 		this._portrait.classList.add('face');
 		this.el.appendChild(this._portrait);
@@ -364,10 +365,19 @@ class DialogBox extends Menu {
 	//#region advancing
 	_start(message) {
 		var input = message.split("|");
-		
+
 		if (input.length > 1) {
-			this.style = input[0].split(" ");
-			this._nametag.innerText = this.style; // TODO: Get name (and maybe style?) from somewhere else
+			this.style = input[0].length > 0 ? input[0].split(" ") : [];
+		}
+
+		if (input.length > 2) {
+			var name = input[1].trim();
+			if (name.length > 0) {
+				this._nametag.innerText = name;
+				this._nametag.style.display = "";
+			} else {
+				this._nametag.style.display = "none";
+			}
 		}
 
 		this._progress = 0;
@@ -379,7 +389,7 @@ class DialogBox extends Menu {
 			this._step();
 		}, [80, 40, 20][SaveData.textSpeed]);
 		
-		// TODO: Minor delay / startup transition, so it doesn't feel abrupt
+		// TODO: Minor delay / startup transition, so it doesn't feel abrupt?
 	}
 	_step() {
 		this._progress++;
@@ -387,7 +397,7 @@ class DialogBox extends Menu {
 		if (this.isDone) {
 			this._finish();
 		} else {
-			this._textArea.innerText = this._message.substr(0, this._progress);
+			this._textArea.innerText = this._message.slice(0, this._progress);
 			if (this._progress % 3 == 0) this._sfxText.play();
 		}
 	}

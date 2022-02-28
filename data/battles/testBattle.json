@@ -40,12 +40,12 @@
 
 	"dialog": [
 		{"turn": 1, "message": [
-			"melee-unit|Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
+			"melee-unit|Alice|Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
 		]},
 		{"turn": 1, "enemy": true, "message": [
-			"enemy-unit right|Looks like it's working on this side too!",
+			"enemy-unit right|Enemy|Looks like it's working on this side too!",
 			"It even shows up on my turn!",
-			"none|Yes, it finally works."
+			"||Yes, it finally works."
 		]}
 	]
 }
