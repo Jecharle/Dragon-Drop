@@ -228,9 +228,9 @@ input[type="range"]::-ms-thumb {
 /*#region dialog*/
 .dialog-box {
 	position: absolute;
-	top: 20%;
-	left: 20%;
-	width: 12em;
+	/*TODO: Bigger font?*/
+	bottom: 16px;
+	width: 90%;
 	height: 4em;
 	display: flex;
 	align-items: flex-start;
@@ -254,7 +254,7 @@ input[type="range"]::-ms-thumb {
 .nametag {
 	position: absolute;
 	top: -15px;
-	left: -5px;
+	left: 5px;
 	height: max-content;
 	width: max-content;
 	display: flex;
@@ -267,27 +267,24 @@ input[type="range"]::-ms-thumb {
 }
 .dialog-box .face {
 	position: absolute;
-	top: 0;
-	right: 100%;
+	bottom: 100%;
+	left: 0;
 	height: var(--face-h);
 	width: var(--face-w);
 	box-sizing: border-box;
 	background-repeat: no-repeat;
 	background-position: bottom left;
+	transform: scale(4); /*TODO: Once I get properly sized portraits, this can drop to 1*/
+	transform-origin: left bottom;
 }
 
-.right .dialog-box {
-	left: unset;
-	right: 20%;
-}
 .right .nametag {
 	left: unset;
-	right: -5px;
+	right: 5px;
 }
 .right .dialog-box .face {
 	left: 100%;
-	right: unset;
-	transform: scaleX(-1);
+	transform: scale(-4, 4);
 }
 /*#endregion dialog*/
 /*#endregion menus*/
