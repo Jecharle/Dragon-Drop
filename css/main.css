@@ -297,7 +297,7 @@ input[type="range"]::-ms-thumb {
 }
 	.wait-button {
 		bottom: 4px;
-		left: 15%;
+		right: 15%;
 	}
 	.end-turn-button {
 		bottom: 2px;
