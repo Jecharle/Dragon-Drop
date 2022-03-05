@@ -367,43 +367,32 @@ class DialogBox extends Menu {
 	}
 
 	//#region advancing
-	
-	_applySetting(settingString) {
-		var input = settingString.split(":");
-		var type = input[0].toLowerCase();
-		var value = input.length > 1 ? input[1].trim() : "";
-		switch (type) {
-			case 'name':
-				this._nametag.innerText = value;
-				this._nametag.style.display = (value.length > 0 ? "" : "none");
-				break;
-			case 'portrait':
-				this.style = value.length > 0 ? value.split(" ") : [];
-				break;
-			// TODO: separate left/right portraits
-			// TODO: non-portrait styles for left/right active highlight, background graphic, and fullscreen vfx
-			case 'voice-pitch':
-				// TODO: adjust voice frequency?
-				break;
-			case 'voice-file':
-				// TODO: change voice sample
-				break;
-			case 'clear':
-				this.style = [];
-				this._nametag.style.display = "none";
-				break;
+	_start(input) {
+		var clear = input.match(/\$clear\[\]/);
+		if (clear) {
+			this.style = [];
+			this._nametag.style.display = "none";
 		}
-	}
 
-	_start(message) {
-		var input = message.split("$");
-
-		for (var i = 0; i < input.length-1; i++) {
-			if (input[i].length > 0) this._applySetting(input[i]);
+		var portrait = input.match(/\$portrait\[(.*?)\]/);
+		if (portrait) {
+			this.style = portrait[1].length > 0 ? portrait[1].split(" ") : [];
 		}
+
+		var name = input.match(/\$name\[(.*?)\]/);
+		if (name) {
+			this._nametag.innerText = name[1].trim();
+			this._nametag.style.display = (name[1].length > 0 ? "" : "none");
+		}
+
+		// TODO: voice / text sound settings
+		// TODO: multiple portraits
+		// TODO: background changes, etc.
+
+		var message = input.replace(/\$.*?\[(.*?)\]/g, ''); // The text, without the '$[]' commands
 
 		this._progress = 0;
-		this._message = input.length > 0 ? input[input.length-1].trim() : "";
+		this._message = message.trim();
 		this._textArea.innerText = "";
 		this.el.classList.remove('done');
 

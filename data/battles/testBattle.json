@@ -40,12 +40,12 @@
 
 	"dialog": [
 		{"turn": 1, "message": [
-			"$portrait: melee-unit $name: Alice $Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
+			"$portrait[melee-unit] $name[Alice] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
 		]},
 		{"turn": 1, "enemy": true, "message": [
-			"$portrait: enemy-unit right $name: Enemy $Looks like it's working on this side too!",
+			"$portrait[enemy-unit right] $name[Enemy] Looks like it's working on this side too!",
 			"It even shows up on my turn!",
-			"$clear $Yes, it finally works."
+			"$clear[] Yes, it finally works."
 		]}
 	]
 }
