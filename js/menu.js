@@ -349,10 +349,10 @@ class DialogBox extends Menu {
 	}
 
 	_addAllControls() {
-		// TODO: Add one more div to group everything together for easier styling
 		this._dialogBox = document.createElement("div");
 		this._dialogBox.classList.add('dialog-box');
 
+		// TODO: Make two separate portraits, controlled by different settings
 		this._portrait = document.createElement("div");
 		this._portrait.classList.add('face');
 		this._dialogBox.appendChild(this._portrait);
@@ -367,33 +367,49 @@ class DialogBox extends Menu {
 	}
 
 	//#region advancing
-	_start(message) {
-		var input = message.split("|");
-
-		if (input.length > 1) {
-			this.style = input[0].length > 0 ? input[0].split(" ") : [];
-		}
-
-		if (input.length > 2) {
-			var name = input[1].trim();
-			if (name.length > 0) {
-				this._nametag.innerText = name;
-				this._nametag.style.display = "";
-			} else {
+	
+	_applySetting(settingString) {
+		var input = settingString.split(":");
+		var type = input[0].toLowerCase();
+		var value = input.length > 1 ? input[1].trim() : "";
+		switch (type) {
+			case 'name':
+				this._nametag.innerText = value;
+				this._nametag.style.display = (value.length > 0 ? "" : "none");
+				break;
+			case 'portrait':
+				this.style = value.length > 0 ? value.split(" ") : [];
+				break;
+			// TODO: separate left/right portraits
+			// TODO: non-portrait styles for left/right active highlight, background graphic, and fullscreen vfx
+			case 'voice-pitch':
+				// TODO: adjust voice frequency?
+				break;
+			case 'voice-file':
+				// TODO: change voice sample
+				break;
+			case 'clear':
+				this.style = [];
 				this._nametag.style.display = "none";
-			}
+				break;
+		}
+	}
+
+	_start(message) {
+		var input = message.split("$");
+
+		for (var i = 0; i < input.length-1; i++) {
+			if (input[i].length > 0) this._applySetting(input[i]);
 		}
 
 		this._progress = 0;
-		this._message = input.length > 0 ? input[input.length-1] : "";
+		this._message = input.length > 0 ? input[input.length-1].trim() : "";
 		this._textArea.innerText = "";
 		this.el.classList.remove('done');
 
 		this._intervalFunction = setInterval(() => {
 			this._step();
 		}, [80, 40, 20][SaveData.textSpeed]);
-		
-		// TODO: Minor delay / startup transition, so it doesn't feel abrupt?
 	}
 	_step() {
 		this._progress++;
