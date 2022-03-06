@@ -45,7 +45,7 @@
 		{"turn": 1, "enemy": true, "message": [
 			"$portrait[enemy-unit right] $name[Enemy] Looks like it's working on this side too!",
 			"It even shows up on my turn!",
-			"$clear[] Yes, it finally works."
+			"$reset[] Yes, it finally works."
 		]}
 	]
 }

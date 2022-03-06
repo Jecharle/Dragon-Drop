@@ -337,6 +337,8 @@ class DialogBox extends Menu {
 	constructor(parent) {
 		super(parent);
 		this._queue = [];
+		this._log = [];
+		this._name = "";
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
@@ -368,9 +370,10 @@ class DialogBox extends Menu {
 
 	//#region advancing
 	_start(input) {
-		var clear = input.match(/\$clear\[\]/);
-		if (clear) {
+		var reset = input.match(/\$reset\[\]/);
+		if (reset) {
 			this.style = [];
+			this._name = "";
 			this._nametag.style.display = "none";
 		}
 
@@ -381,7 +384,8 @@ class DialogBox extends Menu {
 
 		var name = input.match(/\$name\[(.*?)\]/);
 		if (name) {
-			this._nametag.innerText = name[1].trim();
+			this._name = name[1].trim();
+			this._nametag.innerText = this._name;
 			this._nametag.style.display = (name[1].length > 0 ? "" : "none");
 		}
 
@@ -414,6 +418,12 @@ class DialogBox extends Menu {
 		this.el.classList.add('done');
 		this._progress = this._message.length;
 		this._textArea.innerText = this._message;
+
+		if (this._message.length > 0) {
+			var logMessage = this._name.length > 0 ? `${this._name}: ${this._message}` : this._message;
+			this._log.push(logMessage);
+		}
+
 		if (this._intervalFunction) {
 			clearInterval(this._intervalFunction);
 			this._intervalFunction = null;
