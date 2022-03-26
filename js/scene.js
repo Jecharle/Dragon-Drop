@@ -3,7 +3,7 @@
 The root class that responds to user interaction
 and applies rules to pieces and containers
 ***************************************************/
-class Scene extends ElObj {
+class Scene extends UiElObj {
 	constructor(lastScene) {
 		super();
 		this._lastScene = lastScene || null;
@@ -17,6 +17,8 @@ class Scene extends ElObj {
 		
 		this._dialogBox = new DialogBox(this);
 		this.el.appendChild(this._dialogBox.el);
+
+		this._bgm = null;
 
 		this.el.oncontextmenu = ev => {
 			ev.preventDefault();
@@ -32,13 +34,13 @@ class Scene extends ElObj {
 		return false;
 	}
 
-	start() { }
+	start() { Bgm.play(this._bgm); }
 	end() { }
 
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
-	_resume() { this._paused = false; }
-
+	_resume() { this._paused = false; Bgm.play(this._bgm); }
+	
 	//#region menus
 	_openMenu(menu, callback) {
 		if (!menu || this.busy) return;
@@ -118,10 +120,13 @@ class TitleScene extends Scene {
 		this._titleEl = this._createTitle();
 		this._startButtonEl = this._createStartButton();
 		this._optionButtonEl = this._createOptionButton();
+		this._clearButtonEl = this._createClearDataButton();
 
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
+
+		this._bgm = "";
 	}
 
 	_createTitle() {
@@ -132,32 +137,35 @@ class TitleScene extends Scene {
 	}
 
 	_createStartButton() {
-		var button = document.createElement('div');
-		button.classList.add('button');
-		button.onclick = () => {
-			// TEMPORARY starting map
-			MapSceneModel.load("testMap").then(mapModel => {
-				Game.setScene(new MapScene(null, mapModel));
+		return this._addButton("Start Game", () => {
+				MapSceneModel.load("testMap").then(mapModel => { // TEMPORARY starting map
+					Game.setScene(new MapScene(null, mapModel));
+				});
 			});
-		};
-		button.innerText = "Start Game";
-		return button;
 	}	
 
 	_createOptionButton() {
-		var button = document.createElement('div');
-		button.classList.add('button');
-		button.onclick = () => {
-			this._openMenu(this._optionsMenu);
-		};
-		button.innerText = "Options";
-		return button;
+		return this._addButton("Options", () => {
+				this._openMenu(this._optionsMenu);
+			});
+	}
+
+	_createClearDataButton() {
+		return this._addButton("Clear Data", () => {
+				this._openPrompt("Really clear all data?", result => {
+					if (result == 1) {
+						SaveData.clearAll();
+						Bgm.refreshVolume();
+					}
+				});
+			});
 	}
 
 	_buildDOM() {
 		this.el.appendChild(this._titleEl);
 		this.el.appendChild(this._startButtonEl);
 		this.el.appendChild(this._optionButtonEl);
+		this.el.appendChild(this._clearButtonEl);
 		
 		this.el.appendChild(this._optionsMenu.el);
 	}
@@ -177,17 +185,18 @@ class BattleScene extends Scene {
 		this._addDialog(sceneData.dialog);
 
 		this._deployList = new DeployUnitList(Party.getUnits(), this.playerTeam);
-		this._deployList.deployLimit = this._maxDeploy;
 		this._skillList = new SkillList();
 		this._menuButtonEl = this._createMenuButton();
-		this._undoButtonEl = this._createUndoButton();
+		this._waitButtonEl = this._createWaitButton();
 		this._turnTitleEl = this._createTurnTitle();
+		this._turnSubtitleEl = this._createTurnSubtitle();
 		this._endTurnButtonEl = this._createEndTurnButton();
 
 		this._battleMenu = new BattleMenu(this);
 		this._optionsMenu = new OptionsMenu(this);
 
 		this._buildDOM();
+		this._bgm = sceneData.bgm || "Stoneworld Battle.mp3";
 	}
 
 	get unsaved() {
@@ -195,11 +204,22 @@ class BattleScene extends Scene {
 	}
 
 	start() {
+		super.start();
 		if (this._board.deployArea.length > 0) {
-			this._deploy();
+			this._startDeploy();
 		} else {
 			this._skipDeploy();
 		}
+	}
+
+	_getSounds() {
+		super._getSounds();
+
+		this._sfxEndTurn = Sfx.getSfx("crunchy_up.wav");
+		this._sfxStartBattle = this._sfxEndTurn;
+
+		this._bgmVictory = "News Theme.mp3"
+		this._bgmDefeat = "Der Kleber Sting.mp3"
 	}
 
 	//#region ui setup
@@ -208,37 +228,32 @@ class BattleScene extends Scene {
 		turnTitle.classList.add('turn-title');
 		return turnTitle;
 	}
-	_createMenuButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'menu-button');
-		button.onclick = () => {
-			this._openBattleMenu();
-		};
-		button.innerText = "Menu";
-		return button;
+	_createTurnSubtitle() {
+		var turnTitle = document.createElement("span");
+		turnTitle.classList.add('turn-subtitle');
+		return turnTitle;
 	}
-	_createUndoButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'undo-button');
-		button.onclick = () => {
-			this._undoMove();
-			this.refresh();
-		};
-		return button;
+	_createMenuButton() {
+		return this._addButton("Menu", () => {
+				this._openBattleMenu();
+			}, 'nav-button', 'menu-button');
+	}
+	_createWaitButton() {
+		return this._addButton("Wait", () => {
+				this._playerWaitUnit();
+			}, 'nav-button', 'wait-button');
 	}
 	_createEndTurnButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'end-turn-button');
-		button.onclick = () => {
-			this._playerEndTurn();
-		};
-		return button;
+		return this._addButton("End Turn", () => {
+				this._playerEndTurn();
+			}, 'nav-button', 'end-turn-button');
 	}
 
 	_buildDOM() {
 		this.el.appendChild(this._turnTitleEl);
+		this.el.appendChild(this._turnSubtitleEl);
 		this.el.appendChild(this._menuButtonEl);
-		this.el.appendChild(this._undoButtonEl);
+		this.el.appendChild(this._waitButtonEl);
 		this.el.appendChild(this._endTurnButtonEl);
 
 		this.el.appendChild(this._board.el);
@@ -346,19 +361,23 @@ class BattleScene extends Scene {
 		}
 
 		if (this._phase == BattleScene.DeployPhase) {
+			this._turnSubtitleEl.innerText = `${this.playerTeam.size}/${this._maxDeploy}`;
+		} else if (this._phase == BattleScene.EnemyPhase) {
+			this._turnSubtitleEl.innerText = "Enemy";
+		} else {
+			this._turnSubtitleEl.innerText = "Player";
+		}
+
+		if (this._phase == BattleScene.DeployPhase) {
 			this._endTurnButtonEl.innerText = "Ready";
 		} else {
 			this._endTurnButtonEl.innerText = "End Turn";
 		}
-		this._endTurnButtonEl.classList.toggle('disabled', !!(this._autoPhase || this.playerTeam.size == 0));
+		this._endTurnButtonEl.style.display = (!this._autoPhase && !this._unit || this._phase == BattleScene.DeployPhase) ? "" : "none";
+		this._endTurnButtonEl.classList.toggle('disabled', this.playerTeam.size == 0);
 
-		if (!this._lastMove && this._canRedeploy) {
-			this._undoButtonEl.innerText = "Redeploy";
-		} else {
-			this._undoButtonEl.innerText = "Undo Move";
-		}
-		this._undoButtonEl.style.display = (this._phase == BattleScene.DeployPhase) ? "none" : "";
-		this._undoButtonEl.classList.toggle('disabled', this._autoPhase || (!this._lastMove && !this._canRedeploy));
+		this._waitButtonEl.style.display = (this._phase == BattleScene.PlayerPhase && this._unit) ? "" : "none";
+		this._waitButtonEl.classList.toggle('disabled', !this._unit || !this._unit.canAct);
 	}
 	//#endregion refresh
 
@@ -368,7 +387,7 @@ class BattleScene extends Scene {
 	static get EnemyPhase() { return 2; }
 	static get EndPhase() { return -1; }
 
-	_deploy() {
+	_startDeploy() {
 		this._turn = 1;
 		this._phase = BattleScene.DeployPhase;
 		this._setActiveTeam(this.playerTeam);
@@ -388,6 +407,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(this.playerTeam);
 		this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 		this._deployList.hide();
+		this._sfxStartBattle.play();
 		this._showPhaseBanner("Battle Start");
 
 		this._deselectSkill();
@@ -410,6 +430,12 @@ class BattleScene extends Scene {
 			await this._addReinforcements();
 		}
 
+		if (this._phase == BattleScene.DeployPhase) {
+			this._sfxStartBattle.play();
+		} else {
+			this._sfxEndTurn.play();
+		}
+
 		switch (this._phase) {
 			case BattleScene.DeployPhase:
 				this._deployList.hide();
@@ -417,13 +443,9 @@ class BattleScene extends Scene {
 				this._enableGuests(this.playerTeam);
 				this.enemyTeam.members.forEach(unit => unit.aiSetDirection());
 				this._showPhaseBanner("Battle Start");
-				this._canRedeploy = true;
 				break;
 
 			case BattleScene.PlayerPhase:
-				if (SaveData.autoFace) {
-					this.playerTeam.members.forEach(unit => unit.aiSetDirection());
-				}
 				this._phase = BattleScene.EnemyPhase;
 				this._setActiveTeam(this.enemyTeam);
 				this._showPhaseBanner("Enemy Phase");
@@ -505,6 +527,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Victory!");
+		Bgm.play(this._bgmVictory, 0, true);
 	}
 	_lose() {
 		if (this._lastScene) this._lastScene.sendData({ complete: false });
@@ -513,6 +536,7 @@ class BattleScene extends Scene {
 		this._setActiveTeam(null);
 		this.refresh();
 		this._showEndScreen("Defeat");
+		Bgm.play(this._bgmDefeat, 0, true);
 	}
 
 	_showPhaseBanner(text) {
@@ -556,12 +580,26 @@ class BattleScene extends Scene {
 		});
 	}
 	_playerEndTurn() {
-		if (!SaveData.confirmEndTurn || this._phase == BattleScene.DeployPhase) {
-			this._endTurn();
+		var prompt = (this._phase == BattleScene.DeployPhase) ? "Confirm deployment?" : "End Turn?";
+		this._openPrompt(prompt, result => {
+			if (result == 1) {
+				this._endTurn();
+			}
+		});
+	}
+	_playerWaitUnit() {
+		if (!this._unit || !this._unit.canAct || !this._unit.myTurn) return;
+
+		if (!SaveData.confirmEndTurn) {
+			if (SaveData.autoFace) this._unit.aiSetDirection();
+			this._waitUnit();
+			this.refresh();
 		} else {
-			this._openPrompt("End Turn?", result => {
-				if (result == 1) {
-					this._endTurn();
+			this._openPrompt("Have this unit wait?", result => {
+				if (result) {
+					if (SaveData.autoFace) this._unit.aiSetDirection();
+					this._waitUnit();
+					this.refresh();
 				}
 			});
 		}
@@ -580,12 +618,16 @@ class BattleScene extends Scene {
 	}
 	_deselectUnit() {
 		this._deselectTarget();
-		if (this._unit) this._unit.deselect();
+		if (this._unit) {
+			if (this._unit == this._lastMove) this._undoMove(true);
+			this._unit.deselect();
+		}
 		this._unit = null;
 		this._skillList.setUser(null);
 	}
 	async _moveUnit(unit, square) {
 		this.setBusy();
+		unit.sfxMove.play();
 		var success = unit.move(square);
 		this._clearAreas();
 		if (await success) {
@@ -595,17 +637,15 @@ class BattleScene extends Scene {
 		this.setDone();
 		return success;
 	}
-	_undoMove() {
+	_undoMove(noSound) {
 		var unit = this._moveStack.pop();
 		if (unit) {
+			if (!noSound) Game.sfxCancel.play();
 			unit.undoMove();
-		} else if (this._canRedeploy) {
-			this._deploy();
 		}
 	}
 	_clearMoves() {
 		this._moveStack = [];
-		this._canRedeploy = false;
 	}
 	get _lastMove() {
 		if (this._moveStack.length > 0) return this._moveStack[this._moveStack.length-1];
@@ -620,13 +660,12 @@ class BattleScene extends Scene {
 	 	} else {
 			this._board.movePiece(piece, target);
 		}
-		this._deployList.deployed = this.playerTeam.size;
+		piece.sfxSpawn.play();
 		this._deselectUnit();
 	}
 	_retreatUnit(piece, container) {
 		if (piece.square) {
 			piece.setParent(container);
-			this._deployList.deployed = this.playerTeam.size;
 		}
 	}
 
@@ -635,6 +674,7 @@ class BattleScene extends Scene {
 		if (this._skill != skill) this._deselectSkill();
 
 		this._skill = skill;
+		Game.sfxAccept.play();
 		return true;
 	}
 	_deselectSkill() {
@@ -649,7 +689,9 @@ class BattleScene extends Scene {
 		if (await success) {
 			this._clearMoves();
 			this._deselectSkill();
-			this._isBattleOver();
+			if (!this._isBattleOver()) {
+				this._unit.startFacing();
+			}
 			this._skillList.setUser(this._unit);
 		}
 		this.setDone();
@@ -672,7 +714,7 @@ class BattleScene extends Scene {
 	_goBack() {
 		if (this._skill) {
 			this._deselectSkill();
-		} else if (this._unit && this._unit == this._lastMove) { // undo move before deselecting
+		} else if (this._unit && this._unit == this._lastMove) {
 			this._undoMove();
 		} else if (this._unit) {
 			this._deselectUnit();
@@ -682,13 +724,21 @@ class BattleScene extends Scene {
 			this._openBattleMenu();
 		}
 	}
+	_waitUnit() {
+		if (!this._unit) return;
+		this._unit.passTurn();
+		this._clearMoves();
+		this._unit.startFacing();
+	}
 
 	async _addReinforcements() {
 		for (var i = 0; i < this._reinforcementData.length; i++) {
 			var data = this._reinforcementData[i];
 			if (data.turn == this._turn) {
 				var newPiece = this._addMapUnit(data);
+				newPiece.aiSetDirection();
 				newPiece.addTimedClass(500, 'spawn');
+				newPiece.sfxSpawn.play();
 				await Game.asyncPause(500);
 			}
 		}
@@ -714,6 +764,13 @@ class BattleScene extends Scene {
 	pieceEvent(piece, dragging) {
 		if (!piece || this._autoPhase || this.busy) return;
 
+		// TODO: Mesh this in better
+		if (this._unit && this._unit.isFacing && this._unit != piece) {
+			this.refresh();
+			return;
+		}
+
+		// selecting enemy pieces
 		if (!this._skill && piece.type == Piece.Unit && !piece.myTurn) {
 			if (this._unit != piece) {
 				this._selectUnit(piece);
@@ -722,14 +779,24 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._phase == BattleScene.DeployPhase) {
+		// TODO: This is kind of awkwardly bolted on, integrate the logic more cleanly
+		// TODO: Work out when you can deselect a unit and when you can't
+		if (this._unit == piece && piece.isFacing) {
+			piece.confirmFacing();
+			this._deselectUnit();
+			// TODO: Facing sound effect?
+
+			if (this.playerTeam.allDone) {
+				this._endTurn();
+			}
+		} else if (this._phase == BattleScene.DeployPhase) {
 			if (piece.type == Piece.Unit && piece.myTurn) {
-				if (!this._unit || !this._unit.myTurn || dragging) {
-					this._selectUnit(piece);
-					this._selectTarget(piece.square);
-				} else if (this._unit == piece) {
+				if (this._unit == piece) {
 					this._deselectUnit();
-				} else if (!this._unit.square) { // selecting undeployed units
+				} else {
+					if (!dragging && piece.onField) {
+						this._retreatUnit(piece, this._deployList);
+					}
 					this._selectUnit(piece);
 				}
 			}
@@ -741,7 +808,7 @@ class BattleScene extends Scene {
 					this._deselectSkill();
 				}
 			}
-
+			// TODO: Deselecting units should be harder 
 			if (piece.type == Piece.Unit && piece.myTurn) {
 				if (this._unit != piece) {
 					this._selectUnit(piece);
@@ -757,12 +824,24 @@ class BattleScene extends Scene {
 	positionEvent(square, dragId) {
 		if (!square || this._autoPhase || this.busy) return;
 
+		// TODO: Still kind of haphazardly bolted on, here
+		if (this._unit && this._unit.isFacing) {
+			this.refresh();
+			return;
+		}
+
 		if (this._phase == BattleScene.DeployPhase) {
 			if (!square.inRange) {
 				this._deselectUnit();
 			} else if (this._unit && this._unit.idMatch(dragId)) {
 				if (square == this._target) {
+					var newUnit = square.piece;
 					this._swapDeploySquares(this._unit, square);
+					if (newUnit) {
+						this._selectUnit(newUnit);
+					} else {
+						this._deselectUnit();
+					}
 				} else {
 					this._selectTarget(square);
 					this._refreshTargetArea();
@@ -800,6 +879,7 @@ class BattleScene extends Scene {
 		if (this._phase == BattleScene.DeployPhase && container == this._deployList) {
 			if (this._unit && this._unit.idMatch(dragId)) {
 				this._retreatUnit(this._unit, container);
+				Game.sfxCancel.play(); // TODO: Play a retreating noise?
 				this._deselectUnit();
 			}
 			this.refresh();
@@ -837,13 +917,8 @@ class BattleScene extends Scene {
 
 		if (this._autoPhase || this.busy) return;
 
-		if (key == "Escape") {
+		if (key == "Escape" || key == "z" || key == "Z") {
 			this._goBack();
-			this.refresh();
-		}
-
-		if (key == "z" || key == "Z") {
-			this._undoMove();
 			this.refresh();
 		}
 
@@ -863,7 +938,8 @@ class BattleScene extends Scene {
 			}
 		}
 
-		if (this._unit && this._unit.canFace) {
+		// TODO: Work with this to refine it a bit more
+		if (this._unit && this._unit.isFacing) {
 			if (key == "ArrowUp") {
 				this._unit.faceDirection(UnitPiece.North);
 			}
@@ -908,7 +984,9 @@ class BattleScene extends Scene {
 			this.refresh();
 
 			if (!this._skill) {
+				this._waitUnit();
 				this._unit.aiSetDirection();
+				this._unit.refresh();
 				this._deselectUnit();
 				continue;
 			}
@@ -920,7 +998,10 @@ class BattleScene extends Scene {
 				await Game.asyncPause(waitTime);
 				await this._useSkill(this._skill, this._target);
 			}
-			if (this._unit) this._unit.aiSetDirection();
+			if (this._unit) {
+				this._unit.aiSetDirection();
+				this._unit.refresh();
+			}
 			this._deselectUnit();
 			this.refresh();
 
@@ -970,7 +1051,11 @@ class Team {
 
 	//#region turn
 	get untouched() {
-		return this.members.every(member => member.dead || (member.canMove && member.canAct));
+		return [...this.members].every(member => member.dead || (member.canMove && member.canAct));
+	}
+	get allDone() {
+		return [...this.members].every(member => member.dead || !member.square || !member.myTurn ||
+			!(member.canAct || member.canMove || member.isFacing));
 	}
 	get isAuto() {
 		return this._auto;
@@ -1045,9 +1130,12 @@ class MapScene extends Scene {
 			this._piece.move(this._map.getNode(mapData.startNode));
 		}
 		this._camera.setViewSize(Game.width, Game.height);
+
+		this._bgm = mapData.bgm || "";
 	}
 
 	start() {
+		super.start();
 		this._camera.focus(this._piece.node);
 
 		if (this.paused) {
@@ -1063,6 +1151,7 @@ class MapScene extends Scene {
 
 	//#region ui setup
 	_createExploreButton() {
+		// TODO: This isn't currently used
 		var button = document.createElement('div');
 		button.classList.add('button', 'nav-button', 'explore-button');
 		button.onclick = () => {
@@ -1076,13 +1165,9 @@ class MapScene extends Scene {
 		return textBox;
 	}
 	_createMenuButton() {
-		var button = document.createElement('div');
-		button.classList.add('button', 'nav-button', 'menu-button');
-		button.onclick = () => {
-			this._openMapMenu();
-		};
-		button.innerText = "Menu";
-		return button;
+		return this._addButton("Menu", () => {
+				this._openMapMenu();
+			}, 'nav-button', 'menu-button');
 	}
 	_buildView() {
 		this._camera.el.appendChild(this._map.el);

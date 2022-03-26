@@ -1,6 +1,8 @@
 {
 	"type": "map",
 
+	"bgm": "Not As It Seems.mp3",
+
 	"width": 1024,
 	"height": 1000,
 

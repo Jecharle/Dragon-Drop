@@ -11,6 +11,25 @@ p {
 	margin-block: 0.25em;
 }
 
+/*#region common styles*/
+.selectable,.viewable {
+	cursor: pointer;
+}
+	.selectable.draggable,.viewable.draggable {
+		cursor: all-scroll;
+	}
+.unselectable>.sprite {
+	filter: grayscale(100%);
+}
+
+.intro {
+	animation: fade-out 0.5s reverse backwards;
+}
+.outro {
+	animation: fade-out 0.5s forwards;
+}
+/*#endregion common styles*/
+
 /*#region input element styles*/
 input {
 	font: 16px pixelFont;
@@ -96,25 +115,6 @@ input[type="range"]::-ms-thumb {
 
 /*#endregion input element styles*/
 
-/*#region common styles*/
-.selectable,.viewable {
-	cursor: pointer;
-}
-	.selectable.draggable,.viewable.draggable {
-		cursor: all-scroll;
-	}
-.unselectable>.sprite {
-	filter: grayscale(100%);
-}
-
-.intro {
-	animation: fade-out 0.5s reverse backwards;
-}
-.outro {
-	animation: fade-out 0.5s forwards;
-}
-/*#endregion common styles*/
-
 /*#region game window*/
 .game-window {
 	width: var(--game-w);
@@ -150,6 +150,7 @@ input[type="range"]::-ms-thumb {
 
 /*#region menus*/
 .menu {
+	position: absolute;
 	width: 100%;
 	height: 100%;
 	background-color: #000000aa;
@@ -195,14 +196,14 @@ input[type="range"]::-ms-thumb {
 }
 
 .volume-slider input::before {
-	content: "Off";
+	content: "0%";
 	position: absolute;
 	bottom: -1em;
 	left: 0;
 	color: white;
 }
 .volume-slider input::after {
-	content: "Full";
+	content: "100%";
 	position: absolute;
 	bottom: -1em;
 	right: 0;
@@ -224,19 +225,23 @@ input[type="range"]::-ms-thumb {
 	color: white;
 }
 
-.dialog {
+/*#region dialog*/
+.dialog-box {
 	position: absolute;
-	top: 20%;
-	left: 20%;
-	width: 12em;
+	bottom: 16px;
+	width: 90%;
 	height: 4em;
 	display: flex;
 	align-items: flex-start;
 	justify-content: flex-start;
 	border: 1px solid black;
 	background-color: white;
+	padding: 0.5em;
+}
+.dialog {
+	width: 100%;
+	height: 100%;
 	color: black;
-	padding: 1em;
 }
 	.done .dialog::after {
 		content: 'V';
@@ -244,27 +249,62 @@ input[type="range"]::-ms-thumb {
 		right: 2px;
 		bottom: 0;
 	}
+
+.nametag {
+	position: absolute;
+	top: -15px;
+	left: 5px;
+	height: max-content;
+	width: max-content;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: black;
+	padding: 2px;
+	border: 1px solid black;
+	background-color: white;
+}
 .dialog-box .face {
 	position: absolute;
-	top: 20%;
-	right: 80%;
+	bottom: 100%;
+	left: 0;
 	height: var(--face-h);
 	width: var(--face-w);
 	box-sizing: border-box;
 	background-repeat: no-repeat;
 	background-position: bottom left;
+	transform: scale(4); /*TODO: Once I get properly sized portraits, this can drop to 1*/
+	transform-origin: left bottom;
 }
 
-.dialog-box.right .face {
-	left: 80%;
-	right: unset;
-	transform: scaleX(-1);
-}
-.dialog-box.right .dialog {
+.right .nametag {
 	left: unset;
-	right: 20%;
+	right: 5px;
 }
+.right .dialog-box .face {
+	left: 100%;
+	transform: scale(-4, 4);
+}
+/*#endregion dialog*/
 
+/*#region message log*/
+.message-log {
+	display: flex;
+	flex-flow: column;
+	justify-content: flex-end;
+	align-items: center;
+	overflow-y: scroll;
+}
+	/* TODO: Custom scroll bar */
+
+.message-log .message {
+	width: 80%;
+	height: max-content;
+	color: white;
+	margin: 0.5em;
+	border-bottom: 1px solid white;
+}
+/*#endregion message log*/
 /*#endregion menus*/
 
 /*#region battle scene*/
@@ -273,9 +313,9 @@ input[type="range"]::-ms-thumb {
 	width: 15%;
 	position: absolute;
 }
-	.undo-button {
-		bottom: 12px;
-		left: 12px;
+	.wait-button {
+		bottom: 4px;
+		right: 15%;
 	}
 	.end-turn-button {
 		bottom: 2px;
@@ -290,7 +330,14 @@ input[type="range"]::-ms-thumb {
 .turn-title {
 	font-size: 2rem;
 	position: absolute;
-	top: 16px;
+	top: 0.5rem;
+	right: 24px;
+	text-align: center;
+}
+.turn-subtitle {
+	font-size: 1.5rem;
+	position: absolute;
+	top: 2rem;
 	right: 32px;
 	text-align: center;
 }
@@ -328,8 +375,8 @@ input[type="range"]::-ms-thumb {
 		visibility: visible;
 	}
 	.lifebar>.icon {
-		left: calc(100% + 1px);
-		top: -3px;
+		right: calc(var(--icon-w) + 1px);
+		top: -4px;
 	}
 /*#endregion lifebar*/
 
@@ -368,12 +415,12 @@ input[type="range"]::-ms-thumb {
 .icon .icon {
 	position: absolute;
 	left: 1px;
-	top: 1px;
+	top: -1px;
 }
 .icon .double {
 	background: inherit;
 	position: absolute;
-	left: -1px;
+	left: 1px;
 	top: -2px;
 	z-index: -1;
 	filter: brightness(75%);
@@ -736,7 +783,7 @@ input[type="range"]::-ms-thumb {
 				content: "Cover";
 			}
 		.tile-water>.sprite {
-			border-image-source: url(../img/tilesets/testWater.png);
+			border-image-source: url(../img/tilesets/testWater.gif);
 		}
 			.tile-water:hover::before {
 				content: "Rough terrain";
@@ -929,6 +976,22 @@ input[type="range"]::-ms-thumb {
 	}
 
 	/*#region unit status*/
+	.ally.selectable.unit::before {
+		content: "";
+		width: 11px;
+		height: 11px;
+		position: absolute;
+		top: -2px;
+		background-image: url("../img/system/action.png");
+		background-repeat: no-repeat;
+		pointer-events: none;
+		transform: translateZ(99px);
+	}
+	.ally.unit:hover::before, .hp-change.ally.unit::before, .in-range.ally.unit::before, .in-area.ally.unit::before {
+		top: -9px;
+	}
+	/* TODO: Don't show this or the facing arrow in the deploy dock */
+
 	.unit .lifebar {
 		visibility: hidden;
 		pointer-events: none;
@@ -939,23 +1002,15 @@ input[type="range"]::-ms-thumb {
 	}
 
 	.unit .facing-arrow {
-		visibility: hidden;
-		pointer-events: none;
 		position: absolute;
-		bottom: 0;
-		width: var(--square-w);
-		height: var(--square-h);
+		bottom: calc(var(--square-h)/-2);
+		width: calc(2*var(--square-w));
+		height: calc(2*var(--square-h));
 		background-repeat: no-repeat;
 		background-image: url(../img/system/directions.png);
-		background-position-x: 0;
-		background-position-y: calc(var(--y-frame)*var(--square-h));
-		transform: scaleX(var(--x-scale)) translateZ(99px);
-	}
-	.unit:hover .facing-arrow, .in-range .facing-arrow, .in-area .facing-arrow {
-		visibility: visible;
-	}
-	.enemy .facing-arrow {
-		background-position-x: calc(-1 * var(--square-w));
+		background-position-x: calc((var(--x-scale) - 1)*var(--square-w));
+		background-position-y: calc(2*var(--y-frame)*var(--square-h));
+		transform: translateZ(99px);
 	}
 
 	.unit .status-list {
@@ -1065,6 +1120,11 @@ input[type="range"]::-ms-thumb {
 		background-image: url("../img/sprites/testObject.png");
 		background-repeat: repeat-y;
 	}
+	.pillar>.sprite {
+		--unit-h: 48px;
+		background-image: url("../img/sprites/testPillarObject.png");
+		background-repeat: repeat-y;
+	}
 	/*#endregion unit skins*/
 /*#endregion unit*/
 
@@ -1072,32 +1132,31 @@ input[type="range"]::-ms-thumb {
 .deploy-list {
 	position: absolute;
 	z-index: 0;
-	width: calc(var(--unit-w)*2);
-	height: calc(var(--unit-h)*5);
-	left: 2px;
-	bottom: 2px;
+	/*width: calc(var(--unit-w)*6);*/
+	width: max-content;
+	height: calc(var(--unit-h));
+	top: 2px;
 	display: flex;
-	flex-flow: column wrap;
+	flex-flow: row wrap;
 	justify-content: flex-start;
 	background-color: white;
 	border: 1px solid black;
-	border-radius: 4px;
+	border-radius: 2px;
 }
 	.deploy-list .lifebar {
 		visibility: visible;
-		top: unset;
-		bottom: var(--lifebar-h);
-		left: var(--unit-w);
+	}
+	.deploy-list .ally.selectable.unit::before {
+		content: none;
 	}
 	.deploy-list .unit {
 		position: relative;
 		bottom: 0;
-		margin-top: 1px;
 	}
 	.deploy-list .capacity-label {
 		position: absolute;
-		top: 1px;
-		right: 2px;
+		top: 0px;
+		right: -24px;
 	}
 /*#endregion deploy list*/
 /*#endregion battle scene*/

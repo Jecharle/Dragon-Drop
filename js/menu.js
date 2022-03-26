@@ -3,7 +3,7 @@
  The root class for button-based menus for options,
  title screens, and maybe also dialog
 ***************************************************/
-class Menu extends ElObj {
+class Menu extends UiElObj {
 	constructor(parent) {
 		super();
 		this.parent = parent;
@@ -18,60 +18,11 @@ class Menu extends ElObj {
 	}
 
 	_addAllControls() {
-		this._closeButton = this._addButton("Close", 'close-button');
-		this._closeButton.onclick = () => {
-			this.close(0);
-		}
+		this._closeButton = this._addButton("Close", () => {
+				this.close(0);
+			}, 'close-button');
 		this.el.appendChild(this._closeButton);
 	}
-
-	//#region controls
-	_addButton(text, ...classList) {
-		var newButton = document.createElement('div');
-		newButton.classList.add("button", ...classList);
-		newButton.innerText = text;
-		return newButton;
-	}
-
-	_addCheckbox(id, ...classList) {
-		var newCheckbox = document.createElement('input');
-		newCheckbox.classList.add(...classList);
-		newCheckbox.type = "checkbox";
-		newCheckbox.id = id;
-		return newCheckbox;
-	}
-
-	_addSlider(id, min, max, ...classList) {
-		var newSlider = document.createElement('input');
-		newSlider.classList.add(...classList);
-		newSlider.type = "range";
-		newSlider.min = min;
-		newSlider.max = max;
-		newSlider.id = id;
-		return newSlider;
-	}
-
-	_addLabel(text, control, ...classList) {
-		var newLabel = document.createElement('label');
-		newLabel.classList.add(...classList);
-		newLabel.innerText = text;
-		if (control) newLabel.htmlFor = control.id;
-		return newLabel;
-	}
-
-	_addTitle(text, ...classList) {
-		var newTitle = document.createElement('h1');
-		newTitle.classList.add(...classList);
-		newTitle.innerText = text;
-		return newTitle;
-	}
-
-	_addRow(...classList) {
-		var newRow = document.createElement('div');
-		newRow.classList.add('menu-row', ...classList);
-		return newRow;
-	}
-	//#endregion controls
 
 	//#region open/close
 	open(callback) {
@@ -130,16 +81,14 @@ class YesNoMenu extends Menu {
 
 	_addYesNoRow() {
 		var row = this._addRow('yes-no');
-		this._acceptButton = this._addButton("Yes", 'close-button');
-		this._acceptButton.onclick = () => {
-			this.close(1);
-		}
+		this._acceptButton = this._addButton("Yes", () => {
+				this.close(1);
+			}, 'close-button');
 		row.appendChild(this._acceptButton);
 
-		this._cancelButton = this._addButton("No", 'close-button');
-		this._cancelButton.onclick = () => {
-			this.close(0);
-		}
+		this._cancelButton = this._addButton("No", () => {
+				this.close(0);
+			}, 'close-button');
 		row.appendChild(this._cancelButton);
 		return row;
 	}
@@ -180,6 +129,7 @@ class OptionsMenu extends Menu {
 		var optionBox = document.createElement('div');
 		optionBox.classList.add('menu-box');
 		optionBox.appendChild(this._addTextSpeedRow());
+		optionBox.appendChild(this._addTextAutoRow());
 		optionBox.appendChild(this._addEndTurnConfirmRow());
 		optionBox.appendChild(this._addAutoFaceRow());
 		optionBox.appendChild(this._addSoundRow());
@@ -194,6 +144,14 @@ class OptionsMenu extends Menu {
 		this._textSpeedSlider = this._addSlider("textSpeedSlider", 0, 2);
 		row.appendChild(this._addLabel("Text speed", this._textSpeedSlider));
 		row.appendChild(this._textSpeedSlider);
+		return row;
+	}
+
+	_addTextAutoRow() {
+		var row = this._addRow();
+		this._textAutoCheckbox = this._addCheckbox("textAutoCheckbox");
+		row.appendChild(this._textAutoCheckbox);
+		row.appendChild(this._addLabel("Auto Advance Dialog", this._textAutoCheckbox));
 		return row;
 	}
 	
@@ -231,17 +189,15 @@ class OptionsMenu extends Menu {
 
 	_addCloseRow() {
 		var row = this._addRow('accept-cancel');
-		this._acceptButton = this._addButton("Accept", 'close-button');
-		this._acceptButton.onclick = () => {
-			this._saveChanges();
-			this.close(1);
-		}
+		this._acceptButton = this._addButton("Accept", () => {
+				this._saveChanges();
+				this.close(1);
+			}, 'close-button');
 		row.appendChild(this._acceptButton);
 
-		this._cancelButton = this._addButton("Cancel", 'close-button');
-		this._cancelButton.onclick = () => {
-			this.close(0);
-		}
+		this._cancelButton = this._addButton("Cancel", () => {
+				this.close(0);
+			}, 'close-button');
 		row.appendChild(this._cancelButton);
 		return row;
 	}
@@ -251,6 +207,7 @@ class OptionsMenu extends Menu {
 	_loadOptions() {
 		SaveData.loadOptions();
 		this._textSpeedSlider.value = SaveData.textSpeed;
+		this._textAutoCheckbox.checked = SaveData.textAuto;
 		this._endTurnConfirmCheckbox.checked = SaveData.confirmEndTurn;
 		this._autoFaceCheckbox.checked = SaveData.autoFace;
 		this._sfxVolumeSlider.value = SaveData.sfxVolume;
@@ -259,10 +216,12 @@ class OptionsMenu extends Menu {
 
 	_saveChanges() {
 		SaveData.textSpeed = this._textSpeedSlider.value;
+		SaveData.textAuto = this._textAutoCheckbox.checked;
 		SaveData.confirmEndTurn = this._endTurnConfirmCheckbox.checked;
 		SaveData.autoFace = this._autoFaceCheckbox.checked;
 		SaveData.sfxVolume = this._sfxVolumeSlider.value;
 		SaveData.bgmVolume = this._bgmVolumeSlider.value;
+		Bgm.refreshVolume();
 		SaveData.saveOptions();
 	}
 	//#endregion load/save
@@ -296,24 +255,21 @@ class BattleMenu extends Menu {
 		this.el.appendChild(this._addTitle("Paused"));
 
 		// unpause
-		this._resumeButton = this._addButton("Resume");
-		this._resumeButton.onclick = () => {
-			this.close(0);
-		};
+		this._resumeButton = this._addButton("Resume", () => {
+				this.close(0);
+			});
 		this.el.appendChild(this._resumeButton);
 
 		// options menu
-		this._optionsButton = this._addButton("Options");
-		this._optionsButton.onclick = () => {
-			this.close(1);
-		};
+		this._optionsButton = this._addButton("Options", () => {
+				this.close(1);
+			});
 		this.el.appendChild(this._optionsButton);
 
 		// quit the battle
-		this._quitButton = this._addButton("Give Up");
-		this._quitButton.onclick = () => {
-			this.close(2);
-		};
+		this._quitButton = this._addButton("Give Up", () => {
+				this.close(2);
+			});
 		this.el.appendChild(this._quitButton);
 	}
 
@@ -343,24 +299,21 @@ class MapMenu extends Menu {
 		this.el.appendChild(this._addTitle("Paused"));
 
 		// unpause
-		this._resumeButton = this._addButton("Resume");
-		this._resumeButton.onclick = () => {
-			this.close(0);
-		};
+		this._resumeButton = this._addButton("Resume", () => {
+				this.close(0);
+			});
 		this.el.appendChild(this._resumeButton);
 
 		// options menu
-		this._optionsButton = this._addButton("Options");
-		this._optionsButton.onclick = () => {
-			this.close(1);
-		};
+		this._optionsButton = this._addButton("Options", () => {
+				this.close(1);
+			});
 		this.el.appendChild(this._optionsButton);
 
 		// quit to title
-		this._quitButton = this._addButton("Return to title");
-		this._quitButton.onclick = () => {
-			this.close(2);
-		};
+		this._quitButton = this._addButton("Return to title", () => {
+				this.close(2);
+			});
 		this.el.appendChild(this._quitButton);
 	}
 
@@ -383,11 +336,14 @@ class MapMenu extends Menu {
 class DialogBox extends Menu {
 	constructor(parent) {
 		super(parent);
-		this.el.classList.add('dialog-box');
 		this._queue = [];
+		this._log = [];
+		this._name = "";
 		this._message = "";
 		this._progress = 0;
 		this._intervalFunction = null;
+		this._timeoutFunction = null;
+		this._sfxText = Sfx.getSfx("step1.wav");
 
 		this.el.onclick = () => {
 			this._skip();
@@ -395,32 +351,58 @@ class DialogBox extends Menu {
 	}
 
 	_addAllControls() {
+		this._dialogBox = document.createElement("div");
+		this._dialogBox.classList.add('dialog-box');
+
+		// TODO: Make two separate portraits, controlled by different settings
 		this._portrait = document.createElement("div");
 		this._portrait.classList.add('face');
-		this.el.appendChild(this._portrait);
+		this._dialogBox.appendChild(this._portrait);
 		
 		this._textArea = this._addLabel("", null, 'dialog');
-		this.el.appendChild(this._textArea);
+		this._dialogBox.appendChild(this._textArea);
+
+		this._nametag = this._addLabel("", this._textArea, 'nametag');
+		this._dialogBox.appendChild(this._nametag);
+
+		this.el.appendChild(this._dialogBox);
 	}
 
-
-
 	//#region advancing
-	_start(message) {
-		var input = message.split("|");
-		
-		if (input.length > 1) this.style = input[0].split(" ");
+	_start(input) {
+		var reset = input.match(/\$reset\[\]/);
+		if (reset) {
+			this.style = [];
+			this._name = "";
+			this._nametag.style.display = "none";
+		}
+
+		var portrait = input.match(/\$portrait\[(.*?)\]/);
+		if (portrait) {
+			this.style = portrait[1].length > 0 ? portrait[1].split(" ") : [];
+		}
+
+		var name = input.match(/\$name\[(.*?)\]/);
+		if (name) {
+			this._name = name[1].trim();
+			this._nametag.innerText = this._name;
+			this._nametag.style.display = (name[1].length > 0 ? "" : "none");
+		}
+
+		// TODO: voice / text sound settings
+		// TODO: multiple portraits
+		// TODO: background changes, etc.
+
+		var message = input.replace(/\$.*?\[(.*?)\]/g, ''); // The text, without the '$[]' commands
 
 		this._progress = 0;
-		this._message = input.length > 0 ? input[input.length-1] : "";
+		this._message = message.trim();
 		this._textArea.innerText = "";
 		this.el.classList.remove('done');
 
 		this._intervalFunction = setInterval(() => {
 			this._step();
 		}, [80, 40, 20][SaveData.textSpeed]);
-		
-		// TODO: Minor delay / startup transition, so it doesn't feel abrupt
 	}
 	_step() {
 		this._progress++;
@@ -428,21 +410,40 @@ class DialogBox extends Menu {
 		if (this.isDone) {
 			this._finish();
 		} else {
-			this._textArea.innerText = this._message.substr(0, this._progress);
-			// TODO: Text sounds!
+			this._textArea.innerText = this._message.slice(0, this._progress);
+			if (this._progress % 3 == 0) this._sfxText.play();
 		}
 	}
 	_finish() {
 		this.el.classList.add('done');
 		this._progress = this._message.length;
 		this._textArea.innerText = this._message;
-		if (this._intervalFunction) clearInterval(this._intervalFunction);
+
+		if (this._message.length > 0) {
+			var logMessage = this._name.length > 0 ? `<strong>${this._name}</strong>: ${this._message}` : this._message;
+			this._log.push(logMessage);
+		}
+
+		if (this._intervalFunction) {
+			clearInterval(this._intervalFunction);
+			this._intervalFunction = null;
+		}
+		if (SaveData.textAuto) {
+			this._timeoutFunction = setTimeout(() => {
+				this._skip();
+			}, 900);
+		}
 	}
 	get isDone() {
 		return !(this._message && this._progress < this._message.length);
 	}
 
 	_skip() {
+		if (this._timeoutFunction) {
+			clearTimeout(this._timeoutFunction);
+			this._timeoutFunction = null;
+		}
+
 		if (!this.isDone) {
 			this._finish();
 		} else if (this._queue.length > 0) {

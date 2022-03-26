@@ -152,6 +152,7 @@ class Lifebar extends Detail {
 	set defenseValue(value) {
 		this._defense = value;
 		this._defEl.classList.toggle('icon', value != 0);
+		this.el.style.marginLeft = (value != 0) ? "8px" : "";
 
 		if (this._defEl.firstChild) this._defEl.removeChild(this._defEl.firstChild);
 		if (value) this._defEl.appendChild(Detail.numberSprite(value));
@@ -302,14 +303,15 @@ class CooldownLabel extends Detail {
  Limited quantity label
 ***************************************************/
 class QuantityLabel extends Detail {
+	get elClass() {
+		return 'quantity-label';
+	}
+
 	set value(value) {
 		value += "";
 		if (value.length) value = "x"+value;
 		this._value = value;
 		this.el.innerHTML = `<strong>${value}</strong>`;
-	}
-	get elClass() {
-		return 'quantity-label';
 	}
 }
 

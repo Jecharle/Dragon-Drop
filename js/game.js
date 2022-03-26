@@ -45,6 +45,13 @@ class Game {
 		return 384;
 	}
 
+	static get sfxAccept() {
+		return Sfx.getSfx("step1.wav");
+	}
+	static get sfxCancel() {
+		return Sfx.getSfx("soft_hit2.wav");
+	}
+
 	static async asyncPause(milliseconds) {
 		if (!milliseconds || milliseconds < 0) return;
 

@@ -40,6 +40,7 @@ class Container extends ElObj {
 	//#region input events
 	_allowDrop(ev) {
 		ev.preventDefault();
+		ev.dataTransfer.dropEffect = 'move';
 	}
 	_drop(ev) { }
 	_click(ev) { }
@@ -107,7 +108,7 @@ class Board extends Container {
 	get h() { return this._h; }
 	
 	center() {
-		var height = Square.screenY(this.w+1, this.h+1, 0);
+		var height = Square.screenY(this.w, this.h, 0);
 		var offset = Square.screenX(this.w+1, 0, 0) + Square.screenX(0, this.h+1, 0);
 		this.el.style.top = `${Math.floor((Game.height - height)/2)}px`;
 		this.el.style.left = `${Math.floor((Game.width - offset)/2)}px`;
@@ -520,8 +521,8 @@ class Square extends Position {
 		this.piece = null;
 		this.inRange = false;
 
-		this._ground = Square.None;
-		this._decoration = Square.None;
+		this._ground = Square.NoGround;
+		this._decoration = Square.NoDecoration;
 
 		this.addSubsprites();
 
@@ -618,13 +619,14 @@ class Square extends Position {
 	static get _BlockMove() { return 2; }
 	static get _BlockSight() { return 4; }
 
+	static get NoGround() { return { style: null, terrain: Square._BlockMove }; }
 	static get Plain() { return { style: 'tile-cube', terrain: 0 }; }
 	static get Grass() { return { style: 'tile-grass', terrain: 0 }; }
 	static get Water() { return { style: 'tile-water', terrain: Square._SlowMove }; }
-	static get Pit() { return { style: 'tile-pit', terrain: Square._BlocksMove }; }
+	static get Pit() { return { style: 'tile-pit', terrain: Square._BlockMove }; }
 	
 	static parseGround(string) {
-		if (!string) return this.None;
+		if (!string) return this.NoGround;
 		switch (string.toLowerCase()) {
 			case "pl":
 				return this.Plain;
@@ -635,23 +637,23 @@ class Square extends Position {
 			case "wa":
 				return this.Water;
 			default:
-				return this.None;
+				return this.NoGround;
 		}
 	}
 
+	static get NoDecoration() { return { style: null, terrain: 0 }; }
 	static get Column() { return { style: 'deco-pillar', terrain: Square._BlockMove | Square._BlockSight }; }
 	static get TallGrass() { return { style: 'deco-grass', terrain: Square._BlockSight }; }
-	static get None() { return { style: null, terrain: 0 }; }
 
 	static parseDecoration(string) {
-		if (!string) return this.None;
+		if (!string) return this.NoDecoration;
 		switch (string.toLowerCase()) {
 			case "co":
 				return this.Column;
 			case "tg":
 				return this.TallGrass;
 			default:
-				return this.None;
+				return this.NoDecoration;
 		}
 	}
 
@@ -694,9 +696,6 @@ class DeployUnitList extends Container {
 			if (team) unit.setTeam(team);
 		});
 
-		this._deployCounter = new CurrentMaxLabel(0, 0);
-		this.el.appendChild(this._deployCounter.el);
-
 		this.el.ondragover = this._allowDrop;
 	}
 
@@ -707,20 +706,6 @@ class DeployUnitList extends Container {
 
 	get elClass() {
 		return 'deploy-list';
-	}
-
-	get deployed() {
-		return this._deployCounter.value;
-	}
-	set deployed(value) {
-		this._deployCounter.value = value;
-	}
-
-	get deployLimit() {
-		return this._deployCounter.maxValue;
-	}
-	set deployLimit(value) {
-		this._deployCounter.maxValue = value;
 	}
 
 	hide() {
@@ -1043,9 +1028,6 @@ class OverworldMap extends Container {
 	//#endregion move range
 
 	//#region input events
-	_allowDrop(ev) {
-		ev.preventDefault();
-	}
 	_drop(ev) {
 		ev.preventDefault();
 		var dragElId = ev.dataTransfer.getData("piece");

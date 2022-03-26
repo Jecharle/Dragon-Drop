@@ -14,8 +14,9 @@ class Piece extends SpriteElObj {
 		this.el.onclick = this._click;
 		this.el.ondblclick = this._click;
 		this.el.ondragstart = this._drag;
-		this.el.ondrag = this._hold;
 		this.el.ondragend = this._drop;
+
+		this._getSounds();
 	}
 
 	static _id = Math.floor(Math.random()*1000);
@@ -35,6 +36,13 @@ class Piece extends SpriteElObj {
 	get type() { return Piece.None; }
 	//#endregion piece type
 
+	//#region sounds
+	_getSounds() {
+		super._getSounds();
+		this.sfxSelect = Game.sfxAccept;
+	}
+	//#endregion sounds
+
 	//#region parent
 	setParent(container) {
 		if (this._parent && this._parent != container) {
@@ -51,8 +59,8 @@ class Piece extends SpriteElObj {
 	//#region refresh
 	refresh() { }
 	_setSelectable(selectable, draggable) {
-		this.el.setAttribute("draggable", selectable || draggable);
-		this.el.classList.toggle('draggable', selectable || draggable);
+		this.el.setAttribute("draggable", draggable);
+		this.el.classList.toggle('draggable', draggable);
 
 		this.el.classList.toggle('selectable', selectable);
 		this.el.classList.toggle('viewable', !selectable);
@@ -67,8 +75,14 @@ class Piece extends SpriteElObj {
 	//#endregion
 
 	//#region input events
-	select() { return false; }
-	deselect() { }
+	select(noSound) {
+		this.el.classList.add('selected');
+		if(!noSound) this.sfxSelect.play();
+		return true;
+	}
+	deselect() {
+		this.el.classList.remove('selected');
+	}
 
 	_click(ev) {
 		ev.stopPropagation();
@@ -81,9 +95,6 @@ class Piece extends SpriteElObj {
 		ev.dataTransfer.setDragImage(piece.spriteEl, 40, 56); // TODO: Fix the scaling, etc?
 		if (Game.scene) Game.scene.pieceEvent(piece, true);
 		piece.el.classList.add('dragging');
-	}
-	_hold(ev) {
-
 	}
 	_drop(ev) {
 		ev.dataTransfer.clearData("piece");
@@ -156,9 +167,8 @@ class UnitPiece extends Piece {
 
 	_addDirectionEl() {
 		if (this.hasDirection) {
-			this._directionEl = document.createElement('div');
-			this._directionEl.classList.add('facing-arrow');
-			this.el.appendChild(this._directionEl);
+			this._directionSelector = new DirectionSelector(this);
+			this.el.appendChild(this._directionSelector.el);
 		}
 	}
 
@@ -224,6 +234,8 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this.facingSet = false;
+		this._isFacing = false;
 		this._direction = [1, 0];
 		
 		this._status = {};
@@ -232,6 +244,20 @@ class UnitPiece extends Piece {
 		this.refresh();
 	}
 	//#endregion setup
+
+	//#region sounds
+	_getSounds() {
+		super._getSounds();
+		this._sfxCritical = Sfx.getSfx("critical_damage.wav");
+		this._sfxDamage = Sfx.getSfx("damage.wav");
+		this._sfxBlock = Sfx.getSfx("no_damage.wav");
+		this._sfxHeal = Sfx.getSfx("heal.wav");
+		this._sfxDie = Sfx.getSfx("death.wav");
+		
+		this.sfxMove = Sfx.getSfx("steps.wav");
+		this.sfxSpawn = Sfx.getSfx("solid_hit2.wav"); // TODO: Spawn sound
+	}
+	//#endregion sounds
 
 	get equipment() {
 		return this._equipment;
@@ -323,6 +349,10 @@ class UnitPiece extends Piece {
 	}
 	get alive() {
 		return !this.dead;
+	}
+
+	get onField() {
+		return !!this.square;
 	}
 
 	get moveRange() {
@@ -433,9 +463,8 @@ class UnitPiece extends Piece {
 		this._statusList.value = this._status;
 
 		this._refreshSkills();
-		this._setUnselectable(!this.canMove && !this.canAct && this.myTurn);
-		this._setSelectable(this.myTurn && (this.canMove || this.canAct),
-			this.myTurn && (this.canMove || this.canFace));
+		this._setUnselectable(!this.canMove && !this.canAct && !this.canFace && this.myTurn);
+		this._setSelectable(this.myTurn && (this.canMove || this.canAct || this.canFace), this.myTurn && this.canMove);
 	}
 	_refreshSkills() {
 		this.skills.forEach(skill => skill.refresh());
@@ -447,6 +476,7 @@ class UnitPiece extends Piece {
 			this.setParent(null);
 			this.setTeam(null);
 			if (this._partyMember) this._partyMember.alive = false;
+			this._sfxDie.play();
 		}
 	}
 	//#endregion refresh
@@ -475,9 +505,11 @@ class UnitPiece extends Piece {
 			if (criticalHit) {
 				this.addTimedClass(500, 'critical');
 				this.showPopup(`${power}`, 'critical');
+				this._sfxCritical.play();
 			}
 			else {
 				this.showPopup(`${power}`);
+				this._sfxDamage.play();
 			}
 
 			if (this.results) {
@@ -486,6 +518,7 @@ class UnitPiece extends Piece {
 			}
 		} else {
 			this.showPopup("0", 'blocked');
+			this._sfxBlock.play();
 			if (this.results) {
 				this.results.blocked = true;
 			}
@@ -499,6 +532,7 @@ class UnitPiece extends Piece {
 			this.hp += power;
 			this.addTimedClass(1200, 'hp-change');
 			this.showPopup(`+${power}`, 'heal');
+			this._sfxHeal.play();
 			if (this.results) {
 				this.results.heal += power;
 			}
@@ -639,7 +673,10 @@ class UnitPiece extends Piece {
 		return this.alive && !this.actionUsed;
 	}
 	get canFace() {
-		return this.alive && this.myTurn && this.hasDirection;
+		return this.alive && this.hasDirection && !this.facingSet;
+	}
+	get isFacing() {
+		return this.alive && this.hasDirection && this._isFacing;
 	}
 
 	async updateStatusTurnStart() {
@@ -679,6 +716,9 @@ class UnitPiece extends Piece {
 		this.myTurn = false;
 		this.actionUsed = false;
 		this.homeSquare = null;
+		this.facingSet = false;
+		this._isFacing = false;
+		if (this.hasDirection) this._directionSelector.hide();
 		this._skills.forEach(skill => skill.endTurn());
 		this._reactions.forEach(skill => skill.endTurn());
 		this.refresh();
@@ -705,12 +745,20 @@ class UnitPiece extends Piece {
 	undoMove() {
 		if (this.homeSquare == null) return false;
 		
+		var oldSquare = this.square;
 		if (this.homeSquare.parent.movePiece(this, this.homeSquare)) {
+			this.animateMove([oldSquare], UnitPiece.Straight);
 			this.homeSquare = null;
 			this.refresh();
 			return true;
 		}
 		return false;
+	}
+
+	passTurn() {
+		this.homeSquare = this.homeSquare || this.square;
+		this.actionUsed = true;
+		this.refresh();
 	}
 
 	canStand(square) {
@@ -759,7 +807,8 @@ class UnitPiece extends Piece {
 		this.faceDirection(UnitPiece.getDirection(target, from));
 	}
 	sameDirection(direction) {
-		return (this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
+		return (this.direction && direction &&
+			this.direction[0] == direction[0]) && (this.direction[1] == direction[1]);
 	}
 	oppositeDirection(direction) {
 		return (this.direction[0] != direction[0]) && (this.direction[1] != direction[1]);
@@ -773,6 +822,21 @@ class UnitPiece extends Piece {
 		if (!square || this.square == square) return false;
 		var dirTo = this.getDirectionFrom(square);
 		return this.oppositeDirection(dirTo);
+	}
+
+	startFacing() {
+		if (!this.hasDirection || !this.canFace) return false;
+		this._isFacing = true;
+		this._directionSelector.show();
+		return true;
+	}
+	confirmFacing() {
+		if (this.isFacing) {
+			this.facingSet = true;
+			this._isFacing = false;
+			this._directionSelector.hide();
+			this.refresh();
+		}
 	}
 	//#endregion facing
 
@@ -809,9 +873,11 @@ class UnitPiece extends Piece {
 			var [xDir, yDir] = UnitPiece.getDirection(lastSquare, square);
 			turnframes.unshift({ '--x-scale': xDir, '--y-frame': yDir });
 
-			if (lastSquare.z != square.z) {
+			if (lastSquare.z > square.z) { // jump up
 				jumpframes.unshift({ bottom: 0 }, { bottom: '7px' }, { bottom: '8px' }, { bottom: '7px' }, { bottom: 0 });
-		 	} else {
+		 	} else if (lastSquare.z < square.z) { // drop down
+				jumpframes.unshift({ bottom: 0 }, { bottom: '3px' }, { bottom: '4px' }, { bottom: '2px' }, { bottom: 0 });
+		 	} else { // stay straight
 				jumpframes.unshift({ }, { }, { }, { }, { });
 			}
 
@@ -901,32 +967,6 @@ class UnitPiece extends Piece {
 		this.el.appendChild(popup.el);
 	}
 	//#endregion animate
-
-	//#region input events
-	select() {
-		this.el.classList.add('selected');
-		return true;
-	}
-	deselect() {
-		this.el.classList.remove('selected');
-	}
-	_hold(ev) {
-		if (!ev.screenX && !ev.screenY) return;
-		
-		var unit = ev.currentTarget.obj;
-		if (unit && unit.canFace && !unit.canMove) {
-			var [x, y] = unit.direction;
-			
-			if (ev.offsetX > 4) x = 1;
-			else if (ev.offsetX < -4) x = -1;
-
-			if (ev.offsetY > 4) y = 0;
-			else if (ev.offsetY < -4) y = -1;
-			
-			unit.faceDirection([x, y]); // TODO: Call a Scene function instead?
-		}
-	}
-	//#endregion input events
 
 	//#region ai
 	get aiUnitScore() {
@@ -1079,6 +1119,42 @@ class SkillResult {
 		this.evade = false;
 		this.swap = false;
 		this.critical = false;
+	}
+}
+
+/***************************************************
+ Special control for selecting a unit's direction
+***************************************************/
+class DirectionSelector extends ElObj {
+	constructor(parent) {
+		super();
+		this.parent = parent;
+		this.el.classList.add('facing-arrow');
+		
+		this.el.onclick = this._click;
+		this.el.onmousemove = this._mouseOver;
+
+		this.hide();
+	}
+
+	show() {
+		this._show();
+	}
+
+	hide() {
+		this._hide();
+	}
+	
+	_mouseOver(ev) {
+		if (!ev.screenX && !ev.screenY) return;
+		var obj = ev.currentTarget.obj;
+		if (obj && obj.parent && obj.parent.hasDirection) {
+			var dx = ev.offsetX - 48;
+			var dy = ev.offsetY - 24;
+			if (Math.abs(dx) > 8 && Math.abs(dy) > 8) {
+				obj.parent.faceDirection([ dx < 0 ? -1 : 1, dy < 0 ? -1 : 0 ]);
+			}
+		}
 	}
 }
 
@@ -1452,7 +1528,7 @@ class SkillCard extends Piece {
 	//#region refresh
 	refresh() {
 		var usable = this.canUse();
-		this._setSelectable(usable);
+		this._setSelectable(usable, usable);
 		this._setUnselectable(!usable);
 		this._refreshLabels();
 	}
@@ -1464,13 +1540,9 @@ class SkillCard extends Piece {
 	//#endregion refresh
 
 	//#region input events
-	select() {
+	select(noSound) {
 		if (!this.canUse()) return false;
-		this.el.classList.add('selected');
-		return true;
-	}
-	deselect() {
-		this.el.classList.remove('selected');
+		else return super.select(noSound);
 	}
 	//#endregion input events
 

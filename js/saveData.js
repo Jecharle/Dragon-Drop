@@ -46,6 +46,13 @@ class SaveData {
 		this.setOption('textSpeed', 1-value);
 	}
 
+	static get textAuto() {
+		return !!this.getOption('textAuto');
+	}
+	static set textAuto(value) {
+		this.setOption('textAuto', !!value);
+	}
+
 	static get confirmEndTurn() {
 		return !this.getOption('confirmTurnEnd');
 	}
@@ -76,23 +83,26 @@ class SaveData {
 	//#endregion options
 
 	//#region save / load
-	static get storage() { return sessionStorage; } // TEMP: Don't keep saves while I'm testing things
+	static get storage() { return localStorage; }
 
 	static _saveAttribute(attribute) {
 		var textData = JSON.stringify(this[attribute]);
 		if (textData) {
 			this.storage.setItem(attribute, textData);
 		} else {
-			this._clearAttribute(attribute);
+			this.storage.removeItem(attribute);
 		}
 	}
 	static _loadAttribute(attribute) {
 		var textData = this.storage.getItem(attribute);
 		if (textData) {
 			this[attribute] = JSON.parse(textData);
+		} else {
+			this[attribute] = {};
 		}
 	}
 	static _clearAttribute(attribute) {
+		this[attribute] = {};
 		this.storage.removeItem(attribute);
 	}
 
@@ -111,6 +121,7 @@ class SaveData {
 	 */
 	static clearAll() {
 		this.storage.clear();
+		this.loadAll();
 	}
 
 	static loadMap() {

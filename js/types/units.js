@@ -27,6 +27,9 @@ UnitPiece.parseUnitType = function(string) {
 		// inanimate object
 		case "rockobject":
 			return TestRockObject;
+		
+		case "pillarobject":
+			return TestPillarObject;
 
 		// something has gone wrong
 		default:
@@ -215,6 +218,25 @@ class TestRockObject extends ObjectPiece {
 	_setReactions() {
 		this._reactions = [
 			new TestCoverReaction(this),
+		];
+	}
+}
+
+class TestPillarObject extends ObjectPiece {
+	get name() {
+		return "Column";
+	}
+	get _description() {
+		return "Explodes when destroyed";
+	}
+
+	_stats() {
+		this.style = 'pillar';
+		this._maxHp = 4;
+	}
+
+	_setReactions() {
+		this._reactions = [
 			new TestExplodeReaction(this),
 		];
 	}

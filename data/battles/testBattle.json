@@ -12,7 +12,7 @@
 		["3-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
 		["3-pl-  ","4-pl-  ","1-pl-  ","2-pl-  ","2-pl-  ","2-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
 		["2-pl-  ","3-pl-  ","1-pl-  ","2-pl-  ","3-pl-  ","3-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
-		["2-pl-  ","2-pl-  ","1-pl-co","1-wa-  ","1-pl-co","0-na-  ","1-gr-tg","1-pl-  ","1-pl-  ","0-wa-  "],
+		["2-pl-  ","2-pl-  ","1-pl-  ","1-wa-  ","1-pl-  ","0-na-  ","1-gr-tg","1-pl-  ","1-pl-  ","0-wa-  "],
 		["1-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","2-pl-  ","1-pl-  ","1-pl-  ","0-wa-  ","0-wa-  "],
 		["1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","0-pl-  ","0-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","0-wa-  "],
 		["1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  ","1-pl-  "],
@@ -27,6 +27,9 @@
 	],
 
 	"units": [
+		{"turn": 0, "x": 2, "y": 5, "type": "PillarObject"},
+		{"turn": 0, "x": 4, "y": 5, "type": "PillarObject"},
+
 		{"turn": 0, "x": 4, "y": 4, "type": "TestEnemy"},
 
 		{"turn": 1, "x": 5, "y": 4, "type": "TestEnemySupport"},
@@ -37,12 +40,12 @@
 
 	"dialog": [
 		{"turn": 1, "message": [
-			"melee-unit|Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
+			"$portrait[melee-unit] $name[Alice] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sollicitudin ipsum quis ante convallis hendrerit. Nullam in magna id elit pretium cursus ut sit amet lorem."
 		]},
 		{"turn": 1, "enemy": true, "message": [
-			"enemy-unit right|Looks like it's working on this side too!",
+			"$portrait[enemy-unit right] $name[Enemy] Looks like it's working on this side too!",
 			"It even shows up on my turn!",
-			"none|Yes, it finally works."
+			"$reset[] Yes, it finally works."
 		]}
 	]
 }

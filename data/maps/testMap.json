@@ -1,6 +1,8 @@
 {
 	"type": "map",
 
+	"bgm": "Scheming Weasel faster.mp3",
+
 	"width": 1024,
 	"height": 1000,
 
