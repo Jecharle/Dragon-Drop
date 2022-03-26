@@ -228,7 +228,6 @@ input[type="range"]::-ms-thumb {
 /*#region dialog*/
 .dialog-box {
 	position: absolute;
-	/*TODO: Bigger font?*/
 	bottom: 16px;
 	width: 90%;
 	height: 4em;
@@ -287,6 +286,25 @@ input[type="range"]::-ms-thumb {
 	transform: scale(-4, 4);
 }
 /*#endregion dialog*/
+
+/*#region message log*/
+.message-log {
+	display: flex;
+	flex-flow: column;
+	justify-content: flex-end;
+	align-items: center;
+	overflow-y: scroll;
+}
+	/* TODO: Custom scroll bar */
+
+.message-log .message {
+	width: 80%;
+	height: max-content;
+	color: white;
+	margin: 0.5em;
+	border-bottom: 1px solid white;
+}
+/*#endregion message log*/
 /*#endregion menus*/
 
 /*#region battle scene*/

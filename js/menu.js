@@ -420,7 +420,7 @@ class DialogBox extends Menu {
 		this._textArea.innerText = this._message;
 
 		if (this._message.length > 0) {
-			var logMessage = this._name.length > 0 ? `${this._name}: ${this._message}` : this._message;
+			var logMessage = this._name.length > 0 ? `<strong>${this._name}</strong>: ${this._message}` : this._message;
 			this._log.push(logMessage);
 		}
 
