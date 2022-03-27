@@ -74,22 +74,22 @@ class Game {
 		this.el = document.createElement("div");
 		this.el.classList.add('game-window');
 		document.body.appendChild(this.el);
-
-		SaveData.loadAll();
+		this.showLoading();
 
 		// TEMP initial party setup
 		Party.add(new TestMeleePartyMember());
 		Party.add(new TestSupportPartyMember());
 		Party.add(new TestPositionPartyMember());
-		Party.add(new TestStatusPartyMember() );
+		Party.add(new TestStatusPartyMember());
 
-		this.setScene(new TitleScene());
-		/*MapSceneModel.load("testMap").then(mapModel => {
-			this.setScene(new MapScene(null, mapModel));
-		});*/
-		/*BattleSceneModel.load("testBattle").then(battleModel => {
-			this.setScene(new BattleScene(null, battleModel));
-		});*/
+		SaveData.loadAll();
+
+		// load the campaign data at the start
+		StageListModel.load("campaign").then(stageList => {
+			Game.stageList = stageList;
+			Game.hideLoading();
+			Game.setScene(new TitleScene());
+		});
 	}
 }
 Game.begin();

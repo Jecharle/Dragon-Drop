@@ -172,6 +172,83 @@ class TitleScene extends Scene {
 }
 
 /***************************************************
+ Home menu scene
+***************************************************/
+class HomeScene extends Scene {
+	constructor() {
+		super();
+
+		// TODO: Next stage preview / button
+		// TODO: Open list of unlocked bonus stages
+		// TODO: Open history of cleared stages
+		// TODO: Equipment management / store screen
+		// TODO: Options menu
+	}
+}
+
+/***************************************************
+ Scene to handle multiple sub-scenes within a stage
+***************************************************/
+class StageScene extends Scene {
+	constructor(lastScene, stageData) {
+		super(lastScene);
+		this._subSceneList = stageData.scenes;
+		this._flagId = stageData.flag;
+		this.name = stageData.name;
+		this.description = stageData.description;
+
+		this._index = 0;
+	}
+
+	start() {
+		super.start();
+		
+		// returning from a previous scene
+		if (this.paused) {
+			var data = this._getData();
+			this._resume();
+			if (data && data.complete) {
+				this._index++;
+			} else {
+				this._failStage();
+			}
+		}
+
+		if (this._index < this._subSceneList.length) {
+			this._subScene(this._index);
+		} else {
+			this._completeStage();
+		}
+	}
+
+	//#region sub scenes
+	async _subScene(index) {
+		var filename = this._subSceneList[index];
+		// TODO: A setting to specify if it's a battle or a cutscene
+
+		this._pause();
+		var model = await BattleSceneModel.load(filename);
+		Game.setScene( new BattleScene(this, model) );
+	}
+
+	_completeStage() {
+		// first-time clear
+		if (!SaveData.getFlag(this._flagId)) {
+			SaveData.setFlag(this._flagId, 1);
+			SaveData.saveFlags();
+		}
+		this._lastScene.sendData({ complete: true });
+		Game.setScene(this._lastScene);
+	}
+
+	_failStage() {
+		this._lastScene.sendData({ complete: false });
+		Game.setScene(this._lastScene);
+	}
+	//#endregion sub scenes
+}
+
+/***************************************************
  Battle scene
 ***************************************************/
 class BattleScene extends Scene {

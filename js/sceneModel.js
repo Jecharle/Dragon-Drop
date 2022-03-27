@@ -114,3 +114,43 @@ class BattleSceneModel extends SceneModel {
 		return sceneModel;
 	}
 }
+
+/***************************************************
+ StageSceneModel
+***************************************************/
+class StageListModel extends SceneModel {
+	constructor(data, filename) {
+		super(data, filename);
+
+		this._main = data?.main || [];
+		// name, description, substages(filenames), clear flag, reward amount
+
+		this._extra = data?.extra || [];
+		// required flags, name, description, substages(filenames), clear flag, reward amount
+	}
+
+	nextMainStage() {
+		return this._main.find(stage => stage.flag && !SaveData.getFlag(stage.flag)) || null;
+	}
+	clearedMainStages() {
+		return this._main.filter(stage => !stage.flag || SaveData.getFlag(stage.flag));
+	}
+	newExtraStages() {
+		return this._extra.filter(stage => {
+			if (stage.reqFlags && stage.reqFlags.some(flag => !SaveData.getFlag(flag))) return false;
+			return stage.flag && !SaveData.getFlag(stage.flag);
+		});
+	}
+	clearedExtraStages() {
+		return this._extra.filter(stage => {
+			if (stage.reqFlags && stage.reqFlags.some(flag => !SaveData.getFlag(flag))) return false;
+			return !stage.flag || SaveData.getFlag(stage.flag);
+		});
+	}
+
+	static async load(filename) {
+		var data = await SceneModel.load("stages", filename);
+		var sceneModel = new this(data, filename);
+		return sceneModel;
+	}
+}

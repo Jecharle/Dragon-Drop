@@ -1,0 +1,13 @@
+{
+	"main": [
+		{
+			"name": "Test Stage",
+			"description": "Initial stage for system debugging purposes",
+			"flag": "testStage",
+			"reward": 1,
+			"scenes": [
+				"testBattle"
+			]
+		}
+	]
+}
