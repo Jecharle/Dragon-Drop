@@ -4,6 +4,7 @@
 class SaveData {
 
 	static flags = {};
+	static party = {};
 	static mapEvent = {};
 	static options = {};
 
@@ -28,6 +29,24 @@ class SaveData {
 		return !!this.mapEvent[eventId];
 	}
 	//#endregion mapEvent
+
+	//#region party
+	static setPartyValue(partyValue, value) {
+		if (!partyValue) return;
+		this.party[partyValue] = value;
+	}
+	static getPartyValue(partyValue) {
+		if (!partyValue) return 0;
+		return this.party[partyValue] || 0;
+	}
+
+	static get money() {
+		return this.getPartyValue('money') || 0;
+	}
+	static set money(value) {
+		this.setPartyValue('money', value);
+	}
+	//#endregion party
 
 	//#region options
 	static setOption(option, value) {
@@ -109,11 +128,13 @@ class SaveData {
 	static loadAll() {
 		this._loadAttribute('flags');
 		this._loadAttribute('mapEvent');
+		this._loadAttribute('party');
 		this._loadAttribute('options');
 	}
 	static saveAll() {
 		this._saveAttribute('flags');
 		this._saveAttribute('mapEvent');
+		this._saveAttribute('party');
 		this._saveAttribute('options');
 	}
 	/**
@@ -142,6 +163,13 @@ class SaveData {
 	}
 	static clearFlags() {
 		this._clearAttribute('flags');
+	}
+
+	static loadParty() {
+		this._loadAttribute('party');
+	}
+	static saveParty() {
+		this._saveAttribute('party');
 	}
 
 	static loadOptions() {

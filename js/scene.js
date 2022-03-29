@@ -37,6 +37,8 @@ class Scene extends UiElObj {
 	start() { Bgm.play(this._bgm); }
 	end() { }
 
+	refresh() { }
+
 	get paused() { return this._paused; }
 	_pause() { this._paused = true; }
 	_resume() { this._paused = false; Bgm.play(this._bgm); }
@@ -177,8 +179,8 @@ class HomeScene extends Scene {
 		super();
 
 		this._stageListEl = this._createStageList();
-		// TODO: Open history of cleared stages
-		// TODO: Equipment management / store screen
+		this._shopButtonEl = this._createShopButton();
+		// TODO: Stage history button
 		this._optionButtonEl = this._createOptionButton();
 		this._optionsMenu = new OptionsMenu(this);
 		
@@ -187,7 +189,7 @@ class HomeScene extends Scene {
 
 	start() {
 		super.start();
-		this._refreshStageList();
+		this.refresh();
 		if (this.paused) this._resume();
 	}
 
@@ -196,6 +198,12 @@ class HomeScene extends Scene {
 		return this._addButton("Options", () => {
 			this._openMenu(this._optionsMenu);
 		}, 'nav-button', 'menu-button');
+	}
+
+	_createShopButton() {
+		var shopDiv = document.createElement("div");
+		shopDiv.classList.add('shop-button');
+		return shopDiv;
 	}
 
 	_createStageButton(stageData, isMain) {
@@ -211,12 +219,28 @@ class HomeScene extends Scene {
 	_createStageList() {
 		var listDiv = document.createElement("div");
 		listDiv.classList.add('stage-list');
-
 		return listDiv;
 	}
 
+	_buildDOM() {
+		this.el.appendChild(this._stageListEl);
+		this.el.appendChild(this._shopButtonEl);
+		this.el.appendChild(this._optionButtonEl);
+		// TODO: All the other buttons and features
+		this.el.appendChild(this._optionsMenu.el);
+	}
+	//#endregion ui setup
+
+	//#region refresh
+	refresh() {
+		super.refresh();
+		this._refreshShopCurrency();
+		this._refreshStageList();
+	}
+	_refreshShopCurrency() {
+		this._shopButtonEl.innerText = "$"+SaveData.money;
+	}
 	_refreshStageList() {
-		// TODO: Clear any content already in the list
 		while (this._stageListEl.hasChildNodes()) {
 			this._stageListEl.removeChild(this._stageListEl.lastChild);
 		}
@@ -229,14 +253,7 @@ class HomeScene extends Scene {
 			this._stageListEl.appendChild(this._createStageButton(extraStages[i]));
 		}
 	}
-
-	_buildDOM() {
-		this.el.appendChild(this._stageListEl);
-		this.el.appendChild(this._optionButtonEl);
-		// TODO: All the other buttons and features
-		this.el.appendChild(this._optionsMenu.el);
-	}
-	//#endregion ui setup
+	//#endregion refresh
 }
 
 /***************************************************
@@ -247,6 +264,7 @@ class StageScene extends Scene {
 		super(lastScene);
 		this._subSceneList = stageData.scenes;
 		this._flagId = stageData.flag;
+		this.reward = stageData.reward;
 		this.name = stageData.name;
 		this.description = stageData.description;
 
@@ -277,7 +295,7 @@ class StageScene extends Scene {
 	//#region sub scenes
 	async _subScene(index) {
 		var filename = this._subSceneList[index];
-		// TODO: A setting to specify if it's a battle or a cutscene
+		// TODO: A setting to specify if it's a battle or story scene
 
 		this._pause();
 		var model = await BattleSceneModel.load(filename);
@@ -287,6 +305,8 @@ class StageScene extends Scene {
 	_completeStage() {
 		// first-time clear
 		if (!SaveData.getFlag(this._flagId)) {
+			SaveData.money += this.reward;
+			SaveData.saveParty();
 			SaveData.setFlag(this._flagId, 1);
 			SaveData.saveFlags();
 		}
