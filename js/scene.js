@@ -138,9 +138,7 @@ class TitleScene extends Scene {
 
 	_createStartButton() {
 		return this._addButton("Start Game", () => {
-				MapSceneModel.load("testMap").then(mapModel => { // TEMPORARY starting map
-					Game.setScene(new MapScene(null, mapModel));
-				});
+				Game.setScene(new HomeScene());
 			});
 	}	
 
@@ -178,12 +176,67 @@ class HomeScene extends Scene {
 	constructor() {
 		super();
 
-		// TODO: Next stage preview / button
-		// TODO: Open list of unlocked bonus stages
+		this._stageListEl = this._createStageList();
 		// TODO: Open history of cleared stages
 		// TODO: Equipment management / store screen
-		// TODO: Options menu
+		this._optionButtonEl = this._createOptionButton();
+		this._optionsMenu = new OptionsMenu(this);
+		
+		this._buildDOM();
 	}
+
+	start() {
+		super.start();
+		this._refreshStageList();
+		if (this.paused) this._resume();
+	}
+
+	//#region ui setup
+	_createOptionButton() {
+		return this._addButton("Options", () => {
+			this._openMenu(this._optionsMenu);
+		}, 'nav-button', 'menu-button');
+	}
+
+	_createStageButton(stageData, isMain) {
+		// TODO: This will become a more complicated structure with fancier hover
+		var button = this._addButton(stageData.name, () => {
+			this._pause();
+			Game.setScene(new StageScene(this, stageData));
+		}, 'stage-button', isMain ? 'main-stage' : 'extra-stage');
+		button.title = stageData.description;
+		return button;
+	}
+
+	_createStageList() {
+		var listDiv = document.createElement("div");
+		listDiv.classList.add('stage-list');
+
+		return listDiv;
+	}
+
+	_refreshStageList() {
+		// TODO: Clear any content already in the list
+		while (this._stageListEl.hasChildNodes()) {
+			this._stageListEl.removeChild(this._stageListEl.lastChild);
+		}
+
+		var nextStage = Game.stageList.nextMainStage();
+		this._stageListEl.appendChild(this._createStageButton(nextStage, true));
+
+		var extraStages = Game.stageList.newExtraStages();
+		for (var i = 0; i < extraStages.length; i++) {
+			this._stageListEl.appendChild(this._createStageButton(extraStages[i]));
+		}
+	}
+
+	_buildDOM() {
+		this.el.appendChild(this._stageListEl);
+		this.el.appendChild(this._optionButtonEl);
+		// TODO: All the other buttons and features
+		this.el.appendChild(this._optionsMenu.el);
+	}
+	//#endregion ui setup
 }
 
 /***************************************************

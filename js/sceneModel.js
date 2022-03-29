@@ -137,13 +137,13 @@ class StageListModel extends SceneModel {
 	}
 	newExtraStages() {
 		return this._extra.filter(stage => {
-			if (stage.reqFlags && stage.reqFlags.some(flag => !SaveData.getFlag(flag))) return false;
+			if (stage.required && stage.required.some(flag => !SaveData.getFlag(flag))) return false;
 			return stage.flag && !SaveData.getFlag(stage.flag);
 		});
 	}
 	clearedExtraStages() {
 		return this._extra.filter(stage => {
-			if (stage.reqFlags && stage.reqFlags.some(flag => !SaveData.getFlag(flag))) return false;
+			if (stage.required && stage.required.some(flag => !SaveData.getFlag(flag))) return false;
 			return !stage.flag || SaveData.getFlag(stage.flag);
 		});
 	}

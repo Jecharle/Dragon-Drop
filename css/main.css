@@ -307,10 +307,47 @@ input[type="range"]::-ms-thumb {
 /*#endregion message log*/
 /*#endregion menus*/
 
+/*#region home scene*/
+.stage-list {
+	position: absolute;
+	bottom: 6px;
+	right: 6px;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+
+/*TODO: main-stage and extra-stage styling differences*/
+.stage-button:hover {
+	margin-right: 6px;
+}
+	/*TODO: fancy description / details hover text*/
+	.stage-button .detail {
+		position: absolute;
+		display: none;
+	}
+	.stage-button:hover .detail {
+		display: block;
+	}
+
+.history-button {
+	position: absolute;
+	left: 6px;
+	bottom: 6px;
+}
+
+.shop-button {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+}
+/*#endregion home scene*/
+
 /*#region battle scene*/
 /*#region battle scene UI*/
 .nav-button {
-	width: 15%;
+	min-width: 15%;
 	position: absolute;
 }
 	.wait-button {

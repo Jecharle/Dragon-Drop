@@ -3,7 +3,28 @@
 		{
 			"name": "Test Stage",
 			"description": "Initial stage for system debugging purposes",
-			"flag": "testStage",
+			"flag": "testStage1",
+			"reward": 1,
+			"scenes": [
+				"testBattle"
+			]
+		},
+		{
+			"name": "Test Stage 2",
+			"description": "Initial stage for system debugging purposes",
+			"flag": "testStage2",
+			"reward": 2,
+			"scenes": [
+				"testBattle"
+			]
+		}
+	],
+	"extra": [
+		{
+			"name": "Extra Stage",
+			"description": "Extra stage for testing purposes",
+			"required": [ "testStage1" ],
+			"flag": "testExtraStage",
 			"reward": 1,
 			"scenes": [
 				"testBattle"
