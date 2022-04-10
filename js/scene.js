@@ -207,7 +207,9 @@ class HomeScene extends Scene {
 	}
 
 	_createStageDescription(stageData) {
-		var description = `<strong>${stageData.name}</strong><p>${stageData.description}</p><strong>$${stageData.reward}</strong>`;
+		var description = `<strong>${stageData.name}</strong>`
+			+`<p>${stageData.description}</p>`
+			+`<strong>$${stageData.reward} reward</strong>`;
 		// TODO: More detailed and formatted description
 		return new HoverDescription(description);
 	}
