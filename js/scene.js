@@ -206,13 +206,22 @@ class HomeScene extends Scene {
 		return shopDiv;
 	}
 
+	_createStageDescription(stageData) {
+		var description = `<strong>${stageData.name}</strong><p>${stageData.description}</p><strong>$${stageData.reward}</strong>`;
+		// TODO: More detailed and formatted description
+		return new HoverDescription(description);
+	}
 	_createStageButton(stageData, isMain) {
-		// TODO: This will become a more complicated structure with fancier hover
-		var button = this._addButton(stageData.name, () => {
+		var description = this._createStageDescription(stageData);
+		var button = document.createElement('div');
+		button.classList.add('stage-button', isMain ? 'main-stage' : 'extra-stage');
+		button.innerText = `${stageData.name} >>`;
+		button.onclick = () => {
+			this.sfxClick.play();
 			this._pause();
 			Game.setScene(new StageScene(this, stageData));
-		}, 'stage-button', isMain ? 'main-stage' : 'extra-stage');
-		button.title = stageData.description;
+		};
+		button.appendChild(description.el);
 		return button;
 	}
 

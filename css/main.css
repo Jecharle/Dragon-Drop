@@ -316,18 +316,28 @@ input[type="range"]::-ms-thumb {
 	flex-direction: column;
 	justify-content: flex-end;
 	align-items: flex-end;
+	row-gap: 2px;
 }
 
 /*TODO: main-stage and extra-stage styling differences*/
-.stage-button:hover {
-	margin-right: 6px;
+.stage-button {
+	position: relative;
+	border: 1px solid black;
+	border-radius: 2px;
+	padding: 4px;
 }
-	/*TODO: fancy description / details hover text*/
-	.stage-button .detail {
-		position: absolute;
-		display: none;
+	.stage-button .skill-description {
+		left: unset;
+		right: 110%;
 	}
-	.stage-button:hover .detail {
+.stage-button:hover {
+	left: -6px;
+	box-shadow: 1px 1px yellow,
+		1px -1px yellow,
+		-1px 1px yellow,
+		-1px -1px yellow;
+}
+	.stage-button:hover .skill-description {
 		display: block;
 	}
 
