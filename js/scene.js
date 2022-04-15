@@ -249,7 +249,7 @@ class HomeScene extends Scene {
 		this._refreshStageList();
 	}
 	_refreshShopCurrency() {
-		this._shopButtonEl.innerText = "$"+SaveData.money;
+		this._shopButtonEl.innerText = "$"+Game.stageList.getMoney();
 	}
 	_refreshStageList() {
 		while (this._stageListEl.hasChildNodes()) {
@@ -316,8 +316,6 @@ class StageScene extends Scene {
 	_completeStage() {
 		// first-time clear
 		if (!SaveData.getFlag(this._flagId)) {
-			SaveData.money += this.reward;
-			SaveData.saveParty();
 			SaveData.setFlag(this._flagId, 1);
 			SaveData.saveFlags();
 		}

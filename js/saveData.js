@@ -39,13 +39,6 @@ class SaveData {
 		if (!partyValue) return 0;
 		return this.party[partyValue] || 0;
 	}
-
-	static get money() {
-		return this.getPartyValue('money') || 0;
-	}
-	static set money(value) {
-		this.setPartyValue('money', value);
-	}
 	//#endregion party
 
 	//#region options

@@ -127,6 +127,8 @@ class StageListModel extends SceneModel {
 
 		this._extra = data?.extra || [];
 		// required flags, name, description, substages(filenames), clear flag, reward amount
+
+		// TODO: Load shop / item data
 	}
 
 	nextMainStage() {
@@ -146,6 +148,21 @@ class StageListModel extends SceneModel {
 			if (stage.required && stage.required.some(flag => !SaveData.getFlag(flag))) return false;
 			return !stage.flag || SaveData.getFlag(stage.flag);
 		});
+	}
+	// TODO: Available items and purchased items
+
+	getMoney() {
+		var mainReward = this._main.reduce((money, stage) => {
+			return (!stage.flag || SaveData.getFlag(stage.flag)) ? money + stage.reward : money;
+		}, 0);
+		
+		var extraReward = this._extra.reduce((money, stage) => {
+			return (!stage.flag || SaveData.getFlag(stage.flag)) ? money + stage.reward : money;
+		}, 0);
+
+		var itemCost = 0; // TODO: Sum the cost of all purchased items / etc
+
+		return mainReward + extraReward - itemCost;
 	}
 
 	static async load(filename) {

@@ -30,5 +30,13 @@
 				"testBattle"
 			]
 		}
+	],
+	"items": [
+		{
+			"item": "TestEquip",
+			"required": [ "testStage1" ],
+			"flag": "testItem",
+			"cost": 1
+		}
 	]
 }
