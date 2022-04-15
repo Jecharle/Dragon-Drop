@@ -313,18 +313,18 @@ input[type="range"]::-ms-thumb {
 	bottom: 6px;
 	right: 6px;
 	display: flex;
-	flex-direction: column;
+	flex-direction: column-reverse;
 	justify-content: flex-end;
 	align-items: flex-end;
 	row-gap: 2px;
 }
 
-/*TODO: main-stage and extra-stage styling differences*/
 .stage-button {
 	position: relative;
 	border: 1px solid black;
 	border-radius: 2px;
 	padding: 4px;
+	cursor: pointer;
 }
 	.stage-button .skill-description {
 		left: unset;

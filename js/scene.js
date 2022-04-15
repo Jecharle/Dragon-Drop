@@ -256,13 +256,13 @@ class HomeScene extends Scene {
 			this._stageListEl.removeChild(this._stageListEl.lastChild);
 		}
 
-		var nextStage = Game.stageList.nextMainStage();
-		this._stageListEl.appendChild(this._createStageButton(nextStage, true));
-
 		var extraStages = Game.stageList.newExtraStages();
 		for (var i = 0; i < extraStages.length; i++) {
 			this._stageListEl.appendChild(this._createStageButton(extraStages[i]));
 		}
+		
+		var nextStage = Game.stageList.nextMainStage();
+		this._stageListEl.appendChild(this._createStageButton(nextStage, true));
 	}
 	//#endregion refresh
 }
