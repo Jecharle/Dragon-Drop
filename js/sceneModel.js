@@ -166,7 +166,7 @@ class StageListModel extends SceneModel {
 	}
 
 	static async load(filename) {
-		var data = await SceneModel.load("stages", filename);
+		var data = await SceneModel.load("", filename);
 		var sceneModel = new this(data, filename);
 		return sceneModel;
 	}
