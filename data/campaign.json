@@ -19,6 +19,7 @@
 			]
 		}
 	],
+	
 	"extra": [
 		{
 			"name": "Extra Stage",
@@ -31,6 +32,7 @@
 			]
 		}
 	],
+
 	"items": [
 		{
 			"item": "TestEquip",

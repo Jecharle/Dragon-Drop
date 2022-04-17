@@ -27,8 +27,6 @@ class Party {
 		return false;
 	}
 
-	// TODO: Party buffs, special items, etc?
-
 	static _partySize = 4
 	static get partySize() {
 		return this._partySize;
@@ -53,12 +51,18 @@ class Party {
 Members of the party that generate units
 ***************************************************/
 class PartyMember {
-	constructor() {
+	constructor(level) {
 		this.alive = true;
+		this.level = level || 0;
 	}
 
 	get name() {
 		return "";
+	}
+
+	_equipCount = 2;
+	get equipCount() {
+		return this._equipCount;
 	}
 
 	getEquipment() {
@@ -77,11 +81,35 @@ class PartyMember {
 	}
 }
 
+/***************************************************
+ Index function for looking up types by name
+***************************************************/
+PartyMember.parseMember = function(string) {
+	if (!string) return PartyMember;
+	switch (string.toLowerCase()) {
+		case "testmelee":
+			return TestMeleePartyMember;
+		
+		case "testsupport":
+			return TestSupportPartyMember;
+		
+		case "testposition":
+			return TestPositionPartyMember;
+		
+		case "teststatus":
+			return TestStatusPartyMember;
+
+		// something has gone wrong
+		default:
+			return PartyMember;
+	}
+};
+
 class TestMeleePartyMember extends PartyMember {
 	get name() { return "Alice"; }
 
 	getUnit() {
-		return new TestMeleeUnit(this.getEquipment(), this);
+		return new TestMeleeUnit(this);
 	}
 }
 
@@ -89,7 +117,7 @@ class TestSupportPartyMember extends PartyMember {
 	get name() { return "Bob"; }
 
 	getUnit() {
-		return new TestSupportUnit(this.getEquipment(),this);
+		return new TestSupportUnit(this);
 	}
 }
 
@@ -97,7 +125,7 @@ class TestPositionPartyMember extends PartyMember {
 	get name() { return "Carol"; }
 
 	getUnit() {
-		return new TestPositionUnit(this.getEquipment(),this);
+		return new TestPositionUnit(this);
 	}
 }
 
@@ -105,6 +133,6 @@ class TestStatusPartyMember extends PartyMember {
 	get name() { return "Dan"; }
 
 	getUnit() {
-		return new TestStatusUnit(this.getEquipment(),this);
+		return new TestStatusUnit(this);
 	}
 }

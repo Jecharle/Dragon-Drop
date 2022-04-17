@@ -1,4 +1,19 @@
 /***************************************************
+ Index function for looking up types by name
+***************************************************/
+Equipment.parseEquipment = function(string) {
+	if (!string) return Equipment;
+	switch (string.toLowerCase()) {
+		case "testequipment":
+			return TestEquip;
+
+		// something has gone wrong
+		default:
+			return Equipment;
+	}
+};
+
+/***************************************************
  Test basic equipment skill
 ***************************************************/
 class TestEquip extends Equipment {

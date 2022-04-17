@@ -108,14 +108,14 @@ class Piece extends SpriteElObj {
  Unit piece
 ***************************************************/
 class UnitPiece extends Piece {
-	constructor(equipment, partyMember) {
+	constructor(partyMember, equipment) {
 		super();
 		this._team = null;
 		this._guest = false;
 		this._partyMember = partyMember;
 		this.square = null;
 
-		this._equipment = equipment || [];
+		this._equipment = equipment || partyMember?.getEquipment() || [];
 		this.equipment.forEach(equip => equip.setUser(this));
 
 		this._defaultStats();
