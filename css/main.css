@@ -332,10 +332,7 @@ input[type="range"]::-ms-thumb {
 	}
 .stage-button:hover {
 	left: -4px;
-	box-shadow: 1px 1px yellow,
-		1px -1px yellow,
-		-1px 1px yellow,
-		-1px -1px yellow;
+	box-shadow: 0 0 0 1px yellow;
 }
 	.stage-button:hover .skill-description {
 		display: block;
