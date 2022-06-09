@@ -34,7 +34,6 @@ p {
 input {
 	font: 16px pixelFont;
 	cursor: pointer;
-	user-select: none;
 }
 input:disabled {
 	cursor: default;
@@ -54,7 +53,6 @@ input:disabled {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	user-select: none;
 }
 .button:hover {
 	filter: brightness(150%);
@@ -120,8 +118,14 @@ input[type="range"]::-ms-thumb {
 	width: var(--game-w);
 	height: var(--game-h);
 	overflow: hidden;
-	border: 1px solid black; /*TEMP?*/
+	border: 1px solid black; /*TEMP*/
 	position: relative;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	touch-action: none;
 
 	image-rendering: pixelated;
 	transform-origin: 0 0;
@@ -1387,7 +1391,6 @@ input[type="range"]::-ms-thumb {
 	position: absolute;
 	animation: rise-up 1s ease-out;
 	transform: translateZ(99px);
-	user-select: none;
 }
 	.popup-text.blocked {
 		color: silver;
